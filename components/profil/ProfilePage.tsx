@@ -99,7 +99,7 @@ export default function ProfilePage({ id }: Props) {
       </div>
 
       {/* Photo gallery */}
-      <PhotoGallery photo={profile.photo} />
+      <PhotoGallery photo={profile.photo} isPremium={profile.isPremium} />
       <PhotoUpsellBanner />
 
       {/* Name + info */}
