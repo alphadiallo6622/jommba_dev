@@ -1,0 +1,85 @@
+﻿@import "tailwindcss";
+
+@theme {
+  --color-primary: #00A676;
+  --color-primary-dark: #008F64;
+  --color-primary-light: #E8F7F2;
+  --color-jommba-bg: #FFFDF9;
+  --color-jommba-dark: #0A0F1C;
+  --color-text-primary: #1A202C;
+  --color-text-secondary: #2D3748;
+  --color-text-muted: #64748B;
+  --color-text-subtle: #94A3B8;
+  --color-error: #EF4444;
+  
+  --font-sans: var(--font-inter), sans-serif;
+  --font-serif: var(--font-playfair), serif;
+  --font-arabic: var(--font-aref), serif;
+  --font-display: var(--font-violense), var(--font-playfair), serif;
+
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+
+  --shadow-green: 0 4px 14px rgba(0, 166, 118, 0.3);
+  --shadow-green-btn: 0 4px 14px rgba(0, 166, 118, 0.4);
+  --shadow-elevation: 0 20px 40px rgba(0, 166, 118, 0.3);
+
+  --animate-fade-in-up: fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-slide-in: slide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+  @keyframes fade-in-up {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slide-in {
+    0% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(0);
+    }
+  }
+}
+
+@font-face {
+  font-family: 'Violense';
+  src: url('/assets/fonts/Violense.woff2') format('woff2'),
+       url('/assets/fonts/Violense.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+body {
+  background-color: var(--color-jommba-bg);
+  color: var(--color-text-secondary);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Glassmorphism custom utilities */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-dark-effect {
+  background: rgba(10, 15, 28, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+

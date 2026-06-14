@@ -1,0 +1,193 @@
+﻿import Link from "next/link";
+import { Heart, Mail, MapPin } from "lucide-react";
+
+const IconFacebook = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+  </svg>
+);
+const IconInstagram = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+  </svg>
+);
+const IconTwitter = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+  </svg>
+);
+const IconYoutube = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+    <path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z" /><polygon fill="white" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" />
+  </svg>
+);
+import { SOCIAL_LINKS, NAV_LINKS } from "@/lib/constants";
+
+export default function Footer() {
+  return (
+    <footer className="bg-jommba-dark text-white border-t border-white/5 relative overflow-hidden">
+      {/* Decorative accent gradient */}
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary/50 via-primary to-primary-dark/50" />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 lg:gap-12">
+          {/* Brand Info */}
+          <div className="space-y-6">
+            <Link href="/" className="flex items-center gap-2 group w-fit">
+              <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center shadow-green-btn">
+                <Heart className="w-5 h-5 text-white fill-white" />
+              </div>
+              <span className="text-xl font-serif font-bold text-white tracking-tight">
+                Jommba
+              </span>
+            </Link>
+            <p className="text-sm text-text-subtle leading-relaxed">
+              La plateforme de rencontre musulmane halal de référence. Notre mission est de vous aider à trouver votre moitié pour le mariage (Nikah) dans le respect de nos principes et valeurs.
+            </p>
+            {/* Social Icons */}
+            <div className="flex items-center gap-4">
+              <a
+                href={SOCIAL_LINKS.facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-text-subtle hover:bg-primary hover:text-white transition-all duration-200"
+                aria-label="Facebook"
+              >
+                <IconFacebook />
+              </a>
+              <a
+                href={SOCIAL_LINKS.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-text-subtle hover:bg-primary hover:text-white transition-all duration-200"
+                aria-label="Instagram"
+              >
+                <IconInstagram />
+              </a>
+              <a
+                href={SOCIAL_LINKS.twitter}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-text-subtle hover:bg-primary hover:text-white transition-all duration-200"
+                aria-label="Twitter"
+              >
+                <IconTwitter />
+              </a>
+              <a
+                href={SOCIAL_LINKS.youtube}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-text-subtle hover:bg-primary hover:text-white transition-all duration-200"
+                aria-label="Youtube"
+              >
+                <IconYoutube />
+              </a>
+            </div>
+          </div>
+
+          {/* Quick Links */}
+          <div className="space-y-6">
+            <h3 className="text-base font-semibold text-white tracking-wider uppercase">
+              Navigation
+            </h3>
+            <ul className="space-y-3">
+              {NAV_LINKS.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="text-sm text-text-subtle hover:text-primary transition-colors duration-200 flex items-center gap-2"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary/40" />
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+              <li>
+                <Link
+                  href="/connexion"
+                  className="text-sm text-text-subtle hover:text-primary transition-colors duration-200 flex items-center gap-2"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary/40" />
+                  Connexion
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/inscription"
+                  className="text-sm text-text-subtle hover:text-primary transition-colors duration-200 flex items-center gap-2"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary/40" />
+                  S'inscrire
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Legal / Contact */}
+          <div className="space-y-6">
+            <h3 className="text-base font-semibold text-white tracking-wider uppercase">
+              Informations & Aide
+            </h3>
+            <ul className="space-y-3 text-sm text-text-subtle">
+              <li>
+                <Link href="/faq" className="hover:text-primary transition-colors duration-200">
+                  Centre d'aide & FAQ
+                </Link>
+              </li>
+              <li>
+                <a href="#" className="hover:text-primary transition-colors duration-200">
+                  Conditions Générales d'Utilisation
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-primary transition-colors duration-200">
+                  Politique de Confidentialité
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-primary transition-colors duration-200">
+                  Mentions Légales
+                </a>
+              </li>
+              <li className="flex items-center gap-2 pt-2 text-white font-medium">
+                <Mail className="w-4 h-4 text-primary" />
+                <span>support@jommba.net</span>
+              </li>
+              <li className="flex items-center gap-2 text-text-subtle">
+                <MapPin className="w-4 h-4 text-primary" />
+                <span>Paris, France</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Quran Quote Card */}
+          <div className="space-y-6 lg:col-span-1">
+            <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 relative overflow-hidden">
+              {/* Decorative arabesque border hint */}
+              <div className="absolute inset-0 border border-primary/10 rounded-2xl pointer-events-none m-1" />
+              
+              <div className="text-xs text-text-subtle leading-relaxed italic text-center relative z-10">
+                « Et parmi Ses signes Il a créé de vous, pour vous, des épouses pour que vous viviez en tranquillité auprès d'elles; et Il a mis entre vous de l'affection et de la bonté. Il y a en cela des preuves pour des gens qui réfléchissent. »
+              </div>
+              <div className="text-right text-[10px] text-primary font-semibold mt-3 relative z-10">
+                [Coran — Sourate Ar-Rum, Verset 21]
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-16 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-text-subtle text-center sm:text-left">
+            &copy; {new Date().getFullYear()} Jommba. Tous droits réservés.
+          </p>
+          <div className="text-xs text-text-subtle flex gap-4">
+            <span className="flex items-center gap-1">
+              Fait avec <Heart className="w-3.5 h-3.5 text-primary fill-primary" /> pour la communauté
+            </span>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
+

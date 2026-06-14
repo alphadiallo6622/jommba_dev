@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>JOMMBA — Spécification Fonctionnelle Détaillée v1.0</title>
+<style>
+  body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; margin: 2.5cm; color: #111; line-height: 1.5; }
+  h1 { font-size: 16pt; font-weight: bold; color: #064E3B; border-bottom: 2px solid #10B981; padding-bottom: 4px; margin-top: 30px; page-break-before: always; }
+  h1:first-of-type { page-break-before: avoid; }
+  h2 { font-size: 13pt; font-weight: bold; color: #065F46; margin-top: 20px; margin-bottom: 6px; }
+  h3 { font-size: 11pt; font-weight: bold; color: #047857; margin-top: 14px; margin-bottom: 4px; }
+  p { margin: 6px 0 8px 0; text-align: justify; }
+  ul { margin: 4px 0 10px 0; padding-left: 22px; }
+  li { margin-bottom: 4px; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 10pt; }
+  th { background-color: #064E3B; color: white; padding: 8px 10px; text-align: left; }
+  td { border: 1px solid #ccc; padding: 7px 10px; }
+  tr:nth-child(even) td { background-color: #f3f9f6; }
+  .cover { text-align: center; padding: 80px 40px 60px; }
+  .cover h1 { font-size: 36pt; border: none; color: #064E3B; page-break-before: avoid; margin-bottom: 10px; }
+  .cover .subtitle { font-size: 18pt; color: #10B981; font-weight: bold; margin-bottom: 30px; }
+  .cover .meta { font-size: 11pt; color: #555; margin-top: 40px; line-height: 2; }
+  .toc { page-break-before: always; }
+  .toc ul { list-style: none; padding-left: 0; }
+  .toc li { padding: 3px 0; }
+  .toc li.h2 { padding-left: 20px; font-size: 10pt; }
+  .toc li.h3 { padding-left: 40px; font-size: 9.5pt; color: #555; }
+  .section-note { background: #f0fdf4; border-left: 4px solid #10B981; padding: 10px 14px; margin: 10px 0; border-radius: 0 4px 4px 0; font-size: 10.5pt; }
+  .badge { display: inline-block; background: #10B981; color: white; padding: 2px 8px; border-radius: 10px; font-size: 9pt; margin-left: 6px; }
+  .badge-yellow { background: #F59E0B; }
+  .badge-red { background: #EF4444; }
+  hr { border: none; border-top: 1px solid #ddd; margin: 20px 0; }
+</style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- PAGE DE TITRE -->
+<!-- ============================================================ -->
+<div class="cover">
+  <h1>JOMMBA</h1>
+  <div class="subtitle">Spécification Fonctionnelle Détaillée</div>
+  <hr>
+  <div class="meta">
+    <strong>Plateforme Matrimoniale Halal — jommba.net</strong><br>
+    Version 1.0 &nbsp;|&nbsp; Juin 2026<br>
+    Document confidentiel — Usage interne uniquement<br><br>
+    Préparé pour : Construction de la base de données &amp; Dashboard Administrateur
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TABLE DES MATIÈRES -->
+<!-- ============================================================ -->
+<div class="toc">
+<h1 style="page-break-before:always;">TABLE DES MATIÈRES</h1>
+<ul>
+  <li>1. Vue d'ensemble du projet</li>
+  <li class="h2">1.1 Présentation générale</li>
+  <li class="h2">1.2 Proposition de valeur</li>
+  <li class="h2">1.3 Types d'utilisateurs</li>
+  <li class="h2">1.4 Stack technologique</li>
+  <li class="h2">1.5 Comptes de test</li>
+  <li>2. Structure de l'application et navigation</li>
+  <li>3. Authentification</li>
+  <li class="h2">3.1 Inscription (2 étapes)</li>
+  <li class="h2">3.2 Connexion</li>
+  <li class="h2">3.3 Vérification email (OTP)</li>
+  <li class="h2">3.4 Déconnexion</li>
+  <li>4. Onboarding — Création du profil (7 étapes)</li>
+  <li>5. Dashboard principal</li>
+  <li>6. Explorer — Découverte de profils</li>
+  <li>7. Demandes de contact</li>
+  <li>8. Messagerie</li>
+  <li>9. Visiteurs de profil</li>
+  <li>10. Profils favoris</li>
+  <li>11. Vue détaillée d'un profil</li>
+  <li>12. Notifications</li>
+  <li>13. Paramètres utilisateur</li>
+  <li>14. Abonnement Premium</li>
+  <li>15. Boost de visibilité</li>
+  <li>16. Coach IA — Cheikh Abdallah</li>
+  <li>17. Blog</li>
+  <li>18. FAQ</li>
+  <li>19. Pages publiques (Landing page)</li>
+  <li>20. Modèles de données — Référence pour la base de données</li>
+  <li>21. Règles métier</li>
+  <li>22. Matrice d'accès aux fonctionnalités (Free vs Premium)</li>
+  <li>23. Parcours utilisateurs</li>
+  <li>24. Variables d'environnement</li>
+  <li>25. Fonctionnalités à développer (Roadmap)</li>
+  <li>26. Design system</li>
+  <li>Annexes</li>
+</ul>
+</div>
+
+<!-- ============================================================ -->
+<!-- 1. VUE D'ENSEMBLE -->
+<!-- ============================================================ -->
+<h1>1. VUE D'ENSEMBLE DU PROJET</h1>
+
+<h2>1.1 Présentation générale</h2>
+<p>Jommba (jommba.net) est une plateforme matrimoniale halal destinée aux musulmans francophones d'Afrique subsaharienne et de la diaspora. Son objectif est de faciliter des rencontres sérieuses dans le respect des valeurs islamiques : présence du Wali (tuteur matrimonial), vérification manuelle de chaque profil par l'équipe avant mise en ligne, coach IA spécialisé en droit islamique du mariage, et environnement sans contenu illicite.</p>
+
+<h2>1.2 Proposition de valeur</h2>
+<ul>
+  <li>Profils 100 % vérifiés manuellement par l'équipe Jommba avant publication (délai : 12 à 24 heures)</li>
+  <li>Coach IA islamique intégré (Cheikh Abdallah) pour guider les membres</li>
+  <li>Messagerie sécurisée avec gestion du contexte islamique (Wali)</li>
+  <li>Modèle freemium : Gratuit (fonctionnalités de base) + Premium à 10 USD/mois (offre de lancement ; prix normal 15 USD/mois)</li>
+  <li>Respect strict de la vie privée : photos floutées en option, mode invisible, mode pause</li>
+  <li>Contenu éducatif : blog, hadith quotidien, conseil du jour, Marriage Academy</li>
+</ul>
+
+<h2>1.3 Types d'utilisateurs</h2>
+<ul>
+  <li><strong>Membre Gratuit (Free)</strong> : accès limité — 3 demandes de contact/jour, 3 conversations simultanées, 3 questions au coach/jour</li>
+  <li><strong>Membre Premium</strong> : accès illimité aux fonctionnalités principales</li>
+  <li><strong>Membre en cours de validation</strong> : profil créé mais en attente de vérification manuelle (12-24 h)</li>
+  <li><strong>Administrateur</strong> (Dashboard Admin — à développer) : validation des profils, modération, gestion des abonnements, statistiques globales</li>
+</ul>
+
+<h2>1.4 Stack technologique</h2>
+<table>
+  <tr><th>Couche</th><th>Technologie</th><th>Statut</th></tr>
+  <tr><td>Framework</td><td>Next.js 16 (App Router) + React 19 + TypeScript</td><td>✅ Actif</td></tr>
+  <tr><td>Styles</td><td>Tailwind CSS 4</td><td>✅ Actif</td></tr>
+  <tr><td>État global</td><td>Zustand 5 (8 stores)</td><td>✅ Actif</td></tr>
+  <tr><td>Formulaires / Validation</td><td>React Hook Form + Zod</td><td>✅ Actif</td></tr>
+  <tr><td>Coach IA</td><td>Anthropic SDK — Claude Sonnet 4.6 (streaming)</td><td>✅ Actif</td></tr>
+  <tr><td>Animations</td><td>Framer Motion</td><td>✅ Actif</td></tr>
+  <tr><td>Icônes</td><td>Lucide React</td><td>✅ Actif</td></tr>
+  <tr><td>Notifications toast</td><td>Sonner</td><td>✅ Actif</td></tr>
+  <tr><td>HTTP client</td><td>Undici (gestion SSL en proxy)</td><td>✅ Actif</td></tr>
+  <tr><td>Analytics</td><td>Google Tag Manager + Facebook Pixel</td><td>✅ Actif</td></tr>
+  <tr><td>Base de données</td><td>PostgreSQL via Prisma ORM</td><td>⏳ À venir</td></tr>
+  <tr><td>Authentification</td><td>NextAuth.js</td><td>⏳ À venir</td></tr>
+  <tr><td>Paiement</td><td>Stripe</td><td>⏳ À venir</td></tr>
+  <tr><td>Stockage images</td><td>Cloudinary</td><td>⏳ À venir</td></tr>
+</table>
+
+<h2>1.5 Comptes de test (données mock actuelles)</h2>
+<div class="section-note">
+  <strong>Compte Free :</strong> abou.diallo@jommba.net / abou2024 — Abou Diallo, 32 ans, Dakar, non validé<br>
+  <strong>Compte Premium :</strong> alphadiallo2308@gmail.com / alpha2308 — Alpha Diallo, 29 ans, Dakar, validé<br>
+  <strong>Code OTP universel :</strong> 123456 (délai de renvoi : 60 secondes)
+</div>
+
+<!-- ============================================================ -->
+<!-- 2. STRUCTURE -->
+<!-- ============================================================ -->
+<h1>2. STRUCTURE DE L'APPLICATION ET NAVIGATION</h1>
+
+<h2>2.1 Architecture des routes (Next.js App Router)</h2>
+<ul>
+  <li><strong>(public)/</strong> — pages publiques avec Navbar + Footer : Accueil, Blog, FAQ</li>
+  <li><strong>(auth)/</strong> — pages d'authentification avec layout côte à côte islamique : Connexion, Inscription</li>
+  <li><strong>verify-email/</strong> — vérification OTP de l'email</li>
+  <li><strong>onboarding/</strong> — wizard de création de profil en 7 étapes + écran de succès</li>
+  <li><strong>dashboard/</strong> — espace membre authentifié avec BottomNav mobile</li>
+  <li><strong>api/coach</strong> — endpoint streaming IA Coach</li>
+</ul>
+
+<h2>2.2 Routes publiques</h2>
+<table>
+  <tr><th>URL</th><th>Description</th></tr>
+  <tr><td>/</td><td>Landing page complète</td></tr>
+  <tr><td>/blog</td><td>Liste des articles du blog</td></tr>
+  <tr><td>/faq</td><td>Foire aux questions</td></tr>
+  <tr><td>/connexion</td><td>Formulaire de connexion</td></tr>
+  <tr><td>/inscription</td><td>Formulaire d'inscription (2 étapes)</td></tr>
+</table>
+
+<h2>2.3 Routes du Dashboard (espace membre)</h2>
+<table>
+  <tr><th>URL</th><th>Description</th></tr>
+  <tr><td>/dashboard</td><td>Tableau de bord principal</td></tr>
+  <tr><td>/dashboard/explorer</td><td>Découverte de profils (Swipe / Grille)</td></tr>
+  <tr><td>/dashboard/messages</td><td>Liste des conversations</td></tr>
+  <tr><td>/dashboard/messages/[id]</td><td>Fil de conversation individuel</td></tr>
+  <tr><td>/dashboard/demandes</td><td>Demandes de contact (reçues et envoyées)</td></tr>
+  <tr><td>/dashboard/visiteurs</td><td>Visiteurs récents du profil</td></tr>
+  <tr><td>/dashboard/favoris</td><td>Profils mis en favoris</td></tr>
+  <tr><td>/dashboard/profil/[id]</td><td>Vue détaillée du profil d'un membre</td></tr>
+  <tr><td>/dashboard/premium</td><td>Page d'abonnement Premium</td></tr>
+  <tr><td>/dashboard/parametres</td><td>Paramètres du compte</td></tr>
+  <tr><td>/dashboard/notifications</td><td>Centre de notifications</td></tr>
+  <tr><td>/dashboard/aide</td><td>Centre d'aide et support</td></tr>
+</table>
+
+<h2>2.4 API Routes</h2>
+<table>
+  <tr><th>Méthode</th><th>Endpoint</th><th>Description</th></tr>
+  <tr><td>POST</td><td>/api/coach</td><td>Réponse Coach IA en streaming (SSE), modèle Claude Sonnet 4.6</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<!-- 3. AUTHENTIFICATION -->
+<!-- ============================================================ -->
+<h1>3. AUTHENTIFICATION</h1>
+
+<h2>3.1 Inscription (2 étapes)</h2>
+
+<h3>Étape 1 — Informations personnelles</h3>
+<ul>
+  <li>Champs : Prénom, Nom de famille, Adresse email</li>
+  <li>Case à cocher obligatoire : acceptation des CGU et politique de confidentialité</li>
+  <li>Validation Zod : email valide, champs non vides, longueur minimale</li>
+  <li>Bouton « Continuer » activé uniquement si le formulaire est valide</li>
+  <li>Indicateur de progression : Étape 1/2</li>
+</ul>
+
+<h3>Étape 2 — Sécurité du compte</h3>
+<ul>
+  <li>Champ : Mot de passe avec indicateur de force en temps réel (Faible / Moyen / Fort)</li>
+  <li>Champ : Confirmation du mot de passe</li>
+  <li>Toggle de visibilité du mot de passe (icône œil)</li>
+  <li>CAPTCHA mock (à connecter à hCaptcha ou reCAPTCHA en production)</li>
+  <li>Bouton « Retour » pour revenir à l'étape 1</li>
+  <li>Soumission → <code>mockRegister()</code> → redirection vers <code>/verify-email</code></li>
+</ul>
+
+<h2>3.2 Connexion</h2>
+<ul>
+  <li>Champs : Email + Mot de passe</li>
+  <li>Toggle de visibilité du mot de passe</li>
+  <li>Bouton « Se connecter avec Google » (OAuth — mock actuellement)</li>
+  <li>Lien « Mot de passe oublié » (page à développer)</li>
+  <li>Lien « Pas encore membre ? Créer un compte »</li>
+  <li>Layout côte à côte : formulaire à gauche, panneau islamique décoratif à droite</li>
+  <li>Le panneau droit affiche : une citation islamique sur le mariage + 3 valeurs clés de la plateforme</li>
+  <li>Soumission → <code>mockLogin()</code> → redirection vers /dashboard (profil complet) ou /onboarding (sinon)</li>
+  <li>Comptes de test affichés sous le formulaire pour faciliter les tests de développement</li>
+</ul>
+
+<h2>3.3 Vérification email (OTP)</h2>
+<ul>
+  <li>Affichage de l'email partiellement masqué (a***@exemple.com)</li>
+  <li>6 champs OTP individuels (1 chiffre par champ)</li>
+  <li>Auto-avancement : le focus passe automatiquement au champ suivant à chaque saisie</li>
+  <li>Support du collé (paste) : un code collé remplit les 6 champs automatiquement</li>
+  <li>Auto-validation : dès que les 6 chiffres sont saisis, la vérification se lance sans clic</li>
+  <li>Bouton « Renvoyer le code » avec cooldown de 60 secondes (compte à rebours affiché)</li>
+  <li>Code valide → redirection vers <code>/onboarding</code></li>
+  <li>Code universel de test : <strong>123456</strong></li>
+</ul>
+
+<h2>3.4 Déconnexion</h2>
+<ul>
+  <li>Accessible via le menu déroulant profil dans la navbar du Dashboard</li>
+  <li>Effacement du store d'authentification Zustand (suppression du localStorage)</li>
+  <li>Redirection vers <code>/connexion</code></li>
+</ul>
+
+<!-- ============================================================ -->
+<!-- 4. ONBOARDING -->
+<!-- ============================================================ -->
+<h1>4. ONBOARDING — CRÉATION DU PROFIL (7 ÉTAPES)</h1>
+
+<div class="section-note">Le wizard d'onboarding guide le nouvel inscrit à travers 7 étapes de complétion de profil. Une barre de progression (0 à 100 %) et un indicateur « X/7 » sont affichés en permanence en haut de l'écran. L'utilisateur peut naviguer entre les étapes via les boutons Précédent / Suivant. Les données sont sauvegardées dans le store Zustand (persisté en localStorage) à chaque étape.</div>
+
+<h2>Étape 0 — Écran de bienvenue</h2>
+<ul>
+  <li>Message d'accueil personnalisé avec le prénom de l'utilisateur</li>
+  <li>Explication du processus d'onboarding (7 étapes, 12-24 h de validation)</li>
+  <li>Bouton « Commencer mon profil » → Étape 1</li>
+</ul>
+
+<h2>Étape 1 — Genre</h2>
+<ul>
+  <li>Sélection obligatoire : Homme / Femme</li>
+  <li>Chaque option est présentée sous forme de carte cliquable avec icône et label</li>
+  <li>Pas d'option « Autre » (plateforme orientée mariage hétérosexuel islamique)</li>
+</ul>
+
+<h2>Étape 2 — Date de naissance</h2>
+<ul>
+  <li>Sélecteurs déroulants : Jour / Mois / Année</li>
+  <li>Validation : âge minimum 18 ans révolus</li>
+  <li>Calcul et affichage automatique de l'âge</li>
+</ul>
+
+<h2>Étape 3 — Situation matrimoniale</h2>
+<ul>
+  <li>Options : Célibataire / Divorcé(e) / Veuf / Veuve</li>
+  <li>Présentation en cartes cliquables</li>
+</ul>
+
+<h2>Étape 4 — Informations professionnelles</h2>
+<ul>
+  <li>Champ texte libre : Profession (intitulé du poste)</li>
+  <li>Sélecteur : Niveau d'études (Sans diplôme / BAC / BAC+2 / BAC+3 / BAC+5 / Doctorat)</li>
+  <li>Champ numérique : Taille en centimètres</li>
+</ul>
+
+<h2>Étape 5 — Localisation</h2>
+<ul>
+  <li>Sélection du type : <strong>Afrique</strong> ou <strong>Diaspora</strong></li>
+  <li>Si Afrique : sélecteur Pays + sélecteur Région/Ville</li>
+  <li>Si Diaspora : sélecteur Pays de résidence + sélecteur Pays d'origine</li>
+  <li>Pays disponibles : Sénégal, Mali, Côte d'Ivoire, Guinée, Mauritanie, Gambie, France, Belgique, Canada, USA, etc.</li>
+</ul>
+
+<h2>Étape 6 — Valeurs et vision du mariage</h2>
+<ul>
+  <li><strong>Vision du mariage</strong> (multi-sélection) : Mariage sérieux, Mariage islamique, Stabilité familiale, Fonder un foyer pieux, etc.</li>
+  <li><strong>Ce que je recherche</strong> (multi-sélection) : Piété, Sérieux, Gentillesse, Ambition, Humour, Patience, etc.</li>
+  <li><strong>Polygamie</strong> : Oui / Non / Selon les conditions</li>
+  <li><strong>Enfants</strong> : Je n'en ai pas / J'en ai / Je veux des enfants / Je n'en veux pas</li>
+</ul>
+
+<h2>Étape 7 — Photos de profil</h2>
+<ul>
+  <li>Upload de plusieurs photos (minimum 1 recommandé pour compléter le profil)</li>
+  <li>Aperçu en grille des photos sélectionnées</li>
+  <li>Possibilité de supprimer une photo avant soumission</li>
+  <li>Formats acceptés : JPEG, PNG, WebP</li>
+  <li>Mock actuel : génération d'une URL blob locale (Cloudinary en production)</li>
+</ul>
+
+<h2>Écran de succès (après l'étape 7)</h2>
+<p>Page : <code>/onboarding/success</code></p>
+<ul>
+  <li>Message de confirmation : profil soumis avec succès, en attente de validation (12-24 h)</li>
+  <li>Timeline illustrant les étapes : Soumis → En cours de vérification → Profil validé</li>
+  <li>Bannière Premium : offre de lancement à 10 $/mois (prix normal 15 $/mois)</li>
+  <li>Bouton « Accéder au Dashboard »</li>
+</ul>
+
+<!-- ============================================================ -->
+<!-- 5. DASHBOARD PRINCIPAL -->
+<!-- ============================================================ -->
+<h1>5. DASHBOARD PRINCIPAL</h1>
+
+<p>Page : <code>/dashboard</code> — Page d'accueil de l'espace membre. Les composants sont affichés de manière conditionnelle selon le statut de l'utilisateur (Premium / Free, Validé / Non validé).</p>
+
+<h2>5.1 Composants toujours affichés</h2>
+<ul>
+  <li><strong>Bannière Premium</strong> (membres Free uniquement) : CTA pour passer à Premium</li>
+  <li><strong>Carte de profil utilisateur</strong> : avatar, prénom, âge, ville, barre de complétion du profil (%)</li>
+  <li><strong>Jommba Selection</strong> : grille de 12 profils mis en avant</li>
+  <li><strong>Rappel islamique du jour</strong> : hadith ou verset coranique</li>
+  <li><strong>Conseil du jour</strong> : tip matrimonial</li>
+  <li><strong>Navigation rapide (QuickNav)</strong> : raccourcis vers Explorer, Demandes, Messages, Favoris</li>
+</ul>
+
+<h2>5.2 Composants conditionnels</h2>
+<ul>
+  <li><strong>Carte d'appréciation du profil</strong> (Free uniquement) : « Votre profil ne passe pas inaperçu »</li>
+  <li><strong>Alerte profil invisible/pause</strong> : si l'utilisateur est en mode Pause ou Discussion</li>
+  <li><strong>Alerte Boost indisponible</strong> (si non validé) : explique que le Boost nécessite un profil validé</li>
+  <li><strong>Compteur de demandes journalières</strong> : X/3 demandes restantes (Free)</li>
+  <li><strong>Panel Statistiques</strong> : vues totales, favoris, demandes reçues, visiteurs</li>
+  <li><strong>Toggle de visibilité</strong> : sélecteur Actif / Pause / Discussion</li>
+  <li><strong>Marriage Academy</strong> : module d'apprentissage sur le mariage islamique</li>
+</ul>
+
+<h2>5.3 Modes de visibilité du profil</h2>
+<table>
+  <tr><th>Mode</th><th>Comportement</th></tr>
+  <tr><td>Actif</td><td>Profil visible par tous les membres dans l'Explorer et les recherches</td></tr>
+  <tr><td>Pause</td><td>Profil masqué des recherches et de l'Explorer. L'utilisateur peut continuer à naviguer normalement.</td></tr>
+  <tr><td>Discussion</td><td>Profil visible uniquement par les membres avec qui une conversation est déjà en cours</td></tr>
+</table>
+
+<h2>5.4 Navigation Dashboard</h2>
+<ul>
+  <li><strong>BottomNav (mobile)</strong> : 5 onglets — Accueil / Explorer / Messages / Demandes / Profil</li>
+  <li><strong>Barre latérale (desktop)</strong> : menu complet avec toutes les sections + stats rapides</li>
+  <li><strong>Navbar supérieure</strong> : logo Jommba + badge notifications + menu déroulant profil (Paramètres, Déconnexion)</li>
+</ul>
+
+<!-- ============================================================ -->
+<!-- 6. EXPLORER -->
+<!-- ============================================================ -->
+<h1>6. EXPLORER — DÉCOUVERTE DE PROFILS</h1>
+
+<p>Page : <code>/dashboard/explorer</code> — Fonctionnalité principale de découverte de profils compatibles.</p>
+
+<h2>6.1 Mode Swipe (mode par défaut)</h2>
+<ul>
+  <li>Affichage d'une carte de profil à la fois (photo plein format + infos essentielles)</li>
+  <li>Bouton <strong>Passer</strong> (skip) : passer au profil suivant sans action</li>
+  <li>Bouton <strong>Ajouter aux favoris</strong> : enregistrer le profil (étoile/cœur)</li>
+  <li>Bouton <strong>Contacter</strong> : envoyer une demande de contact</li>
+  <li>Bouton <strong>Flash</strong> : manifestation d'intérêt prioritaire (fonctionnalité Premium)</li>
+  <li>Compteur de swipes restants pour les membres Free (3 par jour)</li>
+  <li>Modal Premium déclenchée automatiquement quand le quota Free est atteint</li>
+</ul>
+
+<h2>6.2 Mode Grille</h2>
+<ul>
+  <li>Affichage multi-colonnes de tous les profils disponibles</li>
+  <li>Chaque carte : photo, prénom + initiale, âge, ville</li>
+  <li>Badge « En avant » pour les profils Jommba Selection</li>
+  <li>Clic sur une carte → vue détaillée du profil (<code>/dashboard/profil/[id]</code>)</li>
+</ul>
+
+<h2>6.3 Filtres avancés</h2>
+<ul>
+  <li>Tranche d'âge (min – max avec sliders)</li>
+  <li>Localisation (Afrique / Diaspora / Pays spécifique)</li>
+  <li>Situation matrimoniale (Célibataire / Divorcé / Veuf)</li>
+  <li>Niveau d'études</li>
+  <li>Madhhab (Malékite / Chaféite / Hanéfite / Hanbalite)</li>
+  <li>Fréquentation de la mosquée</li>
+  <li>Niveau d'arabe</li>
+  <li>Désir d'enfants</li>
+  <li>Accepte la relocalisation</li>
+  <li>Polygamie</li>
+  <li>Panel masquable via le bouton Filtres</li>
+</ul>
+
+<h2>6.4 Tour de présentation (Onboarding Guide)</h2>
+<ul>
+  <li>Tour affiché au premier accès à l'Explorer</li>
+  <li>5 étapes : Photo de profil → Bouton Ajouter → Bouton Flash → Filtres → Mode Grille</li>
+  <li>Highlight animé sur chaque élément concerné</li>
+  <li>Modal d'explication pour chaque étape</li>
+  <li>Bouton « Passer le tour »</li>
+</ul>
+
+<h2>6.5 Actions sur un profil</h2>
+<ul>
+  <li><strong>Signaler (Report)</strong> : modal avec motifs prédéfinis (Profil faux, Contenu inapproprié, Harcèlement, Spam, Autre)</li>
+  <li><strong>Bloquer (Block)</strong> : confirmation avant blocage définitif — le profil est masqué de part et d'autre</li>
+</ul>
+
+<h2>6.6 Règles Free vs Premium</h2>
+<table>
+  <tr><th>Action</th><th>Free</th><th>Premium</th></tr>
+  <tr><td>Swipes / Contacts par jour</td><td>3</td><td>Illimité</td></tr>
+  <tr><td>Filtres avancés</td><td>Basiques</td><td>Complets</td></tr>
+  <tr><td>Mode Flash</td><td>Non</td><td>Oui</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<!-- 7. DEMANDES DE CONTACT -->
+<!-- ============================================================ -->
+<h1>7. DEMANDES DE CONTACT</h1>
+
+<p>Page : <code>/dashboard/demandes</code> — Gestion des demandes de mise en contact entre membres.</p>
+
+<h2>7.1 Onglet Demandes reçues</h2>
+<ul>
+  <li>Liste des membres ayant envoyé une demande de contact non encore traitée</li>
+  <li>Pour chaque demande : avatar, prénom + initiale, âge, ville, date/heure relative (« Il y a X heures »)</li>
+  <li>Badge « Nouveau » si la demande n'a pas été vue</li>
+  <li>Actions : <strong>Accepter</strong> / <strong>Refuser</strong></li>
+  <li>Accepter → création d'une conversation dans /dashboard/messages + notification à l'expéditeur</li>
+  <li>Refuser → notification « Refusé » envoyée à l'expéditeur</li>
+</ul>
+
+<h2>7.2 Onglet Demandes envoyées</h2>
+<ul>
+  <li>Liste des demandes envoyées par l'utilisateur connecté</li>
+  <li>Pour chaque demande : avatar, prénom + initiale, âge, date d'envoi</li>
+  <li>Statut : <span class="badge badge-yellow">En attente</span> / <span class="badge">Acceptée</span> / <span class="badge badge-red">Refusée</span></li>
+  <li>Possibilité d'annuler une demande En attente</li>
+</ul>
+
+<h2>7.3 Onglet Contacts (demandes acceptées)</h2>
+<ul>
+  <li>Liste des contacts établis (demandes mutuellement acceptées)</li>
+  <li>Accès rapide à la conversation depuis la liste</li>
+</ul>
+
+<h2>7.4 Vue détail avant décision</h2>
+<ul>
+  <li>Clic sur une demande reçue → affichage du profil complet du demandeur</li>
+  <li>Photo, nom + initiale, âge, ville, vision du mariage, ce qu'il/elle recherche</li>
+  <li>Boutons Accepter / Refuser accessibles depuis cette vue</li>
+</ul>
+
+<h2>7.5 Règles métier</h2>
+<table>
+  <tr><th></th><th>Free</th><th>Premium</th></tr>
+  <tr><td>Demandes envoyées par jour</td><td>3</td><td>Illimitées</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<!-- 8. MESSAGERIE -->
+<!-- ============================================================ -->
+<h1>8. MESSAGERIE</h1>
+
+<p>Pages : <code>/dashboard/messages</code> (liste) et <code>/dashboard/messages/[id]</code> (fil de conversation).</p>
+
+<h2>8.1 Liste des conversations</h2>
+<ul>
+  <li>Conversations triées par date du dernier message (plus récent en premier)</li>
+  <li>Pour chaque conversation : avatar, prénom + initiale, extrait du dernier message, heure</li>
+  <li>Badge rouge avec le nombre de messages non lus</li>
+  <li>Conversations non lues affichées en gras</li>
+  <li>Section conversations archivées (séparée)</li>
+  <li>État vide : écran de bienvenue avec CTA vers l'Explorer</li>
+</ul>
+
+<h2>8.2 Fil de conversation</h2>
+<ul>
+  <li>En-tête : avatar + prénom + initiale du correspondant + lien vers son profil</li>
+  <li>Bulles de messages : côté droit (mes messages en vert), côté gauche (messages du correspondant en gris)</li>
+  <li>Affichage de l'heure pour chaque message</li>
+  <li>Zone de saisie : champ texte + bouton Envoyer</li>
+  <li>Envoi par touche Entrée ou clic sur le bouton</li>
+  <li>Scroll automatique vers le dernier message</li>
+  <li>Messages vocaux (fonctionnalité Premium — à développer)</li>
+</ul>
+
+<h2>8.3 Règles métier</h2>
+<table>
+  <tr><th></th><th>Free</th><th>Premium</th></tr>
+  <tr><td>Conversations simultanées</td><td>3 maximum</td><td>Illimitées</td></tr>
+  <tr><td>Messages vocaux</td><td>Non</td><td>Oui</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<!-- 9. VISITEURS -->
+<!-- ============================================================ -->
+<h1>9. VISITEURS DE PROFIL</h1>
+
+<p>Page : <code>/dashboard/visiteurs</code> — Liste des membres ayant consulté le profil de l'utilisateur.</p>
+
+<h2>9.1 Affichage</h2>
+<ul>
+  <li><strong>Visiteur débloqué</strong> : avatar visible, prénom + initiale, âge, ville, « Il y a X heures », badge « Nouveau »</li>
+  <li><strong>Visiteur bloqué (Free)</strong> : avatar flouté, prénom masqué avec un cadenas, invitation à passer Premium</li>
+  <li>Les <strong>2 derniers visiteurs</strong> sont visibles pour les membres Free</li>
+  <li>Tous les visiteurs sont visibles pour les membres Premium</li>
+</ul>
+
+<h2>9.2 Actions disponibles</h2>
+<ul>
+  <li>Clic sur un visiteur → voir son profil complet</li>
+  <li>Bouton « Contacter » depuis la liste</li>
+</ul>
+
+<h2>9.3 Règles métier</h2>
+<table>
+  <tr><th></th><th>Free</th><th>Premium</th></tr>
+  <tr><td>Visiteurs visibles</td><td>2 derniers uniquement</td><td>Tous</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<!-- 10. FAVORIS -->
+<!-- ============================================================ -->
+<h1>10. PROFILS FAVORIS</h1>
+
+<p>Page : <code>/dashboard/favoris</code> — Profils enregistrés en favoris par l'utilisateur.</p>
+
+<h2>10.1 Fonctionnalités</h2>
+<ul>
+  <li>Liste des profils favoris avec photo, prénom + initiale, âge, ville</li>
+  <li>Date d'ajout aux favoris</li>
+  <li>Bouton « Retirer des favoris »</li>
+  <li>Bouton « Envoyer un message » (accès direct à la conversation)</li>
+  <li>Clic sur la carte → vue détaillée du profil</li>
+  <li>État vide : message + CTA vers l'Explorer</li>
+</ul>
+
+<h2>10.2 Points d'ajout aux favoris</h2>
+<ul>
+  <li>Depuis l'Explorer en mode Swipe (bouton étoile/cœur)</li>
+  <li>Depuis la vue détaillée d'un profil (toggle cœur en en-tête)</li>
+  <li>Depuis la grille Explorer</li>
+</ul>
+
+<!-- ============================================================ -->
+<!-- 11. PROFIL DÉTAIL -->
+<!-- ============================================================ -->
+<h1>11. VUE DÉTAILLÉE D'UN PROFIL</h1>
+
+<p>Page : <code>/dashboard/profil/[id]</code> — Affichage complet du profil d'un autre membre.</p>
+
+<h2>11.1 En-tête</h2>
+<ul>
+  <li>Photo principale (format large)</li>
+  <li>Prénom + initiale du nom, âge, ville, pays</li>
+  <li>Badges : Premium (si membre premium), Validé</li>
+  <li>Bouton toggle favori (cœur plein / cœur vide)</li>
+  <li>Bouton « Contacter » (envoie une demande de contact)</li>
+  <li>Menu « … » → Signaler / Bloquer</li>
+</ul>
+
+<h2>11.2 Galerie photos</h2>
+<ul>
+  <li>Grille de miniatures (toutes les photos du profil)</li>
+  <li>Clic sur une miniature → Lightbox (vue plein écran)</li>
+  <li>Navigation précédent / suivant en lightbox</li>
+</ul>
+
+<h2>11.3 Sections d'informations</h2>
+<table>
+  <tr><th>Section</th><th>Contenu</th></tr>
+  <tr><td>Vision du mariage</td><td>Tags colorés (ex. Mariage sérieux, Famille stable, Foyer pieux)</td></tr>
+  <tr><td>Ce que je recherche</td><td>Tags (ex. Piété, Sérieux, Bienveillance, Patience)</td></tr>
+  <tr><td>Mes qualités</td><td>Tags (ex. Patient, Attentionné, Fiable)</td></tr>
+  <tr><td>Mes centres d'intérêt</td><td>Tags (ex. Lecture, Voyages, Cuisine, Sport)</td></tr>
+  <tr><td>Mes deal-breakers</td><td>Liste des critères non négociables</td></tr>
+</table>
+
+<h2>11.4 Informations religieuses</h2>
+<table>
+  <tr><th>Champ</th><th>Valeurs possibles</th></tr>
+  <tr><td>Madhhab</td><td>Malékite / Chaféite / Hanéfite / Hanbalite</td></tr>
+  <tr><td>Fréquentation de la mosquée</td><td>Quotidienne / Hebdomadaire / Occasionnelle / Rarement</td></tr>
+  <tr><td>Niveau d'arabe</td><td>Aucun / Basique / Intermédiaire / Avancé / Courant</td></tr>
+</table>
+
+<h2>11.5 Projet de vie</h2>
+<table>
+  <tr><th>Champ</th><th>Valeurs possibles</th></tr>
+  <tr><td>Enfants actuels</td><td>Oui (avec nombre) / Non</td></tr>
+  <tr><td>Désir d'enfants</td><td>Oui / Non / Selon les conditions</td></tr>
+  <tr><td>Peut se relocaliser</td><td>Oui / Non / Selon les conditions</td></tr>
+  <tr><td>Polygamie</td><td>Oui / Non / Selon les conditions (hommes uniquement)</td></tr>
+</table>
+
+<h2>11.6 Informations personnelles</h2>
+<ul>
+  <li>Situation matrimoniale : Célibataire / Divorcé(e) / Veuf / Veuve</li>
+  <li>Niveau d'études</li>
+  <li>Profession</li>
+  <li>Taille (en cm)</li>
+  <li>Langues parlées (liste)</li>
+</ul>
+
+<!-- ============================================================ -->
+<!-- 12. NOTIFICATIONS -->
+<!-- ============================================================ -->
+<h1>12. NOTIFICATIONS</h1>
+
+<p>Page : <code>/dashboard/notifications</code> — Centre de notifications de l'utilisateur.</p>
+
+<h2>12.1 Types de notifications</h2>
+<table>
+  <tr><th>Type</th><th>Déclencheur</th><th>Contenu type</th></tr>
+  <tr><td>demande</td><td>Nouvelle demande de contact reçue</td><td>« [Prénom] vous a envoyé une demande de contact »</td></tr>
+  <tr><td>decline</td><td>Une demande envoyée a été refusée</td><td>« [Prénom] n'a pas donné suite à votre demande »</td></tr>
+  <tr><td>profil</td><td>Visite du profil</td><td>« [Prénom] a consulté votre profil »</td></tr>
+  <tr><td>message</td><td>Nouveau message reçu</td><td>« Nouveau message de [Prénom] »</td></tr>
+  <tr><td>visite</td><td>Visiteur récent</td><td>« [Prénom] a visité votre profil »</td></tr>
+  <tr><td>premium</td><td>Abonnement Premium</td><td>Expiration, renouvellement, confirmation de paiement</td></tr>
+</table>
+
+<h2>12.2 Fonctionnalités d'affichage</h2>
+<ul>
+  <li>Icône colorée selon le type (couleurs distinctes par type)</li>
+  <li>Titre + description</li>
+  <li>Date et heure relative (« Il y a X heures/jours »)</li>
+  <li>Indicateur visuel de non-lu (fond coloré ou point)</li>
+</ul>
+
+<h2>12.3 Actions</h2>
+<ul>
+  <li>Marquer une notification comme lue (individuellement)</li>
+  <li>Marquer toutes comme lues</li>
+  <li>Filtrage par type de notification</li>
+  <li>Clic sur une notification → navigation vers la page concernée (profil, messages, etc.)</li>
+</ul>
+
+<h2>12.4 Compteur</h2>
+<ul>
+  <li>Badge rouge avec le nombre de notifications non lues dans la BottomNav et la navbar</li>
+</ul>
+
+<!-- ============================================================ -->
+<!-- 13. PARAMÈTRES -->
+<!-- ============================================================ -->
+<h1>13. PARAMÈTRES UTILISATEUR</h1>
+
+<p>Page : <code>/dashboard/parametres</code> — Gestion complète du compte et des préférences.</p>
+
+<h2>13.1 Structure de navigation</h2>
+<ul>
+  <li>Drawer latéral (desktop) : liste des panneaux cliquables</li>
+  <li>Navigation par onglets (mobile)</li>
+  <li>Chaque panneau possède un bouton « Enregistrer » individuel</li>
+</ul>
+
+<h2>13.2 Panneau — Informations personnelles</h2>
+<ul>
+  <li>Prénom, Nom</li>
+  <li>Date de naissance</li>
+  <li>Situation matrimoniale</li>
+  <li>Profession</li>
+  <li>Niveau d'études</li>
+  <li>Taille</li>
+</ul>
+
+<h2>13.3 Panneau — Personnalité</h2>
+<ul>
+  <li>Centres d'intérêt (tags multi-sélection)</li>
+  <li>Mes qualités (tags multi-sélection)</li>
+  <li>Mes défauts (optionnel, tags)</li>
+  <li>Deal-breakers (ce que je n'accepte pas, tags)</li>
+</ul>
+
+<h2>13.4 Panneau — Localisation</h2>
+<ul>
+  <li>Type : Afrique / Diaspora</li>
+  <li>Pays + Région (si Afrique)</li>
+  <li>Pays de résidence + Pays d'origine (si Diaspora)</li>
+</ul>
+
+<h2>13.5 Panneau — Notifications</h2>
+<ul>
+  <li>Toggle : Nouvelles demandes de contact</li>
+  <li>Toggle : Nouveaux messages</li>
+  <li>Toggle : Visiteurs de profil</li>
+  <li>Toggle : Rappels et conseils du jour</li>
+  <li>Toggle : Actualités et offres Jommba</li>
+</ul>
+
+<h2>13.6 Panneau — Compte &amp; Sécurité</h2>
+<ul>
+  <li>Modifier l'adresse email</li>
+  <li>Modifier le mot de passe</li>
+  <li>Supprimer le compte (avec double confirmation)</li>
+</ul>
+
+<h2>13.7 Panneau — Vision du mariage</h2>
+<ul>
+  <li>Vision du mariage (multi-sélection)</li>
+  <li>Ce que je recherche (multi-sélection)</li>
+  <li>Polygamie</li>
+  <li>Désir d'enfants</li>
+  <li>Peut se relocaliser</li>
+</ul>
+
+<h2>13.8 Panneau — Infos religieuses &amp; langues</h2>
+<ul>
+  <li>Madhhab</li>
+  <li>Fréquentation de la mosquée</li>
+  <li>Niveau d'arabe</li>
+  <li>Langues parlées (multi-sélection)</li>
+</ul>
+
+<!-- ============================================================ -->
+<!-- 14. PREMIUM -->
+<!-- ============================================================ -->
+<h1>14. ABONNEMENT PREMIUM</h1>
+
+<p>Page : <code>/dashboard/premium</code> — Page de souscription et gestion de l'abonnement Premium.</p>
+
+<h2>14.1 Page de vente (non-Premium)</h2>
+
+<h3>Section Héro</h3>
+<ul>
+  <li>Titre accrocheur sur le mariage islamique sérieux</li>
+  <li>Badge « Offre de lancement »</li>
+  <li>Prix mis en avant : 10 $/mois (barré : 15 $/mois)</li>
+</ul>
+
+<h3>Fonctionnalités Premium mises en avant</h3>
+<ul>
+  <li>Demandes de contact illimitées (vs 3/jour en Free)</li>
+  <li>Conversations simultanées illimitées (vs 3 en Free)</li>
+  <li>Messages vocaux</li>
+  <li>Voir tous les visiteurs du profil</li>
+  <li>Voir qui vous a mis en favoris</li>
+  <li>Filtres de recherche avancés complets</li>
+  <li>Mise en avant prioritaire dans les résultats (ranking boosté)</li>
+  <li>Badge « Premium » sur le profil</li>
+  <li>Support prioritaire 7j/7</li>
+  <li>Questions Coach IA illimitées (vs 3/jour en Free)</li>
+</ul>
+
+<h3>Formules tarifaires</h3>
+<table>
+  <tr><th>Durée</th><th>Prix</th><th>Économie</th></tr>
+  <tr><td>1 mois</td><td>10 $/mois</td><td>—</td></tr>
+  <tr><td>3 mois</td><td>À définir</td><td>À définir</td></tr>
+  <tr><td>6 mois</td><td>À définir</td><td>À définir</td></tr>
+  <tr><td>12 mois</td><td>À définir</td><td>À définir</td></tr>
+</table>
+
+<h3>Méthodes de paiement (prévues)</h3>
+<ul>
+  <li>Carte bancaire (Visa, Mastercard) — via Stripe</li>
+  <li>Orange Money</li>
+  <li>Wave</li>
+  <li>MTN Mobile Money</li>
+</ul>
+
+<h3>Garanties affichées</h3>
+<ul>
+  <li>Remboursement sous 7 jours si non satisfait</li>
+  <li>Aucun engagement — résiliation à tout moment</li>
+  <li>Paiements sécurisés (SSL)</li>
+</ul>
+
+<h3>Témoignages (section)</h3>
+<ul>
+  <li>3 témoignages de couples Jommba : Yassine &amp; Sarah, Amine &amp; Leyla, Khadija &amp; Sofiane</li>
+</ul>
+
+<h3>FAQ Premium (section)</h3>
+<ul>
+  <li>Comment annuler mon abonnement ?</li>
+  <li>Puis-je obtenir un remboursement ?</li>
+  <li>Comment changer de formule ?</li>
+  <li>Les paiements sont-ils sécurisés ?</li>
+</ul>
+
+<h2>14.2 Vue membre Premium actif</h2>
+<ul>
+  <li>Statut « Membre Premium Actif » avec date d'expiration</li>
+  <li>Résumé des avantages actifs</li>
+  <li>Bouton « Gérer mon abonnement » (résilier, changer de formule)</li>
+</ul>
+
+<!-- ============================================================ -->
+<!-- 15. BOOST -->
+<!-- ============================================================ -->
+<h1>15. BOOST DE VISIBILITÉ</h1>
+
+<p>Accessible depuis le Dashboard principal — Wizard modale en 3 étapes.</p>
+
+<h2>15.1 Prérequis</h2>
+<ul>
+  <li>Profil validé par l'équipe Jommba</li>
+  <li>Si non validé : alerte « Boost indisponible — votre profil est en cours de validation »</li>
+</ul>
+
+<h2>15.2 Étape 1 — Sélection de l'option</h2>
+<ul>
+  <li>Option 1h : mise en avant immédiate pendant 1 heure</li>
+  <li>Option 3h : mise en avant pendant 3 heures</li>
+  <li>Option 24h : mise en avant pendant 24 heures</li>
+  <li>Prix affiché pour chaque option</li>
+</ul>
+
+<h2>15.3 Étape 2 — Paiement</h2>
+<ul>
+  <li>Récapitulatif de l'option sélectionnée et du prix</li>
+  <li>Choix de la méthode de paiement</li>
+  <li>Bouton de confirmation</li>
+</ul>
+
+<h2>15.4 Étape 3 — Confirmation</h2>
+<ul>
+  <li>Confirmation que le Boost est actif</li>
+  <li>Affichage de l'heure d'expiration</li>
+  <li>Bouton « Retour au Dashboard »</li>
+</ul>
+
+<h2>15.5 Effet du Boost</h2>
+<ul>
+  <li>Le profil Boosté apparaît en premier dans l'Explorer pour tous les membres compatibles</li>
+  <li>Badge « En avant » affiché sur la carte dans la Jommba Selection</li>
+  <li>Un seul Boost actif à la fois par utilisateur</li>
+</ul>
+
+<!-- ============================================================ -->
+<!-- 16. COACH IA -->
+<!-- ============================================================ -->
+<h1>16. COACH IA — CHEIKH ABDALLAH</h1>
+
+<p>Le Coach IA est un assistant conversationnel spécialisé en droit islamique du mariage. Il répond aux questions des membres via une interface de chat intégrée au Dashboard, accessible depuis n'importe quelle page via un bouton flottant.</p>
+
+<h2>16.1 Interface utilisateur</h2>
+<ul>
+  <li>Bouton flottant (bas droit de l'écran) : icône + label « Coach »</li>
+  <li>Clic → ouverture d'une modale de chat</li>
+  <li>Modale : en-tête avec avatar Cheikh Abdallah, bouton Minimiser, bouton Fermer (×)</li>
+  <li>Zone de messages : historique de la conversation (user + assistant)</li>
+  <li>Zone de saisie : champ texte + bouton Envoyer</li>
+  <li>Indicateur de chargement (ellipsis animé) pendant la génération de la réponse</li>
+  <li>Réponses en <strong>streaming</strong> : affichage progressif des mots en temps réel</li>
+  <li>Minimisation : la modale est réduite à un bouton flottant (historique conservé en session)</li>
+</ul>
+
+<h2>16.2 Personnalité et comportement</h2>
+<ul>
+  <li>Nom : <strong>Cheikh Abdallah</strong></li>
+  <li>Ton : chaleureux mais professionnel</li>
+  <li>Vouvoiement systématique</li>
+  <li>Langue : français exclusivement</li>
+  <li>Salutation : « As-salamu alaykum [Prénom] ! »</li>
+  <li>Longueur des réponses : 3 à 5 phrases maximum</li>
+  <li>Citations coraniques et hadiths insérés quand approprié</li>
+</ul>
+
+<h2>16.3 Domaines de compétence</h2>
+<ul>
+  <li>Conditions du mariage en Islam (Wali, témoins, consentement, Mahr)</li>
+  <li>La Khitba (fiançailles islamiques) : étapes, règles, limites</li>
+  <li>La dot (Mahr) : définition, montant, modes de paiement</li>
+  <li>Droits et devoirs des époux en Islam</li>
+  <li>La polygamie : conditions islamiques, équité obligatoire</li>
+  <li>Le divorce islamique : Talaq, Khul', Faskh</li>
+  <li>Comment trouver un(e) conjoint(e) pieux/pieuse</li>
+  <li>Conseils pratiques pour les familles dans le processus de Khitba</li>
+</ul>
+
+<h2>16.4 Intégration technique</h2>
+<table>
+  <tr><th>Paramètre</th><th>Valeur</th></tr>
+  <tr><td>Endpoint</td><td>POST /api/coach</td></tr>
+  <tr><td>Modèle IA</td><td>claude-sonnet-4-6 (Anthropic)</td></tr>
+  <tr><td>Type de réponse</td><td>Streaming (Server-Sent Events / ReadableStream)</td></tr>
+  <tr><td>Max tokens par réponse</td><td>1024</td></tr>
+  <tr><td>Personnalisation</td><td>Prénom de l'utilisateur injecté dans le prompt système</td></tr>
+  <tr><td>Limite Free</td><td>3 questions par jour</td></tr>
+  <tr><td>Premium</td><td>Questions illimitées</td></tr>
+</table>
+
+<h2>16.5 Message de bienvenue (texte exact)</h2>
+<div class="section-note">
+  « As-salamu alaykum ! Je suis Cheikh Abdallah, votre coach personnel pour vous accompagner dans votre démarche de mariage islamique. Je suis là pour répondre à toutes vos questions sur le mariage en Islam, les étapes de la Khitba, les droits et devoirs des époux, ou tout autre sujet lié au mariage islamique. Comment puis-je vous aider aujourd'hui ? »
+</div>
+
+<!-- ============================================================ -->
+<!-- 17. BLOG -->
+<!-- ============================================================ -->
+<h1>17. BLOG</h1>
+
+<p>Page : <code>/blog</code> — Espace éditorial de Jommba sur le mariage islamique.</p>
+
+<h2>17.1 Fonctionnalités</h2>
+<ul>
+  <li>Barre de recherche : filtrage en temps réel des articles par titre ou contenu</li>
+  <li>Onglets de catégories : Tous / Conseils / Spiritualité / Famille / Événements</li>
+  <li>Grille d'articles responsive</li>
+  <li>Carte article : image de couverture (dégradé coloré), titre, extrait, catégorie, auteur, date, temps de lecture</li>
+  <li>Badge « À la une » pour les articles featuredl</li>
+</ul>
+
+<h2>17.2 Article individuel</h2>
+<ul>
+  <li>URL : <code>/blog/[slug]</code></li>
+  <li>Contenu riche (texte formaté)</li>
+  <li>Métadonnées : auteur, date, temps de lecture, catégorie</li>
+  <li>Navigation : article précédent / suivant</li>
+</ul>
+
+<h2>17.3 Catégories</h2>
+<table>
+  <tr><th>Catégorie</th><th>Contenu</th></tr>
+  <tr><td>Conseils</td><td>Conseils pratiques pour les rencontres islamiques</td></tr>
+  <tr><td>Spiritualité</td><td>Dimension spirituelle et religieuse du mariage</td></tr>
+  <tr><td>Famille</td><td>Rôle de la famille et du Wali dans le mariage</td></tr>
+  <tr><td>Événements</td><td>Actualités et événements organisés par Jommba</td></tr>
+</table>
+
+<h2>17.4 Articles existants (données mock)</h2>
+<ul>
+  <li>« Réussir ses rencontres dans le respect islamique »</li>
+  <li>« Le rôle du Wali dans le mariage islamique »</li>
+  <li>2 autres articles à développer</li>
+</ul>
+
+<!-- ============================================================ -->
+<!-- 18. FAQ -->
+<!-- ============================================================ -->
+<h1>18. FAQ — FOIRE AUX QUESTIONS</h1>
+
+<p>Page : <code>/faq</code> — Plus de 25 questions-réponses organisées en 5 catégories.</p>
+
+<h2>18.1 Structure</h2>
+<ul>
+  <li>Barre de recherche : filtrage en temps réel des questions</li>
+  <li>5 onglets de catégories</li>
+  <li>Accordion : chaque question se déplie/replie au clic</li>
+</ul>
+
+<h2>18.2 Catégories et exemples de questions</h2>
+<table>
+  <tr><th>Catégorie</th><th>Exemples de questions</th></tr>
+  <tr><td>Compte</td><td>Comment créer un compte ? Modifier son profil ? Supprimer son compte ? Récupérer son mot de passe ?</td></tr>
+  <tr><td>Vérification</td><td>Pourquoi mon profil doit être vérifié ? Combien de temps cela prend-il ? Que faire si mon profil est refusé ?</td></tr>
+  <tr><td>Messagerie</td><td>Comment envoyer une demande ? Pourquoi je ne peux envoyer que 3 messages (Free) ? Comment signaler un message inapproprié ?</td></tr>
+  <tr><td>Premium</td><td>Quels sont les avantages Premium ? Comment annuler ? Comment obtenir un remboursement ?</td></tr>
+  <tr><td>Sécurité</td><td>Comment Jommba protège mes données ? Comment bloquer un membre ? Mes photos sont-elles visibles par tous ?</td></tr>
+</table>
+
+<h2>18.3 CTA en bas de page</h2>
+<ul>
+  <li>Bouton « Contacter le support » → <code>support@jommba.net</code></li>
+</ul>
+
+<!-- ============================================================ -->
+<!-- 19. LANDING PAGE -->
+<!-- ============================================================ -->
+<h1>19. PAGES PUBLIQUES — LANDING PAGE</h1>
+
+<p>Page : <code>/</code> — Page d'accueil pour les visiteurs non connectés.</p>
+
+<h2>19.1 Sections</h2>
+<table>
+  <tr><th>Section</th><th>Contenu</th></tr>
+  <tr><td>Héro</td><td>Slogan principal, CTA « Créer mon profil » et « Se connecter », visuel islamique</td></tr>
+  <tr><td>Statistiques</td><td>Membres inscrits, mariages célébrés, pays représentés, taux de satisfaction</td></tr>
+  <tr><td>Fonctionnalités (6)</td><td>Conformité Charia, Profils vérifiés, Messagerie sécurisée, Recherche avancée, Contrôle vie privée, Notifications</td></tr>
+  <tr><td>Comment ça marche (4 étapes)</td><td>Créer le profil → Validation → Explorer → Échanger et avancer vers le mariage</td></tr>
+  <tr><td>Témoignages</td><td>3 témoignages de couples Jommba avec noms, âges, villes, date de mariage</td></tr>
+  <tr><td>Grille tarifaire</td><td>Comparaison Free vs Premium avec tableau de fonctionnalités</td></tr>
+  <tr><td>Citation islamique</td><td>Verset coranique ou hadith sur le mariage, en arabe + traduction française</td></tr>
+  <tr><td>CTA final</td><td>Appel à l'action final vers /inscription</td></tr>
+</table>
+
+<h2>19.2 Navigation publique</h2>
+<ul>
+  <li><strong>Navbar</strong> : Logo + Accueil + Blog + FAQ + « Se connecter » + « Créer un compte »</li>
+  <li><strong>Menu mobile</strong> : Drawer latéral</li>
+  <li><strong>Footer</strong> : Liens légaux, réseaux sociaux, email de contact (<code>support@jommba.net</code>), adresse (Paris, France)</li>
+</ul>
+
+<!-- ============================================================ -->
+<!-- 20. MODÈLES DE DONNÉES -->
+<!-- ============================================================ -->
+<h1>20. MODÈLES DE DONNÉES — RÉFÉRENCE POUR LA BASE DE DONNÉES</h1>
+
+<div class="section-note">Ce chapitre documente toutes les entités et leurs champs tels qu'implémentés dans les données mock actuelles. Ces informations serviront de base à la conception du schéma Prisma + PostgreSQL.</div>
+
+<h2>20.1 Entité : User (Utilisateur)</h2>
+<table>
+  <tr><th>Champ</th><th>Type</th><th>Description</th></tr>
+  <tr><td>id</td><td>UUID</td><td>Identifiant unique</td></tr>
+  <tr><td>firstName</td><td>String</td><td>Prénom</td></tr>
+  <tr><td>lastName</td><td>String</td><td>Nom de famille</td></tr>
+  <tr><td>email</td><td>String (unique)</td><td>Adresse email (identifiant de connexion)</td></tr>
+  <tr><td>passwordHash</td><td>String</td><td>Hash bcrypt du mot de passe</td></tr>
+  <tr><td>gender</td><td>Enum</td><td>homme | femme</td></tr>
+  <tr><td>birthDate</td><td>Date</td><td>Date de naissance (YYYY-MM-DD)</td></tr>
+  <tr><td>age</td><td>Int (calculé)</td><td>Âge calculé à partir de birthDate</td></tr>
+  <tr><td>height</td><td>Int</td><td>Taille en centimètres</td></tr>
+  <tr><td>maritalStatus</td><td>Enum</td><td>celibataire | divorce | veuf</td></tr>
+  <tr><td>profession</td><td>String</td><td>Intitulé du poste</td></tr>
+  <tr><td>educationLevel</td><td>Enum</td><td>sans_diplome | bac | bac2 | bac3 | bac5 | doctorat</td></tr>
+  <tr><td>city</td><td>String</td><td>Ville de résidence</td></tr>
+  <tr><td>country</td><td>String</td><td>Pays de résidence (code ISO)</td></tr>
+  <tr><td>locationType</td><td>Enum</td><td>afrique | diaspora</td></tr>
+  <tr><td>originCountry</td><td>String (nullable)</td><td>Pays d'origine (si diaspora)</td></tr>
+  <tr><td>avatar</td><td>String</td><td>URL de la photo de profil principale</td></tr>
+  <tr><td>photos</td><td>String[]</td><td>Tableau d'URLs des photos</td></tr>
+  <tr><td>profileCompletion</td><td>Int</td><td>Pourcentage de complétion 0–100</td></tr>
+  <tr><td>isPremium</td><td>Boolean</td><td>Statut abonnement Premium</td></tr>
+  <tr><td>isValidated</td><td>Boolean</td><td>Profil validé par l'admin</td></tr>
+  <tr><td>isEmailVerified</td><td>Boolean</td><td>Email vérifié via OTP</td></tr>
+  <tr><td>premiumExpiresAt</td><td>DateTime (nullable)</td><td>Date d'expiration Premium</td></tr>
+  <tr><td>visibilityMode</td><td>Enum</td><td>actif | pause | discussion</td></tr>
+  <tr><td>isPhotosBlurred</td><td>Boolean</td><td>Option de floutage des photos</td></tr>
+  <tr><td>isSoundEnabled</td><td>Boolean</td><td>Notifications sonores activées</td></tr>
+  <tr><td>createdAt</td><td>DateTime</td><td>Date de création du compte</td></tr>
+  <tr><td>updatedAt</td><td>DateTime</td><td>Date de dernière modification</td></tr>
+  <tr><td>lastLoginAt</td><td>DateTime</td><td>Date de dernière connexion</td></tr>
+</table>
+
+<h2>20.2 Entité : UserProfile (Profil étendu)</h2>
+<table>
+  <tr><th>Champ</th><th>Type</th><th>Description</th></tr>
+  <tr><td>userId</td><td>UUID (FK)</td><td>Référence vers User (1:1)</td></tr>
+  <tr><td>marriageVision</td><td>String[]</td><td>Tags de vision du mariage</td></tr>
+  <tr><td>soughtQualities</td><td>String[]</td><td>Tags de ce que l'utilisateur recherche</td></tr>
+  <tr><td>interests</td><td>String[]</td><td>Centres d'intérêt</td></tr>
+  <tr><td>qualities</td><td>String[]</td><td>Qualités déclarées</td></tr>
+  <tr><td>dealbreakers</td><td>String[]</td><td>Critères non négociables</td></tr>
+  <tr><td>languages</td><td>String[]</td><td>Codes des langues parlées</td></tr>
+  <tr><td>madhhab</td><td>Enum</td><td>maleki | chafei | hanafi | hanbali</td></tr>
+  <tr><td>mosqueFrequency</td><td>Enum</td><td>quotidien | hebdomadaire | occasionnel | rarement</td></tr>
+  <tr><td>arabicLevel</td><td>Enum</td><td>aucun | basique | intermediaire | avance | courant</td></tr>
+  <tr><td>hasChildren</td><td>Boolean (nullable)</td><td>A des enfants</td></tr>
+  <tr><td>childrenCount</td><td>Int (nullable)</td><td>Nombre d'enfants</td></tr>
+  <tr><td>wantsChildren</td><td>Enum</td><td>oui | non | selon_conditions</td></tr>
+  <tr><td>canRelocate</td><td>Enum</td><td>oui | non | selon_conditions</td></tr>
+  <tr><td>polygamy</td><td>Enum</td><td>oui | non | selon_conditions</td></tr>
+</table>
+
+<h2>20.3 Entité : UserStats (Statistiques utilisateur)</h2>
+<table>
+  <tr><th>Champ</th><th>Type</th><th>Description</th></tr>
+  <tr><td>userId</td><td>UUID (FK)</td><td>Référence vers User (1:1)</td></tr>
+  <tr><td>profileViews</td><td>Int</td><td>Nombre total de vues du profil</td></tr>
+  <tr><td>favoritesReceived</td><td>Int</td><td>Nombre de fois ajouté en favori</td></tr>
+  <tr><td>requestsReceived</td><td>Int</td><td>Nombre de demandes reçues</td></tr>
+  <tr><td>visitorsCount</td><td>Int</td><td>Nombre de visiteurs distincts</td></tr>
+  <tr><td>dailyRequestsSent</td><td>Int</td><td>Demandes envoyées aujourd'hui (pour limite Free)</td></tr>
+  <tr><td>dailyRequestsDate</td><td>Date</td><td>Date de la dernière réinitialisation du compteur</td></tr>
+  <tr><td>dailyCoachQuestions</td><td>Int</td><td>Questions Coach posées aujourd'hui (limite Free)</td></tr>
+  <tr><td>dailyCoachDate</td><td>Date</td><td>Date de la dernière réinitialisation coach</td></tr>
+</table>
+
+<h2>20.4 Entité : ContactRequest (Demande de contact)</h2>
+<table>
+  <tr><th>Champ</th><th>Type</th><th>Description</th></tr>
+  <tr><td>id</td><td>UUID</td><td>Identifiant unique</td></tr>
+  <tr><td>senderId</td><td>UUID (FK)</td><td>Expéditeur → User</td></tr>
+  <tr><td>receiverId</td><td>UUID (FK)</td><td>Destinataire → User</td></tr>
+  <tr><td>status</td><td>Enum</td><td>pending | accepted | refused | cancelled</td></tr>
+  <tr><td>createdAt</td><td>DateTime</td><td>Date d'envoi</td></tr>
+  <tr><td>updatedAt</td><td>DateTime</td><td>Date de la dernière action</td></tr>
+</table>
+
+<h2>20.5 Entité : Conversation</h2>
+<table>
+  <tr><th>Champ</th><th>Type</th><th>Description</th></tr>
+  <tr><td>id</td><td>UUID</td><td>Identifiant unique</td></tr>
+  <tr><td>user1Id</td><td>UUID (FK)</td><td>Premier participant → User</td></tr>
+  <tr><td>user2Id</td><td>UUID (FK)</td><td>Second participant → User</td></tr>
+  <tr><td>createdAt</td><td>DateTime</td><td>Date de création</td></tr>
+  <tr><td>lastMessageAt</td><td>DateTime</td><td>Date du dernier message (pour le tri)</td></tr>
+  <tr><td>isArchived</td><td>Boolean</td><td>Conversation archivée</td></tr>
+</table>
+
+<h2>20.6 Entité : Message</h2>
+<table>
+  <tr><th>Champ</th><th>Type</th><th>Description</th></tr>
+  <tr><td>id</td><td>UUID</td><td>Identifiant unique</td></tr>
+  <tr><td>conversationId</td><td>UUID (FK)</td><td>Conversation → Conversation</td></tr>
+  <tr><td>senderId</td><td>UUID (FK)</td><td>Expéditeur → User</td></tr>
+  <tr><td>content</td><td>Text</td><td>Contenu du message</td></tr>
+  <tr><td>type</td><td>Enum</td><td>text | voice</td></tr>
+  <tr><td>isRead</td><td>Boolean</td><td>Lu par le destinataire</td></tr>
+  <tr><td>createdAt</td><td>DateTime</td><td>Date d'envoi</td></tr>
+</table>
+
+<h2>20.7 Entité : Favorite</h2>
+<table>
+  <tr><th>Champ</th><th>Type</th><th>Description</th></tr>
+  <tr><td>id</td><td>UUID</td><td>Identifiant unique</td></tr>
+  <tr><td>userId</td><td>UUID (FK)</td><td>Utilisateur qui a mis en favori</td></tr>
+  <tr><td>profileId</td><td>UUID (FK)</td><td>Profil mis en favori</td></tr>
+  <tr><td>createdAt</td><td>DateTime</td><td>Date d'ajout</td></tr>
+</table>
+
+<h2>20.8 Entité : ProfileVisit (Visite de profil)</h2>
+<table>
+  <tr><th>Champ</th><th>Type</th><th>Description</th></tr>
+  <tr><td>id</td><td>UUID</td><td>Identifiant unique</td></tr>
+  <tr><td>visitorId</td><td>UUID (FK)</td><td>Visiteur → User</td></tr>
+  <tr><td>visitedId</td><td>UUID (FK)</td><td>Profil visité → User</td></tr>
+  <tr><td>visitedAt</td><td>DateTime</td><td>Date et heure de la visite</td></tr>
+</table>
+
+<h2>20.9 Entité : Notification</h2>
+<table>
+  <tr><th>Champ</th><th>Type</th><th>Description</th></tr>
+  <tr><td>id</td><td>UUID</td><td>Identifiant unique</td></tr>
+  <tr><td>userId</td><td>UUID (FK)</td><td>Destinataire → User</td></tr>
+  <tr><td>type</td><td>Enum</td><td>demande | decline | profil | message | visite | premium</td></tr>
+  <tr><td>title</td><td>String</td><td>Titre de la notification</td></tr>
+  <tr><td>description</td><td>String</td><td>Corps de la notification</td></tr>
+  <tr><td>isRead</td><td>Boolean</td><td>Notification lue</td></tr>
+  <tr><td>targetId</td><td>UUID (nullable)</td><td>ID de l'entité concernée (profil, message…)</td></tr>
+  <tr><td>createdAt</td><td>DateTime</td><td>Date de création</td></tr>
+</table>
+
+<h2>20.10 Entité : Subscription (Abonnement Premium)</h2>
+<table>
+  <tr><th>Champ</th><th>Type</th><th>Description</th></tr>
+  <tr><td>id</td><td>UUID</td><td>Identifiant unique</td></tr>
+  <tr><td>userId</td><td>UUID (FK)</td><td>Abonné → User</td></tr>
+  <tr><td>plan</td><td>Enum</td><td>1m | 3m | 6m | 12m</td></tr>
+  <tr><td>price</td><td>Decimal</td><td>Montant payé</td></tr>
+  <tr><td>currency</td><td>Enum</td><td>USD | EUR | XOF</td></tr>
+  <tr><td>paymentMethod</td><td>Enum</td><td>card | orange_money | wave | mtn</td></tr>
+  <tr><td>status</td><td>Enum</td><td>active | expired | cancelled</td></tr>
+  <tr><td>startDate</td><td>DateTime</td><td>Début de l'abonnement</td></tr>
+  <tr><td>endDate</td><td>DateTime</td><td>Fin de l'abonnement</td></tr>
+  <tr><td>stripeSubscriptionId</td><td>String (nullable)</td><td>ID Stripe (à remplir avec l'intégration Stripe)</td></tr>
+  <tr><td>createdAt</td><td>DateTime</td><td>Date de souscription</td></tr>
+</table>
+
+<h2>20.11 Entité : Boost</h2>
+<table>
+  <tr><th>Champ</th><th>Type</th><th>Description</th></tr>
+  <tr><td>id</td><td>UUID</td><td>Identifiant unique</td></tr>
+  <tr><td>userId</td><td>UUID (FK)</td><td>Utilisateur boosté → User</td></tr>
+  <tr><td>duration</td><td>Enum</td><td>1h | 3h | 24h</td></tr>
+  <tr><td>startedAt</td><td>DateTime</td><td>Début du boost</td></tr>
+  <tr><td>expiresAt</td><td>DateTime</td><td>Fin du boost (calculé)</td></tr>
+  <tr><td>isActive</td><td>Boolean</td><td>Boost en cours</td></tr>
+  <tr><td>price</td><td>Decimal</td><td>Prix payé</td></tr>
+</table>
+
+<h2>20.12 Entité : Report (Signalement)</h2>
+<table>
+  <tr><th>Champ</th><th>Type</th><th>Description</th></tr>
+  <tr><td>id</td><td>UUID</td><td>Identifiant unique</td></tr>
+  <tr><td>reporterId</td><td>UUID (FK)</td><td>Auteur du signalement → User</td></tr>
+  <tr><td>reportedId</td><td>UUID (FK)</td><td>Utilisateur signalé → User</td></tr>
+  <tr><td>reason</td><td>Enum</td><td>profil_faux | contenu_inapproprie | harcelement | spam | autre</td></tr>
+  <tr><td>description</td><td>Text (nullable)</td><td>Description libre optionnelle</td></tr>
+  <tr><td>status</td><td>Enum</td><td>pending | reviewed | resolved</td></tr>
+  <tr><td>createdAt</td><td>DateTime</td><td>Date du signalement</td></tr>
+</table>
+
+<h2>20.13 Entité : Block (Blocage)</h2>
+<table>
+  <tr><th>Champ</th><th>Type</th><th>Description</th></tr>
+  <tr><td>id</td><td>UUID</td><td>Identifiant unique</td></tr>
+  <tr><td>blockerId</td><td>UUID (FK)</td><td>Utilisateur qui bloque → User</td></tr>
+  <tr><td>blockedId</td><td>UUID (FK)</td><td>Utilisateur bloqué → User</td></tr>
+  <tr><td>createdAt</td><td>DateTime</td><td>Date du blocage</td></tr>
+</table>
+
+<h2>20.14 Entité : CoachMessage (Messages du Coach IA)</h2>
+<table>
+  <tr><th>Champ</th><th>Type</th><th>Description</th></tr>
+  <tr><td>id</td><td>UUID</td><td>Identifiant unique</td></tr>
+  <tr><td>userId</td><td>UUID (FK)</td><td>Utilisateur → User</td></tr>
+  <tr><td>role</td><td>Enum</td><td>user | assistant</td></tr>
+  <tr><td>content</td><td>Text</td><td>Contenu du message</td></tr>
+  <tr><td>createdAt</td><td>DateTime</td><td>Date d'envoi</td></tr>
+</table>
+
+<h2>20.15 Entité : OtpCode (Code de vérification)</h2>
+<table>
+  <tr><th>Champ</th><th>Type</th><th>Description</th></tr>
+  <tr><td>id</td><td>UUID</td><td>Identifiant unique</td></tr>
+  <tr><td>email</td><td>String</td><td>Email destinataire</td></tr>
+  <tr><td>code</td><td>String (6 chiffres)</td><td>Code OTP haché</td></tr>
+  <tr><td>expiresAt</td><td>DateTime</td><td>Expiration (10 min recommandé)</td></tr>
+  <tr><td>isUsed</td><td>Boolean</td><td>Code déjà utilisé</td></tr>
+  <tr><td>createdAt</td><td>DateTime</td><td>Date de création</td></tr>
+</table>
+
+<h2>20.16 Entité : BlogPost (Article de blog)</h2>
+<table>
+  <tr><th>Champ</th><th>Type</th><th>Description</th></tr>
+  <tr><td>id</td><td>UUID</td><td>Identifiant unique</td></tr>
+  <tr><td>slug</td><td>String (unique)</td><td>URL de l'article</td></tr>
+  <tr><td>title</td><td>String</td><td>Titre</td></tr>
+  <tr><td>excerpt</td><td>String</td><td>Résumé court</td></tr>
+  <tr><td>content</td><td>Text</td><td>Contenu HTML/Markdown</td></tr>
+  <tr><td>category</td><td>Enum</td><td>conseils | spiritualite | famille | evenements</td></tr>
+  <tr><td>author</td><td>String</td><td>Nom de l'auteur</td></tr>
+  <tr><td>publishedAt</td><td>DateTime</td><td>Date de publication</td></tr>
+  <tr><td>featured</td><td>Boolean</td><td>Article à la une</td></tr>
+  <tr><td>coverGradient</td><td>String</td><td>Classes CSS du dégradé de couverture</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<!-- 21. RÈGLES MÉTIER -->
+<!-- ============================================================ -->
+<h1>21. RÈGLES MÉTIER</h1>
+
+<h2>21.1 Validation des profils</h2>
+<ul>
+  <li>Tout profil nouvellement créé est en statut « non validé » jusqu'à validation manuelle par l'équipe admin</li>
+  <li>Délai de validation : 12 à 24 heures</li>
+  <li>Un profil non validé peut naviguer mais ne peut pas utiliser le Boost</li>
+  <li>L'équipe admin valide ou refuse le profil via le Dashboard Admin (à développer)</li>
+  <li>En cas de refus : notification envoyée avec le motif</li>
+  <li>Les photos sont également soumises à validation (contenu approprié)</li>
+</ul>
+
+<h2>21.2 Limites quotidiennes (membres Free)</h2>
+<ul>
+  <li>Demandes de contact envoyées : <strong>3 maximum par jour</strong> (réinitialisation à minuit heure serveur)</li>
+  <li>Conversations simultanées actives : <strong>3 maximum</strong></li>
+  <li>Questions au Coach IA : <strong>3 maximum par jour</strong></li>
+  <li>Visiteurs visibles : <strong>2 derniers uniquement</strong></li>
+</ul>
+
+<h2>21.3 Interactions entre membres</h2>
+<ul>
+  <li>Seul un membre dont la demande de contact a été <strong>acceptée</strong> peut envoyer des messages</li>
+  <li>Un membre <strong>bloqué</strong> ne peut plus voir le profil de celui qui l'a bloqué, et vice-versa</li>
+  <li>Un profil <strong>signalé</strong> est examiné par l'admin dans les 24h</li>
+  <li>Un profil en mode <strong>Pause</strong> ne reçoit pas de nouvelles demandes</li>
+  <li>Un profil en mode <strong>Discussion</strong> n'est visible que par ses contacts existants</li>
+</ul>
+
+<h2>21.4 Photos</h2>
+<ul>
+  <li>Minimum 1 photo requise pour finaliser l'onboarding</li>
+  <li>Les photos sont soumises à validation admin (contenu islamiquement approprié)</li>
+  <li>L'option « flou photo » masque les détails du visage sur la photo principale (protection de la vie privée)</li>
+</ul>
+
+<h2>21.5 Abonnement Premium</h2>
+<ul>
+  <li>Actif jusqu'à la date d'expiration indiquée</li>
+  <li>Pas de renouvellement automatique sans confirmation (à définir avec Stripe)</li>
+  <li>Remboursement possible dans les 7 premiers jours suivant la souscription</li>
+  <li>Résiliation possible à tout moment (effet à la date d'expiration, pas de remboursement prorata)</li>
+</ul>
+
+<h2>21.6 Boost de visibilité</h2>
+<ul>
+  <li>Réservé aux profils <strong>validés</strong> uniquement</li>
+  <li>Un seul Boost actif à la fois par utilisateur</li>
+  <li>Le Boost expire automatiquement à la fin de sa durée</li>
+  <li>Aucun remboursement après activation</li>
+</ul>
+
+<!-- ============================================================ -->
+<!-- 22. MATRICE D'ACCÈS -->
+<!-- ============================================================ -->
+<h1>22. MATRICE D'ACCÈS AUX FONCTIONNALITÉS — FREE VS PREMIUM</h1>
+
+<table>
+  <tr><th>Fonctionnalité</th><th>Gratuit</th><th>Premium (10 $/mois)</th></tr>
+  <tr><td>Création de profil</td><td>✅ Oui</td><td>✅ Oui</td></tr>
+  <tr><td>Validation du profil</td><td>✅ Oui (12-24h)</td><td>✅ Oui (12-24h)</td></tr>
+  <tr><td>Explorer les profils (Swipe / Grille)</td><td>✅ Oui</td><td>✅ Oui</td></tr>
+  <tr><td>Demandes de contact envoyées</td><td>3 par jour</td><td>Illimitées</td></tr>
+  <tr><td>Conversations simultanées</td><td>3 maximum</td><td>Illimitées</td></tr>
+  <tr><td>Messages vocaux</td><td>❌ Non</td><td>✅ Oui</td></tr>
+  <tr><td>Voir tous les visiteurs du profil</td><td>2 derniers seulement</td><td>✅ Tous</td></tr>
+  <tr><td>Voir qui m'a mis en favori</td><td>❌ Non</td><td>✅ Oui</td></tr>
+  <tr><td>Filtres de recherche</td><td>Basiques</td><td>Complets + avancés</td></tr>
+  <tr><td>Coach IA (Cheikh Abdallah)</td><td>3 questions/jour</td><td>Illimité</td></tr>
+  <tr><td>Boost de visibilité</td><td>❌ Non</td><td>✅ Oui</td></tr>
+  <tr><td>Badge Premium sur le profil</td><td>❌ Non</td><td>✅ Oui</td></tr>
+  <tr><td>Mise en avant prioritaire (ranking)</td><td>❌ Non</td><td>✅ Oui</td></tr>
+  <tr><td>Support</td><td>Standard</td><td>Prioritaire 7j/7</td></tr>
+  <tr><td>Blog, FAQ, hadiths du jour</td><td>✅ Oui</td><td>✅ Oui</td></tr>
+  <tr><td>Marriage Academy</td><td>✅ Oui</td><td>✅ Oui</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<!-- 23. PARCOURS UTILISATEURS -->
+<!-- ============================================================ -->
+<h1>23. PARCOURS UTILISATEURS</h1>
+
+<h2>23.1 Parcours 1 — Nouvel inscrit</h2>
+<div class="section-note">
+  Accueil (/) → Inscription (/inscription) → Étape 1 (Prénom, Nom, Email) → Étape 2 (Mot de passe + CAPTCHA) → Vérification Email OTP (/verify-email) → Onboarding 7 étapes (/onboarding) → Écran de succès (/onboarding/success) → Dashboard (/dashboard)
+</div>
+
+<h2>23.2 Parcours 2 — Découverte et premier contact</h2>
+<div class="section-note">
+  Dashboard → Explorer (/dashboard/explorer) → Swipe des profils → Vue détail → Envoi d'une demande de contact → Notification reçue par l'autre membre → Acceptation de la demande → Fil de conversation ouvert (/dashboard/messages/[id]) → Échange de messages
+</div>
+
+<h2>23.3 Parcours 3 — Gestion d'une demande reçue</h2>
+<div class="section-note">
+  Notification « Nouvelle demande » → Page Demandes (/dashboard/demandes) → Clic sur la demande → Vue profil du demandeur → Décision : Accepter (→ messagerie) ou Refuser (→ notification au demandeur)
+</div>
+
+<h2>23.4 Parcours 4 — Upgrade Premium</h2>
+<div class="section-note">
+  Bannière Premium dans le Dashboard → Page Premium (/dashboard/premium) → Sélection de la formule (1m/3m/6m/12m) → Choix de la méthode de paiement → Confirmation → Activation immédiate du compte Premium
+</div>
+
+<h2>23.5 Parcours 5 — Consultation du Coach IA</h2>
+<div class="section-note">
+  N'importe quelle page du Dashboard → Clic sur le bouton flottant « Coach » → Modal Chat s'ouvre avec message de bienvenue de Cheikh Abdallah → Saisie d'une question → Réponse en streaming → Continuation du dialogue ou fermeture
+</div>
+
+<h2>23.6 Parcours 6 — Boost de visibilité</h2>
+<div class="section-note">
+  Dashboard (profil validé requis) → Clic sur « Booster mon profil » → Étape 1 : Sélection de la durée → Étape 2 : Paiement → Étape 3 : Confirmation → Profil mis en avant dans l'Explorer pour toutes les recherches compatibles
+</div>
+
+<h2>23.7 Parcours 7 — Modification des paramètres</h2>
+<div class="section-note">
+  Dashboard → Navbar → Paramètres (/dashboard/parametres) → Sélection du panneau souhaité → Modification des informations → Clic sur « Enregistrer » → Toast de confirmation
+</div>
+
+<!-- ============================================================ -->
+<!-- 24. VARIABLES D'ENVIRONNEMENT -->
+<!-- ============================================================ -->
+<h1>24. VARIABLES D'ENVIRONNEMENT</h1>
+
+<h2>24.1 Variables actives</h2>
+<table>
+  <tr><th>Variable</th><th>Valeur / Description</th></tr>
+  <tr><td>ANTHROPIC_API_KEY</td><td>Clé API Anthropic pour le Coach IA (Claude Sonnet 4.6)</td></tr>
+  <tr><td>NEXT_PUBLIC_SITE_URL</td><td>https://jommba.net</td></tr>
+  <tr><td>NEXT_PUBLIC_GTM_ID</td><td>GTM-T6Z2BJRC (Google Tag Manager)</td></tr>
+  <tr><td>NEXT_PUBLIC_FB_PIXEL_ID</td><td>1382617603548248 (Facebook Pixel)</td></tr>
+</table>
+
+<h2>24.2 Variables à configurer</h2>
+<table>
+  <tr><th>Variable</th><th>Service</th><th>Usage</th></tr>
+  <tr><td>DATABASE_URL</td><td>PostgreSQL</td><td>Connexion Prisma ORM</td></tr>
+  <tr><td>NEXTAUTH_SECRET</td><td>NextAuth.js</td><td>Signature des sessions JWT</td></tr>
+  <tr><td>NEXTAUTH_URL</td><td>NextAuth.js</td><td>URL de l'application</td></tr>
+  <tr><td>STRIPE_SECRET_KEY</td><td>Stripe</td><td>Traitement des paiements (côté serveur)</td></tr>
+  <tr><td>NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</td><td>Stripe</td><td>Clé publique pour le frontend</td></tr>
+  <tr><td>CLOUDINARY_CLOUD_NAME</td><td>Cloudinary</td><td>Nom du cloud de stockage images</td></tr>
+  <tr><td>CLOUDINARY_API_KEY</td><td>Cloudinary</td><td>Clé API</td></tr>
+  <tr><td>CLOUDINARY_API_SECRET</td><td>Cloudinary</td><td>Secret API</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<!-- 25. ROADMAP -->
+<!-- ============================================================ -->
+<h1>25. FONCTIONNALITÉS À DÉVELOPPER — ROADMAP</h1>
+
+<h2>25.1 Priorité haute (indispensable au lancement)</h2>
+<ul>
+  <li>Base de données PostgreSQL + Prisma ORM (remplacer toutes les données mock)</li>
+  <li>Authentification réelle via NextAuth.js (email/password + OAuth Google)</li>
+  <li>Envoi d'emails transactionnels (OTP, bienvenue, notifications, reset MDP)</li>
+  <li>Paiement Stripe (abonnements Premium + achats Boost unitaires)</li>
+  <li>Stockage images Cloudinary (photos de profil et photos du profil)</li>
+  <li>API REST complète pour toutes les entités (CRUD)</li>
+  <li><strong>Dashboard Administrateur</strong> (validation profils, modération, gestion abonnements)</li>
+</ul>
+
+<h2>25.2 Priorité moyenne</h2>
+<ul>
+  <li>Messages vocaux (Web Audio API + stockage Cloudinary)</li>
+  <li>Notifications push navigateur (Web Push API ou service tiers type OneSignal)</li>
+  <li>Page de récupération du mot de passe (email reset link)</li>
+  <li>Authentification Google OAuth réelle (passport-google ou NextAuth provider)</li>
+  <li>Pagination des listes (profils, messages, notifications)</li>
+  <li>Recherche full-text dans les profils (PostgreSQL full-text ou Algolia)</li>
+  <li>Système de cache (Redis pour sessions et rate-limiting)</li>
+  <li>Rate limiting (protection des endpoints API)</li>
+  <li>Middleware d'authentification Next.js (protection des routes dashboard)</li>
+</ul>
+
+<h2>25.3 Fonctionnalités futures</h2>
+<ul>
+  <li>Application mobile native (React Native) ou PWA</li>
+  <li>Appels vidéo encadrés (avec Wali présent)</li>
+  <li>Système de matching algorithmique (compatibilité calculée)</li>
+  <li>Vérification d'identité par vidéo (KYC)</li>
+  <li>Espace Wali : interface dédiée aux tuteurs matrimoniaux</li>
+  <li>Multi-langue (arabe, anglais)</li>
+  <li>Tableau de bord analytique avancé pour les admins</li>
+  <li>Système de badges de confiance (profil vérifié, photo récente…)</li>
+</ul>
+
+<h2>25.4 Dashboard Administrateur — Spécification sommaire</h2>
+<ul>
+  <li>Liste de tous les profils avec statuts filtrables (En attente / Validé / Refusé / Suspendu)</li>
+  <li>Interface de validation/refus des profils avec motif de refus</li>
+  <li>Modération des signalements (Reports) : liste, détail, décision</li>
+  <li>Gestion des abonnements Premium (historique, annulation, remboursement)</li>
+  <li>Statistiques globales : nouvelles inscriptions, profils validés, conversions Premium, messages échangés</li>
+  <li>Gestion du contenu Blog (création, édition, publication d'articles)</li>
+  <li>Gestion des notifications système (broadcast)</li>
+  <li>Support utilisateurs (tickets, messages entrants)</li>
+  <li>Gestion des Boosts actifs</li>
+</ul>
+
+<!-- ============================================================ -->
+<!-- 26. DESIGN SYSTEM -->
+<!-- ============================================================ -->
+<h1>26. DESIGN SYSTEM</h1>
+
+<h2>26.1 Palette de couleurs</h2>
+<table>
+  <tr><th>Rôle</th><th>Code HEX</th><th>Classe Tailwind</th></tr>
+  <tr><td>Couleur principale (accents, boutons)</td><td>#10B981</td><td>emerald-500</td></tr>
+  <tr><td>Couleur foncée (textes sur fond clair, headers)</td><td>#064E3B</td><td>emerald-900</td></tr>
+  <tr><td>Couleur intermédiaire</td><td>#065F46</td><td>emerald-800</td></tr>
+  <tr><td>Fond principal</td><td>#F9FAFB</td><td>gray-50</td></tr>
+  <tr><td>Texte principal</td><td>#111827</td><td>gray-900</td></tr>
+  <tr><td>Texte secondaire</td><td>#6B7280</td><td>gray-500</td></tr>
+  <tr><td>Bordures</td><td>#E5E7EB</td><td>gray-200</td></tr>
+</table>
+
+<h2>26.2 Typographie</h2>
+<table>
+  <tr><th>Police</th><th>Rôle</th><th>Source</th></tr>
+  <tr><td>Inter</td><td>Police principale (corps du texte, UI)</td><td>Google Fonts</td></tr>
+  <tr><td>Playfair Display</td><td>Titres et accroches (serif élégant)</td><td>Google Fonts</td></tr>
+  <tr><td>Aref Ruqaa</td><td>Texte arabe (citations coraniques, hadith)</td><td>Google Fonts</td></tr>
+</table>
+
+<h2>26.3 Composants UI principaux</h2>
+<ul>
+  <li><strong>Button</strong> : variantes primary (vert), secondary (outline), ghost, destructive (rouge)</li>
+  <li><strong>Card</strong> : conteneur avec ombre légère, coins arrondis <code>rounded-xl</code></li>
+  <li><strong>Badge</strong> : petite étiquette colorée pour statuts et tags</li>
+  <tr><td><strong>Accordion</strong></td><td>Sections dépliables (FAQ, paramètres)</td></tr>
+  <li><strong>Container</strong> : largeur maximale centrée (1280px)</li>
+  <li><strong>SectionHeading</strong> : titre de section centré avec sous-titre optionnel</li>
+  <li><strong>AnimatedSection</strong> : wrapper Framer Motion pour animations d'entrée</li>
+</ul>
+
+<h2>26.4 Icônes</h2>
+<ul>
+  <li>Bibliothèque : <strong>Lucide React</strong></li>
+  <li>Style : trait fin, cohérent, stroke-based</li>
+  <li>Tailles standard : 16px, 20px, 24px</li>
+</ul>
+
+<h2>26.5 Animations</h2>
+<ul>
+  <li>Bibliothèque : <strong>Framer Motion</strong></li>
+  <li>Entrées de sections : fade-in + slide-up</li>
+  <li>Durée des transitions : 200 à 300ms</li>
+  <li>Swipe cards Explorer : animation de glissement horizontal</li>
+</ul>
+
+<!-- ============================================================ -->
+<!-- ANNEXES -->
+<!-- ============================================================ -->
+<h1>ANNEXES</h1>
+
+<h2>Annexe A — Données mock disponibles pour les tests</h2>
+<table>
+  <tr><th>Type</th><th>Quantité</th><th>Détail</th></tr>
+  <tr><td>Profils Explorer (femmes)</td><td>12</td><td>Fa D., Fama N., Ndeye G., etc. Ages 24-49, Sénégal et diaspora</td></tr>
+  <tr><td>Visiteurs de profil</td><td>2</td><td>Aminata D., Fatou N.</td></tr>
+  <tr><td>Conversations</td><td>1</td><td>Fatima S. — fil vide prêt pour les tests</td></tr>
+  <tr><td>Notifications</td><td>7</td><td>Tous types représentés (demande, decline, profil, message, visite, premium)</td></tr>
+  <tr><td>Demandes reçues</td><td>1</td><td>Diatou S., 25 ans, Dakar</td></tr>
+  <tr><td>Demandes envoyées</td><td>1</td><td>Soxna S., 29 ans, statut Refusée</td></tr>
+  <tr><td>Profils détaillés</td><td>4</td><td>Profils complets avec toutes les sections</td></tr>
+  <tr><td>Témoignages</td><td>3</td><td>Yassine &amp; Sarah, Amine &amp; Leyla, Khadija &amp; Sofiane</td></tr>
+  <tr><td>Questions FAQ</td><td>25+</td><td>5 catégories</td></tr>
+  <tr><td>Articles de blog</td><td>4</td><td>4 catégories représentées</td></tr>
+  <tr><td>Plans tarifaires</td><td>2</td><td>Free + Premium</td></tr>
+</table>
+
+<h2>Annexe B — Contacts &amp; Ressources</h2>
+<ul>
+  <li><strong>Site web :</strong> https://jommba.net</li>
+  <li><strong>Email support :</strong> support@jommba.net</li>
+  <li><strong>Localisation :</strong> Paris, France</li>
+  <li><strong>Réseaux sociaux :</strong> Facebook, Instagram, Twitter, YouTube</li>
+</ul>
+
+<h2>Annexe C — Glossaire islamique</h2>
+<table>
+  <tr><th>Terme</th><th>Définition</th></tr>
+  <tr><td>Wali</td><td>Tuteur matrimonial islamique. Obligatoire pour la femme lors du mariage en Islam.</td></tr>
+  <tr><td>Khitba</td><td>Fiançailles islamiques. Demande en mariage formelle, étape précédant le contrat de mariage.</td></tr>
+  <tr><td>Mahr / Dot</td><td>Don obligatoire de l'époux à l'épouse lors de la conclusion du contrat de mariage.</td></tr>
+  <tr><td>Talaq</td><td>Divorce prononcé par l'époux en Islam.</td></tr>
+  <tr><td>Khul'</td><td>Divorce demandé par l'épouse avec restitution du Mahr à l'époux.</td></tr>
+  <tr><td>Faskh</td><td>Annulation du mariage prononcée par un juge islamique (Qadi).</td></tr>
+  <tr><td>Madhhab</td><td>École juridique islamique. Les 4 principales : Malékite, Chaféite, Hanéfite, Hanbalite.</td></tr>
+  <tr><td>Malékite</td><td>École juridique de l'imam Malik ibn Anas. Très répandue en Afrique subsaharienne et au Maghreb.</td></tr>
+  <tr><td>Chaféite</td><td>École juridique de l'imam Al-Shafi'i. Répandue en Égypte, Afrique de l'Est, Asie du Sud-Est.</td></tr>
+  <tr><td>Hadith</td><td>Parole ou action rapportée du Prophète Muhammad (paix et bénédictions sur lui).</td></tr>
+</table>
+
+<h2>Annexe D — Zustand Stores (État global de l'application)</h2>
+<table>
+  <tr><th>Store</th><th>Persisté</th><th>Rôle principal</th></tr>
+  <tr><td>auth.store.ts</td><td>Oui (localStorage)</td><td>Utilisateur connecté, logout</td></tr>
+  <tr><td>onboarding.store.ts</td><td>Oui (localStorage)</td><td>Progression du wizard d'onboarding</td></tr>
+  <tr><td>explorer.store.ts</td><td>Non (session)</td><td>Mode swipe/grille, filtres, compteur swipes</td></tr>
+  <tr><td>favoris.store.ts</td><td>Non (session)</td><td>Liste des profils favoris</td></tr>
+  <tr><td>boost.store.ts</td><td>Non (session)</td><td>Étapes du wizard Boost</td></tr>
+  <tr><td>profile.store.ts</td><td>Oui (localStorage)</td><td>Photo blur, son activé</td></tr>
+  <tr><td>visibility.store.ts</td><td>Non (session)</td><td>Mode de visibilité (actif/pause/discussion)</td></tr>
+  <tr><td>coach.store.ts</td><td>Non (session)</td><td>Ouverture/fermeture modal Coach, historique messages</td></tr>
+</table>
+
+<hr>
+<p style="text-align:center; color:#666; font-size:9pt; margin-top:30px;">
+  Document généré le 13 juin 2026 — JOMMBA Spécification Fonctionnelle v1.0<br>
+  Confidentiel — Usage interne uniquement — jommba.net
+</p>
+
+</body>
+</html>
