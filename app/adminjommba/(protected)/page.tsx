@@ -27,10 +27,10 @@ function getIcon(name: string): LucideIcons.LucideIcon {
 }
 
 const QUICK_ACTIONS = [
-  { label: "Valider des profils",   href: "/admin/validation",   icon: "shield-check" },
-  { label: "Traiter signalements",  href: "/admin/signalements",  icon: "flag"          },
-  { label: "Envoyer une annonce",   href: "/admin/notifications", icon: "send"          },
-  { label: "Nouvel article",        href: "/admin/blog",          icon: "plus-circle"   },
+  { label: "Valider des profils",   href: "/adminjommba/validation",   icon: "shield-check" },
+  { label: "Traiter signalements",  href: "/adminjommba/signalements",  icon: "flag"          },
+  { label: "Envoyer une annonce",   href: "/adminjommba/notifications", icon: "send"          },
+  { label: "Nouvel article",        href: "/adminjommba/blog",          icon: "plus-circle"   },
 ];
 
 const ACT_BG: Record<string, string> = {
@@ -62,7 +62,7 @@ export default function AdminOverviewPage() {
           </p>
         </div>
         <Link
-          href="/admin/validation"
+          href="/adminjommba/validation"
           className="shrink-0 px-5 py-2.5 rounded-xl bg-white text-emerald-700 text-sm font-semibold hover:bg-emerald-50 transition-colors shadow-sm whitespace-nowrap"
         >
           Traiter la file →
@@ -119,7 +119,7 @@ export default function AdminOverviewPage() {
           <CardHeader
             title="Activité récente"
             action={
-              <Link href="/admin/membres" className="text-xs text-[var(--color-brand-600)] hover:underline font-medium">
+              <Link href="/adminjommba/membres" className="text-xs text-[var(--color-brand-600)] hover:underline font-medium">
                 Tout voir
               </Link>
             }

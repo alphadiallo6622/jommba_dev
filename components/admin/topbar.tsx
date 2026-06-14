@@ -27,7 +27,7 @@ export function Topbar({ onMenuClick }: { onMenuClick?: () => void }) {
 
   const handleLogout = async () => {
     await fetch("/api/admin/auth", { method: "DELETE" });
-    router.push("/admin/login");
+    router.push("/adminjommba/login");
   };
 
   const closeAll = () => { setShowNotifs(false); setShowProfile(false); };
@@ -140,7 +140,7 @@ export function Topbar({ onMenuClick }: { onMenuClick?: () => void }) {
               <div className="py-1">
                 {([
                   { icon: User,        label: "Mon profil",    href: null                },
-                  { icon: Settings,    label: "Paramètres",    href: "/admin/parametres" },
+                  { icon: Settings,    label: "Paramètres",    href: "/adminjommba/parametres" },
                   { icon: HelpCircle,  label: "Centre d'aide", href: null                },
                 ] as const).map(({ icon: Icon, label, href }) => (
                   <button

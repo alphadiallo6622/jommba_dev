@@ -18,7 +18,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
 
   const handleLogout = async () => {
     await fetch("/api/admin/auth", { method: "DELETE" });
-    router.push("/admin/login");
+    router.push("/adminjommba/login");
   };
 
   return (

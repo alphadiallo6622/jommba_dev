@@ -1,4 +1,4 @@
-// middleware.ts — protects /admin/* routes (runs in Edge Runtime)
+// middleware.ts — protects /adminjommba/* routes (runs in Edge Runtime)
 import { type NextRequest, NextResponse } from "next/server";
 import { verifyAdminToken, COOKIE } from "@/lib/admin/auth";
 
@@ -7,7 +7,7 @@ export async function middleware(req: NextRequest) {
 
   // Allow login page and API routes through
   if (
-    pathname.startsWith("/admin/login") ||
+    pathname.startsWith("/adminjommba/login") ||
     pathname.startsWith("/api/admin/auth")
   ) {
     return NextResponse.next();
@@ -16,7 +16,7 @@ export async function middleware(req: NextRequest) {
   const token = req.cookies.get(COOKIE)?.value;
   if (!token || !(await verifyAdminToken(token))) {
     const url = req.nextUrl.clone();
-    url.pathname = "/admin/login";
+    url.pathname = "/adminjommba/login";
     return NextResponse.redirect(url);
   }
 
@@ -24,5 +24,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/adminjommba/:path*"],
 };

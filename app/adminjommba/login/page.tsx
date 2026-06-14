@@ -22,7 +22,7 @@ export default function AdminLoginPage() {
         body: JSON.stringify({ email, password }),
       });
       if (res.ok) {
-        router.push("/admin");
+        router.push("/adminjommba");
       } else {
         const data = await res.json();
         setError(data.error ?? "Identifiants invalides");
