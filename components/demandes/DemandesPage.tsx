@@ -83,19 +83,19 @@ export default function DemandesPage() {
       </div>
 
       {/* Main tabs */}
-      <div className="flex gap-2 mb-6 bg-gray-50 p-1 rounded-xl w-fit">
+      <div className="flex mb-6 bg-gray-50 p-1 rounded-xl w-full">
         {mainTabs.map(({ id, label, icon: Icon, count }) => (
           <button
             key={id}
             onClick={() => setActiveTab(id)}
             className={cn(
-              'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+              'flex flex-1 items-center justify-center gap-1.5 px-2 py-2 rounded-lg text-sm font-medium transition-colors',
               activeTab === id
                 ? 'bg-[#064E3B] text-white'
                 : 'text-gray-500 hover:text-gray-700',
             )}
           >
-            <Icon className="w-4 h-4" />
+            <Icon className="w-4 h-4 shrink-0" />
             {label}
             <span className={cn(
               'text-xs px-1.5 py-0.5 rounded-full font-semibold',
