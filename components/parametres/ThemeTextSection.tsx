@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Sparkles, Loader2 } from 'lucide-react'
 
 type Props = {
   label: string
@@ -14,6 +15,38 @@ type Props = {
 
 export default function ThemeTextSection({ label, value, onChange, maxLength, placeholder, themes, hint }: Props) {
   const [focused, setFocused] = useState(false)
+  const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [generating, setGenerating] = useState(false)
+
+  const toggleTheme = (theme: string) => {
+    setSelected(prev => {
+      const next = new Set(prev)
+      if (next.has(theme)) next.delete(theme)
+      else next.add(theme)
+      return next
+    })
+  }
+
+  const generate = async () => {
+    if (!selected.size || generating) return
+    setGenerating(true)
+    try {
+      const res = await fetch('/api/generate-text', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ themes: Array.from(selected), context: label }),
+      })
+      const data = await res.json()
+      if (data.text) {
+        onChange(data.text.slice(0, maxLength))
+        setSelected(new Set())
+      }
+    } catch {
+      // silent fail
+    } finally {
+      setGenerating(false)
+    }
+  }
 
   return (
     <div className="mb-5">
@@ -32,25 +65,54 @@ export default function ThemeTextSection({ label, value, onChange, maxLength, pl
           className="w-full px-3 py-3 text-sm text-gray-700 bg-transparent rounded-xl resize-none outline-none"
         />
         <span className={`absolute bottom-2 right-3 text-xs ${value.length >= maxLength ? 'text-red-400' : 'text-gray-400'}`}>
-          {value.length}/{maxLength}
+          {value.length} · {maxLength} max
         </span>
       </div>
+
       {themes && themes.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mt-2">
-          {themes.map(t => (
-            <button
-              key={t}
-              type="button"
-              onClick={() => {
-                const sep = value.trim() ? (value.endsWith(' ') ? '' : ' ') : ''
-                const next = (value + sep + t).slice(0, maxLength)
-                onChange(next)
-              }}
-              className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full hover:bg-[#E1F5EE] hover:text-[#10B981] transition-colors"
-            >
-              {t}
-            </button>
-          ))}
+        <div className="mt-2 space-y-2">
+          <p className="text-xs text-gray-500 font-medium">✦ Thèmes :</p>
+          <div className="flex flex-wrap gap-1.5">
+            {themes.map(t => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => toggleTheme(t)}
+                className={`text-xs px-3 py-1 rounded-full border transition-colors ${
+                  selected.has(t)
+                    ? 'bg-[#10B981] border-[#10B981] text-white'
+                    : 'bg-white border-gray-200 text-gray-600 hover:border-[#10B981] hover:text-[#10B981]'
+                }`}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={generate}
+            disabled={!selected.size || generating}
+            className={`w-full flex items-center justify-center gap-2 py-2.5 text-sm font-semibold rounded-xl transition-colors ${
+              selected.size && !generating
+                ? 'bg-[#10B981] text-white hover:bg-[#059669]'
+                : 'bg-gray-100 text-gray-400 cursor-default'
+            }`}
+          >
+            {generating ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Génération…
+              </>
+            ) : selected.size > 0 ? (
+              <>
+                <Sparkles className="w-4 h-4" />
+                Générer ({selected.size})
+              </>
+            ) : (
+              'Sélectionne des thèmes'
+            )}
+          </button>
         </div>
       )}
     </div>
