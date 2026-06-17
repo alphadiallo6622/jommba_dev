@@ -89,16 +89,16 @@ export default function DemandesPage() {
             key={id}
             onClick={() => setActiveTab(id)}
             className={cn(
-              'flex flex-1 items-center justify-center gap-1.5 px-2 py-2 rounded-lg text-sm font-medium transition-colors',
+              'flex flex-1 items-center justify-center gap-1 px-1 py-2 rounded-lg text-xs font-medium transition-colors sm:gap-1.5 sm:px-2 sm:text-sm',
               activeTab === id
                 ? 'bg-[#064E3B] text-white'
                 : 'text-gray-500 hover:text-gray-700',
             )}
           >
-            <Icon className="w-4 h-4 shrink-0" />
+            <Icon className="w-3.5 h-3.5 shrink-0 hidden sm:block" />
             {label}
             <span className={cn(
-              'text-xs px-1.5 py-0.5 rounded-full font-semibold',
+              'text-[10px] px-1 py-0.5 rounded-full font-semibold shrink-0 sm:text-xs sm:px-1.5',
               activeTab === id
                 ? 'bg-white/20 text-white'
                 : count > 0 ? 'bg-[#E1F5EE] text-[#10B981]' : 'bg-gray-200 text-gray-400',

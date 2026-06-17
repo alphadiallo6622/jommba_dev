@@ -65,7 +65,7 @@ export default function BottomNav() {
   }
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-100">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-100 pb-[env(safe-area-inset-bottom)]">
       <div className="flex items-end justify-around px-1 pb-2 pt-1">
 
         {sideItems.slice(0, 2).map(item => <NavItem key={item.id} {...item} />)}
