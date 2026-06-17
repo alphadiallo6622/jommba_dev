@@ -57,7 +57,7 @@ export default function DashboardNavbar() {
   }
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/60 backdrop-blur-md border-b border-gray-100/40 h-16">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100 md:bg-white/60 md:backdrop-blur-md md:border-gray-100/40 h-16">
       <div className="h-full flex items-center justify-between px-4 max-w-screen-xl mx-auto">
 
         {/* ── Left: Logo + desktop tabs ── */}
