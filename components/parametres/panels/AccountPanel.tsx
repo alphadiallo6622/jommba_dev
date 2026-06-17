@@ -84,7 +84,7 @@ export default function AccountPanel({ open, onClose }: Props) {
 
       {/* Suspend modal */}
       {suspendModal && (
-        <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center px-4">
+        <div className="fixed inset-0 bg-black/50 z-[80] flex items-center justify-center px-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm">
             <h3 className="font-semibold text-gray-900 mb-2">Suspendre le compte ?</h3>
             <p className="text-sm text-gray-500 mb-5">Ton profil sera masqué. Tu pourras te reconnecter à tout moment.</p>
@@ -98,7 +98,7 @@ export default function AccountPanel({ open, onClose }: Props) {
 
       {/* Delete modal 1 */}
       {deleteModal1 && (
-        <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center px-4">
+        <div className="fixed inset-0 bg-black/50 z-[80] flex items-center justify-center px-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm">
             <h3 className="font-semibold text-gray-900 mb-2">Es-tu sûr(e) ?</h3>
             <p className="text-sm text-gray-500 mb-5">Cette action supprimera définitivement ton profil, tes photos et tous tes messages. Elle est irréversible.</p>
@@ -112,7 +112,7 @@ export default function AccountPanel({ open, onClose }: Props) {
 
       {/* Delete modal 2 */}
       {deleteModal2 && (
-        <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center px-4">
+        <div className="fixed inset-0 bg-black/50 z-[80] flex items-center justify-center px-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm">
             <h3 className="font-semibold text-red-600 mb-2">Confirmation finale</h3>
             <p className="text-sm text-gray-500 mb-5">Clique sur "Supprimer" pour confirmer la suppression définitive de ton compte Jommba.</p>

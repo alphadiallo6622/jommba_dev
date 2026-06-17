@@ -21,7 +21,7 @@ export default function SettingsDrawer({ open, title, onClose, children, footer 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/40 z-40"
+            className="fixed inset-0 bg-black/40 z-[60]"
             onClick={onClose}
           />
           <motion.div
@@ -30,7 +30,7 @@ export default function SettingsDrawer({ open, title, onClose, children, footer 
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed top-0 right-0 h-full w-full max-w-lg bg-white z-50 flex flex-col shadow-2xl"
+            className="fixed top-0 right-0 h-full w-full max-w-lg bg-white z-[70] flex flex-col shadow-2xl"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100">
