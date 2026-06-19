@@ -209,6 +209,106 @@ function ConfigureApiModal({
   );
 }
 
+/* ── Invite Modal ───────────────────────────────────────────────────────────── */
+function InviteModal({
+  onInvite,
+  onClose,
+}: {
+  onInvite: (email: string, role: string) => void;
+  onClose: () => void;
+}) {
+  const [email, setEmail] = useState("");
+  const [role,  setRole]  = useState(ROLES[2]); // "support" par défaut
+  const [error, setError] = useState("");
+
+  const handleSubmit = () => {
+    const trimmed = email.trim().toLowerCase();
+    if (!trimmed) { setError("L'adresse email est requise."); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) { setError("Adresse email invalide."); return; }
+    onInvite(trimmed, role);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]" onClick={onClose} />
+      <div
+        className="relative bg-white rounded-2xl w-full max-w-sm shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-line)]">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-[var(--color-faint)] flex items-center justify-center shrink-0">
+              <UserPlus className="w-3.5 h-3.5 text-[var(--color-muted)]" />
+            </div>
+            <h2 className="text-sm font-bold text-[var(--color-ink)]">Inviter un administrateur</h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1 rounded-lg hover:bg-[var(--color-faint)] text-[var(--color-muted)] transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="p-5 space-y-4">
+          {/* Email */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-[var(--color-ink)]">
+              Adresse email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => { setEmail(e.target.value); setError(""); }}
+              placeholder="prenom@exemple.com"
+              className="w-full px-3.5 py-2.5 text-sm border border-[var(--color-line)] rounded-xl bg-[var(--color-faint)] text-[var(--color-ink)] placeholder:text-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-300)] focus:bg-white transition"
+            />
+            {error && <p className="text-xs text-red-500">{error}</p>}
+          </div>
+
+          {/* Role */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-[var(--color-ink)]">Rôle</label>
+            <div className="relative">
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="w-full appearance-none px-3.5 py-2.5 pr-9 text-sm border border-[var(--color-line)] rounded-xl bg-[var(--color-faint)] text-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-300)] transition"
+              >
+                {ROLES.map((r) => (
+                  <option key={r} value={r}>{r}</option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted)] pointer-events-none" />
+            </div>
+            <p className="text-xs text-[var(--color-muted)]">
+              Un email d&apos;invitation lui sera envoyé avec ce rôle.
+            </p>
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-2 pt-1">
+            <button
+              onClick={onClose}
+              className="flex-1 py-2.5 rounded-xl border border-[var(--color-line)] text-sm text-[var(--color-ink)] hover:bg-[var(--color-faint)] transition-colors"
+            >
+              Annuler
+            </button>
+            <button
+              onClick={handleSubmit}
+              className="flex-1 py-2.5 rounded-xl bg-[var(--color-brand-600)] text-white text-sm font-semibold hover:bg-[var(--color-brand-700)] transition-colors flex items-center justify-center gap-1.5"
+            >
+              <MailIcon className="w-3.5 h-3.5" />
+              Envoyer l&apos;invitation
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Admin Actions Modal ────────────────────────────────────────────────────── */
 function AdminModal({
   state,
@@ -368,10 +468,27 @@ export default function ParametresPage() {
 
   const [admins,      setAdmins]      = useState<AdminEntry[]>(INIT_ADMINS);
   const [modal,       setModal]       = useState<ModalState>(null);
+  const [inviteOpen,  setInviteOpen]  = useState(false);
   const [apiServices, setApiServices] = useState<ApiService[]>(INIT_API_SERVICES);
   const [configuring, setConfiguring] = useState<ApiService | null>(null);
   const [limits,      setLimits]      = useState({ contacts: 3, conversations: 3, coachQuestions: 3, visitors: 2 });
   const [pricing,     setPricing]     = useState({ launchPrice: 10, normalPrice: 15, refundWindow: 7, autoValidate: false });
+
+  /* Invite handler */
+  const handleInvite = (email: string, role: string) => {
+    const name = email.split("@")[0].replace(/[._-]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    const newAdmin: AdminEntry = {
+      id:       `a${Date.now()}`,
+      name,
+      email,
+      role,
+      status:   "invited",
+      lastSeen: "En attente",
+    };
+    setAdmins((prev) => [...prev, newAdmin]);
+    show(`Invitation envoyée à ${email}`, "success");
+    setInviteOpen(false);
+  };
 
   /* Admin action handlers */
   const openActions    = (admin: AdminEntry) => setModal({ admin, step: "actions" });
@@ -440,7 +557,7 @@ export default function ParametresPage() {
           <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-[var(--color-line)]">
             <h3 className="font-semibold text-sm text-[var(--color-ink)]">Comptes administrateurs</h3>
             <button
-              onClick={() => show("Invitation envoyée", "success")}
+              onClick={() => setInviteOpen(true)}
               className="flex items-center gap-1.5 text-xs font-medium text-[var(--color-brand-600)] hover:underline"
             >
               <UserPlus className="w-3.5 h-3.5" /> Inviter
@@ -577,6 +694,14 @@ export default function ParametresPage() {
           </Card>
         </div>
       </div>
+
+      {/* Invite modal */}
+      {inviteOpen && (
+        <InviteModal
+          onInvite={handleInvite}
+          onClose={() => setInviteOpen(false)}
+        />
+      )}
 
       {/* Admin modal */}
       {modal && (
