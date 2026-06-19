@@ -1,6 +1,7 @@
 'use client'
 
 import { Trash2, MapPin, Briefcase } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import type { FavoriteEntry } from '@/store/favoris.store'
 
 interface Props {
@@ -25,11 +26,15 @@ function parseLocation(location: string): string {
 }
 
 export default function FavorisCard({ entry, onRemove }: Props) {
+  const router = useRouter()
   const { profile, addedAt } = entry
   const photo = profile.photos[0] ?? 'https://i.pravatar.cc/400?img=1'
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+    <div
+      onClick={() => router.push(`/dashboard/profil/${profile.id}`)}
+      className="bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+    >
       {/* Photo */}
       <div className="relative">
         <img
@@ -39,7 +44,7 @@ export default function FavorisCard({ entry, onRemove }: Props) {
         />
         {/* Delete button */}
         <button
-          onClick={() => onRemove(profile.id)}
+          onClick={(e) => { e.stopPropagation(); onRemove(profile.id) }}
           className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white shadow flex items-center justify-center hover:bg-red-50 transition-colors group"
           title="Retirer des favoris"
         >

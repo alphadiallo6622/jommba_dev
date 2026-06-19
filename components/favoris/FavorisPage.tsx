@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Heart, Users, HeartOff, Lock, Clock, Crown, MapPin } from 'lucide-react'
-import { toast } from 'sonner'
 import { useFavorisStore } from '@/store/favoris.store'
 import { useCurrentUser } from '@/lib/use-current-user'
 import FavorisCard from './FavorisCard'
@@ -152,7 +151,7 @@ export default function FavorisPage() {
                         {person.location}
                       </div>
                       <button
-                        onClick={() => toast.success('Profil bientôt accessible')}
+                        onClick={() => router.push(`/dashboard/profil/${person.id}`)}
                         className="w-full bg-emerald-500 text-white text-sm font-medium py-2 rounded-lg flex items-center justify-center gap-1 hover:bg-emerald-600 transition-colors"
                       >
                         Voir le profil →
