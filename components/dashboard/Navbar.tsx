@@ -71,7 +71,7 @@ export default function DashboardNavbar() {
             <img
               src="/logo_jommba.jpeg"
               alt="Jommba"
-              className="h-8 md:h-12 w-auto"
+              className="w-[115px] h-auto md:w-auto md:h-12"
             />
           </button>
 

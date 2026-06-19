@@ -33,7 +33,7 @@ export default function Navbar() {
           "fixed top-0 left-0 right-0 z-50 h-[76px] transition-all duration-300 flex items-center",
           isScrolled
             ? "glass-effect shadow-sm border-b border-white/10"
-            : "bg-transparent border-b border-transparent"
+            : "bg-white md:bg-transparent border-b border-gray-100 md:border-transparent"
         )}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex items-center justify-between">
