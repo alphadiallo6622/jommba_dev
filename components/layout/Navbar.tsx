@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, Heart } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { NAV_LINKS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import MobileMenu from "./MobileMenu";
@@ -38,13 +38,13 @@ export default function Navbar() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-green-btn group-hover:scale-105 transition-transform duration-300">
-              <Heart className="w-6 h-6 text-white fill-white" />
+          <Link href="/" className="flex items-center group">
+            {/* Mobile : clip sur l'illustration uniquement */}
+            <div className="md:hidden h-10 w-12 overflow-hidden shrink-0">
+              <img src="/logo.png" alt="Jommba" className="h-10 w-auto max-w-none group-hover:scale-105 transition-transform duration-300" />
             </div>
-            <span className="text-2xl font-serif font-bold text-jommba-dark tracking-tight">
-              Jommba<span className="text-primary">.net</span>
-            </span>
+            {/* Desktop : logo complet */}
+            <img src="/logo.png" alt="Jommba" className="hidden md:block h-11 w-auto group-hover:scale-105 transition-transform duration-300" />
           </Link>
 
           {/* Desktop Navigation */}

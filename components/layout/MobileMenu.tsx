@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import Link from "next/link";
-import { X, Heart } from "lucide-react";
+import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { NAV_LINKS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -36,13 +36,8 @@ export default function MobileMenu({ isOpen, onClose, pathname }: MobileMenuProp
           >
             {/* Header */}
             <div className="flex items-center justify-between pb-6 border-b border-text-muted/10">
-              <Link href="/" onClick={onClose} className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-green-btn">
-                  <Heart className="w-5 h-5 text-white fill-white" />
-                </div>
-                <span className="text-xl font-serif font-bold text-jommba-dark">
-                  Jommba<span className="text-primary">.net</span>
-                </span>
+              <Link href="/" onClick={onClose} className="flex items-center">
+                <img src="/logo.png" alt="Jommba" className="h-9 w-auto" />
               </Link>
               <button
                 onClick={onClose}
