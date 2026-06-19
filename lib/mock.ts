@@ -1,4 +1,4 @@
-import { mockUsers, mockUserFree, MockUser } from '@/lib/mock-user'
+﻿import { mockUsers, mockUserFree, MockUser } from '@/lib/mock-user'
 
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms))
 
@@ -6,7 +6,7 @@ export const MOCK_DELAY = 1000
 export const MOCK_OTP = '123456'
 
 const MOCK_CREDENTIALS: Record<string, string> = {
-  'abou.diallo@jommba.net': 'abou2024',
+  'abou.diallo@jommba.com': 'abou2024',
   'alphadiallo2308@gmail.com': 'alpha2308',
 }
 

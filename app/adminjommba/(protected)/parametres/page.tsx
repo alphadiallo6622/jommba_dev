@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 // app/admin/(protected)/parametres/page.tsx
 import { useState, type ElementType } from "react";
 import {
@@ -38,9 +38,9 @@ interface ApiService {
 
 /* ── Constants ──────────────────────────────────────────────────────────────── */
 const INIT_ADMINS: AdminEntry[] = [
-  { id: "a1", name: "Admin Jommba",  email: "admin@jommba.net",    role: "super-admin", status: "active",  lastSeen: "Aujourd'hui" },
-  { id: "a2", name: "Modérateur",    email: "mod@jommba.net",      role: "modération",  status: "active",  lastSeen: "Il y a 2 h"  },
-  { id: "a3", name: "Aïssatou Ba",   email: "aissatou@jommba.net", role: "support",     status: "invited", lastSeen: "En attente"  },
+  { id: "a1", name: "Admin Jommba",  email: "admin@jommba.com",    role: "super-admin", status: "active",  lastSeen: "Aujourd'hui" },
+  { id: "a2", name: "Modérateur",    email: "mod@jommba.com",      role: "modération",  status: "active",  lastSeen: "Il y a 2 h"  },
+  { id: "a3", name: "Aïssatou Ba",   email: "aissatou@jommba.com", role: "support",     status: "invited", lastSeen: "En attente"  },
 ];
 
 const ROLES = ["super-admin", "modération", "support", "lecture seule"];

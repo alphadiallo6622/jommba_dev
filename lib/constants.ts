@@ -1,4 +1,4 @@
-﻿export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://jommba.net";
+﻿export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://jommba.com";
 
 export const SITE_METADATA = {
   title: "Jommba - Rencontre Halal & Mariage Musulman",
@@ -20,7 +20,7 @@ export const SOCIAL_LINKS = {
 };
 
 export const CONTACT_INFO = {
-  email: "support@jommba.net",
+  email: "support@jommba.com",
   address: "Paris, France",
 };
 

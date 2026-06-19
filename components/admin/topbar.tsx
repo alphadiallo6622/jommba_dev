@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 // components/admin/topbar.tsx
 import { useState } from "react";
 import { Bell, Menu, Search, ChevronDown, LogOut, User, Settings, HelpCircle } from "lucide-react";
@@ -132,7 +132,7 @@ export function Topbar({ onMenuClick }: { onMenuClick?: () => void }) {
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-[var(--color-ink)] truncate">Admin Jommba</p>
-                  <p className="text-xs text-[var(--color-muted)] truncate">admin@jommba.net</p>
+                  <p className="text-xs text-[var(--color-muted)] truncate">admin@jommba.com</p>
                 </div>
               </div>
 

@@ -151,7 +151,7 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-2 pt-2 text-white font-medium">
                 <Mail className="w-4 h-4 text-primary" />
-                <span>support@jommba.net</span>
+                <span>support@jommba.com</span>
               </li>
               <li className="flex items-center gap-2 text-text-subtle">
                 <MapPin className="w-4 h-4 text-primary" />

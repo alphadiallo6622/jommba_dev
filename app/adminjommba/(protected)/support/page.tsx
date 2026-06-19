@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 // app/admin/(protected)/support/page.tsx
 import { useState } from "react";
 import { X, Mail, Send, ChevronDown, ChevronUp } from "lucide-react";
@@ -73,7 +73,7 @@ function ReplyModal({
             {/* De */}
             <div className="flex items-center gap-3 px-5 py-2.5">
               <span className="text-xs font-semibold text-[var(--color-muted)] w-12 shrink-0">De</span>
-              <span className="text-sm text-[var(--color-ink)]">support@jommba.net</span>
+              <span className="text-sm text-[var(--color-ink)]">support@jommba.com</span>
             </div>
             {/* À */}
             <div className="flex items-center gap-3 px-5 py-2.5">
@@ -110,7 +110,7 @@ function ReplyModal({
           {/* Signature */}
           <div className="px-5 pb-3 text-xs text-[var(--color-muted)] border-t border-dashed border-[var(--color-line)] pt-3 mt-1">
             <p className="font-medium text-[var(--color-ink)]">Admin Jommba</p>
-            <p>Équipe Support · support@jommba.net</p>
+            <p>Équipe Support · support@jommba.com</p>
             <p className="italic mt-0.5">Jommba — Trouvez votre moitié dans le respect islamique.</p>
           </div>
 
@@ -196,7 +196,7 @@ export default function SupportPage() {
           <div>
             <h1 className="text-xl font-bold text-[var(--color-ink)]">Support utilisateurs</h1>
             <p className="text-sm text-[var(--color-muted)] mt-0.5">
-              Tickets entrants — support@jommba.net
+              Tickets entrants — support@jommba.com
             </p>
           </div>
           {openCount > 0 && (

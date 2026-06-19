@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -213,7 +213,7 @@ export default function ConnexionPage() {
             <div className="space-y-2">
               <div className="bg-gray-50 rounded-xl px-3 py-2.5">
                 <p className="text-xs font-semibold text-gray-600 mb-0.5">Compte Gratuit</p>
-                <p className="text-[11px] text-gray-400">abou.diallo@jommba.net</p>
+                <p className="text-[11px] text-gray-400">abou.diallo@jommba.com</p>
                 <p className="text-[11px] text-gray-400">Mot de passe : <span className="font-mono font-semibold text-gray-600">abou2024</span></p>
               </div>
               <div className="bg-amber-50 border border-amber-100 rounded-xl px-3 py-2.5">

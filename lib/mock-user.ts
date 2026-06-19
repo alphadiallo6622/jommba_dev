@@ -1,4 +1,4 @@
-export type MockUser = {
+﻿export type MockUser = {
   id: string
   firstName: string
   lastName: string
@@ -32,7 +32,7 @@ export const mockUserFree: MockUser = {
   height: 180,
   city: 'Dakar',
   country: 'SN',
-  email: 'abou.diallo@jommba.net',
+  email: 'abou.diallo@jommba.com',
   avatar: 'https://i.pravatar.cc/150?img=3',
   profileCompletion: 86,
   isPremium: false,

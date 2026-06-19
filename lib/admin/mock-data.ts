@@ -1,4 +1,4 @@
-// lib/admin/mock-data.ts
+﻿// lib/admin/mock-data.ts
 // Données mock typées (à remplacer par vos requêtes Prisma / Server Actions).
 
 export type MemberStatus = "validated" | "pending" | "refused" | "suspended";
@@ -255,7 +255,7 @@ export const ANALYTICS_KPIS: Kpi[] = [
 
 export const MEMBERS: Member[] = [
   { id: "1",  name: "Alpha Diallo",    email: "alphadiallo2308@gmail.com", age: 29, location: "Dakar, Sénégal",          status: "validated", plan: "premium", joinedAt: "2026-01-12" },
-  { id: "2",  name: "Abou Diallo",     email: "abou.diallo@jommba.net",    age: 32, location: "Dakar, Sénégal",          status: "pending",   plan: "free",    joinedAt: "2026-06-13" },
+  { id: "2",  name: "Abou Diallo",     email: "abou.diallo@jommba.com",    age: 32, location: "Dakar, Sénégal",          status: "pending",   plan: "free",    joinedAt: "2026-06-13" },
   { id: "3",  name: "Diatou Sow",      email: "diatou.s@gmail.com",        age: 25, location: "Dakar, Sénégal",          status: "pending",   plan: "free",    joinedAt: "2026-06-13" },
   { id: "4",  name: "Fatima Sy",       email: "fatima.sy@gmail.com",       age: 27, location: "Thiès, Sénégal",          status: "validated", plan: "premium", joinedAt: "2026-03-04" },
   { id: "5",  name: "Moussa Keïta",    email: "m.keita@gmail.com",         age: 34, location: "Bamako, Mali",            status: "pending",   plan: "free",    joinedAt: "2026-06-13" },

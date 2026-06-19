@@ -7,7 +7,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: SITE_METADATA.title,
   description: SITE_METADATA.description,
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://jommba.net"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://jommba.com"),
 };
 
 export default function RootLayout({

@@ -29,7 +29,7 @@ export default function FAQContactCTA() {
             </p>
 
             <Button
-              href="mailto:support@jommba.net"
+              href="mailto:support@jommba.com"
               variant="dark"
               size="md"
               icon={<Mail className="w-4 h-4" />}
