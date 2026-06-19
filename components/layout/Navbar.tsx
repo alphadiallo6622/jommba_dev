@@ -42,7 +42,7 @@ export default function Navbar() {
             <img
               src="/logo_jommba.jpeg"
               alt="Jommba"
-              className="h-10 md:h-14 w-auto group-hover:scale-105 transition-transform duration-300"
+              className="max-w-none w-[140px] h-auto md:w-auto md:h-14 group-hover:scale-105 transition-transform duration-300"
             />
           </Link>
 

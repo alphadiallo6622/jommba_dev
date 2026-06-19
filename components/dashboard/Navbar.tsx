@@ -57,7 +57,7 @@ export default function DashboardNavbar() {
   }
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100 md:bg-white/60 md:backdrop-blur-md md:border-gray-100/40 h-16">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100 md:bg-white/60 md:backdrop-blur-md md:border-gray-100/40 h-16 md:h-[72px]">
       <div className="h-full flex items-center justify-between px-4 max-w-screen-xl mx-auto">
 
         {/* ── Left: Logo + desktop tabs ── */}
@@ -65,13 +65,13 @@ export default function DashboardNavbar() {
           {/* Logo — cliquable → /dashboard */}
           <button
             onClick={() => router.push('/dashboard')}
-            className="flex items-center mr-3 shrink-0 focus:outline-none"
+            className="flex items-center mr-2 shrink-0 focus:outline-none"
             aria-label="Accueil Jommba"
           >
             <img
               src="/logo_jommba.jpeg"
               alt="Jommba"
-              className="w-[115px] h-auto md:w-auto md:h-12"
+              className="max-w-none w-[135px] h-auto md:w-auto md:h-14"
             />
           </button>
 
@@ -82,7 +82,7 @@ export default function DashboardNavbar() {
                 key={id}
                 onClick={() => handleTabClick(id)}
                 className={cn(
-                  'flex flex-col items-center justify-center gap-0.5 px-2.5 h-16 relative transition-colors duration-200 min-w-[52px]',
+                  'flex flex-col items-center justify-center gap-0.5 px-2.5 h-16 md:h-[72px] relative transition-colors duration-200 min-w-[52px]',
                   activeTab === id ? 'text-emerald-500' : 'text-gray-400 hover:text-gray-600',
                 )}
               >
@@ -97,7 +97,7 @@ export default function DashboardNavbar() {
             <button
               onClick={() => handleTabClick('premium')}
               className={cn(
-                'flex flex-col items-center justify-center gap-0.5 px-2.5 h-16 relative transition-colors duration-200 min-w-[52px]',
+                'flex flex-col items-center justify-center gap-0.5 px-2.5 h-16 md:h-[72px] relative transition-colors duration-200 min-w-[52px]',
                 activeTab === 'premium' ? 'text-amber-500' : 'text-amber-400 hover:text-amber-500',
               )}
             >
