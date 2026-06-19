@@ -62,13 +62,19 @@ export default function DashboardNavbar() {
 
         {/* ── Left: Logo + desktop tabs ── */}
         <div className="flex items-center">
-          {/* Logo */}
-          <div className="flex items-center gap-2 mr-4 shrink-0">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: '#10B981' }}>
-              <Heart className="w-4 h-4 text-white fill-white" />
+          {/* Logo — cliquable → /dashboard */}
+          <button
+            onClick={() => router.push('/dashboard')}
+            className="flex items-center mr-3 shrink-0 focus:outline-none"
+            aria-label="Accueil Jommba"
+          >
+            {/* Mobile : clip pour n'afficher que l'illustration (sans le texte) */}
+            <div className="md:hidden h-9 w-12 overflow-hidden shrink-0">
+              <img src="/logo.png" alt="Jommba" className="h-9 w-auto max-w-none" />
             </div>
-            <span className="font-serif font-bold text-[22px]" style={{ color: '#064E3B' }}>Jommba</span>
-          </div>
+            {/* Desktop : logo complet */}
+            <img src="/logo.png" alt="Jommba" className="hidden md:block h-10 w-auto" />
+          </button>
 
           {/* Main tabs — desktop only */}
           <div className="hidden md:flex items-center">

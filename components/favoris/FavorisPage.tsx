@@ -119,7 +119,11 @@ export default function FavorisPage() {
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {QUI_M_AIME.map((person) => (
-              <div key={person.id} className="bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm">
+              <div
+                key={person.id}
+                className={`bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm${isPremium ? ' cursor-pointer hover:shadow-md transition-shadow' : ''}`}
+                onClick={isPremium ? () => router.push(`/dashboard/profil/${person.id}`) : undefined}
+              >
                 <div className="relative">
                   <img
                     src={person.photo}
