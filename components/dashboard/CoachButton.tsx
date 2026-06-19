@@ -2,12 +2,10 @@
 
 import { usePathname } from 'next/navigation'
 import { useCoachStore } from '@/store/coach.store'
-import { useCurrentUser } from '@/lib/use-current-user'
 
 export default function CoachButton() {
   const pathname = usePathname()
   const { isOpen, openCoach } = useCoachStore()
-  const { avatar } = useCurrentUser()
 
   if (pathname.startsWith('/dashboard/messages')) return null
 
@@ -22,9 +20,9 @@ export default function CoachButton() {
       aria-label="Coach"
     >
       <img
-        src={avatar}
-        alt="Coach"
-        className="w-7 h-7 rounded-full object-cover shrink-0"
+        src="/coach.png"
+        alt="Coach Abdallah"
+        className="w-7 h-7 rounded-full object-cover object-top shrink-0"
       />
       <span className="text-white text-xs font-semibold">Coach</span>
     </button>

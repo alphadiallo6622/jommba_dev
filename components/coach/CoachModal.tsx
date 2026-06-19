@@ -6,7 +6,7 @@ import { X, Minus, Send } from 'lucide-react'
 import { useCoachStore } from '@/store/coach.store'
 import { useCurrentUser } from '@/lib/use-current-user'
 
-const COACH_AVATAR = 'https://i.pravatar.cc/100?img=68'
+const COACH_AVATAR = '/coach.png'
 
 export default function CoachModal() {
   const {
