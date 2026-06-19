@@ -68,12 +68,11 @@ export default function DashboardNavbar() {
             className="flex items-center mr-3 shrink-0 focus:outline-none"
             aria-label="Accueil Jommba"
           >
-            {/* Mobile : clip pour n'afficher que l'illustration (sans le texte) */}
-            <div className="md:hidden h-9 w-12 overflow-hidden shrink-0">
-              <img src="/logo_jommba.jpeg" alt="Jommba" className="h-9 w-auto max-w-none" />
-            </div>
-            {/* Desktop : logo complet */}
-            <img src="/logo_jommba.jpeg" alt="Jommba" className="hidden md:block h-10 w-auto" />
+            <img
+              src="/logo_jommba.jpeg"
+              alt="Jommba"
+              className="h-8 md:h-12 w-auto"
+            />
           </button>
 
           {/* Main tabs — desktop only */}

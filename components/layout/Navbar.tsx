@@ -39,12 +39,11 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center group">
-            {/* Mobile : clip sur l'illustration uniquement */}
-            <div className="md:hidden h-10 w-12 overflow-hidden shrink-0">
-              <img src="/logo_jommba.jpeg" alt="Jommba" className="h-10 w-auto max-w-none group-hover:scale-105 transition-transform duration-300" />
-            </div>
-            {/* Desktop : logo complet */}
-            <img src="/logo_jommba.jpeg" alt="Jommba" className="hidden md:block h-11 w-auto group-hover:scale-105 transition-transform duration-300" />
+            <img
+              src="/logo_jommba.jpeg"
+              alt="Jommba"
+              className="h-10 md:h-14 w-auto group-hover:scale-105 transition-transform duration-300"
+            />
           </Link>
 
           {/* Desktop Navigation */}
