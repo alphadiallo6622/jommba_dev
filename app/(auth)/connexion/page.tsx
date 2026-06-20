@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -8,12 +8,11 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Mail, Lock, Eye, EyeOff, Heart, Shield, Users, CheckCircle2, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { mockLogin } from '@/lib/mock'
-import { useAuthStore } from '@/store/auth.store'
+import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 
 const schema = z.object({
-  email: z.string().email('Adresse email invalide'),
+  email: z.email('Adresse email invalide'),
   password: z.string().min(1, 'Le mot de passe est requis'),
 })
 type FormData = z.infer<typeof schema>
@@ -72,7 +71,6 @@ function SidePanel() {
 
 export default function ConnexionPage() {
   const router = useRouter()
-  const setCurrentUser = useAuthStore(s => s.setCurrentUser)
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
 
@@ -83,25 +81,38 @@ export default function ConnexionPage() {
   const onSubmit = async (data: FormData) => {
     setLoading(true)
     try {
-      const res = await mockLogin(data)
-      if (res.success && res.user) {
-        setCurrentUser(res.user)
-        toast.success(`Connexion réussie ! Salam ${res.user.firstName} 🌙`)
-        router.push('/dashboard')
+      const supabase = createClient()
+      const { error } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      })
+      if (error) {
+        const msg = error.message.includes('Invalid login credentials')
+          ? 'Email ou mot de passe incorrect'
+          : error.message
+        toast.error(msg)
       } else {
-        toast.error(res.error ?? 'Email ou mot de passe incorrect')
+        toast.success('Connexion réussie ! Bienvenue 🌙')
+        router.push('/dashboard')
+        router.refresh()
       }
     } finally {
       setLoading(false)
     }
   }
 
-  const handleGoogleMock = async () => {
+  const handleGoogleLogin = async () => {
     setLoading(true)
-    await new Promise(r => setTimeout(r, 1000))
-    setLoading(false)
-    toast.success('Connexion Google simulée — redirection...')
-    setTimeout(() => router.push('/dashboard'), 800)
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: `${window.location.origin}/api/auth/callback` },
+      })
+      if (error) toast.error(error.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -127,7 +138,7 @@ export default function ConnexionPage() {
 
           {/* Google button */}
           <button
-            onClick={handleGoogleMock}
+            onClick={handleGoogleLogin}
             disabled={loading}
             className="w-full flex items-center justify-center gap-3 py-2.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700 disabled:opacity-60"
           >
@@ -207,7 +218,7 @@ export default function ConnexionPage() {
             </Link>
           </p>
 
-          {/* Test accounts */}
+          {/* Comptes de test */}
           <div className="border-t border-gray-100 pt-4">
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 text-center">Comptes de test</p>
             <div className="space-y-2">

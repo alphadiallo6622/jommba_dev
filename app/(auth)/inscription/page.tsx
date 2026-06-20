@@ -11,14 +11,14 @@ import {
   Loader2, User, ArrowLeft, ArrowRight, Check,
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { mockRegister } from '@/lib/mock'
+import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 
 /* ─── Schemas ─── */
 const step1Schema = z.object({
   firstName: z.string().min(2, 'Prénom requis (min. 2 caractères)'),
   lastName:  z.string().min(2, 'Nom requis (min. 2 caractères)'),
-  email:     z.string().email('Adresse email invalide'),
+  email:     z.email('Adresse email invalide'),
 })
 const step2Schema = z.object({
   password:        z.string().min(8, 'Minimum 8 caractères'),
@@ -98,7 +98,6 @@ function SidePanel() {
 function StepIndicator({ step }: { step: 1 | 2 }) {
   return (
     <div className="flex items-center justify-center gap-3 mb-6">
-      {/* Step 1 */}
       <div className={cn(
         'w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all',
         step === 1 ? 'text-white' : 'bg-emerald-500 text-white',
@@ -106,7 +105,6 @@ function StepIndicator({ step }: { step: 1 | 2 }) {
         {step === 1 ? '1' : <Check className="w-4 h-4" />}
       </div>
       <div className={cn('h-0.5 w-8 rounded-full', step === 2 ? 'bg-emerald-500' : 'bg-gray-200')} />
-      {/* Step 2 */}
       <div className={cn(
         'w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all',
         step === 2 ? 'text-white' : 'bg-gray-200 text-gray-400',
@@ -120,21 +118,19 @@ function StepIndicator({ step }: { step: 1 | 2 }) {
 /* ─── Main page ─── */
 export default function InscriptionPage() {
   const router  = useRouter()
-  const [step, setStep]         = useState<1 | 2>(1)
-  const [agreed, setAgreed]     = useState(false)
-  const [loading, setLoading]   = useState(false)
+  const [step, setStep]           = useState<1 | 2>(1)
+  const [agreed, setAgreed]       = useState(false)
+  const [loading, setLoading]     = useState(false)
   const [step1Data, setStep1Data] = useState<Step1Data | null>(null)
-  const [showPwd, setShowPwd]   = useState(false)
+  const [showPwd, setShowPwd]     = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
 
-  /* Step 1 form */
   const {
     register: r1,
     handleSubmit: hs1,
     formState: { errors: e1 },
   } = useForm<Step1Data>({ resolver: zodResolver(step1Schema) })
 
-  /* Step 2 form */
   const {
     register: r2,
     handleSubmit: hs2,
@@ -147,13 +143,20 @@ export default function InscriptionPage() {
   const strength     = getStrength(pwdValue)
   const passwordsMatch = pwdValue && confirmValue && pwdValue === confirmValue
 
-  /* Google mock */
+  /* Google OAuth */
   const handleGoogle = async () => {
+    if (!agreed) return
     setLoading(true)
-    await new Promise(r => setTimeout(r, 1000))
-    setLoading(false)
-    toast.success('Connexion Google simulée — redirection...')
-    setTimeout(() => router.push('/dashboard'), 800)
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: `${window.location.origin}/api/auth/callback` },
+      })
+      if (error) toast.error(error.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   /* Step 1 → 2 */
@@ -162,18 +165,26 @@ export default function InscriptionPage() {
     setStep(2)
   }
 
-  /* Step 2 → register */
+  /* Step 2 → Supabase signUp */
   const onStep2 = async (data: Step2Data) => {
     if (!step1Data) return
     setLoading(true)
     try {
-      const res = await mockRegister({
-        firstName: step1Data.firstName,
-        lastName:  step1Data.lastName,
-        email:     step1Data.email,
-        password:  data.password,
+      const supabase = createClient()
+      const { error } = await supabase.auth.signUp({
+        email:    step1Data.email,
+        password: data.password,
+        options: {
+          data: {
+            first_name: step1Data.firstName,
+            last_name:  step1Data.lastName,
+          },
+          emailRedirectTo: `${window.location.origin}/api/auth/callback`,
+        },
       })
-      if (res.success) {
+      if (error) {
+        toast.error(error.message)
+      } else {
         toast.success('Compte créé ! Vérifie ta boîte mail.')
         router.push('/verify-email')
       }
