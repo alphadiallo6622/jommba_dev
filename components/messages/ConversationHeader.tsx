@@ -2,8 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Heart, Clock, MoreVertical, ChevronRight, Lock, LockOpen, Trash2 } from 'lucide-react'
-import { toast } from 'sonner'
+import { ArrowLeft, Heart, Clock, MoreVertical, ChevronRight, Lock, LockOpen, User } from 'lucide-react'
 import { Conversation } from '@/lib/mock-messages'
 
 type Props = {
@@ -23,10 +22,9 @@ export default function ConversationHeader({ conv, msgsRemaining }: Props) {
     setTimeout(() => setShowTooltip(false), 3000)
   }
 
-  const handleArchive = () => {
+  const handleViewProfile = () => {
     setMenuOpen(false)
-    toast.success('Conversation archivée')
-    router.push('/dashboard/messages')
+    router.push(`/dashboard/profil/${conv.id}`)
   }
 
   return (
@@ -93,11 +91,11 @@ export default function ConversationHeader({ conv, msgsRemaining }: Props) {
               <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
               <div className="absolute right-0 top-10 bg-white rounded-xl shadow-lg border border-gray-100 py-1 min-w-[180px] z-20">
                 <button
-                  onClick={handleArchive}
-                  className="w-full text-left px-4 py-3 text-sm text-red-500 flex items-center gap-2.5 hover:bg-red-50 transition-colors"
+                  onClick={handleViewProfile}
+                  className="w-full text-left px-4 py-3 text-sm text-gray-700 flex items-center gap-2.5 hover:bg-gray-50 transition-colors"
                 >
-                  <Trash2 className="w-4 h-4 text-red-400 shrink-0" />
-                  Archiver la conversation
+                  <User className="w-4 h-4 text-gray-400 shrink-0" />
+                  Voir le profil
                 </button>
               </div>
             </>

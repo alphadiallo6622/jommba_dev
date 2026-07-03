@@ -3,8 +3,11 @@
 import { useState } from 'react'
 import { Eye, PauseCircle, MessageCircle, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { useVisibilityStore, VisibilityMode } from '@/store/visibility.store'
+import { useAuth } from '@/components/providers/AuthProvider'
+import { createClient } from '@/lib/supabase/client'
 
 type Option = { id: VisibilityMode; label: string; icon: string }
 
@@ -44,11 +47,28 @@ const confirmConfigs: Record<'pause' | 'discussion', ConfirmConfig> = {
 
 export default function VisibilityToggle() {
   const { mode, setMode } = useVisibilityStore()
+  const { user } = useAuth()
   const [pending, setPending] = useState<'pause' | 'discussion' | null>(null)
+
+  // Persiste la visibilité en BDD (profiles.visibility)
+  const persistMode = async (newMode: VisibilityMode) => {
+    const previous = mode
+    setMode(newMode)
+    if (!user) return
+    const supabase = createClient()
+    const { error } = await supabase
+      .from('profiles')
+      .update({ visibility: newMode === 'actif' ? 'active' : newMode })
+      .eq('user_id', user.id)
+    if (error) {
+      setMode(previous)
+      toast.error('Erreur lors du changement de visibilité')
+    }
+  }
 
   const handleSelect = (id: VisibilityMode) => {
     if (id === 'actif') {
-      setMode('actif')
+      persistMode('actif')
       return
     }
     if (id === mode) return
@@ -56,7 +76,7 @@ export default function VisibilityToggle() {
   }
 
   const confirm = () => {
-    if (pending) setMode(pending)
+    if (pending) persistMode(pending)
     setPending(null)
   }
 

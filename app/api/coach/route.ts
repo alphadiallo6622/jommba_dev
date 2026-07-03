@@ -1,6 +1,8 @@
 import { NextRequest } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { COACH_SYSTEM_PROMPT } from '@/lib/coach-prompt'
+import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 // bypass SSL cert verification (corporate proxy / dev environment)
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -43,6 +45,16 @@ export async function POST(req: NextRequest) {
 
   const systemPrompt = COACH_SYSTEM_PROMPT.replace('[prénom]', userName)
 
+  // Identifie le membre (best-effort) pour les statistiques admin.
+  let coachUserId: string | null = null
+  try {
+    const supabase = await createClient()
+    const { data } = await supabase.auth.getUser()
+    coachUserId = data.user?.id ?? null
+  } catch {
+    coachUserId = null
+  }
+
   try {
     const stream = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
@@ -55,6 +67,7 @@ export async function POST(req: NextRequest) {
     const encoder = new TextEncoder()
     const readable = new ReadableStream({
       async start(controller) {
+        let outputTokens: number | null = null
         try {
           for await (const chunk of stream) {
             if (
@@ -63,11 +76,22 @@ export async function POST(req: NextRequest) {
             ) {
               controller.enqueue(encoder.encode(chunk.delta.text))
             }
+            if (chunk.type === 'message_delta' && chunk.usage?.output_tokens) {
+              outputTokens = chunk.usage.output_tokens
+            }
           }
         } catch (err) {
           controller.error(err)
         } finally {
           controller.close()
+          // Journalise la question pour les stats du dashboard admin (non bloquant).
+          try {
+            await createAdminClient()
+              .from('coach_usage')
+              .insert({ user_id: coachUserId, tokens: outputTokens })
+          } catch {
+            // La journalisation ne doit jamais faire échouer la réponse du coach.
+          }
         }
       },
     })

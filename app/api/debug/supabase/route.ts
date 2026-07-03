@@ -16,10 +16,15 @@ export async function GET() {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     // 2. Lister les tables existantes dans le schéma public
-    const { data: tables, error: tablesError } = await supabase
-      .rpc('list_public_tables')
-      .select()
-      .catch(() => ({ data: null, error: 'RPC non disponible' }))
+    let tables: unknown = null
+    let tablesError: unknown = null
+    try {
+      const result = await supabase.rpc('list_public_tables').select()
+      tables = result.data
+      tablesError = result.error
+    } catch {
+      tablesError = 'RPC non disponible'
+    }
 
     // Fallback : requête information_schema directe
     let tableList: string[] = []

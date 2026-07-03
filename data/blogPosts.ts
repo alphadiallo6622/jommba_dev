@@ -3,7 +3,7 @@
   title: string;
   excerpt: string;
   content: string;
-  category: "Conseils" | "Spiritualité" | "Famille" | "Événements";
+  category: string; // "Conseils" | "Spiritualité" | "Famille" | "Événements" | "Actualités"
   author: {
     name: string;
     avatar: string;
@@ -11,7 +11,8 @@
   date: string;
   readTime: string;
   featured: boolean;
-  coverGradient: string; // Dynamic modern gradients instead of static heavy images
+  coverGradient: string; // Dégradé utilisé tant qu'aucune image n'est fournie
+  coverImage?: string;   // URL Cloudinary — prioritaire sur coverGradient si présente
 }
 
 export const BLOG_POSTS: BlogPost[] = [

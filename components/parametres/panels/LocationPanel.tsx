@@ -1,7 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
+import { Loader2 } from 'lucide-react'
+import { useCurrentUser } from '@/lib/use-current-user'
+import { useAuth } from '@/components/providers/AuthProvider'
+import { updateMyProfile } from '@/lib/supabase/profile-actions'
 import SettingsDrawer from '../SettingsDrawer'
 
 type Props = { open: boolean; onClose: () => void }
@@ -12,13 +16,42 @@ const DAKAR_CITIES = ['Dakar','Thiès','Kaolack','Saint-Louis','Ziguinchor','Dio
 const ETUDES = ['Bac','Bac+2','Bac+3','Bac+5','Doctorat','Autre']
 
 export default function LocationPanel({ open, onClose }: Props) {
+  const mockUser = useCurrentUser()
+  const { user } = useAuth()
   const [inAfrica, setInAfrica] = useState(true)
   const [country, setCountry]   = useState('Sénégal')
   const [city, setCity]         = useState('Dakar')
-  const [profession, setProfession] = useState('Comptable')
+  const [profession, setProfession] = useState('')
   const [etudes, setEtudes]     = useState('Bac+3')
+  const [saving, setSaving]     = useState(false)
 
-  const save = () => { toast.success('Localisation sauvegardée'); onClose() }
+  // Initialise depuis le profil réel chargé dans le store
+  useEffect(() => {
+    if (mockUser.country) {
+      const isAfrica = AFRICA_COUNTRIES.includes(mockUser.country) || mockUser.country === 'SN'
+      setInAfrica(isAfrica)
+      setCountry(mockUser.country === 'SN' ? 'Sénégal' : mockUser.country)
+    }
+    if (mockUser.city) setCity(mockUser.city)
+    // tags = [situation, job, éducation] (voir buildTags dans profile-service)
+    if (mockUser.tags[1]) setProfession(mockUser.tags[1])
+    if (mockUser.tags[2] && ETUDES.includes(mockUser.tags[2])) setEtudes(mockUser.tags[2])
+  }, [mockUser])
+
+  const save = async () => {
+    if (!user) return
+    setSaving(true)
+    const err = await updateMyProfile(user.id, {
+      country,
+      city:      city || null,
+      job:       profession.trim() || null,
+      education: etudes,
+    })
+    setSaving(false)
+    if (err) { toast.error(`Erreur : ${err}`); return }
+    toast.success('Localisation sauvegardée ✓')
+    onClose()
+  }
 
   const countries = inAfrica ? AFRICA_COUNTRIES : DIASPORA_COUNTRIES
 
@@ -28,7 +61,12 @@ export default function LocationPanel({ open, onClose }: Props) {
   return (
     <SettingsDrawer open={open} title="Localisation & parcours" onClose={onClose}
       footer={
-        <button onClick={save} className="w-full py-3 bg-[#10B981] text-white text-sm font-semibold rounded-xl hover:bg-[#059669] transition-colors">
+        <button
+          onClick={save}
+          disabled={saving}
+          className="w-full py-3 bg-[#10B981] text-white text-sm font-semibold rounded-xl hover:bg-[#059669] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+        >
+          {saving && <Loader2 className="w-4 h-4 animate-spin" />}
           Sauvegarder
         </button>
       }

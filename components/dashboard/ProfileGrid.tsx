@@ -1,11 +1,26 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Heart, Crown, MapPin, Briefcase, X, Star } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import { mockProfiles } from '@/lib/mock-user'
+import { createClient } from '@/lib/supabase/client'
+import { useAuth } from '@/components/providers/AuthProvider'
+import { useCurrentUser } from '@/lib/use-current-user'
+import { sendContactRequest } from '@/lib/supabase/likes-service'
+import { oppositeGender } from '@/lib/gender'
+
+type GridProfile = {
+  id: string
+  name: string
+  age: number
+  city: string
+  job: string
+  score: number
+  photo: string
+  isPremium: boolean
+}
 
 function scoreColor(score: number) {
   if (score >= 90) return 'bg-emerald-500'
@@ -13,9 +28,8 @@ function scoreColor(score: number) {
   return 'bg-rose-500'
 }
 
-/* ── Desktop grid card ── */
 function GridCard({ profile, liked, onLike }: {
-  profile: typeof mockProfiles[0]
+  profile: GridProfile
   liked: boolean
   onLike: () => void
 }) {
@@ -28,7 +42,7 @@ function GridCard({ profile, liked, onLike }: {
         onClick={() => router.push(`/dashboard/profil/${profile.id}`)}
       >
         <img
-          src={`https://i.pravatar.cc/400?img=${profile.img}`}
+          src={profile.photo}
           alt={profile.name}
           className="w-full h-full object-cover"
           draggable={false}
@@ -80,13 +94,50 @@ function GridCard({ profile, liked, onLike }: {
 }
 
 export default function ProfileGrid() {
-  const router = useRouter()
-  const [index, setIndex]   = useState(0)
-  const [liked, setLiked]   = useState<Set<number>>(new Set())
-  const [leaving, setLeaving] = useState<'pass' | 'like' | null>(null)
+  const router  = useRouter()
+  const { user } = useAuth()
+  const { isPremium, gender } = useCurrentUser()
+  const [profiles, setProfiles] = useState<GridProfile[]>([])
+  const [index, setIndex]       = useState(0)
+  const [liked, setLiked]       = useState<Set<string>>(new Set())
+  const [leaving, setLeaving]   = useState<'pass' | 'like' | null>(null)
 
-  const total   = mockProfiles.length
-  const profile = mockProfiles[index]
+  useEffect(() => {
+    if (!user) return
+    const targetGender = oppositeGender(gender)
+    if (!targetGender) return
+    const supabase = createClient()
+    supabase
+      .from('profiles')
+      .select('user_id, first_name, last_name, age, city, job, avatar_url, is_premium, profile_completion')
+      .neq('user_id', user.id)
+      .eq('status', 'validated')
+      .eq('visibility', 'active')
+      .eq('gender', targetGender)
+      .gte('profile_completion', 100)
+      .order('profile_completion', { ascending: false })
+      .limit(12)
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setProfiles(
+            (data as { user_id: string; first_name: string; last_name: string | null; age: number | null; city: string | null; job: string | null; avatar_url: string | null; is_premium: boolean; profile_completion: number }[])
+              .map(p => ({
+                id:        p.user_id,
+                name:      `${p.first_name} ${(p.last_name ?? '').charAt(0)}.`,
+                age:       p.age ?? 0,
+                city:      p.city ?? 'Inconnu',
+                job:       p.job ?? '',
+                score:     p.profile_completion ?? 80,
+                photo:     p.avatar_url ?? `https://i.pravatar.cc/400?u=${p.user_id}`,
+                isPremium: p.is_premium,
+              }))
+          )
+        }
+      })
+  }, [user, gender])
+
+  const total   = profiles.length
+  const profile = profiles[index]
 
   const advance = (action: 'pass' | 'like') => {
     setLeaving(action)
@@ -96,20 +147,26 @@ export default function ProfileGrid() {
     }, 200)
   }
 
-  const handleLike = (id: number, name: string) => {
-    if (!liked.has(id)) {
-      setLiked(prev => new Set([...prev, id]))
-      toast.success(`Demande envoyée à ${name} ✓`)
+  const handleLike = async (id: string, name: string): Promise<boolean> => {
+    if (liked.has(id) || !user) return false
+    const result = await sendContactRequest(user.id, id, isPremium)
+    if (!result.ok) {
+      toast.error(result.message)
+      return false
     }
+    setLiked(prev => new Set([...prev, id]))
+    toast.success(`Demande envoyée à ${name} ✓`)
+    return true
   }
 
   const handlePass = () => advance('pass')
-
-  const handleLikeCarousel = () => {
+  const handleLikeCarousel = async () => {
     if (!profile) return
-    handleLike(profile.id, profile.name)
-    advance('like')
+    const ok = await handleLike(profile.id, profile.name)
+    if (ok) advance('like')
   }
+
+  if (profiles.length === 0) return null
 
   return (
     <>
@@ -125,11 +182,11 @@ export default function ProfileGrid() {
               <p className="text-xs text-gray-400">Des profils choisis pour toi</p>
             </div>
           </div>
-          <span className="text-xs text-gray-400">{mockProfiles.length} profils</span>
+          <span className="text-xs text-gray-400">{profiles.length} profils</span>
         </div>
 
         <div className="grid grid-cols-4 gap-3">
-          {mockProfiles.map(p => (
+          {profiles.map(p => (
             <GridCard
               key={p.id}
               profile={p}
@@ -149,7 +206,7 @@ export default function ProfileGrid() {
         </div>
       </div>
 
-      {/* ── MOBILE : carousel (inchangé) ── */}
+      {/* ── MOBILE : carousel ── */}
       <div className="md:hidden bg-white rounded-xl p-4 space-y-3">
 
         {!profile ? (
@@ -216,7 +273,7 @@ export default function ProfileGrid() {
               onClick={() => router.push(`/dashboard/profil/${profile.id}`)}
             >
               <img
-                src={`https://i.pravatar.cc/400?img=${profile.img}`}
+                src={profile.photo}
                 alt={profile.name}
                 className="w-full h-full object-cover"
                 draggable={false}

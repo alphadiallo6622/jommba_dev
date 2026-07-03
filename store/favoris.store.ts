@@ -8,13 +8,17 @@ export type FavoriteEntry = {
 
 type FavorisStore = {
   favorites: FavoriteEntry[]
+  hydrate:        (entries: FavoriteEntry[]) => void
   addFavorite:    (profile: ExplorerProfile) => void
-  removeFavorite: (id: number) => void
-  isFavorite:     (id: number) => boolean
+  removeFavorite: (id: string) => void
+  isFavorite:     (id: string) => boolean
 }
 
 export const useFavorisStore = create<FavorisStore>()((set, get) => ({
   favorites: [],
+
+  // Remplace le contenu du store par les favoris chargés depuis Supabase
+  hydrate: (entries) => set({ favorites: entries }),
 
   addFavorite: (profile) => {
     if (get().isFavorite(profile.id)) return

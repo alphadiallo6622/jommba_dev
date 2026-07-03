@@ -22,6 +22,7 @@ interface Props<T> {
   xlsFilename?: string;
   rowKey: (row: T) => string;
   footer?: React.ReactNode;
+  initialSearch?: string;
 }
 
 const PER_PAGE = 10;
@@ -40,8 +41,9 @@ export function DataTable<T>({
   xlsFilename,
   rowKey,
   footer,
+  initialSearch,
 }: Props<T>) {
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialSearch ?? "");
   const [chip, setChip] = useState("all");
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");

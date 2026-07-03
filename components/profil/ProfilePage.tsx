@@ -1,15 +1,20 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   ArrowLeft, Camera, Crown, MoreHorizontal, MapPin, Plus,
   Bot, Lightbulb, Heart, Users, BookOpen, Home, Globe,
-  Star, AlertCircle, XCircle, Languages,
+  Star, AlertCircle, XCircle, Languages, Loader2,
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { mockProfiles } from '@/lib/mock-demandes'
+import { createClient } from '@/lib/supabase/client'
+import { useAuth } from '@/components/providers/AuthProvider'
 import { useCurrentUser } from '@/lib/use-current-user'
+import { sendContactRequest } from '@/lib/supabase/likes-service'
+import { oppositeGender } from '@/lib/gender'
+import type { FullProfile } from '@/lib/mock-demandes'
+import type { Profile } from '@/lib/supabase/types'
 import ProfileSection from './ProfileSection'
 import ProfileGridSection from './ProfileGridSection'
 import PhotoGallery from './PhotoGallery'
@@ -18,33 +23,178 @@ import MyProfileView from './MyProfileView'
 
 type Props = { id: string }
 
+function profileToFull(p: Profile, requestStatus: FullProfile['requestStatus']): FullProfile {
+  return {
+    id:             p.user_id,
+    firstName:      p.first_name,
+    age:            p.age ?? 0,
+    photo:          p.avatar_url ?? `https://i.pravatar.cc/400?u=${p.user_id}`,
+    isPhotoBlurred: false,
+    isPremium:      p.is_premium,
+    location:       [p.city, p.country].filter(Boolean).join(', ') || 'Inconnu',
+    tags:           [p.marital_status, p.job, p.education].filter(Boolean) as string[],
+    requestStatus,
+    marriageVision: p.marriage_vision ?? '',
+    seeking:        p.seeking ?? '',
+    religion: {
+      madhhab: p.madhhab ?? '',
+      mosque:  p.mosque_frequency ?? '',
+      arabic:  p.arabic_level ?? '',
+    },
+    lifeProject: {
+      hasChildren:   p.has_children ?? '',
+      wantsChildren: p.wants_children ?? '',
+      canRelocate:   p.can_relocate ?? '',
+      polygamy:      p.polygamy ?? '',
+    },
+    interests:   p.interests ?? '',
+    qualities:   p.qualities ?? '',
+    flaws:       p.flaws ?? '',
+    dealbreakers: p.dealbreakers ?? '',
+    languages:   p.languages ?? '',
+  }
+}
+
 export default function ProfilePage({ id }: Props) {
   const router  = useRouter()
-  const { id: currentUserId } = useCurrentUser()
-  const profile = mockProfiles[id]
+  const { user } = useAuth()
+  const { isPremium, gender } = useCurrentUser()
+  const [profile, setProfile]   = useState<FullProfile | null>(null)
+  const [loading, setLoading]   = useState(true)
   const [menuOpen, setMenuOpen] = useState(false)
 
-  const isMyProfile = id === currentUserId
+  const isMyProfile = id === user?.id
 
-  if (isMyProfile) {
-    return <MyProfileView />
+  const fetchProfile = useCallback(async () => {
+    if (!user || isMyProfile) { setLoading(false); return }
+    setLoading(true)
+    try {
+      const supabase = createClient()
+
+      const [{ data: p }, { data: outgoing }, { data: incoming }] = await Promise.all([
+        supabase.from('profiles').select('*').eq('user_id', id).single(),
+        supabase.from('likes').select('status').eq('sender_id', user.id).eq('receiver_id', id).eq('type', 'request').maybeSingle(),
+        supabase.from('likes').select('status').eq('sender_id', id).eq('receiver_id', user.id).eq('type', 'request').maybeSingle(),
+      ])
+
+      if (!p) { setProfile(null); return }
+
+      // Matching hétérosexuel strict : un accès direct par URL à un profil du
+      // même genre (ou dont le genre n'est pas encore renseigné) est traité
+      // comme introuvable, comme s'il n'existait pas.
+      const targetGender = oppositeGender(gender)
+      if (!targetGender || (p as Profile).gender !== targetGender) {
+        setProfile(null)
+        return
+      }
+
+      // Un profil incomplet (< 100%) est invisible pour les autres — même
+      // règle que la bannière "Ton profil est invisible" sur le dashboard.
+      if (((p as Profile).profile_completion ?? 0) < 100) {
+        setProfile(null)
+        return
+      }
+
+      let status: FullProfile['requestStatus'] = 'none'
+      if (outgoing) {
+        status = outgoing.status === 'accepted' ? 'acceptee' : outgoing.status === 'rejected' ? 'refusee' : 'en-attente'
+      } else if (incoming && incoming.status === 'pending') {
+        status = 'incoming'
+      } else if (incoming && incoming.status === 'accepted') {
+        status = 'acceptee'
+      }
+
+      setProfile(profileToFull(p as Profile, status))
+
+      // Journalise la visite (1 ligne par paire visiteur/profil, horodatage
+      // rafraîchi — sert au compteur de Visiteurs uniques) — seulement pour
+      // un profil valide et accessible.
+      supabase.from('profile_visitors').upsert({
+        visitor_id: user.id,
+        profile_id: id,
+        visited_at: new Date().toISOString(),
+      }, { onConflict: 'visitor_id,profile_id' }).then(({ error }) => {
+        if (error) console.error('[ProfilePage] visit log error:', error)
+      })
+
+      // Journalise chaque vue individuellement (non dédupliqué — sert au
+      // compteur de Vues total, distinct des Visiteurs uniques).
+      supabase.from('profile_views').insert({
+        viewer_id:  user.id,
+        profile_id: id,
+      }).then(({ error }) => {
+        if (error) console.error('[ProfilePage] view log error:', error)
+      })
+    } catch (err) {
+      console.error('[ProfilePage] fetch error:', err)
+    } finally {
+      setLoading(false)
+    }
+  }, [user, id, isMyProfile, gender])
+
+  useEffect(() => { fetchProfile() }, [fetchProfile])
+
+  const handleSendRequest = async () => {
+    if (!user) return
+    const result = await sendContactRequest(user.id, id, isPremium)
+    if (!result.ok) { toast.error(result.message); return }
+    setProfile(p => p ? { ...p, requestStatus: 'en-attente' } : p)
+    toast.success('Demande envoyée ✓')
   }
 
-  if (!profile) {
-    return (
-      <div className="max-w-lg mx-auto px-4 py-12 text-center">
-        <p className="text-gray-400">Profil introuvable.</p>
-        <button onClick={() => router.back()} className="mt-4 text-[#10B981] text-sm font-medium">
-          ← Retour
-        </button>
-      </div>
-    )
+  const handleAcceptIncoming = async () => {
+    if (!user) return
+    const supabase = createClient()
+    await supabase.from('likes').update({ status: 'accepted' })
+      .eq('sender_id', id).eq('receiver_id', user.id).eq('type', 'request')
+    setProfile(p => p ? { ...p, requestStatus: 'acceptee' } : p)
+    toast.success('Demande acceptée ✓')
+    router.push(`/dashboard/messages/${id}`)
   }
+
+  const handleRefuseIncoming = async () => {
+    if (!user) return
+    const supabase = createClient()
+    await supabase.from('likes').update({ status: 'rejected' })
+      .eq('sender_id', id).eq('receiver_id', user.id).eq('type', 'request')
+    setProfile(p => p ? { ...p, requestStatus: 'none' } : p)
+    toast.error('Demande refusée')
+  }
+
+  const handleReport = async () => {
+    setMenuOpen(false)
+    if (!user) return
+    const supabase = createClient()
+    const { error } = await supabase.from('reports').insert({
+      reporter_id: user.id,
+      reported_id: id,
+      reason:      'Signalement depuis le profil',
+      status:      'pending',
+    })
+    if (error) { toast.error('Erreur lors du signalement'); return }
+    toast.success('Signalement envoyé. Notre équipe va examiner ce profil.')
+  }
+
+  if (isMyProfile) return <MyProfileView />
+
+  if (loading) return (
+    <div className="flex justify-center py-24">
+      <Loader2 className="w-6 h-6 animate-spin text-[#10B981]" />
+    </div>
+  )
+
+  if (!profile) return (
+    <div className="max-w-lg mx-auto px-4 py-12 text-center">
+      <p className="text-gray-400">Profil introuvable.</p>
+      <button onClick={() => router.back()} className="mt-4 text-[#10B981] text-sm font-medium">
+        ← Retour
+      </button>
+    </div>
+  )
 
   return (
     <div className="max-w-lg mx-auto px-4 py-4 pb-24 relative">
 
-      {/* Back link */}
       <button
         onClick={() => router.back()}
         className="flex items-center gap-1.5 text-gray-500 text-sm mb-4 hover:text-gray-700 transition-colors"
@@ -53,7 +203,7 @@ export default function ProfilePage({ id }: Props) {
         Retour aux profils
       </button>
 
-      {/* Photo zone */}
+      {/* Photo */}
       <div className="relative mb-4">
         <img
           src={profile.photo}
@@ -70,8 +220,6 @@ export default function ProfilePage({ id }: Props) {
             <Crown className="w-3 h-3" /> PREMIUM
           </span>
         )}
-
-        {/* 3-dot menu */}
         <div className="absolute bottom-3 right-3">
           <button
             onClick={() => setMenuOpen(v => !v)}
@@ -88,7 +236,7 @@ export default function ProfilePage({ id }: Props) {
                 Bloquer
               </button>
               <button
-                onClick={() => { setMenuOpen(false); toast.info('Signalement envoyé') }}
+                onClick={handleReport}
                 className="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-gray-50"
               >
                 Signaler
@@ -98,11 +246,9 @@ export default function ProfilePage({ id }: Props) {
         </div>
       </div>
 
-      {/* Photo gallery */}
       <PhotoGallery photo={profile.photo} isPremium={profile.isPremium} />
       <PhotoUpsellBanner />
 
-      {/* Name + info */}
       <div className="mb-4">
         <h1 className="text-2xl font-bold text-gray-900 mb-1">
           {profile.firstName}, {profile.age}
@@ -112,35 +258,18 @@ export default function ProfilePage({ id }: Props) {
         </p>
         <div className="flex gap-2 flex-wrap">
           {profile.tags.map(tag => (
-            <span key={tag} className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">
-              {tag}
-            </span>
+            <span key={tag} className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">{tag}</span>
           ))}
         </div>
       </div>
 
-      {/* Status banner */}
-      <RequestStatusBanner status={profile.requestStatus} />
+      <RequestStatusBanner
+        status={profile.requestStatus}
+        onSend={handleSendRequest}
+        onAccept={handleAcceptIncoming}
+        onRefuse={handleRefuseIncoming}
+      />
 
-      {/* Incoming demande: accept / refuse buttons */}
-      {profile.requestStatus === 'incoming' && (
-        <div className="grid grid-cols-2 gap-2 mb-3">
-          <button
-            onClick={() => { toast.success('Demande acceptée ✓'); router.push(`/dashboard/messages/${id}`) }}
-            className="py-3 bg-[#10B981] text-white text-sm font-semibold rounded-lg hover:bg-[#059669] transition-colors"
-          >
-            Accepter ✓
-          </button>
-          <button
-            onClick={() => { toast.error('Demande refusée'); router.back() }}
-            className="py-3 bg-gray-100 text-gray-600 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
-          >
-            Refuser
-          </button>
-        </div>
-      )}
-
-      {/* Match IA + Idées */}
       <div className="grid grid-cols-2 gap-3 mb-6">
         <button
           onClick={() => toast('Fonctionnalité bientôt disponible')}
@@ -156,38 +285,19 @@ export default function ProfilePage({ id }: Props) {
         </button>
       </div>
 
-      {/* Content sections */}
       <div className="space-y-3">
-        <ProfileSection
-          icon={Heart}
-          iconColor="text-pink-500"
-          iconBg="bg-pink-50"
-          title="Ma vision du mariage"
-          text={profile.marriageVision}
-        />
-        <ProfileSection
-          icon={Users}
-          iconColor="text-green-600"
-          iconBg="bg-green-50"
-          title="Ce que je recherche"
-          text={profile.seeking}
-        />
+        <ProfileSection icon={Heart}      iconColor="text-pink-500"   iconBg="bg-pink-50"   title="Ma vision du mariage"       text={profile.marriageVision} />
+        <ProfileSection icon={Users}      iconColor="text-green-600"  iconBg="bg-green-50"  title="Ce que je recherche"        text={profile.seeking} />
         <ProfileGridSection
-          icon={BookOpen}
-          iconColor="text-blue-500"
-          iconBg="bg-blue-50"
-          title="Pratique religieuse"
+          icon={BookOpen} iconColor="text-blue-500" iconBg="bg-blue-50" title="Pratique religieuse"
           fields={[
-            { label: 'MADHHAB', value: profile.religion.madhhab  },
-            { label: 'MOSQUÉE', value: profile.religion.mosque   },
-            { label: 'ARABE',   value: profile.religion.arabic   },
+            { label: 'MADHHAB', value: profile.religion.madhhab },
+            { label: 'MOSQUÉE', value: profile.religion.mosque  },
+            { label: 'ARABE',   value: profile.religion.arabic  },
           ]}
         />
         <ProfileGridSection
-          icon={Home}
-          iconColor="text-amber-500"
-          iconBg="bg-amber-50"
-          title="Projet de vie"
+          icon={Home} iconColor="text-amber-500" iconBg="bg-amber-50" title="Projet de vie"
           fields={[
             { label: 'A DES ENFANTS',        value: profile.lifeProject.hasChildren   },
             { label: 'SOUHAITE DES ENFANTS', value: profile.lifeProject.wantsChildren },
@@ -195,72 +305,42 @@ export default function ProfilePage({ id }: Props) {
             { label: 'POLYGAMIE',            value: profile.lifeProject.polygamy      },
           ]}
         />
-        <ProfileSection
-          icon={Globe}
-          iconColor="text-teal-500"
-          iconBg="bg-teal-50"
-          title="Centres d'intérêt"
-          text={profile.interests}
-        />
-        <ProfileSection
-          icon={Star}
-          iconColor="text-yellow-500"
-          iconBg="bg-yellow-50"
-          title="Mes qualités"
-          text={profile.qualities}
-        />
+        <ProfileSection icon={Globe}     iconColor="text-teal-500"   iconBg="bg-teal-50"   title="Centres d'intérêt"          text={profile.interests} />
+        <ProfileSection icon={Star}      iconColor="text-yellow-500" iconBg="bg-yellow-50" title="Mes qualités"                text={profile.qualities} />
         {profile.flaws && (
-          <ProfileSection
-            icon={AlertCircle}
-            iconColor="text-orange-500"
-            iconBg="bg-orange-50"
-            title="Mes défauts"
-            text={profile.flaws}
-          />
+          <ProfileSection icon={AlertCircle} iconColor="text-orange-500" iconBg="bg-orange-50" title="Mes défauts" text={profile.flaws} />
         )}
-        <ProfileSection
-          icon={XCircle}
-          iconColor="text-red-500"
-          iconBg="bg-red-50"
-          title="Ce que je n'accepte pas"
-          text={profile.dealbreakers}
-        />
-        <ProfileSection
-          icon={Languages}
-          iconColor="text-violet-500"
-          iconBg="bg-violet-50"
-          title="Langues parlées"
-          text={profile.languages}
-        />
+        <ProfileSection icon={XCircle}   iconColor="text-red-500"    iconBg="bg-red-50"    title="Ce que je n'accepte pas"    text={profile.dealbreakers} />
+        <ProfileSection icon={Languages} iconColor="text-violet-500" iconBg="bg-violet-50" title="Langues parlées"            text={profile.languages} />
       </div>
 
     </div>
   )
 }
 
-function RequestStatusBanner({ status }: { status: string }) {
+type BannerProps = {
+  status: FullProfile['requestStatus']
+  onSend: () => void
+  onAccept: () => void
+  onRefuse: () => void
+}
+function RequestStatusBanner({ status, onSend, onAccept, onRefuse }: BannerProps) {
   if (status === 'incoming') return (
-    <div className="w-full py-3 bg-pink-50 text-pink-600 text-center text-sm font-medium rounded-lg mb-3 flex items-center justify-center gap-1.5">
-      <Heart className="w-4 h-4 fill-current" /> Cette personne souhaite te contacter
-    </div>
+    <>
+      <div className="w-full py-3 bg-pink-50 text-pink-600 text-center text-sm font-medium rounded-lg mb-3 flex items-center justify-center gap-1.5">
+        <Heart className="w-4 h-4 fill-current" /> Cette personne souhaite te contacter
+      </div>
+      <div className="grid grid-cols-2 gap-2 mb-3">
+        <button onClick={onAccept} className="py-3 bg-[#10B981] text-white text-sm font-semibold rounded-lg hover:bg-[#059669] transition-colors">Accepter ✓</button>
+        <button onClick={onRefuse} className="py-3 bg-gray-100 text-gray-600 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">Refuser</button>
+      </div>
+    </>
   )
-  if (status === 'refusee') return (
-    <div className="w-full py-3 bg-red-50 text-red-500 text-center text-sm font-medium rounded-lg mb-3">
-      Demande refusée
-    </div>
-  )
-  if (status === 'en-attente') return (
-    <div className="w-full py-3 bg-amber-50 text-amber-600 text-center text-sm font-medium rounded-lg mb-3">
-      Demande envoyée — En attente
-    </div>
-  )
-  if (status === 'acceptee') return (
-    <div className="w-full py-3 bg-[#E1F5EE] text-[#10B981] text-center text-sm font-medium rounded-lg mb-3">
-      ✓ Contact accepté
-    </div>
-  )
+  if (status === 'refusee')    return <div className="w-full py-3 bg-red-50 text-red-500 text-center text-sm font-medium rounded-lg mb-3">Demande refusée</div>
+  if (status === 'en-attente') return <div className="w-full py-3 bg-amber-50 text-amber-600 text-center text-sm font-medium rounded-lg mb-3">Demande envoyée — En attente</div>
+  if (status === 'acceptee')   return <div className="w-full py-3 bg-[#E1F5EE] text-[#10B981] text-center text-sm font-medium rounded-lg mb-3">✓ Contact accepté</div>
   return (
-    <button className="w-full py-3 bg-[#10B981] text-white text-sm font-semibold rounded-lg mb-3 flex items-center justify-center gap-2 hover:bg-[#059669] transition-colors">
+    <button onClick={onSend} className="w-full py-3 bg-[#10B981] text-white text-sm font-semibold rounded-lg mb-3 flex items-center justify-center gap-2 hover:bg-[#059669] transition-colors">
       <Plus className="w-4 h-4" /> Ajouter
     </button>
   )

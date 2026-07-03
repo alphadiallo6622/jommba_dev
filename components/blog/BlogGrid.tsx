@@ -10,15 +10,16 @@ import { cn } from "@/lib/utils";
 
 interface BlogGridProps {
   searchQuery: string;
+  posts?: BlogPost[];
 }
 
-const CATEGORIES = ["Tous", "Spiritualité", "Conseils", "Famille", "Événements"];
+const CATEGORIES = ["Tous", "Spiritualité", "Conseils", "Famille", "Événements", "Actualités"];
 
-export default function BlogGrid({ searchQuery }: BlogGridProps) {
+export default function BlogGrid({ searchQuery, posts = BLOG_POSTS }: BlogGridProps) {
   const [selectedCategory, setSelectedCategory] = useState("Tous");
 
   // Filter logic
-  const filteredPosts = BLOG_POSTS.filter((post) => {
+  const filteredPosts = posts.filter((post) => {
     const matchesCategory =
       selectedCategory === "Tous" || post.category === selectedCategory;
     const matchesSearch =

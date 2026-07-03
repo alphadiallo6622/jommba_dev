@@ -1,11 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Heart, Inbox, Send, Users, Search, Timer, CheckCircle, XCircle } from 'lucide-react'
+import { Heart, Inbox, Send, Users, Search, Timer, CheckCircle, XCircle, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { mockRecues, mockEnvoyees, mockContacts, ReceivedRequest, SentRequest, ContactEntry } from '@/lib/mock-demandes'
+import type { ReceivedRequest, SentRequest, ContactEntry } from '@/lib/mock-demandes'
 import { cn } from '@/lib/utils'
+import { createClient } from '@/lib/supabase/client'
+import { useAuth } from '@/components/providers/AuthProvider'
 import ReceivedRequestCard from './ReceivedRequestCard'
 import SentRequestCard from './SentRequestCard'
 import ContactCard from './ContactCard'
@@ -22,38 +24,162 @@ const subFilters: { id: SubFilter; label: string; icon: React.ElementType }[] = 
   { id: 'refusees',    label: 'Refusées',    icon: XCircle     },
 ]
 
+function formatTimeAgo(dateStr: string): string {
+  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
+  if (diff < 60)     return "À l'instant"
+  if (diff < 3600)   return `Il y a ${Math.floor(diff / 60)} min`
+  if (diff < 86400)  return `Il y a ${Math.floor(diff / 3600)} h`
+  if (diff < 172800) return 'Hier'
+  return `Il y a ${Math.floor(diff / 86400)} j`
+}
+
+function mapStatus(status: string): 'en-attente' | 'acceptee' | 'refusee' {
+  if (status === 'accepted') return 'acceptee'
+  if (status === 'rejected') return 'refusee'
+  return 'en-attente'
+}
+
 export default function DemandesPage() {
   const router = useRouter()
+  const { user } = useAuth()
   const [activeTab, setActiveTab]     = useState<MainTab>('recues')
   const [subFilter, setSubFilter]     = useState<SubFilter>('toutes')
-  const [recues, setRecues]           = useState<ReceivedRequest[]>(mockRecues)
-  const [envoyees]                    = useState<SentRequest[]>(mockEnvoyees)
-  const [contacts]                    = useState<ContactEntry[]>(mockContacts)
+  const [recues, setRecues]           = useState<ReceivedRequest[]>([])
+  const [envoyees, setEnvoyees]       = useState<SentRequest[]>([])
+  const [contacts, setContacts]       = useState<ContactEntry[]>([])
+  const [loading, setLoading]         = useState(true)
   const [pendingRequest, setPendingRequest] = useState<ReceivedRequest | null>(null)
 
-  const handleAccept = (id: number) => {
+  const fetchData = useCallback(async () => {
+    if (!user) return
+    setLoading(true)
+    try {
+      const supabase = createClient()
+
+      const [{ data: likesRecues }, { data: likesEnvoyees }] = await Promise.all([
+        supabase.from('likes')
+          .select('*')
+          .eq('receiver_id', user.id)
+          .eq('type', 'request')
+          .order('created_at', { ascending: false }),
+        supabase.from('likes')
+          .select('*')
+          .eq('sender_id', user.id)
+          .eq('type', 'request')
+          .order('created_at', { ascending: false }),
+      ])
+
+      const senderIds   = (likesRecues   ?? []).map((l: { sender_id: string }) => l.sender_id)
+      const receiverIds = (likesEnvoyees ?? []).map((l: { receiver_id: string }) => l.receiver_id)
+      const allIds = [...new Set([...senderIds, ...receiverIds])]
+
+      type ProfileRow = { user_id: string; first_name: string; last_name: string | null; age: number | null; avatar_url: string | null; city: string | null }
+      const profileMap = new Map<string, ProfileRow>()
+
+      if (allIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('user_id, first_name, last_name, age, avatar_url, city')
+          .in('user_id', allIds)
+        for (const p of (profiles ?? []) as ProfileRow[]) profileMap.set(p.user_id, p)
+      }
+
+      const buildPhoto = (userId: string, url: string | null) =>
+        url ?? `https://i.pravatar.cc/150?u=${userId}`
+
+      setRecues(
+        (likesRecues ?? [])
+          .filter((l: { status: string }) => l.status === 'pending')
+          .map((l: { sender_id: string; created_at: string }) => {
+            const p = profileMap.get(l.sender_id)
+            return {
+              id:          l.sender_id,
+              firstName:   p?.first_name ?? '…',
+              lastInitial: (p?.last_name ?? '').charAt(0) || '?',
+              age:         p?.age ?? 0,
+              photo:       buildPhoto(l.sender_id, p?.avatar_url ?? null),
+              city:        p?.city ?? 'Inconnu',
+              timeAgo:     formatTimeAgo(l.created_at),
+              isNew:       Date.now() - new Date(l.created_at).getTime() < 86_400_000,
+            }
+          })
+      )
+
+      const envoyeesData: SentRequest[] = (likesEnvoyees ?? []).map(
+        (l: { receiver_id: string; created_at: string; status: string }) => {
+          const p = profileMap.get(l.receiver_id)
+          return {
+            id:          l.receiver_id,
+            firstName:   p?.first_name ?? '…',
+            lastInitial: (p?.last_name ?? '').charAt(0) || '?',
+            age:         p?.age ?? 0,
+            photo:       buildPhoto(l.receiver_id, p?.avatar_url ?? null),
+            timeAgo:     formatTimeAgo(l.created_at),
+            status:      mapStatus(l.status),
+          }
+        }
+      )
+      setEnvoyees(envoyeesData)
+
+      setContacts(
+        envoyeesData
+          .filter((_, i) => (likesEnvoyees ?? [])[i]?.status === 'accepted')
+          .map(({ id, firstName, lastInitial, age, photo, timeAgo }) => ({
+            id, firstName, lastInitial, age, photo, city: profileMap.get(id)?.city ?? 'Inconnu', timeAgo,
+          }))
+      )
+    } catch (err) {
+      console.error('[DemandesPage] fetch error:', err)
+    } finally {
+      setLoading(false)
+    }
+  }, [user])
+
+  useEffect(() => { fetchData() }, [fetchData])
+
+  const handleAccept = (id: string) => {
     const request = recues.find(r => r.id === id)
     if (request) setPendingRequest(request)
   }
 
-  const handleConfirmAccept = () => {
-    if (!pendingRequest) return
+  const handleConfirmAccept = async () => {
+    if (!pendingRequest || !user) return
+    const supabase = createClient()
+    const { error } = await supabase
+      .from('likes')
+      .update({ status: 'accepted' })
+      .eq('sender_id', pendingRequest.id)
+      .eq('receiver_id', user.id)
+      .eq('type', 'request')
+
+    if (error) {
+      toast.error("Erreur lors de l'acceptation")
+      return
+    }
     setRecues(prev => prev.filter(r => r.id !== pendingRequest.id))
     setPendingRequest(null)
     toast.success('Demande acceptée ✓')
     router.push(`/dashboard/messages/${pendingRequest.id}`)
   }
 
-  const handleRefuse = (id: number) => {
+  const handleRefuse = async (id: string) => {
+    if (!user) return
+    const supabase = createClient()
+    await supabase
+      .from('likes')
+      .update({ status: 'rejected' })
+      .eq('sender_id', id)
+      .eq('receiver_id', user.id)
+      .eq('type', 'request')
     setRecues(prev => prev.filter(r => r.id !== id))
     toast.error('Demande refusée')
   }
 
   const filteredEnvoyees = envoyees.filter(r => {
-    if (subFilter === 'toutes')      return true
-    if (subFilter === 'en-attente')  return r.status === 'en-attente'
-    if (subFilter === 'acceptees')   return r.status === 'acceptee'
-    if (subFilter === 'refusees')    return r.status === 'refusee'
+    if (subFilter === 'toutes')     return true
+    if (subFilter === 'en-attente') return r.status === 'en-attente'
+    if (subFilter === 'acceptees')  return r.status === 'acceptee'
+    if (subFilter === 'refusees')   return r.status === 'refusee'
     return true
   })
 
@@ -103,14 +229,21 @@ export default function DemandesPage() {
                 ? 'bg-white/20 text-white'
                 : count > 0 ? 'bg-[#E1F5EE] text-[#10B981]' : 'bg-gray-200 text-gray-400',
             )}>
-              {count}
+              {loading ? '…' : count}
             </span>
           </button>
         ))}
       </div>
 
+      {/* Loading spinner */}
+      {loading && (
+        <div className="flex justify-center py-16">
+          <Loader2 className="w-6 h-6 animate-spin text-[#10B981]" />
+        </div>
+      )}
+
       {/* === REÇUES === */}
-      {activeTab === 'recues' && (
+      {!loading && activeTab === 'recues' && (
         recues.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {recues.map(r => (
@@ -134,9 +267,8 @@ export default function DemandesPage() {
       )}
 
       {/* === ENVOYÉES === */}
-      {activeTab === 'envoyees' && (
+      {!loading && activeTab === 'envoyees' && (
         <>
-          {/* Sub-filters */}
           <div className="flex gap-2 mb-5 flex-wrap">
             {subFilters.map(({ id, label, icon: Icon }) => (
               <button
@@ -174,7 +306,7 @@ export default function DemandesPage() {
       )}
 
       {/* === CONTACTS === */}
-      {activeTab === 'contacts' && (
+      {!loading && activeTab === 'contacts' && (
         contacts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {contacts.map(c => (

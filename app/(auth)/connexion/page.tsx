@@ -82,20 +82,25 @@ export default function ConnexionPage() {
     setLoading(true)
     try {
       const supabase = createClient()
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
       })
+      console.log('[Connexion] response:', JSON.stringify({ user: authData?.user?.email, session: !!authData?.session, error }))
       if (error) {
-        const msg = error.message.includes('Invalid login credentials')
-          ? 'Email ou mot de passe incorrect'
-          : error.message
-        toast.error(msg)
-      } else {
-        toast.success('Connexion réussie ! Bienvenue 🌙')
-        router.push('/dashboard')
-        router.refresh()
+        console.error('[Connexion] Supabase error:', JSON.stringify(error))
+        const isInvalidCreds =
+          error.code === 'invalid_credentials' ||
+          (error.message ?? '').toLowerCase().includes('invalid login credentials') ||
+          (error.message ?? '').toLowerCase().includes('invalid_credentials')
+        toast.error(isInvalidCreds ? 'Email ou mot de passe incorrect' : (error.message || 'Erreur de connexion'))
+        return
       }
+      router.push('/dashboard')
+      router.refresh()
+    } catch (err) {
+      console.error('[Connexion] Exception inattendue:', err)
+      toast.error('Impossible de se connecter. Vérifie ta connexion internet.')
     } finally {
       setLoading(false)
     }
@@ -178,9 +183,9 @@ export default function ConnexionPage() {
             <div>
               <div className="flex items-center justify-between mb-1">
                 <label className="text-xs font-semibold text-gray-700">Mot de passe</label>
-                <button type="button" className="text-xs font-medium" style={{ color: '#10B981' }}>
+                <Link href="/mot-de-passe-oublie" className="text-xs font-medium" style={{ color: '#10B981' }}>
                   Mot de passe oublié ?
-                </button>
+                </Link>
               </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -217,26 +222,6 @@ export default function ConnexionPage() {
               S&rsquo;inscrire gratuitement
             </Link>
           </p>
-
-          {/* Comptes de test */}
-          <div className="border-t border-gray-100 pt-4">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 text-center">Comptes de test</p>
-            <div className="space-y-2">
-              <div className="bg-gray-50 rounded-xl px-3 py-2.5">
-                <p className="text-xs font-semibold text-gray-600 mb-0.5">Compte Gratuit</p>
-                <p className="text-[11px] text-gray-400">abou.diallo@jommba.com</p>
-                <p className="text-[11px] text-gray-400">Mot de passe : <span className="font-mono font-semibold text-gray-600">abou2024</span></p>
-              </div>
-              <div className="bg-amber-50 border border-amber-100 rounded-xl px-3 py-2.5">
-                <div className="flex items-center gap-1.5 mb-0.5">
-                  <p className="text-xs font-semibold text-amber-700">Compte Premium</p>
-                  <span className="text-[9px] font-bold bg-amber-500 text-white px-1.5 py-0.5 rounded-full">PREMIUM</span>
-                </div>
-                <p className="text-[11px] text-amber-600">alphadiallo2308@gmail.com</p>
-                <p className="text-[11px] text-amber-600">Mot de passe : <span className="font-mono font-semibold text-amber-800">alpha2308</span></p>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

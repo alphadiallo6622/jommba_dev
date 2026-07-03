@@ -1,26 +1,23 @@
-// app/admin/(protected)/statistiques/page.tsx
+// app/adminjommba/(protected)/statistiques/page.tsx
 import type { Metadata } from "next";
 import { KpiCard } from "@/components/admin/ui/kpi-card";
 import { Card, CardHeader } from "@/components/admin/ui/card";
 import { BarChart } from "@/components/admin/ui/bar-chart";
 import { AreaChart } from "@/components/admin/ui/area-chart";
 import { HBarChart } from "@/components/admin/ui/hbar-chart";
-import {
-  ANALYTICS_KPIS,
-  CONVERSION_DATA,
-  COUNTRY_DATA,
-  REVENUE_DATA,
-  MESSAGES_DATA,
-} from "@/lib/admin/mock-data";
+import { getStatsData } from "@/lib/admin/queries";
 
 export const metadata: Metadata = { title: "Statistiques" };
+export const dynamic = "force-dynamic";
 
-export default function StatistiquesPage() {
+export default async function StatistiquesPage() {
+  const { kpis, conversion, messages, countries, revenue } = await getStatsData();
+
   return (
     <div className="space-y-5">
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {ANALYTICS_KPIS.map((kpi) => (
+        {kpis.map((kpi) => (
           <KpiCard key={kpi.label} kpi={kpi} />
         ))}
       </div>
@@ -31,16 +28,16 @@ export default function StatistiquesPage() {
           <CardHeader title="Conversion Premium par mois" />
           <div className="px-4 pt-3 pb-2">
             <BarChart
-              data={CONVERSION_DATA.map((d) => ({ label: d.month, value: d.count }))}
+              data={conversion.map((d) => ({ label: d.month, value: d.count }))}
             />
           </div>
         </Card>
 
         <Card>
-          <CardHeader title="Messages échangés / jour" />
+          <CardHeader title="Messages échangés / jour (30 j)" />
           <div className="px-4 pt-4 pb-3">
             <AreaChart
-              data={MESSAGES_DATA.map((d) => ({ value: d.count }))}
+              data={messages.map((d) => ({ value: d.count }))}
               color="#059669"
             />
           </div>
@@ -52,7 +49,13 @@ export default function StatistiquesPage() {
         <Card>
           <CardHeader title="Membres par pays" />
           <div className="px-6 py-5">
-            <HBarChart data={COUNTRY_DATA} />
+            {countries.length === 0 ? (
+              <p className="text-sm text-[var(--color-muted)] text-center py-6">
+                Aucune donnée
+              </p>
+            ) : (
+              <HBarChart data={countries} />
+            )}
           </div>
         </Card>
 
@@ -60,7 +63,7 @@ export default function StatistiquesPage() {
           <CardHeader title="Revenus mensuels (USD)" />
           <div className="px-4 pt-4 pb-3">
             <AreaChart
-              data={REVENUE_DATA.map((d) => ({ label: d.month, value: d.amount }))}
+              data={revenue.map((d) => ({ label: d.month, value: d.amount }))}
               color="#10b981"
             />
           </div>

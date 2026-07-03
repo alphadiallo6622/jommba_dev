@@ -1,9 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
-import { CheckCircle } from 'lucide-react'
+import { CheckCircle, Loader2 } from 'lucide-react'
 import { useCurrentUser } from '@/lib/use-current-user'
+import { useAuth } from '@/components/providers/AuthProvider'
+import { updateMyProfile } from '@/lib/supabase/profile-actions'
 import SettingsDrawer from '../SettingsDrawer'
 
 type Props = { open: boolean; onClose: () => void }
@@ -17,6 +19,7 @@ const ENFANTS_OPT = ['Aucun', '1', '2', '3', '4+']
 
 export default function InfosPanel({ open, onClose }: Props) {
   const mockUser = useCurrentUser()
+  const { user } = useAuth()
   const [firstName, setFirstName] = useState(mockUser.firstName)
   const [lastName, setLastName]   = useState(mockUser.lastName)
   const [day, setDay]     = useState('15')
@@ -25,9 +28,45 @@ export default function InfosPanel({ open, onClose }: Props) {
   const [height, setHeight] = useState(String(mockUser.height))
   const [situation, setSituation] = useState('Célibataire')
   const [enfants, setEnfants] = useState('Aucun')
+  const [saving, setSaving]   = useState(false)
 
-  const save = () => {
-    toast.success('Informations sauvegardées')
+  // Réinitialise le formulaire quand le profil réel est chargé dans le store
+  useEffect(() => {
+    setFirstName(mockUser.firstName)
+    setLastName(mockUser.lastName)
+    setHeight(String(mockUser.height))
+    if (mockUser.tags[0] && SITUATIONS.includes(mockUser.tags[0])) setSituation(mockUser.tags[0])
+    const h = mockUser.lifeProject.hasChildren
+    if (h && ENFANTS_OPT.includes(h)) setEnfants(h)
+    else if (h === 'Non') setEnfants('Aucun')
+  }, [mockUser])
+
+  const save = async () => {
+    if (!user) return
+    if (!firstName.trim()) { toast.error('Le prénom est obligatoire'); return }
+
+    // Âge calculé depuis la date de naissance
+    const birth = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
+    const today = new Date()
+    let age = today.getFullYear() - birth.getFullYear()
+    if (
+      today.getMonth() < birth.getMonth() ||
+      (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate())
+    ) age--
+
+    setSaving(true)
+    const err = await updateMyProfile(user.id, {
+      first_name:     firstName.trim(),
+      last_name:      lastName.trim() || null,
+      age:            age >= 18 && age <= 99 ? age : undefined,
+      height:         height ? parseInt(height) : null,
+      marital_status: situation,
+      has_children:   enfants === 'Aucun' ? 'Non' : enfants,
+    })
+    setSaving(false)
+
+    if (err) { toast.error(`Erreur : ${err}`); return }
+    toast.success('Informations sauvegardées ✓')
     onClose()
   }
 
@@ -37,7 +76,12 @@ export default function InfosPanel({ open, onClose }: Props) {
   return (
     <SettingsDrawer open={open} title="Mes informations" onClose={onClose}
       footer={
-        <button onClick={save} className="w-full py-3 bg-[#10B981] text-white text-sm font-semibold rounded-xl hover:bg-[#059669] transition-colors">
+        <button
+          onClick={save}
+          disabled={saving}
+          className="w-full py-3 bg-[#10B981] text-white text-sm font-semibold rounded-xl hover:bg-[#059669] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+        >
+          {saving && <Loader2 className="w-4 h-4 animate-spin" />}
           Sauvegarder
         </button>
       }

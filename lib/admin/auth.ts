@@ -1,8 +1,25 @@
 // lib/admin/auth.ts
-// HMAC-SHA256 signed tokens using Web Crypto API (works in Edge Runtime + Node 18+)
+// Sessions admin signées HMAC-SHA256 (Web Crypto — Edge Runtime + Node 18+).
+// v2 : le token porte l'identité (email, nom, rôle) pour le multi-comptes.
+// La clé maître (ADMIN_EMAIL / ADMIN_PASSWORD en env) reste le super-admin
+// de secours ; les autres comptes vivent dans admin_accounts + Supabase Auth.
 
 export const COOKIE = "admin_session";
 const TTL = 8 * 60 * 60; // 8 h
+const VERSION = 2;
+
+export type AdminRole = "super-admin" | "modération" | "support" | "lecture seule";
+
+export interface AdminSession {
+  email: string;
+  name: string;
+  role: AdminRole;
+  /** id de la ligne admin_accounts — null pour la clé maître env */
+  accountId: string | null;
+  /** id auth.users du compte dédié — null pour la clé maître env */
+  userId: string | null;
+  exp: number;
+}
 
 function b64u(input: ArrayBuffer | Uint8Array): string {
   const bytes = input instanceof Uint8Array ? input : new Uint8Array(input);
@@ -32,12 +49,15 @@ async function getKey(): Promise<CryptoKey> {
   );
 }
 
-export async function createAdminToken(): Promise<string> {
-  const payloadB64 = b64u(
-    new TextEncoder().encode(
-      JSON.stringify({ exp: Math.floor(Date.now() / 1000) + TTL, v: 1 }),
-    ),
-  );
+export async function createAdminToken(
+  identity: Omit<AdminSession, "exp">,
+): Promise<string> {
+  const payload: AdminSession & { v: number } = {
+    ...identity,
+    exp: Math.floor(Date.now() / 1000) + TTL,
+    v: VERSION,
+  };
+  const payloadB64 = b64u(new TextEncoder().encode(JSON.stringify(payload)));
   const key = await getKey();
   const sig = await crypto.subtle.sign(
     "HMAC",
@@ -47,10 +67,11 @@ export async function createAdminToken(): Promise<string> {
   return `${payloadB64}.${b64u(sig)}`;
 }
 
-export async function verifyAdminToken(token: string): Promise<boolean> {
+/** Retourne la session si le token est valide et non expiré, sinon null. */
+export async function verifyAdminToken(token: string): Promise<AdminSession | null> {
   try {
     const [payloadB64, sigB64] = token.split(".");
-    if (!payloadB64 || !sigB64) return false;
+    if (!payloadB64 || !sigB64) return null;
     const key = await getKey();
     const valid = await crypto.subtle.verify(
       "HMAC",
@@ -58,12 +79,26 @@ export async function verifyAdminToken(token: string): Promise<boolean> {
       b64uDecode(sigB64),
       new TextEncoder().encode(payloadB64),
     );
-    if (!valid) return false;
-    const { exp } = JSON.parse(
+    if (!valid) return null;
+    const payload = JSON.parse(
       new TextDecoder().decode(b64uDecode(payloadB64)),
-    );
-    return Math.floor(Date.now() / 1000) < exp;
+    ) as Partial<AdminSession> & { v?: number };
+
+    // Les tokens v1 (login unique historique) ne portent pas d'identité :
+    // on force une reconnexion.
+    if (payload.v !== VERSION) return null;
+    if (!payload.exp || Math.floor(Date.now() / 1000) >= payload.exp) return null;
+    if (!payload.email || !payload.role) return null;
+
+    return {
+      email: payload.email,
+      name: payload.name ?? "Admin",
+      role: payload.role,
+      accountId: payload.accountId ?? null,
+      userId: payload.userId ?? null,
+      exp: payload.exp,
+    };
   } catch {
-    return false;
+    return null;
   }
 }

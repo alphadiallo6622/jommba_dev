@@ -1,5 +1,6 @@
 import type { Profile } from './types'
 import type { MockUser } from '@/lib/mock-user'
+import type { ExplorerProfile } from '@/lib/mock-explorer'
 
 // Mappe un profil Supabase (snake_case) vers MockUser (camelCase)
 // pour la compatibilité avec les composants existants.
@@ -8,6 +9,7 @@ export function profileToMockUser(profile: Profile, email: string): MockUser {
     id:                profile.user_id,
     firstName:         profile.first_name,
     lastName:          profile.last_name ?? '',
+    gender:            (profile.gender as 'homme' | 'femme' | null) ?? null,
     age:               profile.age ?? 0,
     height:            profile.height ?? 0,
     city:              profile.city ?? '',
@@ -35,8 +37,36 @@ export function profileToMockUser(profile: Profile, email: string): MockUser {
     },
     interests:   profile.interests ?? '',
     qualities:   profile.qualities ?? '',
+    flaws:       profile.flaws ?? '',
     dealbreakers: profile.dealbreakers ?? '',
     languages:   profile.languages ?? '',
+    visibility:  profile.visibility ?? 'active',
+  }
+}
+
+export function supabaseProfileToExplorer(p: Profile): ExplorerProfile {
+  return {
+    id: p.user_id,
+    firstName: p.first_name,
+    lastInitial: (p.last_name ?? '').charAt(0) || '?',
+    age: p.age ?? 0,
+    location: [p.city, p.country].filter(Boolean).join(', ') || 'Inconnu',
+    maritalStatus: p.marital_status ?? '',
+    job: p.job ?? '',
+    photos: [p.avatar_url ?? `https://i.pravatar.cc/400?u=${p.user_id}`],
+    isEnAvant: p.is_premium,
+    marriageVision: p.marriage_vision ?? '',
+    ceQueJeRecherche: p.seeking ?? '',
+    centresInteret: p.interests ?? '',
+    mesQualites: p.qualities ?? '',
+    info: {
+      madhhab: p.madhhab ?? '',
+      education: p.education ?? '',
+      enfants: p.has_children ?? '',
+      souhaitEnfants: p.wants_children ?? '',
+      peutDemenager: p.can_relocate ?? '',
+      polygamie: p.polygamy ?? '',
+    },
   }
 }
 

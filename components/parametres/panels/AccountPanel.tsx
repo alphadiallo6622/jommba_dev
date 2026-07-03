@@ -4,28 +4,60 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { AlertTriangle, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useAuth } from '@/components/providers/AuthProvider'
+import { createClient } from '@/lib/supabase/client'
 import SettingsDrawer from '../SettingsDrawer'
 
 type Props = { open: boolean; onClose: () => void }
 
 export default function AccountPanel({ open, onClose }: Props) {
   const router = useRouter()
+  const { user } = useAuth()
   const [suspendModal, setSuspendModal] = useState(false)
   const [deleteModal1, setDeleteModal1] = useState(false)
   const [deleteModal2, setDeleteModal2] = useState(false)
+  const [busy, setBusy]                 = useState(false)
 
-  const suspend = () => {
-    setSuspendModal(false)
-    onClose()
-    toast.success('Compte suspendu temporairement')
-    router.push('/')
+  const suspend = async () => {
+    if (!user || busy) return
+    setBusy(true)
+    try {
+      const supabase = createClient()
+      const { error } = await supabase
+        .from('profiles')
+        .update({ status: 'suspended' })
+        .eq('user_id', user.id)
+      if (error) { toast.error('Erreur lors de la suspension'); return }
+
+      setSuspendModal(false)
+      onClose()
+      toast.success('Compte suspendu temporairement')
+      await supabase.auth.signOut()
+      router.push('/')
+    } finally {
+      setBusy(false)
+    }
   }
 
-  const deleteAccount = () => {
-    setDeleteModal2(false)
-    onClose()
-    toast.success('Compte supprimé définitivement')
-    router.push('/')
+  const deleteAccount = async () => {
+    if (busy) return
+    setBusy(true)
+    try {
+      const res = await fetch('/api/account/delete', { method: 'POST' })
+      if (!res.ok) {
+        const { error } = await res.json().catch(() => ({ error: 'Erreur inconnue' }))
+        toast.error(error ?? 'Échec de la suppression')
+        return
+      }
+      setDeleteModal2(false)
+      onClose()
+      toast.success('Compte supprimé définitivement')
+      const supabase = createClient()
+      await supabase.auth.signOut()
+      router.push('/')
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (

@@ -1,7 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { toast } from 'sonner'
+import { Loader2 } from 'lucide-react'
 import { useCurrentUser } from '@/lib/use-current-user'
+import { useAuth } from '@/components/providers/AuthProvider'
+import { updateMyProfile } from '@/lib/supabase/profile-actions'
 import SettingsDrawer from '../SettingsDrawer'
 import ThemeTextSection from '../ThemeTextSection'
 
@@ -13,14 +17,42 @@ const FLAW_THEMES     = ['Perfectionniste','Timide','Têtu','Impatient','Désorg
 
 export default function PersonalityPanel({ open, onClose }: Props) {
   const mockUser = useCurrentUser()
+  const { user } = useAuth()
   const [interests, setInterests] = useState(mockUser.interests)
   const [qualities, setQualities] = useState(mockUser.qualities)
-  const [flaws, setFlaws]         = useState('')
+  const [flaws, setFlaws]         = useState(mockUser.flaws)
+  const [saving, setSaving]       = useState(false)
+
+  // Réinitialise quand le profil réel est chargé dans le store
+  useEffect(() => {
+    setInterests(mockUser.interests)
+    setQualities(mockUser.qualities)
+    setFlaws(mockUser.flaws)
+  }, [mockUser])
+
+  const save = async () => {
+    if (!user) return
+    setSaving(true)
+    const err = await updateMyProfile(user.id, {
+      interests: interests.trim() || null,
+      qualities: qualities.trim() || null,
+      flaws:     flaws.trim() || null,
+    })
+    setSaving(false)
+    if (err) { toast.error(`Erreur : ${err}`); return }
+    toast.success('Personnalité sauvegardée ✓')
+    onClose()
+  }
 
   return (
     <SettingsDrawer open={open} title="Personnalité" onClose={onClose}
       footer={
-        <button onClick={onClose} className="w-full py-3 bg-[#10B981] text-white text-sm font-semibold rounded-xl hover:bg-[#059669] transition-colors">
+        <button
+          onClick={save}
+          disabled={saving}
+          className="w-full py-3 bg-[#10B981] text-white text-sm font-semibold rounded-xl hover:bg-[#059669] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+        >
+          {saving && <Loader2 className="w-4 h-4 animate-spin" />}
           Enregistrer et fermer
         </button>
       }

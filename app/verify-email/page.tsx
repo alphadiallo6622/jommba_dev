@@ -1,95 +1,119 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { Heart, AlertCircle, RefreshCw, ArrowLeft, Loader2, CheckCircle2 } from 'lucide-react'
+import { useState, useEffect, useRef, type ClipboardEvent, type KeyboardEvent } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Heart, AlertCircle, RefreshCw, ArrowLeft, Loader2, Mail } from 'lucide-react'
 import { toast } from 'sonner'
-import { mockVerifyOtp, mockSendOtp } from '@/lib/mock'
+import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import { Suspense } from 'react'
+import { cn } from '@/lib/utils'
 
-const OTP_LENGTH = 6
+const CODE_LENGTH = 6
 
-export default function VerifyEmailPage() {
-  const router = useRouter()
-  const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(''))
-  const [loading, setLoading]       = useState(false)
-  const [resending, setResending]   = useState(false)
-  const [countdown, setCountdown]   = useState(60)
-  const [verified, setVerified]     = useState(false)
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([])
+function VerifyEmailContent() {
+  const router         = useRouter()
+  const searchParams   = useSearchParams()
+  const emailParam     = searchParams.get('email') ?? ''
 
-  /* Countdown timer for resend */
+  const [digits, setDigits]       = useState<string[]>(Array(CODE_LENGTH).fill(''))
+  const [verifying, setVerifying] = useState(false)
+  const [resending, setResending] = useState(false)
+  const [countdown, setCountdown] = useState(60)
+  const inputsRef = useRef<(HTMLInputElement | null)[]>([])
+
   useEffect(() => {
     if (countdown <= 0) return
     const t = setTimeout(() => setCountdown(c => c - 1), 1000)
     return () => clearTimeout(t)
   }, [countdown])
 
-  /* Auto-validate when all 6 digits filled */
   useEffect(() => {
-    const code = digits.join('')
-    if (code.length === OTP_LENGTH && !loading) {
-      handleVerify(code)
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [digits])
+    inputsRef.current[0]?.focus()
+  }, [])
 
-  const handleVerify = async (code: string) => {
-    setLoading(true)
+  const submitCode = async (code: string) => {
+    if (!emailParam) {
+      toast.error('Email introuvable. Retourne à l\'inscription.')
+      return
+    }
+    setVerifying(true)
     try {
-      const res = await mockVerifyOtp(code)
-      if (res.success) {
-        setVerified(true)
-        toast.success('Email vérifié ! Bienvenue sur Jommba.')
-        setTimeout(() => router.push('/onboarding'), 1200)
+      const supabase = createClient()
+      const { error } = await supabase.auth.verifyOtp({
+        email: emailParam,
+        token: code,
+        type: 'signup',
+      })
+      if (error) {
+        toast.error(error.message)
+        setDigits(Array(CODE_LENGTH).fill(''))
+        inputsRef.current[0]?.focus()
       } else {
-        toast.error('Code incorrect. Essaie à nouveau.')
-        setDigits(Array(OTP_LENGTH).fill(''))
-        inputRefs.current[0]?.focus()
+        toast.success('Email vérifié ! Bienvenue sur Jommba.')
+        router.replace('/onboarding')
       }
     } finally {
-      setLoading(false)
+      setVerifying(false)
     }
   }
 
-  const handleInput = (i: number, value: string) => {
-    const char = value.replace(/\D/g, '').slice(-1)
+  const handleChange = (index: number, value: string) => {
+    const digit = value.replace(/\D/g, '').slice(-1)
     const next = [...digits]
-    next[i] = char
+    next[index] = digit
     setDigits(next)
-    if (char && i < OTP_LENGTH - 1) {
-      inputRefs.current[i + 1]?.focus()
+
+    if (digit && index < CODE_LENGTH - 1) {
+      inputsRef.current[index + 1]?.focus()
+    }
+
+    const code = next.join('')
+    if (code.length === CODE_LENGTH) {
+      submitCode(code)
     }
   }
 
-  const handleKeyDown = (i: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Backspace' && !digits[i] && i > 0) {
-      const next = [...digits]
-      next[i - 1] = ''
-      setDigits(next)
-      inputRefs.current[i - 1]?.focus()
+  const handleKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && !digits[index] && index > 0) {
+      inputsRef.current[index - 1]?.focus()
     }
   }
 
-  const handlePaste = (e: React.ClipboardEvent) => {
-    e.preventDefault()
-    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, OTP_LENGTH)
+  const handlePaste = (e: ClipboardEvent<HTMLInputElement>) => {
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, CODE_LENGTH)
     if (!pasted) return
-    const next = Array(OTP_LENGTH).fill('')
-    pasted.split('').forEach((c, i) => { next[i] = c })
+    e.preventDefault()
+    const next = Array(CODE_LENGTH).fill('')
+    pasted.split('').forEach((d, i) => { next[i] = d })
     setDigits(next)
-    const nextFocus = Math.min(pasted.length, OTP_LENGTH - 1)
-    inputRefs.current[nextFocus]?.focus()
+    const lastIndex = Math.min(pasted.length, CODE_LENGTH) - 1
+    inputsRef.current[lastIndex]?.focus()
+    if (pasted.length === CODE_LENGTH) {
+      submitCode(pasted)
+    }
   }
 
   const handleResend = async () => {
+    if (!emailParam) {
+      toast.error('Email introuvable. Retourne à l\'inscription.')
+      return
+    }
     setResending(true)
-    await mockSendOtp('email@exemple.com')
-    setResending(false)
-    setCountdown(60)
-    setDigits(Array(OTP_LENGTH).fill(''))
-    inputRefs.current[0]?.focus()
-    toast.success('Nouveau code envoyé !')
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.auth.resend({ type: 'signup', email: emailParam })
+      if (error) {
+        toast.error(error.message)
+      } else {
+        setCountdown(60)
+        setDigits(Array(CODE_LENGTH).fill(''))
+        inputsRef.current[0]?.focus()
+        toast.success('Code renvoyé !')
+      }
+    } finally {
+      setResending(false)
+    }
   }
 
   return (
@@ -107,52 +131,41 @@ export default function VerifyEmailPage() {
         {/* Header */}
         <div className="text-center space-y-2">
           <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: '#D1FAE5' }}>
-            <span className="text-3xl">📩</span>
+            <Mail className="w-8 h-8 text-emerald-600" />
           </div>
-          <h1 className="text-2xl font-serif font-bold text-gray-900">Vérifie ta boîte mail</h1>
+          <h1 className="text-2xl font-serif font-bold text-gray-900">Entre ton code</h1>
           <p className="text-sm text-gray-500 leading-relaxed">
             Un code à 6 chiffres a été envoyé à<br />
-            <span className="font-semibold text-gray-700">ton.email@exemple.com</span>
+            <span className="font-semibold text-gray-700">{emailParam || 'ton adresse email'}</span>
           </p>
         </div>
 
         {/* OTP inputs */}
-        <div className="flex gap-2.5 justify-center" onPaste={handlePaste}>
-          {Array.from({ length: OTP_LENGTH }).map((_, i) => (
+        <div className="flex items-center justify-center gap-2">
+          {digits.map((digit, i) => (
             <input
               key={i}
-              ref={el => { inputRefs.current[i] = el }}
+              ref={el => { inputsRef.current[i] = el }}
               type="text"
               inputMode="numeric"
               maxLength={1}
-              value={digits[i]}
-              onChange={e => handleInput(i, e.target.value)}
+              value={digit}
+              disabled={verifying}
+              onChange={e => handleChange(i, e.target.value)}
               onKeyDown={e => handleKeyDown(i, e)}
-              disabled={loading || verified}
-              className={[
-                'w-12 h-14 text-center text-xl font-bold rounded-xl border-2 transition-all focus:outline-none',
-                verified
-                  ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                  : digits[i]
-                    ? 'border-emerald-500 bg-white text-gray-900'
-                    : 'border-gray-200 bg-white text-gray-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20',
-                loading ? 'opacity-60' : '',
-              ].join(' ')}
+              onPaste={handlePaste}
+              className={cn(
+                'w-11 h-13 sm:w-12 sm:h-14 text-center text-xl font-bold rounded-xl border text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition-all disabled:opacity-60',
+                digit ? 'border-emerald-400' : 'border-gray-200 focus:border-emerald-500',
+              )}
             />
           ))}
         </div>
 
-        {/* Loading / verified state */}
-        {loading && (
-          <div className="flex items-center justify-center gap-2 text-sm text-emerald-600">
+        {verifying && (
+          <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
             <Loader2 className="w-4 h-4 animate-spin" />
             Vérification en cours…
-          </div>
-        )}
-        {verified && (
-          <div className="flex items-center justify-center gap-2 text-sm text-emerald-600 font-semibold">
-            <CheckCircle2 className="w-5 h-5" />
-            Email vérifié ! Redirection…
           </div>
         )}
 
@@ -161,8 +174,7 @@ export default function VerifyEmailPage() {
           <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
           <p className="text-xs text-amber-700 leading-relaxed">
             Si tu ne vois pas l&rsquo;email, vérifie ton dossier <strong>Spam</strong> ou{' '}
-            <strong>Courrier indésirable</strong>. Le code est valable{' '}
-            <strong>1 heure</strong>.
+            <strong>Courrier indésirable</strong>. Le code est valable <strong>1 heure</strong>.
           </p>
         </div>
 
@@ -199,7 +211,16 @@ export default function VerifyEmailPage() {
             Modifier mon adresse email
           </Link>
         </div>
+
       </div>
     </div>
+  )
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense>
+      <VerifyEmailContent />
+    </Suspense>
   )
 }

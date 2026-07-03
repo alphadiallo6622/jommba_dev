@@ -1,40 +1,58 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { MessageCircle, Search } from 'lucide-react'
-import { mockConversations } from '@/lib/mock-messages'
+import { useState, useEffect, useMemo, useCallback } from 'react'
+import { MessageCircle, Search, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useAuth } from '@/components/providers/AuthProvider'
+import {
+  fetchConversationList,
+  formatTimeAgo,
+  type ConversationListEntry,
+} from '@/lib/supabase/messages-service'
 import VoiceMessageBanner from './VoiceMessageBanner'
 import ConversationCard from './ConversationCard'
 
-type Tab = 'tous' | 'non-lus' | 'lus' | 'archivees'
+type Tab = 'tous' | 'non-lus' | 'lus'
 
 export default function MessagesPage() {
-  const [activeTab, setActiveTab]   = useState<Tab>('tous')
+  const { user } = useAuth()
+  const [activeTab, setActiveTab]     = useState<Tab>('tous')
   const [searchQuery, setSearchQuery] = useState('')
+  const [conversations, setConversations] = useState<ConversationListEntry[]>([])
+  const [loading, setLoading]         = useState(true)
 
-  const nonArchived = mockConversations.filter(c => !c.isArchived)
+  const fetchData = useCallback(async () => {
+    if (!user) return
+    setLoading(true)
+    try {
+      setConversations(await fetchConversationList(user.id))
+    } catch (err) {
+      console.error('[MessagesPage] fetch error:', err)
+    } finally {
+      setLoading(false)
+    }
+  }, [user])
+
+  useEffect(() => { fetchData() }, [fetchData])
 
   const tabs = [
-    { id: 'tous'      as Tab, label: 'Tous',      count: nonArchived.length                         },
-    { id: 'non-lus'   as Tab, label: 'Non lus',   count: nonArchived.filter(c => !c.isRead).length  },
-    { id: 'lus'       as Tab, label: 'Lus',       count: nonArchived.filter(c => c.isRead).length   },
-    { id: 'archivees' as Tab, label: 'Archivées', count: mockConversations.filter(c => c.isArchived).length },
+    { id: 'tous'    as Tab, label: 'Tous',    count: conversations.length                       },
+    { id: 'non-lus' as Tab, label: 'Non lus', count: conversations.filter(c => !c.isRead).length },
+    { id: 'lus'     as Tab, label: 'Lus',     count: conversations.filter(c =>  c.isRead).length },
   ]
 
   const filtered = useMemo(() => {
-    return mockConversations
+    return conversations
       .filter(c => {
-        if (activeTab === 'non-lus')   return !c.isRead && !c.isArchived
-        if (activeTab === 'lus')       return  c.isRead && !c.isArchived
-        if (activeTab === 'archivees') return  c.isArchived
-        return !c.isArchived
+        if (activeTab === 'non-lus') return !c.isRead
+        if (activeTab === 'lus')     return  c.isRead
+        return true
       })
       .filter(c =>
         searchQuery === '' ||
         `${c.firstName} ${c.lastInitial}`.toLowerCase().includes(searchQuery.toLowerCase())
       )
-  }, [activeTab, searchQuery])
+  }, [conversations, activeTab, searchQuery])
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
@@ -46,7 +64,7 @@ export default function MessagesPage() {
           <MessageCircle className="w-6 h-6 text-[#10B981]" />
         </h1>
         <p className="text-gray-400 text-sm mt-1">
-          {nonArchived.length} conversation{nonArchived.length > 1 ? 's' : ''}
+          {loading ? '…' : `${conversations.length} conversation${conversations.length > 1 ? 's' : ''}`}
         </p>
       </div>
 
@@ -93,17 +111,44 @@ export default function MessagesPage() {
         />
       </div>
 
+      {/* Loading */}
+      {loading && (
+        <div className="flex justify-center py-12">
+          <Loader2 className="w-6 h-6 animate-spin text-[#10B981]" />
+        </div>
+      )}
+
       {/* Conversations */}
-      <div className="space-y-2">
-        {filtered.length > 0 ? (
-          filtered.map(conv => <ConversationCard key={conv.id} conv={conv} />)
-        ) : (
-          <div className="bg-white rounded-xl border border-gray-100 p-12 text-center">
-            <MessageCircle className="w-10 h-10 text-gray-200 mx-auto mb-3" />
-            <p className="text-gray-400 text-sm">Aucune conversation</p>
-          </div>
-        )}
-      </div>
+      {!loading && (
+        <div className="space-y-2">
+          {filtered.length > 0 ? (
+            filtered.map(conv => (
+              <ConversationCard
+                key={conv.conversationId}
+                conv={{
+                  id:          conv.otherUserId,
+                  firstName:   conv.firstName,
+                  lastInitial: conv.lastInitial,
+                  photo:       conv.photo,
+                  lastMessage: conv.lastMessage,
+                  timeAgo:     formatTimeAgo(conv.lastMessageAt),
+                  isRead:      conv.isRead,
+                  unreadCount: conv.unreadCount,
+                  isArchived:  false,
+                }}
+              />
+            ))
+          ) : (
+            <div className="bg-white rounded-xl border border-gray-100 p-12 text-center">
+              <MessageCircle className="w-10 h-10 text-gray-200 mx-auto mb-3" />
+              <p className="text-gray-400 text-sm">Aucune conversation</p>
+              <p className="text-gray-300 text-xs mt-1">
+                Accepte une demande de contact pour démarrer une discussion
+              </p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

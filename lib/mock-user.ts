@@ -2,6 +2,7 @@
   id: string
   firstName: string
   lastName: string
+  gender: 'homme' | 'femme' | null
   age: number
   height: number
   city: string
@@ -20,14 +21,17 @@
   lifeProject: { hasChildren: string; wantsChildren: string; canRelocate: string; polygamy: string }
   interests: string
   qualities: string
+  flaws: string
   dealbreakers: string
   languages: string
+  visibility: 'active' | 'pause' | 'discussion'
 }
 
 export const mockUserFree: MockUser = {
   id: 'user-abou-001',
   firstName: 'Abou',
   lastName: 'Diallo',
+  gender: 'homme',
   age: 32,
   height: 180,
   city: 'Dakar',
@@ -46,14 +50,17 @@ export const mockUserFree: MockUser = {
   lifeProject: { hasChildren: 'Non', wantsChildren: 'Oui', canRelocate: 'À discuter', polygamy: 'Ouvert' },
   interests: 'Football, lecture islamique, voyages, cuisine.',
   qualities: 'Responsable, sincère, patient, attaché à mes valeurs.',
+  flaws: '',
   dealbreakers: "La malhonnêteté et le manque de pudeur.",
   languages: 'Français, Wolof, Arabe (notions)',
+  visibility: 'active',
 }
 
 export const mockUserPremium: MockUser = {
   id: 'user-alpha-001',
   firstName: 'Alpha',
   lastName: 'Diallo',
+  gender: 'homme',
   age: 29,
   height: 175,
   city: 'Dakar',
@@ -72,8 +79,10 @@ export const mockUserPremium: MockUser = {
   lifeProject: { hasChildren: 'Non', wantsChildren: 'Oui', canRelocate: 'Oui', polygamy: 'Non' },
   interests: 'Lecture, sport, voyages halal, bénévolat, technologie.',
   qualities: 'Ambitieux, doux, respectueux, fiable et très attaché à la famille.',
+  flaws: '',
   dealbreakers: "Le mensonge, le manque de respect et l'absence de pratique religieuse.",
   languages: 'Français, Wolof, Anglais, Arabe',
+  visibility: 'active',
 }
 
 export const mockUsers: MockUser[] = [mockUserFree, mockUserPremium]

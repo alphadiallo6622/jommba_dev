@@ -3,24 +3,24 @@
 import { usePathname, useRouter } from 'next/navigation'
 import { LayoutGrid, UserPlus, Search, MessageCircle, Heart } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { mockConversations } from '@/lib/mock-messages'
-import { mockNotifications } from '@/lib/mock-notifications'
-
-const MOCK_DEMANDES_PENDING = 3
+import { useNotifCount } from '@/lib/use-notif-count'
+import { useDemandesCount } from '@/lib/use-demandes-count'
+import { useUnreadMessagesCount } from '@/lib/use-unread-messages'
 
 export default function BottomNav() {
-  const pathname = usePathname()
-  const router   = useRouter()
+  const pathname       = usePathname()
+  const router         = useRouter()
+  const actUnread      = useNotifCount()
+  const demandesUnread = useDemandesCount()
 
-  const msgUnread = mockConversations.reduce((acc, c) => acc + c.unreadCount, 0)
-  const actUnread = mockNotifications.filter(n => !n.isRead).length
+  const msgUnread = useUnreadMessagesCount()
 
   const isActive = (path: string) =>
     path === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(path)
 
   const sideItems = [
     { id: 'accueil',  label: 'Accueil',  icon: LayoutGrid,    path: '/dashboard',               badge: 0 },
-    { id: 'demandes', label: 'Demandes', icon: UserPlus,      path: '/dashboard/demandes',      badge: MOCK_DEMANDES_PENDING },
+    { id: 'demandes', label: 'Demandes', icon: UserPlus,      path: '/dashboard/demandes',      badge: demandesUnread },
     { id: 'messages', label: 'Messages', icon: MessageCircle, path: '/dashboard/messages',      badge: msgUnread },
     { id: 'activite', label: 'Activite', icon: Heart,         path: '/dashboard/notifications', badge: actUnread },
   ]

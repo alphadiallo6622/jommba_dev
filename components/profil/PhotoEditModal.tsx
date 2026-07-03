@@ -1,14 +1,19 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Eye, EyeOff, Trash2, Settings, CheckCircle, Crown, Plus, Star } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { useProfileStore } from '@/store/profile.store'
 import { useCurrentUser } from '@/lib/use-current-user'
-
-type Photo = { id: string; src: string; isMain: boolean }
+import { useAuth } from '@/components/providers/AuthProvider'
+import { createClient } from '@/lib/supabase/client'
+import { refreshProfileInStore } from '@/lib/supabase/profile-actions'
+import {
+  loadMyPhotos, uploadPhoto, deletePhotoById, setPrimaryPhoto,
+  type UserPhoto,
+} from '@/lib/supabase/photos-service'
 
 const MAX_FREE    = 3
 const MAX_PREMIUM = 6
@@ -20,32 +25,49 @@ export default function PhotoEditModal({ open, onClose }: Props) {
   const { isPhotosBlurred, togglePhotosBlur } = useProfileStore()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const currentUser = useCurrentUser()
+  const { user } = useAuth()
 
-  const [photos, setPhotos] = useState<Photo[]>([
-    { id: '1', src: currentUser.avatar, isMain: true },
-  ])
+  const [photos, setPhotos] = useState<UserPhoto[]>([])
 
   const isPremium = currentUser.isPremium
   const maxPhotos = isPremium ? MAX_PREMIUM : MAX_FREE
   const hasRoom   = photos.length < maxPhotos
 
-  const setMain = (id: string) => {
+  const fetchPhotos = useCallback(async () => {
+    if (!user) return
+    setPhotos(await loadMyPhotos(user.id, currentUser.avatar))
+  }, [user, currentUser.avatar])
+
+  useEffect(() => { if (open) fetchPhotos() }, [open, fetchPhotos])
+
+  const setMain = async (id: string) => {
+    if (!user) return
+    const photo = photos.find(p => p.id === id)
+    if (!photo) return
     setPhotos(prev => prev.map(p => ({ ...p, isMain: p.id === id })))
-    toast.success('Photo principale mise à jour')
+    const err = await setPrimaryPhoto(user.id, id, photo.src)
+    if (err) { toast.error('Erreur lors de la mise à jour'); fetchPhotos(); return }
+    await refreshProfileInStore(user.id)
+    toast.success('Photo principale mise à jour ✓')
   }
 
-  const deletePhoto = (id: string) => {
+  const deletePhoto = async (id: string) => {
+    if (!user) return
     if (photos.length === 1) {
       toast.error('Tu dois conserver au moins une photo')
       return
     }
-    setPhotos(prev => {
-      const next    = prev.filter(p => p.id !== id)
-      const wasMain = prev.find(p => p.id === id)?.isMain
-      if (wasMain && next.length > 0) next[0] = { ...next[0], isMain: true }
-      return next
-    })
-    toast.success('Photo supprimée')
+    const wasMain   = photos.find(p => p.id === id)?.isMain
+    const remaining = photos.filter(p => p.id !== id)
+    setPhotos(remaining.map((p, i) => wasMain && i === 0 ? { ...p, isMain: true } : p))
+
+    const err = await deletePhotoById(user.id, id)
+    if (err) { toast.error('Erreur lors de la suppression'); fetchPhotos(); return }
+    if (wasMain && remaining[0]) {
+      await setPrimaryPhoto(user.id, remaining[0].id, remaining[0].src)
+      await refreshProfileInStore(user.id)
+    }
+    toast.success('Photo supprimée ✓')
   }
 
   const addPhoto = () => {
@@ -61,19 +83,32 @@ export default function PhotoEditModal({ open, onClose }: Props) {
     fileInputRef.current?.click()
   }
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (!file) return
+    e.target.value = ''
+    if (!file || !user) return
     if (!file.type.startsWith('image/')) { toast.error('Veuillez sélectionner une image'); return }
     if (file.size > 10 * 1024 * 1024)   { toast.error('Image trop lourde (max 10 Mo)');  return }
-    const url = URL.createObjectURL(file)
-    setPhotos(prev => [...prev, { id: Date.now().toString(), src: url, isMain: prev.length === 0 }])
+
+    const isMain = photos.length === 0
+    const added  = await uploadPhoto(user.id, file, isMain, photos.length)
+    if (!added) { toast.error("Échec de l'upload. Réessaie."); return }
+    setPhotos(prev => [...prev, added])
+    if (isMain) await refreshProfileInStore(user.id)
     toast.success('Photo ajoutée ✓')
-    e.target.value = ''
+  }
+
+  // Le flou des photos est une préférence persistée (user_preferences)
+  const handleToggleBlur = async () => {
+    togglePhotosBlur()
+    if (!user) return
+    const supabase = createClient()
+    await supabase.from('user_preferences')
+      .update({ photos_blurred: !isPhotosBlurred })
+      .eq('user_id', user.id)
   }
 
   const handleSave = () => {
-    toast.success('Photos sauvegardées ✓')
     onClose()
   }
 
@@ -138,7 +173,7 @@ export default function PhotoEditModal({ open, onClose }: Props) {
                 </div>
 
                 <button
-                  onClick={() => togglePhotosBlur()}
+                  onClick={handleToggleBlur}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-colors ${
                     isPhotosBlurred
                       ? 'bg-[#E1F5EE] border-[#10B981]/40 hover:bg-green-100'

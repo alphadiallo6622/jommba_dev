@@ -6,8 +6,8 @@ import { ReceivedRequest } from '@/lib/mock-demandes'
 
 type Props = {
   request: ReceivedRequest
-  onAccept: (id: number) => void
-  onRefuse: (id: number) => void
+  onAccept: (id: string) => void
+  onRefuse: (id: string) => void
 }
 
 export default function ReceivedRequestCard({ request, onAccept, onRefuse }: Props) {

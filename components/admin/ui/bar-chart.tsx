@@ -14,7 +14,7 @@ export function BarChart({
   data: BarPoint[];
   color?: string;
 }) {
-  const maxV = Math.max(...data.map((d) => d.value));
+  const maxV = Math.max(...data.map((d) => d.value)) || 1;
   const barW = CW / data.length;
   const gap  = barW * 0.25;
 
@@ -48,7 +48,7 @@ export function MiniBarChart({
   data: { day: number; count: number }[];
   color?: string;
 }) {
-  const maxV = Math.max(...data.map((d) => d.count));
+  const maxV = Math.max(...data.map((d) => d.count)) || 1;
   const W = 400, H = 100;
   const barW = W / data.length;
   const gap  = barW * 0.3;

@@ -1,13 +1,17 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Camera, Crown, Eye, X, Plus } from 'lucide-react'
+import { Camera, Crown, Eye, X, Plus, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useCurrentUser } from '@/lib/use-current-user'
+import { useAuth } from '@/components/providers/AuthProvider'
+import { refreshProfileInStore } from '@/lib/supabase/profile-actions'
+import {
+  loadMyPhotos, uploadPhoto, deletePhotoById, setPrimaryPhoto,
+  type UserPhoto,
+} from '@/lib/supabase/photos-service'
 import SettingsDrawer from '../SettingsDrawer'
-
-type Photo = { id: string; src: string; isMain: boolean }
 
 const MAX_FREE    = 3
 const MAX_PREMIUM = 6
@@ -24,9 +28,10 @@ type Props = { open: boolean; onClose: () => void }
 export default function PhotoPanel({ open, onClose }: Props) {
   const router = useRouter()
   const currentUser = useCurrentUser()
-  const [photos, setPhotos] = useState<Photo[]>([
-    { id: '1', src: currentUser.avatar, isMain: true },
-  ])
+  const { user } = useAuth()
+  const [photos, setPhotos]     = useState<UserPhoto[]>([])
+  const [loading, setLoading]   = useState(true)
+  const [uploading, setUploading] = useState(false)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -34,23 +39,46 @@ export default function PhotoPanel({ open, onClose }: Props) {
   const maxPhotos = isPremium ? MAX_PREMIUM : MAX_FREE
   const hasRoom   = photos.length < maxPhotos
 
-  const setMain = (id: string) => {
+  const fetchPhotos = useCallback(async () => {
+    if (!user) return
+    setLoading(true)
+    try {
+      setPhotos(await loadMyPhotos(user.id, currentUser.avatar))
+    } finally {
+      setLoading(false)
+    }
+  }, [user, currentUser.avatar])
+
+  useEffect(() => { if (open) fetchPhotos() }, [open, fetchPhotos])
+
+  const setMain = async (id: string) => {
+    if (!user) return
+    const photo = photos.find(p => p.id === id)
+    if (!photo) return
     setPhotos(prev => prev.map(p => ({ ...p, isMain: p.id === id })))
-    toast.success('Photo principale mise à jour')
+    const err = await setPrimaryPhoto(user.id, id, photo.src)
+    if (err) { toast.error('Erreur lors de la mise à jour'); fetchPhotos(); return }
+    await refreshProfileInStore(user.id)
+    toast.success('Photo principale mise à jour ✓')
   }
 
-  const deletePhoto = (id: string) => {
+  const deletePhoto = async (id: string) => {
+    if (!user) return
     if (photos.length === 1) {
       toast.error('Tu dois conserver au moins une photo')
       return
     }
-    setPhotos(prev => {
-      const next    = prev.filter(p => p.id !== id)
-      const wasMain = prev.find(p => p.id === id)?.isMain
-      if (wasMain && next.length > 0) next[0] = { ...next[0], isMain: true }
-      return next
-    })
-    toast.success('Photo supprimée')
+    const wasMain = photos.find(p => p.id === id)?.isMain
+    const remaining = photos.filter(p => p.id !== id)
+    setPhotos(remaining.map((p, i) => wasMain && i === 0 ? { ...p, isMain: true } : p))
+
+    const err = await deletePhotoById(user.id, id)
+    if (err) { toast.error('Erreur lors de la suppression'); fetchPhotos(); return }
+    if (wasMain && remaining[0]) {
+      await setPrimaryPhoto(user.id, remaining[0].id, remaining[0].src)
+      await refreshProfileInStore(user.id)
+    }
+    toast.success('Photo supprimée ✓')
   }
 
   const addPhoto = () => {
@@ -66,9 +94,10 @@ export default function PhotoPanel({ open, onClose }: Props) {
     fileInputRef.current?.click()
   }
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (!file) return
+    e.target.value = ''
+    if (!file || !user) return
     if (!file.type.startsWith('image/')) {
       toast.error('Veuillez sélectionner une image')
       return
@@ -77,13 +106,16 @@ export default function PhotoPanel({ open, onClose }: Props) {
       toast.error('Image trop lourde (max 10 Mo)')
       return
     }
-    const url = URL.createObjectURL(file)
-    setPhotos(prev => [
-      ...prev,
-      { id: Date.now().toString(), src: url, isMain: prev.length === 0 },
-    ])
+
+    setUploading(true)
+    const isMain = photos.length === 0
+    const added  = await uploadPhoto(user.id, file, isMain, photos.length)
+    setUploading(false)
+
+    if (!added) { toast.error("Échec de l'upload. Réessaie."); return }
+    setPhotos(prev => [...prev, added])
+    if (isMain) await refreshProfileInStore(user.id)
     toast.success('Photo ajoutée ✓')
-    e.target.value = ''
   }
 
   return (
@@ -101,10 +133,10 @@ export default function PhotoPanel({ open, onClose }: Props) {
       onClose={onClose}
       footer={
         <button
-          onClick={() => { toast.success('Photos sauvegardées ✓'); onClose() }}
+          onClick={onClose}
           className="w-full py-3 bg-[#10B981] text-white text-sm font-semibold rounded-xl hover:bg-[#059669] transition-colors flex items-center justify-center gap-2"
         >
-          <Camera className="w-4 h-4" /> Enregistrer et fermer
+          <Camera className="w-4 h-4" /> Fermer
         </button>
       }
     >
@@ -126,6 +158,11 @@ export default function PhotoPanel({ open, onClose }: Props) {
         </div>
 
         {/* Grid */}
+        {loading ? (
+          <div className="flex justify-center py-10">
+            <Loader2 className="w-5 h-5 animate-spin text-[#10B981]" />
+          </div>
+        ) : (
         <div className="grid grid-cols-3 gap-3">
           {photos.map(photo => (
             <div key={photo.id} className="flex flex-col gap-1.5">
@@ -167,16 +204,23 @@ export default function PhotoPanel({ open, onClose }: Props) {
             <div className="flex flex-col gap-1.5">
               <button
                 onClick={addPhoto}
-                className="aspect-square rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center gap-1.5 hover:border-[#10B981] hover:bg-[#E1F5EE] transition-colors group"
+                disabled={uploading}
+                className="aspect-square rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center gap-1.5 hover:border-[#10B981] hover:bg-[#E1F5EE] transition-colors group disabled:opacity-50"
               >
                 <div className="w-8 h-8 rounded-full bg-gray-100 group-hover:bg-[#10B981]/15 flex items-center justify-center transition-colors">
-                  <Plus className="w-4 h-4 text-gray-400 group-hover:text-[#10B981]" />
+                  {uploading
+                    ? <Loader2 className="w-4 h-4 animate-spin text-[#10B981]" />
+                    : <Plus className="w-4 h-4 text-gray-400 group-hover:text-[#10B981]" />
+                  }
                 </div>
-                <span className="text-[10px] text-gray-400 group-hover:text-[#10B981] font-medium transition-colors">Ajouter</span>
+                <span className="text-[10px] text-gray-400 group-hover:text-[#10B981] font-medium transition-colors">
+                  {uploading ? 'Envoi…' : 'Ajouter'}
+                </span>
               </button>
             </div>
           )}
         </div>
+        )}
 
         {/* Premium upsell — free users only */}
         {!isPremium && (

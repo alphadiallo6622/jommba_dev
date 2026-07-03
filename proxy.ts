@@ -1,12 +1,11 @@
-// middleware.ts — protège /adminjommba/* (HMAC) et /dashboard/* (Supabase Auth)
 import { type NextRequest, NextResponse } from "next/server"
 import { createServerClient } from "@supabase/ssr"
 import { verifyAdminToken, COOKIE } from "@/lib/admin/auth"
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl
 
-  // ── 1. Routes admin (HMAC existant, inchangé) ────────────────────────────
+  // ── 1. Routes admin (HMAC) ────────────────────────────────────────────────
   if (pathname.startsWith("/adminjommba")) {
     if (
       pathname.startsWith("/adminjommba/login") ||
@@ -51,8 +50,6 @@ export async function middleware(req: NextRequest) {
       }
     )
 
-    // Vérifie la session Supabase (ne PAS utiliser getSession ici — côté serveur
-    // il faut getUser pour valider le JWT côté Supabase Auth).
     const {
       data: { user },
     } = await supabase.auth.getUser()

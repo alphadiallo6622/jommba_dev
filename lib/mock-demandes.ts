@@ -1,5 +1,5 @@
 export type ReceivedRequest = {
-  id: number
+  id: string
   firstName: string
   lastInitial: string
   age: number
@@ -10,7 +10,7 @@ export type ReceivedRequest = {
 }
 
 export type SentRequest = {
-  id: number
+  id: string
   firstName: string
   lastInitial: string
   age: number
@@ -20,7 +20,7 @@ export type SentRequest = {
 }
 
 export type ContactEntry = {
-  id: number
+  id: string
   firstName: string
   lastInitial: string
   age: number
@@ -52,7 +52,7 @@ export type FullProfile = {
 
 export const mockRecues: ReceivedRequest[] = [
   {
-    id: 1,
+    id: 'mock-diatou',
     firstName: 'Diatou', lastInitial: 'S', age: 25,
     photo: 'https://i.pravatar.cc/150?img=5',
     city: 'Dakar', timeAgo: 'Hier', isNew: true,
@@ -61,7 +61,7 @@ export const mockRecues: ReceivedRequest[] = [
 
 export const mockEnvoyees: SentRequest[] = [
   {
-    id: 2,
+    id: 'mock-soxna',
     firstName: 'Soxna', lastInitial: 'S', age: 29,
     photo: 'https://i.pravatar.cc/150?img=8',
     timeAgo: 'Il y a 1h',

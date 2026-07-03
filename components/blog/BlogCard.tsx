@@ -21,12 +21,19 @@ export default function BlogCard({ post, featured = false }: BlogCardProps) {
       >
         {/* Cover Banner */}
         <div className="lg:col-span-6 relative bg-gradient-to-br from-primary-dark via-primary to-emerald-700 flex flex-col justify-center items-center p-12 text-white overflow-hidden aspect-video lg:aspect-auto">
-          {/* Decorative shapes */}
-          <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white/5 blur-xl" />
-          <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full bg-white/5 blur-md" />
-          
-          <BookOpen className="w-16 h-16 opacity-20 stroke-[1.5] mb-4" />
-          <div className="text-center text-xs font-bold tracking-widest uppercase opacity-75">
+          {post.coverImage ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={post.coverImage} alt={post.title} className="absolute inset-0 w-full h-full object-cover" />
+          ) : (
+            <>
+              {/* Decorative shapes */}
+              <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white/5 blur-xl" />
+              <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full bg-white/5 blur-md" />
+
+              <BookOpen className="w-16 h-16 opacity-20 stroke-[1.5] mb-4" />
+            </>
+          )}
+          <div className="absolute top-4 left-4 text-xs font-bold tracking-widest uppercase text-white opacity-90 bg-black/20 px-2.5 py-1 rounded-full backdrop-blur-sm">
             Article à la Une
           </div>
         </div>
@@ -81,8 +88,15 @@ export default function BlogCard({ post, featured = false }: BlogCardProps) {
     <Card hover padding="none" className="flex flex-col h-full overflow-hidden">
       {/* Cover Banner */}
       <div className={`relative bg-gradient-to-br ${post.coverGradient} flex flex-col justify-center items-center p-8 text-white aspect-video overflow-hidden shrink-0`}>
-        <div className="absolute top-0 right-0 w-24 h-24 rounded-full bg-white/5 blur-xl" />
-        <BookOpen className="w-12 h-12 opacity-25 stroke-[1.5]" />
+        {post.coverImage ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={post.coverImage} alt={post.title} className="absolute inset-0 w-full h-full object-cover" />
+        ) : (
+          <>
+            <div className="absolute top-0 right-0 w-24 h-24 rounded-full bg-white/5 blur-xl" />
+            <BookOpen className="w-12 h-12 opacity-25 stroke-[1.5]" />
+          </>
+        )}
       </div>
 
       {/* Content */}

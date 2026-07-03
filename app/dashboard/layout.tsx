@@ -13,22 +13,43 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const { data: { user } } = await supabase.auth.getUser()
 
   let mockUser = null
+  let prefs: { photosBlurred: boolean; soundEnabled: boolean } | null = null
   if (user) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('user_id', user.id)
-      .single()
+    const [{ data: profile }, { count: views }, { count: visitors }, { count: favorites }, { count: requests }, { count: likesUsedToday }, { data: preferences }] = await Promise.all([
+      supabase.from('profiles').select('*').eq('user_id', user.id).single(),
+      supabase.from('profile_views').select('*', { count: 'exact', head: true }).eq('profile_id', user.id),
+      supabase.from('profile_visitors').select('*', { count: 'exact', head: true }).eq('profile_id', user.id),
+      supabase.from('likes').select('*', { count: 'exact', head: true }).eq('receiver_id', user.id).eq('type', 'favorite'),
+      supabase.from('likes').select('*', { count: 'exact', head: true }).eq('receiver_id', user.id).eq('type', 'request'),
+      supabase.from('likes').select('*', { count: 'exact', head: true }).eq('sender_id', user.id).eq('type', 'request').gte('created_at', new Date().toISOString().slice(0, 10)),
+      supabase.from('user_preferences').select('photos_blurred, sound_enabled').eq('user_id', user.id).maybeSingle(),
+    ])
 
     if (profile) {
       mockUser = profileToMockUser(profile, user.email ?? '')
+      mockUser.stats = {
+        views:     views     ?? 0,
+        visitors:  visitors  ?? 0,
+        favorites: favorites ?? 0,
+        requests:  requests  ?? 0,
+      }
+      mockUser.dailyRequests = {
+        used:  likesUsedToday ?? 0,
+        total: profile.is_premium ? 999 : 3,
+      }
+    }
+    if (preferences) {
+      prefs = {
+        photosBlurred: preferences.photos_blurred,
+        soundEnabled:  preferences.sound_enabled,
+      }
     }
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Initialise le store Zustand avec les données réelles Supabase */}
-      <ProfileInitializer profile={mockUser} />
+      {/* Initialise les stores Zustand avec les données réelles Supabase */}
+      <ProfileInitializer profile={mockUser} prefs={prefs} />
       {children}
       <BoostModal />
       <CoachButton />

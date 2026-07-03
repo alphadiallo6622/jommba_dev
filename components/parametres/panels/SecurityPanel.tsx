@@ -2,10 +2,12 @@
 
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Crown, CheckCircle, ShieldCheck } from 'lucide-react'
+import { Crown, CheckCircle, ShieldCheck, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import SettingsDrawer from '../SettingsDrawer'
 import { useCurrentUser } from '@/lib/use-current-user'
+import { useAuth } from '@/components/providers/AuthProvider'
+import { createClient } from '@/lib/supabase/client'
 
 type Props = { open: boolean; onClose: () => void }
 
@@ -18,16 +20,37 @@ const BENEFITS = [
 export default function SecurityPanel({ open, onClose }: Props) {
   const router = useRouter()
   const { isPremium, firstName, lastName } = useCurrentUser()
+  const { user } = useAuth()
   const [currentPwd, setCurrentPwd] = useState('')
   const [newPwd, setNewPwd]         = useState('')
+  const [changing, setChanging]     = useState(false)
 
   const pseudo = `@${firstName.toLowerCase()}${lastName.toLowerCase().charAt(0)}4321`
 
-  const changePassword = () => {
+  const changePassword = async () => {
+    if (!user?.email) return
     if (!currentPwd || !newPwd) { toast.error('Remplis les deux champs'); return }
     if (newPwd.length < 8) { toast.error('Mot de passe trop court (8 caractères min)'); return }
-    toast.success('Mot de passe modifié avec succès')
-    setCurrentPwd(''); setNewPwd('')
+
+    setChanging(true)
+    try {
+      const supabase = createClient()
+
+      // Vérifie le mot de passe actuel avant de le remplacer
+      const { error: verifyErr } = await supabase.auth.signInWithPassword({
+        email:    user.email,
+        password: currentPwd,
+      })
+      if (verifyErr) { toast.error('Mot de passe actuel incorrect'); return }
+
+      const { error } = await supabase.auth.updateUser({ password: newPwd })
+      if (error) { toast.error(`Erreur : ${error.message}`); return }
+
+      toast.success('Mot de passe modifié avec succès ✓')
+      setCurrentPwd(''); setNewPwd('')
+    } finally {
+      setChanging(false)
+    }
   }
 
   const inputCls = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-[#10B981]'
@@ -74,8 +97,10 @@ export default function SecurityPanel({ open, onClose }: Props) {
           </div>
           <button
             onClick={changePassword}
-            className="mt-3 w-full py-2.5 bg-[#10B981] text-white text-sm font-semibold rounded-xl hover:bg-[#059669] transition-colors"
+            disabled={changing}
+            className="mt-3 w-full py-2.5 bg-[#10B981] text-white text-sm font-semibold rounded-xl hover:bg-[#059669] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
           >
+            {changing && <Loader2 className="w-4 h-4 animate-spin" />}
             Modifier
           </button>
         </div>

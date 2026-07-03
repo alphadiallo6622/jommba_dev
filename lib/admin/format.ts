@@ -15,6 +15,30 @@ export function formatDate(iso: string): string {
   return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 }
 
+/** "Il y a 3 h", "Il y a 22 min", "Hier", "12 juin 2026"… */
+export function timeAgo(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const min = Math.floor(diffMs / 60_000);
+  if (min < 1)  return "À l'instant";
+  if (min < 60) return `Il y a ${min} min`;
+  const h = Math.floor(min / 60);
+  if (h < 24) return `Il y a ${h} h`;
+  const d = Math.floor(h / 24);
+  if (d === 1) return "Hier";
+  if (d < 7)  return `Il y a ${d} j`;
+  return formatDate(iso);
+}
+
+/** "18 h 12 min" à partir d'une durée en ms. */
+export function formatDuration(ms: number): string {
+  if (ms <= 0) return "0 min";
+  const totalMin = Math.floor(ms / 60_000);
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  if (h === 0) return `${m} min`;
+  return `${h} h ${String(m).padStart(2, "0")} min`;
+}
+
 /** Génère et télécharge un fichier Excel SpreadsheetML 2003 (.xls). Client only. */
 export function downloadXls(filename: string, headers: string[], rows: (string | number)[][]): void {
   const esc = (v: string | number) =>

@@ -1,5 +1,5 @@
 export type ExplorerProfile = {
-  id: number
+  id: string
   firstName: string
   lastInitial: string
   age: number
@@ -24,7 +24,7 @@ export type ExplorerProfile = {
 
 export const MOCK_PROFILES: ExplorerProfile[] = [
   {
-    id: 1, firstName: 'Fa', lastInitial: 'D', age: 47,
+    id: 'mock-1', firstName: 'Fa', lastInitial: 'D', age: 47,
     location: 'Diaspora FR • Originaire SN Sénégal',
     maritalStatus: 'Divorcé(e)', job: 'Animatrice péri...',
     photos: ['https://i.pravatar.cc/400?img=47'],
@@ -36,7 +36,7 @@ export const MOCK_PROFILES: ExplorerProfile[] = [
     info: { madhhab: 'Maliki', education: 'Baccalauréat', enfants: '1 enfant(s)', souhaitEnfants: "J'en ai déjà", peutDemenager: 'Oui', polygamie: "N'accepte pas" }
   },
   {
-    id: 2, firstName: 'Fama', lastInitial: 'N', age: 29,
+    id: 'mock-2', firstName: 'Fama', lastInitial: 'N', age: 29,
     location: 'SN Thiès, Sénégal',
     maritalStatus: 'Célibataire', job: 'Agent de s...',
     photos: ['https://i.pravatar.cc/400?img=29'],
@@ -47,7 +47,7 @@ export const MOCK_PROFILES: ExplorerProfile[] = [
     info: { madhhab: 'Maliki', education: 'Bac+3', enfants: '0', souhaitEnfants: "J'en veux", peutDemenager: 'Non', polygamie: 'Non' }
   },
   {
-    id: 3, firstName: 'Ndeye', lastInitial: 'G', age: 46,
+    id: 'mock-3', firstName: 'Ndeye', lastInitial: 'G', age: 46,
     location: 'Diaspora CA • Originaire SN Sénégal',
     maritalStatus: 'Divorcé(e)', job: 'Travaille...',
     photos: ['https://i.pravatar.cc/400?img=46'],
@@ -59,7 +59,7 @@ export const MOCK_PROFILES: ExplorerProfile[] = [
     info: { madhhab: 'Maliki', education: 'Bac+5', enfants: '2', souhaitEnfants: 'Indifférent', peutDemenager: 'Oui', polygamie: 'À discuter' }
   },
   {
-    id: 4, firstName: 'Fatou', lastInitial: 'K', age: 49,
+    id: 'mock-4', firstName: 'Fatou', lastInitial: 'K', age: 49,
     location: 'SN Dakar, Sénégal',
     maritalStatus: 'Divorcé(e)', job: 'Commerçant...',
     photos: ['https://i.pravatar.cc/400?img=49'],
@@ -71,7 +71,7 @@ export const MOCK_PROFILES: ExplorerProfile[] = [
     info: { madhhab: 'Shafi', education: 'Bac', enfants: '3', souhaitEnfants: "J'en ai déjà", peutDemenager: 'Non', polygamie: 'Non' }
   },
   {
-    id: 5, firstName: 'Aïssatou', lastInitial: 'B', age: 27,
+    id: 'mock-5', firstName: 'Aïssatou', lastInitial: 'B', age: 27,
     location: 'SN Dakar, Sénégal',
     maritalStatus: 'Célibataire', job: 'Infirmière',
     photos: ['https://i.pravatar.cc/400?img=27'],
@@ -83,7 +83,7 @@ export const MOCK_PROFILES: ExplorerProfile[] = [
     info: { madhhab: 'Maliki', education: 'Bac+3', enfants: '0', souhaitEnfants: "J'en veux", peutDemenager: 'Selon les conditions', polygamie: 'Non' }
   },
   {
-    id: 6, firstName: 'Mariama', lastInitial: 'S', age: 33,
+    id: 'mock-6', firstName: 'Mariama', lastInitial: 'S', age: 33,
     location: 'Diaspora FR • Originaire GN Guinée',
     maritalStatus: 'Célibataire', job: 'Comptable',
     photos: ['https://i.pravatar.cc/400?img=33'],
@@ -95,7 +95,7 @@ export const MOCK_PROFILES: ExplorerProfile[] = [
     info: { madhhab: 'Maliki', education: 'Bac+5', enfants: '0', souhaitEnfants: "J'en veux", peutDemenager: 'Non', polygamie: 'Accepte pas' }
   },
   {
-    id: 7, firstName: 'Rokhaya', lastInitial: 'D', age: 38,
+    id: 'mock-7', firstName: 'Rokhaya', lastInitial: 'D', age: 38,
     location: 'SN Diourbel, Sénégal',
     maritalStatus: 'Veuve', job: 'Enseignante',
     photos: ['https://i.pravatar.cc/400?img=38'],
@@ -107,7 +107,7 @@ export const MOCK_PROFILES: ExplorerProfile[] = [
     info: { madhhab: 'Maliki', education: 'Bac+4', enfants: '2', souhaitEnfants: "J'en ai déjà", peutDemenager: 'Oui', polygamie: 'À discuter' }
   },
   {
-    id: 8, firstName: 'Khadidiatou', lastInitial: 'C', age: 24,
+    id: 'mock-8', firstName: 'Khadidiatou', lastInitial: 'C', age: 24,
     location: 'SN Kaolack, Sénégal',
     maritalStatus: 'Célibataire', job: 'Étudiante',
     photos: ['https://i.pravatar.cc/400?img=24'],
@@ -119,7 +119,7 @@ export const MOCK_PROFILES: ExplorerProfile[] = [
     info: { madhhab: 'Maliki', education: 'Bac+2', enfants: '0', souhaitEnfants: "J'en veux", peutDemenager: 'Oui', polygamie: 'Non' }
   },
   {
-    id: 9, firstName: 'Awa', lastInitial: 'T', age: 42,
+    id: 'mock-9', firstName: 'Awa', lastInitial: 'T', age: 42,
     location: 'Diaspora BE • Originaire SN Sénégal',
     maritalStatus: 'Divorcé(e)', job: 'Aide-soignante',
     photos: ['https://i.pravatar.cc/400?img=42'],
@@ -131,7 +131,7 @@ export const MOCK_PROFILES: ExplorerProfile[] = [
     info: { madhhab: 'Maliki', education: 'Bac+2', enfants: '1', souhaitEnfants: "J'en ai déjà", peutDemenager: 'Non', polygamie: 'Accepte pas' }
   },
   {
-    id: 10, firstName: 'Penda', lastInitial: 'F', age: 31,
+    id: 'mock-10', firstName: 'Penda', lastInitial: 'F', age: 31,
     location: 'SN Ziguinchor, Sénégal',
     maritalStatus: 'Célibataire', job: 'Juriste',
     photos: ['https://i.pravatar.cc/400?img=31'],
@@ -143,7 +143,7 @@ export const MOCK_PROFILES: ExplorerProfile[] = [
     info: { madhhab: 'Maliki', education: 'Bac+5', enfants: '0', souhaitEnfants: "J'en veux", peutDemenager: 'Oui', polygamie: 'Non' }
   },
   {
-    id: 11, firstName: 'Sokhna', lastInitial: 'M', age: 36,
+    id: 'mock-11', firstName: 'Sokhna', lastInitial: 'M', age: 36,
     location: 'Diaspora CA • Originaire ML Mali',
     maritalStatus: 'Célibataire', job: 'Pharmacienne',
     photos: ['https://i.pravatar.cc/400?img=36'],
@@ -155,7 +155,7 @@ export const MOCK_PROFILES: ExplorerProfile[] = [
     info: { madhhab: 'Maliki', education: 'Bac+5', enfants: '0', souhaitEnfants: "J'en veux", peutDemenager: 'Selon les conditions', polygamie: 'Non' }
   },
   {
-    id: 12, firstName: 'Coumba', lastInitial: 'N', age: 26,
+    id: 'mock-12', firstName: 'Coumba', lastInitial: 'N', age: 26,
     location: 'SN Saint-Louis, Sénégal',
     maritalStatus: 'Célibataire', job: 'Commerciale',
     photos: ['https://i.pravatar.cc/400?img=26'],

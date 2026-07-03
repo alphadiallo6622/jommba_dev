@@ -6,8 +6,8 @@ import { Home, Compass, Eye, Star, Heart, Crown, Zap, MessageCircle, Bell, Chevr
 import { cn } from '@/lib/utils'
 import { useCurrentUser } from '@/lib/use-current-user'
 import { useBoostStore } from '@/store/boost.store'
-import { mockConversations } from '@/lib/mock-messages'
-import { mockNotifications } from '@/lib/mock-notifications'
+import { useNotifCount } from '@/lib/use-notif-count'
+import { useUnreadMessagesCount } from '@/lib/use-unread-messages'
 import ProfileDropdown from './ProfileDropdown'
 
 type TabId = 'accueil' | 'decouvrir' | 'visiteurs' | 'favoris' | 'demandes' | 'premium'
@@ -43,8 +43,8 @@ export default function DashboardNavbar() {
   const router      = useRouter()
   const currentUser = useCurrentUser()
   const openBoost   = useBoostStore(s => s.openBoost)
-  const totalUnread = mockConversations.reduce((acc, c) => acc + c.unreadCount, 0)
-  const notifUnread = mockNotifications.filter(n => !n.isRead).length
+  const totalUnread = useUnreadMessagesCount()
+  const notifUnread = useNotifCount()
   const [localTab, setLocalTab]     = useState<TabId>('accueil')
   const [dropdownOpen, setDropdown] = useState(false)
 

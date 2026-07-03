@@ -1,4 +1,4 @@
-// app/admin/(protected)/page.tsx
+// app/adminjommba/(protected)/page.tsx
 import type { Metadata } from "next";
 import * as LucideIcons from "lucide-react";
 import Link from "next/link";
@@ -6,14 +6,10 @@ import { KpiCard } from "@/components/admin/ui/kpi-card";
 import { Card, CardHeader } from "@/components/admin/ui/card";
 import { LineChart } from "@/components/admin/ui/line-chart";
 import { DonutChart } from "@/components/admin/ui/donut-chart";
-import {
-  OVERVIEW_KPIS,
-  ACTIVITY,
-  INSCRIPTIONS_DATA,
-  MEMBER_DISTRIBUTION,
-} from "@/lib/admin/mock-data";
+import { getOverviewData } from "@/lib/admin/queries";
 
 export const metadata: Metadata = { title: "Vue d'ensemble" };
+export const dynamic = "force-dynamic";
 
 function getIcon(name: string): LucideIcons.LucideIcon {
   const pascal = name
@@ -44,7 +40,9 @@ const ACT_IC: Record<string, string> = {
   red:   "text-red-600",
 };
 
-export default function AdminOverviewPage() {
+export default async function AdminOverviewPage() {
+  const { kpis, chart, distribution, activity, pendingProfiles } = await getOverviewData();
+
   return (
     <div className="space-y-5">
       {/* ── Alert banner ── */}
@@ -55,7 +53,9 @@ export default function AdminOverviewPage() {
         <div>
           <p className="text-emerald-100 text-sm mb-1">As-salamu alaykum, Admin</p>
           <h2 className="text-white text-2xl font-bold leading-tight">
-            7 profils attendent votre validation
+            {pendingProfiles > 0
+              ? `${pendingProfiles} profil${pendingProfiles > 1 ? "s" : ""} attend${pendingProfiles > 1 ? "ent" : ""} votre validation`
+              : "Aucun profil en attente de validation"}
           </h2>
           <p className="text-emerald-200 text-sm mt-1">
             Délai cible de traitement&nbsp;: 12 à 24 heures par profil.
@@ -71,7 +71,7 @@ export default function AdminOverviewPage() {
 
       {/* ── KPI cards ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {OVERVIEW_KPIS.map((kpi) => (
+        {kpis.map((kpi) => (
           <KpiCard key={kpi.label} kpi={kpi} />
         ))}
       </div>
@@ -84,12 +84,12 @@ export default function AdminOverviewPage() {
             title="Inscriptions & validations (30 j)"
             action={
               <span className="text-[11px] text-[var(--color-muted)] bg-[var(--color-faint)] px-2 py-0.5 rounded-full">
-                données mock
+                temps réel
               </span>
             }
           />
           <div className="px-2 pt-3 pb-1">
-            <LineChart data={INSCRIPTIONS_DATA} />
+            <LineChart data={chart} />
           </div>
           <div className="flex items-center gap-5 px-5 pb-4">
             <span className="flex items-center gap-1.5 text-xs text-[var(--color-muted)]">
@@ -107,7 +107,7 @@ export default function AdminOverviewPage() {
         <Card className="lg:col-span-2">
           <CardHeader title="Répartition des membres" />
           <div className="p-5">
-            <DonutChart segments={MEMBER_DISTRIBUTION} />
+            <DonutChart segments={distribution} />
           </div>
         </Card>
       </div>
@@ -125,20 +125,26 @@ export default function AdminOverviewPage() {
             }
           />
           <div className="divide-y divide-[var(--color-line)]">
-            {ACTIVITY.map((item, i) => {
-              const Icon = getIcon(item.icon);
-              return (
-                <div key={i} className="flex items-start gap-3 px-5 py-3">
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${ACT_BG[item.tone]}`}>
-                    <Icon className={`w-3.5 h-3.5 ${ACT_IC[item.tone]}`} />
+            {activity.length === 0 ? (
+              <p className="px-5 py-8 text-sm text-[var(--color-muted)] text-center">
+                Aucune activité récente
+              </p>
+            ) : (
+              activity.map((item, i) => {
+                const Icon = getIcon(item.icon);
+                return (
+                  <div key={i} className="flex items-start gap-3 px-5 py-3">
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${ACT_BG[item.tone]}`}>
+                      <Icon className={`w-3.5 h-3.5 ${ACT_IC[item.tone]}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-[var(--color-ink)] leading-snug">{item.text}</p>
+                      <p className="text-xs text-[var(--color-muted)] mt-0.5">{item.when}</p>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-[var(--color-ink)] leading-snug">{item.text}</p>
-                    <p className="text-xs text-[var(--color-muted)] mt-0.5">{item.when}</p>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </Card>
 

@@ -4,7 +4,6 @@ import { useState, useRef } from 'react'
 import { useOnboardingStore } from '@/store/onboarding.store'
 import { ArrowLeft, Upload, Star, Eye, EyeOff, X, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { mockUploadPhoto } from '@/lib/mock'
 import { toast } from 'sonner'
 
 type Props = { onNext: () => void; onBack: () => void; isLast?: boolean }
@@ -21,12 +20,22 @@ export default function StepPhotos({ onNext, onBack, isLast }: Props) {
   const handleFile = async (index: number, file: File) => {
     const u = [...uploading]; u[index] = true; setUploading(u)
     try {
-      const res = await mockUploadPhoto(file)
-      if (res.success) {
-        const next = [...photos]
-        next[index] = res.url
-        setField('photos', next)
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const res = await fetch('/api/upload/avatar', { method: 'POST', body: formData })
+      const json = await res.json() as { url?: string; error?: string }
+
+      if (!res.ok || !json.url) {
+        toast.error(json.error ?? 'Échec du téléversement')
+        return
       }
+
+      const next = [...photos]
+      next[index] = json.url
+      setField('photos', next)
+    } catch {
+      toast.error('Erreur réseau. Réessaie.')
     } finally {
       const u2 = [...uploading]; u2[index] = false; setUploading(u2)
     }
@@ -63,7 +72,7 @@ export default function StepPhotos({ onNext, onBack, isLast }: Props) {
       {/* Photo slots */}
       <div className="space-y-3">
         {Array.from({ length: MAX_PHOTOS }).map((_, i) => {
-          const url = photos[i] ?? ''
+          const url    = photos[i] ?? ''
           const isMain = i === 0
           return (
             <div

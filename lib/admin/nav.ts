@@ -25,9 +25,9 @@ export const NAV: NavSection[] = [
   {
     title: "Modération",
     items: [
-      { label: "File de validation",  desc: "Modération des profils",   href: "/adminjommba/validation",   icon: ShieldCheck, badge: { value: 7, tone: "amber" } },
+      { label: "File de validation",  desc: "Modération des profils",   href: "/adminjommba/validation",   icon: ShieldCheck },
       { label: "Membres",             desc: "Gestion des comptes",      href: "/adminjommba/membres",       icon: Users },
-      { label: "Signalements",        desc: "Modération",               href: "/adminjommba/signalements",  icon: Flag,        badge: { value: 3, tone: "red"   } },
+      { label: "Signalements",        desc: "Modération",               href: "/adminjommba/signalements",  icon: Flag },
       { label: "Photos en attente",   desc: "Modération du contenu",    href: "/adminjommba/photos",        icon: Image },
     ],
   },
@@ -44,7 +44,7 @@ export const NAV: NavSection[] = [
       { label: "Blog",          desc: "Contenu éditorial",   href: "/adminjommba/blog",          icon: Newspaper },
       { label: "Coach IA",      desc: "Cheikh Abdallah",     href: "/adminjommba/coach",         icon: MessageSquareHeart },
       { label: "Notifications", desc: "Diffusion",           href: "/adminjommba/notifications", icon: Megaphone },
-      { label: "Support",       desc: "Tickets utilisateurs", href: "/adminjommba/support",       icon: LifeBuoy, badge: { value: 4, tone: "green" } },
+      { label: "Support",       desc: "Tickets utilisateurs", href: "/adminjommba/support",       icon: LifeBuoy },
     ],
   },
   {

@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($env:PATH = \"C:\\\\Program Files\\\\nodejs;\" + $env:PATH; cd \"e:\\\\ANTIGRAVITY\\\\Projet_Jommba\\\\Jommba_dev\"; npx tsc --noEmit 2>&1 | Select-Object -First 80)",
+      "PowerShell($env:PATH = \"C:\\\\Program Files\\\\nodejs;\" + $env:PATH; cd \"e:\\\\ANTIGRAVITY\\\\Projet_Jommba\\\\Jommba_dev\"; npx tsc --noEmit 2>&1 | Select-Object -First 40)",
+      "PowerShell($env:PATH = \"C:\\\\Program Files\\\\nodejs;\" + $env:PATH; cd \"e:\\\\ANTIGRAVITY\\\\Projet_Jommba\\\\Jommba_dev\"; Get-Process -Name \"node\" -ErrorAction SilentlyContinue | Select-Object Id, CPU, StartTime)",
+      "PowerShell($env:PATH = \"C:\\\\Program Files\\\\nodejs;\" + $env:PATH; $r = Invoke-WebRequest -Uri \"http://localhost:3000/admin\" -MaximumRedirection 0 -ErrorAction SilentlyContinue; \"Status: $\\($r.StatusCode\\)\"; $r.Headers['Location'])",
+      "PowerShell($env:PATH = \"C:\\\\Program Files\\\\nodejs;\" + $env:PATH; & \"C:\\\\Program Files\\\\nodejs\\\\node.exe\" -e \"const http = require\\('http'\\); const req = http.request\\({hostname:'localhost',port:3000,path:'/admin',method:'GET'}, \\(res\\) => { console.log\\('Status:', res.statusCode\\); console.log\\('Location:', res.headers.location\\); }\\); req.on\\('error', e => console.error\\(e.message\\)\\); req.end\\(\\);\")",
+      "Bash(npx tsc *)",
+      "Bash(xxd)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(node -e \"const p = require\\('./node_modules/@supabase/supabase-js/package.json'\\); console.log\\('supabase-js:', p.version\\)\")",
+      "Bash(node -e \"const p = require\\('./node_modules/@supabase/ssr/package.json'\\); console.log\\('supabase/ssr:', p.version\\)\")"
+    ]
+  }
+}

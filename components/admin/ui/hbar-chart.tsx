@@ -1,10 +1,10 @@
 // components/admin/ui/hbar-chart.tsx
-import type { CountryBar } from "@/lib/admin/mock-data";
+import type { CountryBar } from "@/lib/admin/types";
 
 const COLORS = ["#10b981", "#10b981", "#10b981", "#10b981", "#e8920c", "#e8920c"];
 
 export function HBarChart({ data }: { data: CountryBar[] }) {
-  const maxV = Math.max(...data.map((d) => d.count));
+  const maxV = Math.max(...data.map((d) => d.count)) || 1;
 
   return (
     <div className="space-y-3 w-full">

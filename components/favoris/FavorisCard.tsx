@@ -6,7 +6,7 @@ import type { FavoriteEntry } from '@/store/favoris.store'
 
 interface Props {
   entry: FavoriteEntry
-  onRemove: (id: number) => void
+  onRemove: (id: string) => void
 }
 
 function formatDate(iso: string) {

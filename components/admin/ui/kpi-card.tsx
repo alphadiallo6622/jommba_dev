@@ -1,7 +1,7 @@
 // components/admin/ui/kpi-card.tsx
 import * as LucideIcons from "lucide-react";
 import { Sparkline } from "./sparkline";
-import type { Kpi } from "@/lib/admin/mock-data";
+import type { Kpi } from "@/lib/admin/types";
 
 function getIcon(name: string): LucideIcons.LucideIcon {
   const pascal = name

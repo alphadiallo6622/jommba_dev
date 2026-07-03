@@ -5,13 +5,26 @@ import { EyeOff, Eye, Crown, Shield, Lock, CheckCircle } from 'lucide-react'
 import SettingsDrawer from '../SettingsDrawer'
 import { useCurrentUser } from '@/lib/use-current-user'
 import { useProfileStore } from '@/store/profile.store'
+import { useAuth } from '@/components/providers/AuthProvider'
+import { createClient } from '@/lib/supabase/client'
 
 type Props = { open: boolean; onClose: () => void }
 
 export default function ConfidentialityPanel({ open, onClose }: Props) {
   const router = useRouter()
   const { isPremium } = useCurrentUser()
+  const { user } = useAuth()
   const { isPhotosBlurred, togglePhotosBlur } = useProfileStore()
+
+  // Persiste la préférence en BDD en plus du store local
+  const handleToggleBlur = async () => {
+    togglePhotosBlur()
+    if (!user) return
+    const supabase = createClient()
+    await supabase.from('user_preferences')
+      .update({ photos_blurred: !isPhotosBlurred })
+      .eq('user_id', user.id)
+  }
 
   return (
     <SettingsDrawer open={open} title="Confidentialité" onClose={onClose}
@@ -54,7 +67,7 @@ export default function ConfidentialityPanel({ open, onClose }: Props) {
 
               {/* Toggle button */}
               <button
-                onClick={togglePhotosBlur}
+                onClick={handleToggleBlur}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-colors ${
                   isPhotosBlurred
                     ? 'bg-[#E1F5EE] border-[#10B981]/40 hover:bg-green-100'

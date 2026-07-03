@@ -1,5 +1,5 @@
 // components/admin/ui/donut-chart.tsx
-import type { DonutSegment } from "@/lib/admin/mock-data";
+import type { DonutSegment } from "@/lib/admin/types";
 
 const CX = 110, CY = 110, R_OUT = 92, R_IN = 60;
 

@@ -151,7 +151,7 @@ export default function InscriptionPage() {
       const supabase = createClient()
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: `${window.location.origin}/api/auth/callback` },
+        options: { redirectTo: `${window.location.origin}/api/auth/callback?next=/onboarding` },
       })
       if (error) toast.error(error.message)
     } finally {
@@ -179,14 +179,13 @@ export default function InscriptionPage() {
             first_name: step1Data.firstName,
             last_name:  step1Data.lastName,
           },
-          emailRedirectTo: `${window.location.origin}/api/auth/callback`,
         },
       })
       if (error) {
         toast.error(error.message)
       } else {
         toast.success('Compte créé ! Vérifie ta boîte mail.')
-        router.push('/verify-email')
+        router.push(`/verify-email?email=${encodeURIComponent(step1Data.email)}`)
       }
     } finally {
       setLoading(false)

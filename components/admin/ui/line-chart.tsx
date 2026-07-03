@@ -1,5 +1,5 @@
 // components/admin/ui/line-chart.tsx
-import type { ChartPoint } from "@/lib/admin/mock-data";
+import type { ChartPoint } from "@/lib/admin/types";
 
 const VW = 560, VH = 190;
 const ML = 38, MR = 12, MT = 10, MB = 36;

@@ -1,5 +1,5 @@
 export type Visitor = {
-  id: number
+  id: string
   photo: string
   firstName: string
   lastInitial: string
@@ -12,7 +12,7 @@ export type Visitor = {
 
 export const mockVisitors: Visitor[] = [
   {
-    id: 1,
+    id: 'mock-visitor-1',
     photo: 'https://i.pravatar.cc/300?img=10',
     firstName: 'Aminata',
     lastInitial: 'D',
@@ -23,7 +23,7 @@ export const mockVisitors: Visitor[] = [
     isNew: true,
   },
   {
-    id: 2,
+    id: 'mock-visitor-2',
     photo: 'https://i.pravatar.cc/300?img=20',
     firstName: 'Fatou',
     lastInitial: 'N',

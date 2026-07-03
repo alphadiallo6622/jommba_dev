@@ -5,6 +5,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { NAV } from "@/lib/admin/nav";
 import { LogOut } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import type { AdminIdentity } from "@/lib/admin/types";
+import { initials } from "@/lib/admin/format";
 
 const BADGE_STYLE: Record<string, string> = {
   amber: "bg-amber-400/25 text-amber-200",
@@ -12,7 +14,17 @@ const BADGE_STYLE: Record<string, string> = {
   green: "bg-emerald-400/25 text-emerald-300",
 };
 
-export function Sidebar({ onClose }: { onClose?: () => void }) {
+export type NavBadges = Record<string, { value: number; tone: "amber" | "red" | "green" }>;
+
+export function Sidebar({
+  badges,
+  identity,
+  onClose,
+}: {
+  badges?: NavBadges;
+  identity?: AdminIdentity;
+  onClose?: () => void;
+}) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -46,6 +58,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
             {section.items.map((item) => {
               const Icon = item.icon as LucideIcon;
               const active = pathname === item.href;
+              const badge = badges?.[item.href] ?? item.badge;
               return (
                 <Link
                   key={item.href}
@@ -61,9 +74,9 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
                     <Icon className="w-4 h-4 shrink-0" />
                     {item.label}
                   </span>
-                  {item.badge && (
-                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${BADGE_STYLE[item.badge.tone]}`}>
-                      {item.badge.value}
+                  {badge && (
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${BADGE_STYLE[badge.tone]}`}>
+                      {badge.value}
                     </span>
                   )}
                 </Link>
@@ -77,11 +90,11 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
       <div className="px-3 py-3 border-t border-white/10 shrink-0">
         <div className="flex items-center gap-2.5 px-1">
           <div className="w-8 h-8 rounded-full bg-[var(--color-brand-600)] flex items-center justify-center shrink-0">
-            <span className="text-white text-xs font-bold">AJ</span>
+            <span className="text-white text-xs font-bold">{initials(identity?.name ?? "Admin Jommba")}</span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-white truncate leading-tight">Admin Jommba</p>
-            <p className="text-[11px] text-white/45 truncate">super-admin</p>
+            <p className="text-sm font-semibold text-white truncate leading-tight">{identity?.name ?? "Admin Jommba"}</p>
+            <p className="text-[11px] text-white/45 truncate">{identity?.role ?? "super-admin"}</p>
           </div>
           <button
             onClick={handleLogout}

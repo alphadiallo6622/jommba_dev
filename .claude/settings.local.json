@@ -36,7 +36,17 @@
       "PowerShell(New-Item -ItemType Directory -Force \"e:\\\\ANTIGRAVITY\\\\Projet_Jommba\\\\Jommba_dev\\\\components\\\\coach\")",
       "PowerShell($env:PATH = \"C:\\\\Program Files\\\\nodejs;\" + $env:PATH; Set-Location \"e:\\\\ANTIGRAVITY\\\\Projet_Jommba\\\\Jommba_dev\"; & \"C:\\\\Program Files\\\\nodejs\\\\npx.cmd\" next build 2>&1 | Select-Object -Last 20)",
       "PowerShell(Get-Process -Name \"node\" -ErrorAction SilentlyContinue)",
-      "PowerShell(Stop-Process -Force -Confirm:$false)"
+      "PowerShell(Stop-Process -Force -Confirm:$false)",
+      "Bash(find . -maxdepth 1 -iname \".env*\")",
+      "Bash(find supabase *)",
+      "Bash(npx tsc *)",
+      "Bash(netstat -ano)",
+      "Bash(npx eslint *)",
+      "mcp__supabase__search_docs",
+      "Bash(npm run *)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "supabase"
+  ]
 }
