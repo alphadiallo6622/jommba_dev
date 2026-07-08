@@ -121,6 +121,7 @@ export default function InscriptionPage() {
   const [step, setStep]           = useState<1 | 2>(1)
   const [agreed, setAgreed]       = useState(false)
   const [loading, setLoading]     = useState(false)
+  const [checkingEmail, setCheckingEmail] = useState(false)
   const [step1Data, setStep1Data] = useState<Step1Data | null>(null)
   const [showPwd, setShowPwd]     = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
@@ -129,6 +130,7 @@ export default function InscriptionPage() {
     register: r1,
     handleSubmit: hs1,
     formState: { errors: e1 },
+    setError: setError1,
   } = useForm<Step1Data>({ resolver: zodResolver(step1Schema) })
 
   const {
@@ -160,7 +162,24 @@ export default function InscriptionPage() {
   }
 
   /* Step 1 → 2 */
-  const onStep1 = (data: Step1Data) => {
+  const onStep1 = async (data: Step1Data) => {
+    setCheckingEmail(true)
+    try {
+      const res = await fetch('/api/check-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: data.email }),
+      })
+      const result = await res.json()
+      if (!result.valid) {
+        setError1('email', { type: 'manual', message: result.reason ?? "Cette adresse email n'existe pas ou n'accepte pas les messages" })
+        return
+      }
+    } catch {
+      // En cas d'erreur réseau, on laisse passer plutôt que de bloquer l'inscription
+    } finally {
+      setCheckingEmail(false)
+    }
     setStep1Data(data)
     setStep(2)
   }
@@ -323,12 +342,14 @@ export default function InscriptionPage() {
 
                 <button
                   type="submit"
-                  disabled={!agreed}
+                  disabled={!agreed || checkingEmail}
                   className="w-full py-2.5 rounded-xl text-white font-semibold text-sm transition-all flex items-center justify-center gap-2 disabled:cursor-not-allowed"
                   style={{ background: agreed ? '#10B981' : '#9CA3AF' }}
                 >
-                  Continuer
-                  <ArrowRight className="w-4 h-4" />
+                  {checkingEmail
+                    ? <Loader2 className="w-4 h-4 animate-spin" />
+                    : <>Continuer<ArrowRight className="w-4 h-4" /></>
+                  }
                 </button>
               </form>
 
