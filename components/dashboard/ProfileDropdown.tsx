@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { Volume2, VolumeX, EyeOff, Eye, LogOut, Settings, HelpCircle, User } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 import { useCurrentUser } from '@/lib/use-current-user'
 import { useProfileStore } from '@/store/profile.store'
 import { useAuthStore } from '@/store/auth.store'
@@ -15,6 +16,39 @@ export default function ProfileDropdown({ onClose }: Props) {
   const { isPhotosBlurred, isSoundEnabled, togglePhotosBlur, toggleSound } = useProfileStore()
 
   const go = (path: string) => { onClose(); router.push(path) }
+
+  // Persiste le floutage : profiles.photos_blurred (lu par les visiteurs)
+  // + user_preferences (préférence du compte).
+  const handleToggleBlur = async () => {
+    const next = !isPhotosBlurred
+    togglePhotosBlur()
+    onClose()
+    if (!mockUser.id) return
+    const supabase = createClient()
+    await Promise.all([
+      supabase.from('profiles').update({ photos_blurred: next }).eq('user_id', mockUser.id),
+      supabase.from('user_preferences').update({ photos_blurred: next }).eq('user_id', mockUser.id),
+    ])
+  }
+
+  const handleToggleSound = async () => {
+    const next = !isSoundEnabled
+    toggleSound()
+    onClose()
+    if (!mockUser.id) return
+    const supabase = createClient()
+    await supabase.from('user_preferences').update({ sound_enabled: next }).eq('user_id', mockUser.id)
+  }
+
+  // Déconnexion réelle : ferme la session Supabase (cookies) puis vide le store.
+  const handleLogout = async () => {
+    onClose()
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    logout()
+    router.push('/')
+    router.refresh()
+  }
 
   return (
     <div className="absolute top-full right-0 mt-1 w-64 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-50 overflow-hidden">
@@ -30,7 +64,9 @@ export default function ProfileDropdown({ onClose }: Props) {
           )}
         </div>
         <p className="text-xs text-[#10B981] mt-0.5">
-          → Demandes restantes {mockUser.dailyRequests.total - mockUser.dailyRequests.used}/{mockUser.dailyRequests.total}
+          {mockUser.isPremium
+            ? '→ Demandes illimitées'
+            : `→ Demandes restantes ${Math.max(0, mockUser.dailyRequests.total - mockUser.dailyRequests.used)}/${mockUser.dailyRequests.total}`}
         </p>
       </div>
 
@@ -54,7 +90,7 @@ export default function ProfileDropdown({ onClose }: Props) {
 
       {/* Toggle flouter photos */}
       <button
-        onClick={() => { togglePhotosBlur(); onClose() }}
+        onClick={handleToggleBlur}
         className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
           isPhotosBlurred
             ? 'bg-amber-50 text-amber-700 hover:bg-amber-100'
@@ -70,7 +106,7 @@ export default function ProfileDropdown({ onClose }: Props) {
 
       {/* Toggle son */}
       <button
-        onClick={() => { toggleSound(); onClose() }}
+        onClick={handleToggleSound}
         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
       >
         {isSoundEnabled
@@ -93,7 +129,7 @@ export default function ProfileDropdown({ onClose }: Props) {
 
       {/* Déconnexion */}
       <button
-        onClick={() => { onClose(); logout(); router.push('/') }}
+        onClick={handleLogout}
         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
       >
         <LogOut className="w-4 h-4" />

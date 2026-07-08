@@ -54,18 +54,20 @@ export interface Profile {
   is_premium:         boolean
   profile_completion: number
   visibility:         Visibility
+  photos_blurred:     boolean
   validated_at:       string | null
   refusal_reason:     string | null
   created_at:         string
   updated_at:         string
 }
 
-export type ProfileInsert = Omit<Profile, 'id' | 'created_at' | 'updated_at' | 'validated_at' | 'refusal_reason'> & {
+export type ProfileInsert = Omit<Profile, 'id' | 'created_at' | 'updated_at' | 'validated_at' | 'refusal_reason' | 'photos_blurred'> & {
   id?:             string
   created_at?:     string
   updated_at?:     string
   validated_at?:   string | null
   refusal_reason?: string | null
+  photos_blurred?: boolean
 }
 export type ProfileUpdate = Partial<ProfileInsert>
 
@@ -413,7 +415,17 @@ export type Database = {
         Relationships: []
       }
     }
-    Functions: Record<string, never>
+    Functions: {
+      get_platform_stats: {
+        Args: Record<string, never>
+        Returns: {
+          members_total:     number
+          members_validated: number
+          countries:         number
+          matches:           number
+        }[]
+      }
+    }
     Enums:     Record<string, never>
   }
 }

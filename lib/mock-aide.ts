@@ -91,9 +91,3 @@ export const tutorialSteps = [
   { step: 4, title: 'Échange des messages', description: 'Quand une demande est acceptée, commence la conversation.' },
 ]
 
-export const platformStats = {
-  members: '50 000+',
-  couples: '2 000+',
-  countries: '15',
-  satisfaction: '94%',
-}

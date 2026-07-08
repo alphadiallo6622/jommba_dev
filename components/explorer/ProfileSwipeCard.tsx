@@ -12,7 +12,7 @@ type Props = {
 }
 
 export default function ProfileSwipeCard({ profile, highlightPhoto, isFavorite, onToggleFavorite }: Props) {
-  const photoUrl   = profile.photos[0] ?? 'https://i.pravatar.cc/400?img=1'
+  const photoUrl   = profile.photos[0] ?? '/avatar-placeholder.svg'
   const photoCount = profile.photos.length
 
   return (
@@ -45,7 +45,7 @@ export default function ProfileSwipeCard({ profile, highlightPhoto, isFavorite, 
         <img
           src={photoUrl}
           alt={`${profile.firstName} ${profile.lastInitial}.`}
-          className="w-full h-full object-cover"
+          className={cn('w-full h-full object-cover', profile.photosBlurred && 'blur-md scale-105')}
         />
 
         {/* Bottom gradient */}

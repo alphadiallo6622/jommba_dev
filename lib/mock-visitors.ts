@@ -10,27 +10,5 @@ export type Visitor = {
   isNew: boolean
 }
 
-export const mockVisitors: Visitor[] = [
-  {
-    id: 'mock-visitor-1',
-    photo: 'https://i.pravatar.cc/300?img=10',
-    firstName: 'Aminata',
-    lastInitial: 'D',
-    age: 27,
-    city: 'Dakar',
-    country: 'SN',
-    hoursAgo: 16,
-    isNew: true,
-  },
-  {
-    id: 'mock-visitor-2',
-    photo: 'https://i.pravatar.cc/300?img=20',
-    firstName: 'Fatou',
-    lastInitial: 'N',
-    age: 31,
-    city: 'Thiès',
-    country: 'SN',
-    hoursAgo: 22,
-    isNew: true,
-  },
-]
+// ⚠ Nom historique — ne contient plus aucune donnée fictive (type uniquement).
+// Les visiteurs réels viennent de Supabase (profile_visitors).

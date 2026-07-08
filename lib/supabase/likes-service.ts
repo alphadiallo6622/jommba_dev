@@ -2,7 +2,19 @@
 
 import { createClient } from './client'
 
+// Valeur de repli si platform_settings est indisponible.
 export const FREE_DAILY_REQUESTS = 3
+
+// Limite quotidienne pilotée par la console admin (Paramètres → Limites).
+async function getFreeDailyLimit(): Promise<number> {
+  const supabase = createClient()
+  const { data } = await supabase
+    .from('platform_settings')
+    .select('limits')
+    .eq('id', 1)
+    .maybeSingle()
+  return Number((data?.limits as { contacts?: number } | null)?.contacts) || FREE_DAILY_REQUESTS
+}
 
 export type SendRequestResult =
   | { ok: true }
@@ -38,18 +50,21 @@ export async function sendContactRequest(
 
   if (!isPremium) {
     const today = new Date().toISOString().slice(0, 10)
-    const { count } = await supabase
-      .from('likes')
-      .select('*', { count: 'exact', head: true })
-      .eq('sender_id', senderId)
-      .eq('type', 'request')
-      .gte('created_at', today)
+    const [{ count }, dailyLimit] = await Promise.all([
+      supabase
+        .from('likes')
+        .select('*', { count: 'exact', head: true })
+        .eq('sender_id', senderId)
+        .eq('type', 'request')
+        .gte('created_at', today),
+      getFreeDailyLimit(),
+    ])
 
-    if ((count ?? 0) >= FREE_DAILY_REQUESTS) {
+    if ((count ?? 0) >= dailyLimit) {
       return {
         ok: false,
         reason: 'limit',
-        message: `Limite de ${FREE_DAILY_REQUESTS} demandes par jour atteinte. Passe Premium pour des demandes illimitées !`,
+        message: `Limite de ${dailyLimit} demandes par jour atteinte. Passe Premium pour des demandes illimitées !`,
       }
     }
   }

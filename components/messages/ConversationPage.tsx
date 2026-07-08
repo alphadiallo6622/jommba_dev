@@ -90,7 +90,7 @@ export default function ConversationPage({ id }: Props) {
           id,
           firstName:   p?.first_name ?? '…',
           lastInitial: (p?.last_name ?? p?.first_name ?? '?').charAt(0),
-          photo:       p?.avatar_url ?? `https://i.pravatar.cc/150?u=${id}`,
+          photo:       p?.avatar_url ?? '/avatar-placeholder.svg',
           lastMessage: dbMessages.at(-1)?.content ?? 'Démarrez la conversation...',
           timeAgo:     formatTimeAgo(dbMessages.at(-1)?.created_at ?? null),
           isRead:      true,

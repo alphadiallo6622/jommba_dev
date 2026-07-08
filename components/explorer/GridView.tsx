@@ -37,7 +37,7 @@ export default function GridView() {
           <ProfileGridCard
             key={profile.id}
             profile={profile}
-            blurred={!isPremium && i >= FREE_CARD_COUNT}
+            blurred={(!isPremium && i >= FREE_CARD_COUNT) || profile.photosBlurred}
           />
         ))}
       </div>

@@ -98,14 +98,17 @@ export default function PhotoEditModal({ open, onClose }: Props) {
     toast.success('Photo ajoutée ✓')
   }
 
-  // Le flou des photos est une préférence persistée (user_preferences)
+  // Persiste le flou : profiles.photos_blurred est la source lue par les
+  // visiteurs (RLS), user_preferences reste la préférence du compte.
   const handleToggleBlur = async () => {
+    const next = !isPhotosBlurred
     togglePhotosBlur()
     if (!user) return
     const supabase = createClient()
-    await supabase.from('user_preferences')
-      .update({ photos_blurred: !isPhotosBlurred })
-      .eq('user_id', user.id)
+    await Promise.all([
+      supabase.from('profiles').update({ photos_blurred: next }).eq('user_id', user.id),
+      supabase.from('user_preferences').update({ photos_blurred: next }).eq('user_id', user.id),
+    ])
   }
 
   const handleSave = () => {

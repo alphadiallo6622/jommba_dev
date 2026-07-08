@@ -20,6 +20,7 @@ type GridProfile = {
   score: number
   photo: string
   isPremium: boolean
+  photoBlurred: boolean
 }
 
 function scoreColor(score: number) {
@@ -44,7 +45,7 @@ function GridCard({ profile, liked, onLike }: {
         <img
           src={profile.photo}
           alt={profile.name}
-          className="w-full h-full object-cover"
+          className={cn('w-full h-full object-cover', profile.photoBlurred && 'blur-md scale-105')}
           draggable={false}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/5 to-transparent pointer-events-none" />
@@ -109,7 +110,7 @@ export default function ProfileGrid() {
     const supabase = createClient()
     supabase
       .from('profiles')
-      .select('user_id, first_name, last_name, age, city, job, avatar_url, is_premium, profile_completion')
+      .select('user_id, first_name, last_name, age, city, job, avatar_url, is_premium, profile_completion, photos_blurred')
       .neq('user_id', user.id)
       .eq('status', 'validated')
       .eq('visibility', 'active')
@@ -120,16 +121,17 @@ export default function ProfileGrid() {
       .then(({ data }) => {
         if (data && data.length > 0) {
           setProfiles(
-            (data as { user_id: string; first_name: string; last_name: string | null; age: number | null; city: string | null; job: string | null; avatar_url: string | null; is_premium: boolean; profile_completion: number }[])
+            (data as { user_id: string; first_name: string; last_name: string | null; age: number | null; city: string | null; job: string | null; avatar_url: string | null; is_premium: boolean; profile_completion: number; photos_blurred: boolean | null }[])
               .map(p => ({
-                id:        p.user_id,
-                name:      `${p.first_name} ${(p.last_name ?? '').charAt(0)}.`,
-                age:       p.age ?? 0,
-                city:      p.city ?? 'Inconnu',
-                job:       p.job ?? '',
-                score:     p.profile_completion ?? 80,
-                photo:     p.avatar_url ?? `https://i.pravatar.cc/400?u=${p.user_id}`,
-                isPremium: p.is_premium,
+                id:           p.user_id,
+                name:         `${p.first_name} ${(p.last_name ?? '').charAt(0)}.`,
+                age:          p.age ?? 0,
+                city:         p.city ?? 'Inconnu',
+                job:          p.job ?? '',
+                score:        p.profile_completion ?? 80,
+                photo:        p.avatar_url ?? '/avatar-placeholder.svg',
+                isPremium:    p.is_premium,
+                photoBlurred: p.photos_blurred ?? true,
               }))
           )
         }
@@ -275,7 +277,7 @@ export default function ProfileGrid() {
               <img
                 src={profile.photo}
                 alt={profile.name}
-                className="w-full h-full object-cover"
+                className={cn('w-full h-full object-cover', profile.photoBlurred && 'blur-md scale-105')}
                 draggable={false}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/5 to-transparent pointer-events-none" />

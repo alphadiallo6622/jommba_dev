@@ -15,15 +15,20 @@ export default async function DashboardLayout({ children }: { children: React.Re
   let mockUser = null
   let prefs: { photosBlurred: boolean; soundEnabled: boolean } | null = null
   if (user) {
-    const [{ data: profile }, { count: views }, { count: visitors }, { count: favorites }, { count: requests }, { count: likesUsedToday }, { data: preferences }] = await Promise.all([
+    const [{ data: profile }, { count: views }, { count: visitors }, { count: favorites }, { count: requests }, { count: likesUsedToday }, { data: preferences }, { data: settings }] = await Promise.all([
       supabase.from('profiles').select('*').eq('user_id', user.id).single(),
       supabase.from('profile_views').select('*', { count: 'exact', head: true }).eq('profile_id', user.id),
       supabase.from('profile_visitors').select('*', { count: 'exact', head: true }).eq('profile_id', user.id),
       supabase.from('likes').select('*', { count: 'exact', head: true }).eq('receiver_id', user.id).eq('type', 'favorite'),
       supabase.from('likes').select('*', { count: 'exact', head: true }).eq('receiver_id', user.id).eq('type', 'request'),
       supabase.from('likes').select('*', { count: 'exact', head: true }).eq('sender_id', user.id).eq('type', 'request').gte('created_at', new Date().toISOString().slice(0, 10)),
-      supabase.from('user_preferences').select('photos_blurred, sound_enabled').eq('user_id', user.id).maybeSingle(),
+      supabase.from('user_preferences').select('sound_enabled').eq('user_id', user.id).maybeSingle(),
+      supabase.from('platform_settings').select('limits').eq('id', 1).maybeSingle(),
     ])
+
+    // Limite quotidienne pilotée par la console admin (Paramètres → Limites)
+    const freeDailyLimit =
+      Number((settings?.limits as { contacts?: number } | null)?.contacts) || 3
 
     if (profile) {
       mockUser = profileToMockUser(profile, user.email ?? '')
@@ -35,13 +40,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
       }
       mockUser.dailyRequests = {
         used:  likesUsedToday ?? 0,
-        total: profile.is_premium ? 999 : 3,
+        total: profile.is_premium ? 999 : freeDailyLimit,
       }
-    }
-    if (preferences) {
+      // Le flou vit sur profiles (lisible par les visiteurs via RLS)
       prefs = {
-        photosBlurred: preferences.photos_blurred,
-        soundEnabled:  preferences.sound_enabled,
+        photosBlurred: profile.photos_blurred ?? true,
+        soundEnabled:  preferences?.sound_enabled ?? true,
       }
     }
   }

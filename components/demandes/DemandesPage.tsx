@@ -85,7 +85,7 @@ export default function DemandesPage() {
       }
 
       const buildPhoto = (userId: string, url: string | null) =>
-        url ?? `https://i.pravatar.cc/150?u=${userId}`
+        url ?? '/avatar-placeholder.svg'
 
       setRecues(
         (likesRecues ?? [])

@@ -17,27 +17,5 @@ export type Message = {
   time: string
 }
 
-export const mockConversations: Conversation[] = [
-  {
-    id: 'conv-001',
-    firstName: 'Fatima',
-    lastInitial: 'S',
-    photo: 'https://i.pravatar.cc/150?img=5',
-    lastMessage: 'Démarrez la conversation...',
-    timeAgo: 'Il y a 11h',
-    isRead: true,
-    unreadCount: 0,
-    isArchived: false,
-  },
-]
-
-export const mockMessages: Record<string, Message[]> = {
-  'conv-001': [],
-}
-
-export const MOCK_AUTO_REPLIES = [
-  'Wa alaykum salam 🙏',
-  'Alhamdulillah, merci pour ton message',
-  "In sha Allah on pourra en discuter",
-  'Barak Allahu fik',
-]
+// ⚠ Nom historique — ne contient plus aucune donnée fictive (types uniquement).
+// Les conversations et messages réels viennent de Supabase.

@@ -13,7 +13,7 @@ type Props = {
 
 export default function ProfileGridCard({ profile, blurred }: Props) {
   const router  = useRouter()
-  const photoUrl = profile.photos[0] ?? 'https://i.pravatar.cc/400?img=1'
+  const photoUrl = profile.photos[0] ?? '/avatar-placeholder.svg'
 
   return (
     <div className={cn(

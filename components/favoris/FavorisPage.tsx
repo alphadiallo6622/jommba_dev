@@ -101,8 +101,9 @@ export default function FavorisPage() {
                 id,
                 firstName: '…', lastInitial: '?', age: 0,
                 location: 'Inconnu', maritalStatus: '', job: '',
-                photos: [`https://i.pravatar.cc/400?u=${id}`],
-                isEnAvant: false, marriageVision: '', ceQueJeRecherche: '',
+                photos: ['/avatar-placeholder.svg'],
+                isEnAvant: false, photosBlurred: false,
+                marriageVision: '', ceQueJeRecherche: '',
                 centresInteret: '', mesQualites: '',
                 info: { madhhab: '', education: '', enfants: '', souhaitEnfants: '', peutDemenager: '', polygamie: '' },
               }
@@ -116,7 +117,7 @@ export default function FavorisPage() {
           const hrs = Math.floor((Date.now() - new Date(receivedTimeMap.get(id) ?? new Date().toISOString()).getTime()) / 3_600_000)
           return {
             id,
-            photo:       p?.avatar_url ?? `https://i.pravatar.cc/300?u=${id}`,
+            photo:       p?.avatar_url ?? '/avatar-placeholder.svg',
             firstName:   p?.first_name ?? '…',
             lastInitial: (p?.last_name ?? '').charAt(0) || '?',
             age:         p?.age ?? 0,

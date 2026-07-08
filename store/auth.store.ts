@@ -1,7 +1,7 @@
 import { create } from 'zustand'
-import { mockUserFree, type MockUser } from '@/lib/mock-user'
+import { EMPTY_USER, type MockUser } from '@/lib/mock-user'
 
-// Le store est initialisé avec mockUserFree comme fallback pendant
+// Le store démarre avec un utilisateur NEUTRE (aucune donnée fictive) pendant
 // que ProfileInitializer charge le vrai profil depuis Supabase.
 // Après chargement, currentUser contient les données réelles de la BDD.
 
@@ -13,8 +13,8 @@ type AuthStore = {
 }
 
 export const useAuthStore = create<AuthStore>()((set) => ({
-  currentUser: mockUserFree,
+  currentUser: EMPTY_USER,
   isProfileLoaded: false,
   setCurrentUser: (user) => set({ currentUser: user, isProfileLoaded: true }),
-  logout: () => set({ currentUser: mockUserFree, isProfileLoaded: false }),
+  logout: () => set({ currentUser: EMPTY_USER, isProfileLoaded: false }),
 }))

@@ -16,14 +16,17 @@ export default function ConfidentialityPanel({ open, onClose }: Props) {
   const { user } = useAuth()
   const { isPhotosBlurred, togglePhotosBlur } = useProfileStore()
 
-  // Persiste la préférence en BDD en plus du store local
+  // Persiste la préférence : profiles.photos_blurred est la source lue par
+  // les visiteurs (RLS), user_preferences reste la préférence du compte.
   const handleToggleBlur = async () => {
+    const next = !isPhotosBlurred
     togglePhotosBlur()
     if (!user) return
     const supabase = createClient()
-    await supabase.from('user_preferences')
-      .update({ photos_blurred: !isPhotosBlurred })
-      .eq('user_id', user.id)
+    await Promise.all([
+      supabase.from('profiles').update({ photos_blurred: next }).eq('user_id', user.id),
+      supabase.from('user_preferences').update({ photos_blurred: next }).eq('user_id', user.id),
+    ])
   }
 
   return (

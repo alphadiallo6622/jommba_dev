@@ -1,17 +1,35 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Search, ChevronDown, ChevronUp, Mail, UserPlus, Heart, MessageCircle, Camera, Crown, Shield, Settings, BookOpen, CheckCircle } from 'lucide-react'
-import { faqCategories, tutorialSteps, platformStats } from '@/lib/mock-aide'
+import { createClient } from '@/lib/supabase/client'
+import { faqCategories, tutorialSteps } from '@/lib/mock-aide'
 
 const ICON_MAP: Record<string, React.ElementType> = {
   UserPlus, Heart, MessageCircle, Camera, Crown, Shield, Settings, BookOpen,
+}
+
+type PlatformStats = {
+  members_total: number
+  members_validated: number
+  countries: number
+  matches: number
 }
 
 export default function AidePage() {
   const [search, setSearch]         = useState('')
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
   const [openItem, setOpenItem]     = useState<string | null>(null)
+  const [stats, setStats]           = useState<PlatformStats | null>(null)
+
+  // Statistiques réelles de la plateforme (fonction SQL sécurisée)
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.rpc('get_platform_stats').then(({ data }) => {
+      const row = Array.isArray(data) ? data[0] : data
+      if (row) setStats(row as PlatformStats)
+    })
+  }, [])
 
   const filtered = faqCategories.flatMap(cat =>
     cat.items
@@ -127,14 +145,14 @@ export default function AidePage() {
         </div>
       )}
 
-      {/* Stats */}
-      {!search.trim() && !activeCategory && (
+      {/* Stats — données réelles de la plateforme */}
+      {!search.trim() && !activeCategory && stats && (
         <div className="grid grid-cols-2 gap-3 mb-5">
           {[
-            { label: 'Membres actifs', value: platformStats.members },
-            { label: 'Couples formés', value: platformStats.couples },
-            { label: 'Pays', value: platformStats.countries },
-            { label: 'Satisfaction', value: platformStats.satisfaction },
+            { label: 'Membres inscrits', value: stats.members_total.toLocaleString('fr-FR') },
+            { label: 'Profils validés', value: stats.members_validated.toLocaleString('fr-FR') },
+            { label: 'Pays représentés', value: String(stats.countries) },
+            { label: 'Mises en relation', value: stats.matches.toLocaleString('fr-FR') },
           ].map(({ label, value }) => (
             <div key={label} className="bg-white border border-gray-100 rounded-xl p-3 text-center">
               <p className="text-xl font-bold text-[#10B981]">{value}</p>

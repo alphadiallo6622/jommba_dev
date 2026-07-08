@@ -28,7 +28,7 @@ function parseLocation(location: string): string {
 export default function FavorisCard({ entry, onRemove }: Props) {
   const router = useRouter()
   const { profile, addedAt } = entry
-  const photo = profile.photos[0] ?? 'https://i.pravatar.cc/400?img=1'
+  const photo = profile.photos[0] ?? '/avatar-placeholder.svg'
 
   return (
     <div

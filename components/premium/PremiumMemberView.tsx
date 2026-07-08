@@ -1,21 +1,53 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { CheckCircle, Crown, RefreshCw, X, ChevronDown, ChevronUp, Calendar, Zap } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { createClient } from '@/lib/supabase/client'
+import { useAuth } from '@/components/providers/AuthProvider'
 import { useCurrentUser } from '@/lib/use-current-user'
 import { features, faqs } from '@/lib/mock-premium'
 
-const MOCK_EXPIRY = '7 juillet 2026'
-const MOCK_PLAN = 'Premium 1 Mois'
-const MOCK_DAYS_LEFT = 30
+const MONTHS_FR = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre']
+
+function frDate(iso: string): string {
+  const d = new Date(iso)
+  return `${d.getDate()} ${MONTHS_FR[d.getMonth()]} ${d.getFullYear()}`
+}
+
+type SubInfo = { expiry: string; daysLeft: number; planLabel: string }
 
 export default function PremiumMemberView() {
   const router = useRouter()
+  const { user } = useAuth()
   const { firstName, stats } = useCurrentUser()
   const [openFaq, setOpenFaq] = useState<number | null>(null)
   const [showCancelConfirm, setShowCancelConfirm] = useState(false)
+  const [sub, setSub] = useState<SubInfo | null>(null)
+
+  // Abonnement réel du membre (subscriptions — RLS : propriétaire uniquement)
+  useEffect(() => {
+    if (!user) return
+    const supabase = createClient()
+    supabase
+      .from('subscriptions')
+      .select('plan, status, duration_months, current_period_end')
+      .eq('user_id', user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!data || data.plan !== 'premium' || !data.current_period_end) return
+        const end = new Date(data.current_period_end)
+        const daysLeft = Math.max(0, Math.ceil((end.getTime() - Date.now()) / 86_400_000))
+        setSub({
+          expiry: frDate(data.current_period_end),
+          daysLeft,
+          planLabel: `Premium ${data.duration_months ?? 1} Mois`,
+        })
+      })
+  }, [user])
+
+  const expiry = sub?.expiry ?? '—'
 
   const handleRenew = () => {
     toast.success('Renouvellement — disponible depuis les paramètres dans la prochaine version')
@@ -23,7 +55,7 @@ export default function PremiumMemberView() {
 
   const handleCancel = () => {
     setShowCancelConfirm(false)
-    toast.info("Abonnement annulé. Tu conserves l'accès jusqu'au 7 juillet 2026.")
+    toast.info(`Abonnement annulé. Tu conserves l'accès jusqu'au ${expiry}.`)
   }
 
   return (
@@ -40,17 +72,19 @@ export default function PremiumMemberView() {
             Tous tes avantages sont actifs
           </p>
         </div>
-        <div className="bg-white/10 rounded-xl px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm">
-            <Calendar className="w-4 h-4 text-emerald-300" />
-            <span className="text-white/80">Expire le</span>
-            <span className="font-semibold">{MOCK_EXPIRY}</span>
+        {sub && (
+          <div className="bg-white/10 rounded-xl px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm">
+              <Calendar className="w-4 h-4 text-emerald-300" />
+              <span className="text-white/80">Expire le</span>
+              <span className="font-semibold">{sub.expiry}</span>
+            </div>
+            <span className="text-xs bg-emerald-500 text-white px-2 py-0.5 rounded-full font-medium">
+              {sub.daysLeft}j restants
+            </span>
           </div>
-          <span className="text-xs bg-emerald-500 text-white px-2 py-0.5 rounded-full font-medium">
-            {MOCK_DAYS_LEFT}j restants
-          </span>
-        </div>
-        <div className="text-xs text-white/50">{MOCK_PLAN} · Renouvellement automatique</div>
+        )}
+        {sub && <div className="text-xs text-white/50">{sub.planLabel} · Renouvellement automatique</div>}
       </section>
 
       {/* Impact stats since premium */}
@@ -58,9 +92,9 @@ export default function PremiumMemberView() {
         <h2 className="font-bold text-gray-900 text-base mb-3">Ton impact depuis Premium</h2>
         <div className="grid grid-cols-3 gap-3">
           {[
-            { value: stats?.visitors ?? 89,  label: 'Visiteurs' },
-            { value: stats?.favorites ?? 34, label: 'Favoris' },
-            { value: stats?.requests ?? 12,  label: 'Contacts' },
+            { value: stats?.visitors ?? 0,  label: 'Visiteurs' },
+            { value: stats?.favorites ?? 0, label: 'Favoris' },
+            { value: stats?.requests ?? 0,  label: 'Contacts' },
           ].map(({ value, label }) => (
             <div key={label} className="bg-emerald-50 border border-emerald-100 rounded-xl py-4 flex flex-col items-center gap-1">
               <span className="text-2xl font-bold text-emerald-600">{value}</span>
@@ -121,7 +155,7 @@ export default function PremiumMemberView() {
           </div>
           <div className="flex-1 text-left">
             <p className="text-sm font-semibold text-gray-900">Renouveler maintenant</p>
-            <p className="text-xs text-gray-400">Prolonger avant le {MOCK_EXPIRY}</p>
+            <p className="text-xs text-gray-400">Prolonger avant le {expiry}</p>
           </div>
           <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">
             Offre -33%
@@ -152,7 +186,7 @@ export default function PremiumMemberView() {
           </div>
           <div className="flex-1 text-left">
             <p className="text-sm font-semibold text-red-500">Annuler l&apos;abonnement</p>
-            <p className="text-xs text-gray-400">Tu restes Premium jusqu&apos;au {MOCK_EXPIRY}</p>
+            <p className="text-xs text-gray-400">Tu restes Premium jusqu&apos;au {expiry}</p>
           </div>
         </button>
       </section>
@@ -199,7 +233,7 @@ export default function PremiumMemberView() {
           >
             <h3 className="font-bold text-gray-900 text-lg">Annuler le Premium ?</h3>
             <p className="text-sm text-gray-500 leading-relaxed">
-              Tu conserveras tous tes avantages jusqu&apos;au <span className="font-semibold text-gray-800">{MOCK_EXPIRY}</span>.
+              Tu conserveras tous tes avantages jusqu&apos;au <span className="font-semibold text-gray-800">{expiry}</span>.
               Après cette date, ton profil repassera en version gratuite.
             </p>
             <div className="space-y-2 pt-1">

@@ -170,7 +170,7 @@ export async function fetchConversationList(myId: string): Promise<ConversationL
       otherUserId:    otherId,
       firstName:      p?.first_name ?? '…',
       lastInitial:    (p?.last_name ?? '').charAt(0) || '?',
-      photo:          p?.avatar_url ?? `https://i.pravatar.cc/150?u=${otherId}`,
+      photo:          p?.avatar_url ?? '/avatar-placeholder.svg',
       lastMessage:    last?.content ?? 'Démarrez la conversation...',
       lastMessageAt:  last?.created_at ?? c.last_message_at,
       isRead:         nUnread === 0,
