@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { useCurrentUser } from '@/lib/use-current-user'
 import { sendContactRequest } from '@/lib/supabase/likes-service'
+import { notifyByEmail } from '@/lib/notify-email'
 import { oppositeGender } from '@/lib/gender'
 import { MIN_VISIBLE_PROFILE_COMPLETION } from '@/lib/constants'
 
@@ -98,7 +99,7 @@ function GridCard({ profile, liked, onLike }: {
 export default function ProfileGrid() {
   const router  = useRouter()
   const { user } = useAuth()
-  const { isPremium, gender } = useCurrentUser()
+  const { isPremium, gender, firstName: myFirstName } = useCurrentUser()
   const [profiles, setProfiles] = useState<GridProfile[]>([])
   const [index, setIndex]       = useState(0)
   const [liked, setLiked]       = useState<Set<string>>(new Set())
@@ -158,6 +159,7 @@ export default function ProfileGrid() {
       return false
     }
     setLiked(prev => new Set([...prev, id]))
+    notifyByEmail(id, 'demande', myFirstName || 'Un membre')
     toast.success(`Demande envoyée à ${name} ✓`)
     return true
   }

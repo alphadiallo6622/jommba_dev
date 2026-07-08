@@ -41,7 +41,7 @@ alter table public.profile_visitors
 alter table public.profiles add column if not exists flaws text;
 
 alter table public.user_preferences
-  add column if not exists push_enabled  boolean not null default false,
+  add column if not exists push_enabled  boolean not null default true,
   add column if not exists email_demande boolean not null default true,
   add column if not exists email_message boolean not null default true,
   add column if not exists email_promo   boolean not null default true;

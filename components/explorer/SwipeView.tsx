@@ -8,6 +8,7 @@ import { useFavorisStore } from '@/store/favoris.store'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { useCurrentUser } from '@/lib/use-current-user'
 import { sendContactRequest, addFavorite as dbAddFavorite, removeFavorite as dbRemoveFavorite } from '@/lib/supabase/likes-service'
+import { notifyByEmail } from '@/lib/notify-email'
 import { cn } from '@/lib/utils'
 import ProfileSwipeCard from './ProfileSwipeCard'
 import ProfileDetails from './ProfileDetails'
@@ -16,7 +17,7 @@ export default function SwipeView() {
   const { currentProfileIndex, nextProfile, tourHighlight, profiles, setShowPremiumModal } = useExplorerStore()
   const { isFavorite, addFavorite, removeFavorite } = useFavorisStore()
   const { user } = useAuth()
-  const { isPremium } = useCurrentUser()
+  const { isPremium, firstName: myFirstName } = useCurrentUser()
   const [isSliding, setIsSliding]         = useState(false)
   const [skipConfirmOpen, setSkipConfirm] = useState(false)
 
@@ -62,6 +63,7 @@ export default function SwipeView() {
       }
       return
     }
+    notifyByEmail(profile.id, 'demande', myFirstName || 'Un membre')
     animateAndNext(() => toast.success('Demande envoyée ✓'))
   }
 

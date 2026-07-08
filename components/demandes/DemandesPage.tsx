@@ -8,6 +8,8 @@ import type { ReceivedRequest, SentRequest, ContactEntry } from '@/lib/mock-dema
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/providers/AuthProvider'
+import { useCurrentUser } from '@/lib/use-current-user'
+import { notifyByEmail } from '@/lib/notify-email'
 import ReceivedRequestCard from './ReceivedRequestCard'
 import SentRequestCard from './SentRequestCard'
 import ContactCard from './ContactCard'
@@ -42,6 +44,7 @@ function mapStatus(status: string): 'en-attente' | 'acceptee' | 'refusee' {
 export default function DemandesPage() {
   const router = useRouter()
   const { user } = useAuth()
+  const { firstName: myFirstName } = useCurrentUser()
   const [activeTab, setActiveTab]     = useState<MainTab>('recues')
   const [subFilter, setSubFilter]     = useState<SubFilter>('toutes')
   const [recues, setRecues]           = useState<ReceivedRequest[]>([])
@@ -158,6 +161,7 @@ export default function DemandesPage() {
     }
     setRecues(prev => prev.filter(r => r.id !== pendingRequest.id))
     setPendingRequest(null)
+    notifyByEmail(pendingRequest.id, 'demande_acceptee', myFirstName || 'Un membre')
     toast.success('Demande acceptée ✓')
     router.push(`/dashboard/messages/${pendingRequest.id}`)
   }

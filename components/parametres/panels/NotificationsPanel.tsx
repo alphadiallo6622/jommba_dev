@@ -12,7 +12,7 @@ type PrefKey = 'push_enabled' | 'email_demande' | 'email_message' | 'email_promo
 
 export default function NotificationsPanel({ open, onClose }: Props) {
   const { user } = useAuth()
-  const [pushEnabled, setPushEnabled]   = useState(false)
+  const [pushEnabled, setPushEnabled]   = useState(true)
   const [emailDemande, setEmailDemande] = useState(true)
   const [emailMessage, setEmailMessage] = useState(true)
   const [emailPromo, setEmailPromo]     = useState(true)

@@ -12,6 +12,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { useCurrentUser } from '@/lib/use-current-user'
 import { sendContactRequest } from '@/lib/supabase/likes-service'
+import { notifyByEmail } from '@/lib/notify-email'
 import { oppositeGender } from '@/lib/gender'
 import { MIN_VISIBLE_PROFILE_COMPLETION } from '@/lib/constants'
 import type { FullProfile } from '@/lib/mock-demandes'
@@ -59,7 +60,7 @@ function profileToFull(p: Profile, requestStatus: FullProfile['requestStatus']):
 export default function ProfilePage({ id }: Props) {
   const router  = useRouter()
   const { user } = useAuth()
-  const { isPremium, gender } = useCurrentUser()
+  const { isPremium, gender, firstName: myFirstName } = useCurrentUser()
   const [profile, setProfile]   = useState<FullProfile | null>(null)
   const [loading, setLoading]   = useState(true)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -140,6 +141,7 @@ export default function ProfilePage({ id }: Props) {
     const result = await sendContactRequest(user.id, id, isPremium)
     if (!result.ok) { toast.error(result.message); return }
     setProfile(p => p ? { ...p, requestStatus: 'en-attente' } : p)
+    notifyByEmail(id, 'demande', myFirstName || 'Un membre')
     toast.success('Demande envoyée ✓')
   }
 
@@ -149,6 +151,7 @@ export default function ProfilePage({ id }: Props) {
     await supabase.from('likes').update({ status: 'accepted' })
       .eq('sender_id', id).eq('receiver_id', user.id).eq('type', 'request')
     setProfile(p => p ? { ...p, requestStatus: 'acceptee' } : p)
+    notifyByEmail(id, 'demande_acceptee', myFirstName || 'Un membre')
     toast.success('Demande acceptée ✓')
     router.push(`/dashboard/messages/${id}`)
   }

@@ -17,6 +17,7 @@ import {
   formatTimeAgo,
 } from '@/lib/supabase/messages-service'
 import type { Message as DbMessage } from '@/lib/supabase/types'
+import { notifyByEmail } from '@/lib/notify-email'
 import ConversationHeader from './ConversationHeader'
 import MessageArea from './MessageArea'
 import MessageInput from './MessageInput'
@@ -37,7 +38,7 @@ function toUiMessage(m: DbMessage, myId: string): Message {
 
 export default function ConversationPage({ id }: Props) {
   const router        = useRouter()
-  const { isPremium } = useCurrentUser()
+  const { isPremium, firstName: myFirstName } = useCurrentUser()
   const { user }      = useAuth()
 
   const [conv, setConv]                   = useState<Conversation | null>(null)
@@ -152,6 +153,7 @@ export default function ConversationPage({ id }: Props) {
       return
     }
     setMessages(prev => prev.map(m => m.id === optimistic.id ? toUiMessage(saved, user.id) : m))
+    notifyByEmail(id, 'message', myFirstName || 'Un membre')
   }
 
   if (loading) {
