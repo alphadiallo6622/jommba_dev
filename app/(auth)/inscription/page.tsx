@@ -13,6 +13,7 @@ import {
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
+import { TurnstileWidget } from '@/components/auth/TurnstileWidget'
 
 /* ─── Schemas ─── */
 const step1Schema = z.object({
@@ -125,6 +126,7 @@ export default function InscriptionPage() {
   const [step1Data, setStep1Data] = useState<Step1Data | null>(null)
   const [showPwd, setShowPwd]     = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
 
   const {
     register: r1,
@@ -187,8 +189,24 @@ export default function InscriptionPage() {
   /* Step 2 → Supabase signUp */
   const onStep2 = async (data: Step2Data) => {
     if (!step1Data) return
+    if (!turnstileToken) {
+      toast.error('Merci de valider le contrôle anti-robot.')
+      return
+    }
     setLoading(true)
     try {
+      const verifyRes = await fetch('/api/verify-turnstile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: turnstileToken }),
+      })
+      const verifyResult = await verifyRes.json()
+      if (!verifyResult.success) {
+        toast.error('Vérification anti-robot échouée. Réessaie.')
+        setTurnstileToken(null)
+        return
+      }
+
       const supabase = createClient()
       const { error } = await supabase.auth.signUp({
         email:    step1Data.email,
@@ -432,24 +450,11 @@ export default function InscriptionPage() {
                 {e2.confirmPassword && <p className="text-xs text-red-500 mt-1">{e2.confirmPassword.message}</p>}
               </div>
 
-              {/* Fake Cloudflare CAPTCHA */}
-              <div className="border border-gray-200 rounded-xl p-3.5 flex items-center justify-between bg-gray-50">
-                <div className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded border-2 border-gray-300 bg-white flex items-center justify-center">
-                    <Check className="w-3 h-3 text-emerald-500" />
-                  </div>
-                  <span className="text-sm text-gray-700 font-medium">Je ne suis pas un robot</span>
-                </div>
-                <div className="flex flex-col items-end">
-                  <div className="w-8 h-8 opacity-60">
-                    <svg viewBox="0 0 65 65" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M32.5 5L60 20v25L32.5 60 5 45V20L32.5 5z" fill="#F48120" />
-                      <path d="M32.5 15L50 24.5v16L32.5 50 15 40.5v-16L32.5 15z" fill="white" fillOpacity="0.3" />
-                    </svg>
-                  </div>
-                  <span className="text-[8px] text-gray-400">Cloudflare</span>
-                </div>
-              </div>
+              {/* Cloudflare Turnstile */}
+              <TurnstileWidget
+                onVerify={token => setTurnstileToken(token)}
+                onExpire={() => setTurnstileToken(null)}
+              />
 
               {/* Actions */}
               <div className="flex gap-3 pt-1">
@@ -463,7 +468,7 @@ export default function InscriptionPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || !turnstileToken}
                   className="flex-1 py-2.5 rounded-xl text-white font-semibold text-sm transition-opacity hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2"
                   style={{ background: '#10B981' }}
                 >
