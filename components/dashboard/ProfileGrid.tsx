@@ -132,7 +132,7 @@ export default function ProfileGrid() {
                 score:        p.profile_completion ?? 80,
                 photo:        p.avatar_url ?? '/avatar-placeholder.svg',
                 isPremium:    p.is_premium,
-                photoBlurred: p.photos_blurred ?? true,
+                photoBlurred: p.photos_blurred ?? false,
               }))
           )
         }

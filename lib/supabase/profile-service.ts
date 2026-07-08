@@ -55,7 +55,7 @@ export function supabaseProfileToExplorer(p: Profile): ExplorerProfile {
     job: p.job ?? '',
     photos: [p.avatar_url ?? '/avatar-placeholder.svg'],
     isEnAvant: p.is_premium,
-    photosBlurred: p.photos_blurred ?? true,
+    photosBlurred: p.photos_blurred ?? false,
     marriageVision: p.marriage_vision ?? '',
     ceQueJeRecherche: p.seeking ?? '',
     centresInteret: p.interests ?? '',

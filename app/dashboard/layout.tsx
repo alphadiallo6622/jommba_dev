@@ -44,7 +44,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       }
       // Le flou vit sur profiles (lisible par les visiteurs via RLS)
       prefs = {
-        photosBlurred: profile.photos_blurred ?? true,
+        photosBlurred: profile.photos_blurred ?? false,
         soundEnabled:  preferences?.sound_enabled ?? true,
       }
     }

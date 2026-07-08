@@ -30,7 +30,7 @@ function profileToFull(p: Profile, requestStatus: FullProfile['requestStatus']):
     firstName:      p.first_name,
     age:            p.age ?? 0,
     photo:          p.avatar_url ?? '/avatar-placeholder.svg',
-    isPhotoBlurred: p.photos_blurred ?? true,
+    isPhotoBlurred: p.photos_blurred ?? false,
     isPremium:      p.is_premium,
     location:       [p.city, p.country].filter(Boolean).join(', ') || 'Inconnu',
     tags:           [p.marital_status, p.job, p.education].filter(Boolean) as string[],
