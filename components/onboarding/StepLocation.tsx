@@ -91,7 +91,7 @@ export default function StepLocation({ onNext, onBack }: Props) {
         </div>
       )}
 
-      {/* Region (Senegal only) */}
+      {/* Region — dropdown pour le Sénégal, champ libre pour les autres pays africains */}
       {type === 'afrique' && location?.country === 'Sénégal' && (
         <div>
           <label className="text-xs font-semibold text-gray-700 block mb-1.5">Région</label>
@@ -103,6 +103,18 @@ export default function StepLocation({ onNext, onBack }: Props) {
             <option value="">Sélectionner une région</option>
             {SENEGAL_REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
+        </div>
+      )}
+      {type === 'afrique' && location?.country && location.country !== 'Sénégal' && (
+        <div>
+          <label className="text-xs font-semibold text-gray-700 block mb-1.5">Ville</label>
+          <input
+            type="text"
+            value={location?.region ?? ''}
+            onChange={e => setRegion(e.target.value)}
+            placeholder="Ex : Conakry, Bamako…"
+            className="w-full py-2.5 px-3 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 bg-white"
+          />
         </div>
       )}
 
@@ -118,6 +130,20 @@ export default function StepLocation({ onNext, onBack }: Props) {
             <option value="">Sélectionner</option>
             {DIASPORA_COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
+        </div>
+      )}
+
+      {/* Diaspora ville */}
+      {type === 'diaspora' && location?.residenceCountry && (
+        <div>
+          <label className="text-xs font-semibold text-gray-700 block mb-1.5">Ville</label>
+          <input
+            type="text"
+            value={location?.region ?? ''}
+            onChange={e => setRegion(e.target.value)}
+            placeholder="Ex : Paris, Montréal…"
+            className="w-full py-2.5 px-3 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 bg-white"
+          />
         </div>
       )}
 

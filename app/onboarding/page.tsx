@@ -69,9 +69,13 @@ export default function OnboardingPage() {
         ) age--
       }
 
-      // Determine country and city from location
-      const country = store.location?.residenceCountry ?? store.location?.country ?? null
-      const city    = store.location?.region ?? null
+      // Determine country and city from location.
+      // Un champ vide reste '' (jamais undefined) dans le store tant qu'il
+      // n'a pas été rempli — ?? seul ne le convertit pas en null, ce qui
+      // faussait le calcul de complétude du profil (city:"" comptait comme
+      // "rempli"). On normalise explicitement ici.
+      const country = (store.location?.residenceCountry || store.location?.country || null)
+      const city    = (store.location?.region?.trim() || null)
 
       // First valid photo = avatar
       const avatar_url = store.photos.find(p => Boolean(p)) ?? null

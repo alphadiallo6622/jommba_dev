@@ -4,6 +4,7 @@ import { AlertTriangle, PauseCircle, MessageCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCurrentUser } from '@/lib/use-current-user'
 import { useVisibilityStore } from '@/store/visibility.store'
+import { MIN_VISIBLE_PROFILE_COMPLETION } from '@/lib/constants'
 
 export default function InvisibleAlert() {
   const router = useRouter()
@@ -44,7 +45,7 @@ export default function InvisibleAlert() {
     )
   }
 
-  if (profileCompletion >= 100) return null
+  if (profileCompletion >= MIN_VISIBLE_PROFILE_COMPLETION) return null
 
   return (
     <div className="rounded-xl p-4 border border-amber-200" style={{ background: '#FEF3C7' }}>

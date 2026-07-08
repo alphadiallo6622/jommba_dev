@@ -16,6 +16,7 @@ import { useCurrentUser } from '@/lib/use-current-user'
 import { createClient } from '@/lib/supabase/client'
 import { supabaseProfileToExplorer } from '@/lib/supabase/profile-service'
 import { oppositeGender, type Gender } from '@/lib/gender'
+import { MIN_VISIBLE_PROFILE_COMPLETION } from '@/lib/constants'
 import type { Profile } from '@/lib/supabase/types'
 
 export default function ExplorerPage() {
@@ -43,7 +44,7 @@ export default function ExplorerPage() {
           .eq('status', 'validated')
           .eq('visibility', 'active')
           .eq('gender', targetGender)
-          .gte('profile_completion', 100)
+          .gte('profile_completion', MIN_VISIBLE_PROFILE_COMPLETION)
           .order('created_at', { ascending: false })
           .limit(50),
         supabase

@@ -13,6 +13,7 @@ import { useAuth } from '@/components/providers/AuthProvider'
 import { useCurrentUser } from '@/lib/use-current-user'
 import { sendContactRequest } from '@/lib/supabase/likes-service'
 import { oppositeGender } from '@/lib/gender'
+import { MIN_VISIBLE_PROFILE_COMPLETION } from '@/lib/constants'
 import type { FullProfile } from '@/lib/mock-demandes'
 import type { Profile } from '@/lib/supabase/types'
 import ProfileSection from './ProfileSection'
@@ -88,9 +89,9 @@ export default function ProfilePage({ id }: Props) {
         return
       }
 
-      // Un profil incomplet (< 100%) est invisible pour les autres — même
-      // règle que la bannière "Ton profil est invisible" sur le dashboard.
-      if (((p as Profile).profile_completion ?? 0) < 100) {
+      // Un profil incomplet est invisible pour les autres — même règle que
+      // la bannière "Ton profil est invisible" sur le dashboard.
+      if (((p as Profile).profile_completion ?? 0) < MIN_VISIBLE_PROFILE_COMPLETION) {
         setProfile(null)
         return
       }

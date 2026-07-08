@@ -10,6 +10,7 @@ import { useAuth } from '@/components/providers/AuthProvider'
 import { useCurrentUser } from '@/lib/use-current-user'
 import { sendContactRequest } from '@/lib/supabase/likes-service'
 import { oppositeGender } from '@/lib/gender'
+import { MIN_VISIBLE_PROFILE_COMPLETION } from '@/lib/constants'
 
 type GridProfile = {
   id: string
@@ -115,7 +116,7 @@ export default function ProfileGrid() {
       .eq('status', 'validated')
       .eq('visibility', 'active')
       .eq('gender', targetGender)
-      .gte('profile_completion', 100)
+      .gte('profile_completion', MIN_VISIBLE_PROFILE_COMPLETION)
       .order('profile_completion', { ascending: false })
       .limit(12)
       .then(({ data }) => {
