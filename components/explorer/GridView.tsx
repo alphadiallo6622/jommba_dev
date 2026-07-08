@@ -38,6 +38,7 @@ export default function GridView() {
             key={profile.id}
             profile={profile}
             blurred={(!isPremium && i >= FREE_CARD_COUNT) || profile.photosBlurred}
+            viewerIsPremium={isPremium}
           />
         ))}
       </div>

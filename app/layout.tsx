@@ -3,6 +3,7 @@ import { inter, playfair, arefRuqaa } from "@/lib/fonts";
 import { SITE_METADATA } from "@/lib/constants";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/components/providers/AuthProvider";
+import { PresenceProvider } from "@/components/providers/PresenceProvider";
 import { createClient } from "@/lib/supabase/server";
 import "./globals.css";
 
@@ -28,7 +29,9 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-jommba-bg text-text-secondary font-sans">
         <AuthProvider initialUser={user}>
-          {children}
+          <PresenceProvider>
+            {children}
+          </PresenceProvider>
         </AuthProvider>
         <Toaster richColors position="top-center" />
       </body>

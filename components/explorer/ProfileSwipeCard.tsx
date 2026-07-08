@@ -1,19 +1,22 @@
 'use client'
 
-import { Star } from 'lucide-react'
+import { Star, BadgeCheck } from 'lucide-react'
 import { ExplorerProfile } from '@/lib/mock-explorer'
 import { cn } from '@/lib/utils'
+import { useIsOnline } from '@/components/providers/PresenceProvider'
 
 type Props = {
   profile: ExplorerProfile
   highlightPhoto?: boolean
   isFavorite?: boolean
   onToggleFavorite?: () => void
+  viewerIsPremium?: boolean
 }
 
-export default function ProfileSwipeCard({ profile, highlightPhoto, isFavorite, onToggleFavorite }: Props) {
+export default function ProfileSwipeCard({ profile, highlightPhoto, isFavorite, onToggleFavorite, viewerIsPremium }: Props) {
   const photoUrl   = profile.photos[0] ?? '/avatar-placeholder.svg'
   const photoCount = profile.photos.length
+  const isOnline   = useIsOnline(profile.id)
 
   return (
     <div className={cn(
@@ -30,6 +33,13 @@ export default function ProfileSwipeCard({ profile, highlightPhoto, isFavorite, 
         {profile.isEnAvant && (
           <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 bg-violet-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">
             ⭐ En avant
+          </div>
+        )}
+
+        {viewerIsPremium && isOnline && (
+          <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 bg-white/90 text-emerald-600 text-xs font-bold px-2.5 py-1 rounded-full shadow-sm">
+            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            En ligne
           </div>
         )}
 
@@ -54,8 +64,9 @@ export default function ProfileSwipeCard({ profile, highlightPhoto, isFavorite, 
         {/* Info overlay */}
         <div className="absolute bottom-4 left-4 right-4 text-white">
           <div className="flex items-center justify-between mb-1">
-            <h2 className="text-xl font-bold drop-shadow-sm">
+            <h2 className="text-xl font-bold drop-shadow-sm flex items-center gap-1.5">
               {profile.firstName} {profile.lastInitial}., {profile.age}
+              <BadgeCheck className="w-4 h-4 text-sky-400 shrink-0" aria-label="Profil vérifié" />
             </h2>
 
             {/* Star / Favorite button */}

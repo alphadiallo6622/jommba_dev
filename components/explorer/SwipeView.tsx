@@ -94,6 +94,7 @@ export default function SwipeView() {
             highlightPhoto={tourHighlight === 'photo'}
             isFavorite={isFavorite(profile.id)}
             onToggleFavorite={handleToggleFavorite}
+            viewerIsPremium={isPremium}
           />
         </div>
 

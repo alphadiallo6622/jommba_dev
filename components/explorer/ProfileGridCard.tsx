@@ -1,19 +1,22 @@
 'use client'
 
-import { Plus, Crown } from 'lucide-react'
+import { Plus, Crown, BadgeCheck } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { ExplorerProfile } from '@/lib/mock-explorer'
 import { cn } from '@/lib/utils'
+import { useIsOnline } from '@/components/providers/PresenceProvider'
 
 type Props = {
   profile: ExplorerProfile
   blurred?: boolean
+  viewerIsPremium?: boolean
 }
 
-export default function ProfileGridCard({ profile, blurred }: Props) {
+export default function ProfileGridCard({ profile, blurred, viewerIsPremium }: Props) {
   const router  = useRouter()
   const photoUrl = profile.photos[0] ?? '/avatar-placeholder.svg'
+  const isOnline = useIsOnline(profile.id)
 
   return (
     <div className={cn(
@@ -57,6 +60,13 @@ export default function ProfileGridCard({ profile, blurred }: Props) {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
 
+            {viewerIsPremium && isOnline && (
+              <div className="absolute top-2 right-2 flex items-center gap-1 bg-white/90 text-emerald-600 text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                En ligne
+              </div>
+            )}
+
             {/* Add button */}
             <button
               onClick={() => toast.success('Demande envoyée ✓')}
@@ -71,8 +81,9 @@ export default function ProfileGridCard({ profile, blurred }: Props) {
 
       {/* Info — always visible, but subdued when blurred */}
       <div className={cn('p-2.5 space-y-1', blurred && 'opacity-50')}>
-        <p className="text-sm font-semibold text-gray-900 truncate">
+        <p className="text-sm font-semibold text-gray-900 truncate flex items-center gap-1">
           {profile.firstName} {profile.lastInitial}., {profile.age}
+          <BadgeCheck className="w-3.5 h-3.5 text-sky-500 shrink-0" aria-label="Profil vérifié" />
         </p>
         <p className="text-xs text-gray-400 flex items-center gap-1 truncate">
           📍 {profile.location}

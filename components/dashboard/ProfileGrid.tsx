@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Heart, Crown, MapPin, Briefcase, X, Star } from 'lucide-react'
+import { Heart, Crown, MapPin, Briefcase, X, Star, BadgeCheck } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -10,6 +10,7 @@ import { useAuth } from '@/components/providers/AuthProvider'
 import { useCurrentUser } from '@/lib/use-current-user'
 import { sendContactRequest } from '@/lib/supabase/likes-service'
 import { notifyByEmail } from '@/lib/notify-email'
+import { useIsOnline } from '@/components/providers/PresenceProvider'
 import { oppositeGender } from '@/lib/gender'
 import { MIN_VISIBLE_PROFILE_COMPLETION } from '@/lib/constants'
 
@@ -31,12 +32,14 @@ function scoreColor(score: number) {
   return 'bg-rose-500'
 }
 
-function GridCard({ profile, liked, onLike }: {
+function GridCard({ profile, liked, onLike, viewerIsPremium }: {
   profile: GridProfile
   liked: boolean
   onLike: () => void
+  viewerIsPremium: boolean
 }) {
   const router = useRouter()
+  const isOnline = useIsOnline(profile.id)
   return (
     <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer group">
       <div
@@ -59,6 +62,13 @@ function GridCard({ profile, liked, onLike }: {
           </div>
         )}
 
+        {viewerIsPremium && isOnline && (
+          <div className="absolute top-2 right-11 flex items-center gap-1 bg-white/90 text-emerald-600 text-[10px] font-bold px-2 py-1 rounded-full shadow">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            En ligne
+          </div>
+        )}
+
         <button
           onClick={(e) => { e.stopPropagation(); onLike() }}
           className={cn(
@@ -78,8 +88,9 @@ function GridCard({ profile, liked, onLike }: {
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 p-3 pointer-events-none">
-          <p className="text-white font-bold text-base leading-tight">
+          <p className="text-white font-bold text-base leading-tight flex items-center gap-1">
             {profile.name} <span className="font-normal opacity-90">{profile.age}</span>
+            <BadgeCheck className="w-4 h-4 text-sky-400 shrink-0" aria-label="Profil vérifié" />
           </p>
           <div className="flex items-center gap-1 mt-0.5">
             <MapPin className="w-3 h-3 text-white/70 shrink-0" />
@@ -197,6 +208,7 @@ export default function ProfileGrid() {
               profile={p}
               liked={liked.has(p.id)}
               onLike={() => handleLike(p.id, p.name)}
+              viewerIsPremium={isPremium}
             />
           ))}
         </div>

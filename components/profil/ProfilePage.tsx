@@ -5,9 +5,10 @@ import { useRouter } from 'next/navigation'
 import {
   ArrowLeft, Camera, Crown, MoreHorizontal, MapPin, Plus,
   Bot, Lightbulb, Heart, Users, BookOpen, Home, Globe,
-  Star, AlertCircle, XCircle, Languages, Loader2,
+  Star, AlertCircle, XCircle, Languages, Loader2, BadgeCheck,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useIsOnline } from '@/components/providers/PresenceProvider'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { useCurrentUser } from '@/lib/use-current-user'
@@ -61,6 +62,7 @@ export default function ProfilePage({ id }: Props) {
   const router  = useRouter()
   const { user } = useAuth()
   const { isPremium, gender, firstName: myFirstName } = useCurrentUser()
+  const isOnline = useIsOnline(id)
   const [profile, setProfile]   = useState<FullProfile | null>(null)
   const [loading, setLoading]   = useState(true)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -224,6 +226,11 @@ export default function ProfilePage({ id }: Props) {
             <Crown className="w-3 h-3" /> PREMIUM
           </span>
         )}
+        {isPremium && isOnline && (
+          <span className="absolute top-3 left-3 bg-white/90 text-emerald-600 text-xs px-3 py-1 rounded-full font-semibold flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500" /> En ligne
+          </span>
+        )}
         <div className="absolute bottom-3 right-3">
           <button
             onClick={() => setMenuOpen(v => !v)}
@@ -254,8 +261,9 @@ export default function ProfilePage({ id }: Props) {
       <PhotoUpsellBanner />
 
       <div className="mb-4">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">
+        <h1 className="text-2xl font-bold text-gray-900 mb-1 flex items-center gap-1.5">
           {profile.firstName}, {profile.age}
+          <BadgeCheck className="w-5 h-5 text-sky-500 shrink-0" aria-label="Profil vérifié" />
         </h1>
         <p className="text-gray-500 text-sm flex items-center gap-1 mb-3">
           <MapPin className="w-3.5 h-3.5" /> {profile.location}
