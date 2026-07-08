@@ -10,10 +10,6 @@ import SettingsDrawer from '../SettingsDrawer'
 
 type Props = { open: boolean; onClose: () => void }
 
-const DAYS   = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, '0'))
-const MONTHS = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc']
-const YEARS  = Array.from({ length: 50 }, (_, i) => String(2005 - i))
-
 const SITUATIONS  = ['Célibataire', 'Divorcé(e)', 'Veuf/Veuve', 'Marié(e) - polygamie']
 const ENFANTS_OPT = ['Aucun', '1', '2', '3', '4+']
 
@@ -22,9 +18,6 @@ export default function InfosPanel({ open, onClose }: Props) {
   const { user } = useAuth()
   const [firstName, setFirstName] = useState(mockUser.firstName)
   const [lastName, setLastName]   = useState(mockUser.lastName)
-  const [day, setDay]     = useState('15')
-  const [month, setMonth] = useState('03')
-  const [year, setYear]   = useState('1992')
   const [height, setHeight] = useState(String(mockUser.height))
   const [situation, setSituation] = useState('Célibataire')
   const [enfants, setEnfants] = useState('Aucun')
@@ -45,20 +38,13 @@ export default function InfosPanel({ open, onClose }: Props) {
     if (!user) return
     if (!firstName.trim()) { toast.error('Le prénom est obligatoire'); return }
 
-    // Âge calculé depuis la date de naissance
-    const birth = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
-    const today = new Date()
-    let age = today.getFullYear() - birth.getFullYear()
-    if (
-      today.getMonth() < birth.getMonth() ||
-      (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate())
-    ) age--
-
     setSaving(true)
+    // L'âge n'est jamais renvoyé ici : il est fixé à l'onboarding et la date
+    // de naissance n'est pas stockée en base (seul l'âge calculé l'est) —
+    // il n'y a donc aucune source fiable pour le recalculer depuis ce panneau.
     const err = await updateMyProfile(user.id, {
       first_name:     firstName.trim(),
       last_name:      lastName.trim() || null,
-      age:            age >= 18 && age <= 99 ? age : undefined,
       height:         height ? parseInt(height) : null,
       marital_status: situation,
       has_children:   enfants === 'Aucun' ? 'Non' : enfants,
@@ -70,7 +56,6 @@ export default function InfosPanel({ open, onClose }: Props) {
     onClose()
   }
 
-  const select = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 bg-white focus:outline-none focus:border-[#10B981]'
   const input  = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-[#10B981]'
 
   return (
@@ -97,23 +82,15 @@ export default function InfosPanel({ open, onClose }: Props) {
           <input value={lastName} onChange={e => setLastName(e.target.value)} className={input} />
         </div>
 
-        {/* DDN */}
+        {/* Âge — fixé à l'onboarding, non modifiable */}
         <div>
-          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Date de naissance</label>
-          <div className="grid grid-cols-3 gap-2">
-            <select value={day} onChange={e => setDay(e.target.value)} className={select}>
-              {DAYS.map(d => <option key={d}>{d}</option>)}
-            </select>
-            <select value={month} onChange={e => setMonth(e.target.value)} className={select}>
-              {MONTHS.map((m, i) => <option key={i} value={String(i+1).padStart(2,'0')}>{m}</option>)}
-            </select>
-            <select value={year} onChange={e => setYear(e.target.value)} className={select}>
-              {YEARS.map(y => <option key={y}>{y}</option>)}
-            </select>
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Âge</label>
+          <div className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-500 bg-gray-50">
+            {mockUser.age} ans
           </div>
           <div className="mt-2 flex items-center gap-1.5 bg-[#E1F5EE] px-3 py-2 rounded-lg">
             <CheckCircle className="w-3.5 h-3.5 text-[#10B981]" />
-            <p className="text-xs text-[#10B981]">Ton âge sera calculé automatiquement et jamais modifiable après validation.</p>
+            <p className="text-xs text-[#10B981]">Ton âge a été calculé à l&apos;inscription et n&apos;est plus modifiable.</p>
           </div>
         </div>
 
