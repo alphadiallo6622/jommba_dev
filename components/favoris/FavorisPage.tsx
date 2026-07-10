@@ -119,7 +119,7 @@ export default function FavorisPage() {
             id,
             photo:       p?.avatar_url ?? '/avatar-placeholder.svg',
             firstName:   p?.first_name ?? '…',
-            lastInitial: (p?.last_name ?? '').charAt(0) || '?',
+            lastInitial: (p?.last_name ?? '').charAt(0),
             age:         p?.age ?? 0,
             location:    [p?.city, p?.country].filter(Boolean).join(', ') || 'Inconnu',
             hoursAgo:    hrs,

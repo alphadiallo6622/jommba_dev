@@ -169,7 +169,7 @@ export async function fetchConversationList(myId: string): Promise<ConversationL
       conversationId: c.id,
       otherUserId:    otherId,
       firstName:      p?.first_name ?? '…',
-      lastInitial:    (p?.last_name ?? '').charAt(0) || '?',
+      lastInitial:    (p?.last_name ?? '').charAt(0),
       photo:          p?.avatar_url ?? '/avatar-placeholder.svg',
       lastMessage:    last?.content ?? 'Démarrez la conversation...',
       lastMessageAt:  last?.created_at ?? c.last_message_at,

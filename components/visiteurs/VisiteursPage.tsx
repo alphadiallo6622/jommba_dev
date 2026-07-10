@@ -60,7 +60,7 @@ export default function VisiteursPage() {
             id,
             photo:       p?.avatar_url ?? '/avatar-placeholder.svg',
             firstName:   p?.first_name ?? '…',
-            lastInitial: (p?.last_name ?? '').charAt(0) || '?',
+            lastInitial: (p?.last_name ?? '').charAt(0),
             age:         p?.age ?? 0,
             city:        p?.city ?? 'Inconnu',
             country:     p?.country ?? '',

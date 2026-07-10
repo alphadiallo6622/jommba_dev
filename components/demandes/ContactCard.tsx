@@ -2,7 +2,6 @@
 
 import { MapPin, MessageCircle, ArrowRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { toast } from 'sonner'
 import { ContactEntry } from '@/lib/mock-demandes'
 
 type Props = {
@@ -30,7 +29,7 @@ export default function ContactCard({ contact }: Props) {
       </div>
       <div className="flex gap-2">
         <button
-          onClick={() => toast.info('Messagerie bientôt disponible 💬')}
+          onClick={() => router.push(`/dashboard/messages/${contact.id}`)}
           className="flex-1 py-2 bg-[#10B981] text-white rounded-lg text-sm font-medium hover:bg-[#059669] flex items-center justify-center gap-1 transition-colors"
         >
           <MessageCircle className="w-4 h-4" /> Écrire un message

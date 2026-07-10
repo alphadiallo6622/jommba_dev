@@ -98,7 +98,7 @@ export default function DemandesPage() {
             return {
               id:          l.sender_id,
               firstName:   p?.first_name ?? '…',
-              lastInitial: (p?.last_name ?? '').charAt(0) || '?',
+              lastInitial: (p?.last_name ?? '').charAt(0),
               age:         p?.age ?? 0,
               photo:       buildPhoto(l.sender_id, p?.avatar_url ?? null),
               city:        p?.city ?? 'Inconnu',
@@ -114,7 +114,7 @@ export default function DemandesPage() {
           return {
             id:          l.receiver_id,
             firstName:   p?.first_name ?? '…',
-            lastInitial: (p?.last_name ?? '').charAt(0) || '?',
+            lastInitial: (p?.last_name ?? '').charAt(0),
             age:         p?.age ?? 0,
             photo:       buildPhoto(l.receiver_id, p?.avatar_url ?? null),
             timeAgo:     formatTimeAgo(l.created_at),

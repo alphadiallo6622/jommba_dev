@@ -90,7 +90,7 @@ export default function ConversationPage({ id }: Props) {
         setConv({
           id,
           firstName:   p?.first_name ?? '…',
-          lastInitial: (p?.last_name ?? p?.first_name ?? '?').charAt(0),
+          lastInitial: (p?.last_name ?? '').charAt(0),
           photo:       p?.avatar_url ?? '/avatar-placeholder.svg',
           lastMessage: dbMessages.at(-1)?.content ?? 'Démarrez la conversation...',
           timeAgo:     formatTimeAgo(dbMessages.at(-1)?.created_at ?? null),
