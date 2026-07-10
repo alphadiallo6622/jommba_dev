@@ -88,8 +88,42 @@ export function AbonnementsClient({
       ),
       sortable: true,
     },
+    {
+      key: "gender",
+      label: "Sexe",
+      render: (s) => (
+        <span className="text-sm">{s.gender === "femme" ? "Femme" : s.gender === "homme" ? "Homme" : "—"}</span>
+      ),
+      sortable: true,
+      csvValue: (s) => (s.gender === "femme" ? "Femme" : s.gender === "homme" ? "Homme" : "—"),
+    },
+    {
+      key: "city",
+      label: "Ville",
+      render: (s) => <span className="text-sm">{s.city?.trim() || "—"}</span>,
+      sortable: true,
+      csvValue: (s) => s.city?.trim() || "—",
+    },
+    {
+      key: "location",
+      label: "Localisation",
+      render: (s) => <span className="text-sm">{s.location}</span>,
+      sortable: true,
+      csvValue: (s) => s.location,
+    },
     { key: "plan",    label: "Formule",  sortable: true },
     { key: "payment", label: "Paiement", sortable: true },
+    {
+      key: "amount",
+      label: "Montant",
+      render: (s) => (
+        <span className="text-sm font-medium">
+          {s.amount == null ? "—" : s.amount === 0 ? "Offert" : `${s.amount} $`}
+        </span>
+      ),
+      sortable: true,
+      csvValue: (s) => (s.amount == null ? "—" : s.amount === 0 ? "Offert" : `${s.amount} $`),
+    },
     {
       key: "status",
       label: "Statut",

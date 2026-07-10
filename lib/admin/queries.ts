@@ -265,15 +265,41 @@ export async function getStatsData(): Promise<StatsData> {
 
 // ── Membres ───────────────────────────────────────────────────────────────────
 
-function toMemberRow(m: AdminMember): MemberRow {
+/** Détails profil enrichis + abonnement, indexés par user_id. */
+type MemberExtra = {
+  height: number | null;
+  languages: string | null;
+  mosque_frequency: string | null;
+  arabic_level: string | null;
+  has_children: string | null;
+  wants_children: string | null;
+  can_relocate: string | null;
+  polygamy: string | null;
+  seeking: string | null;
+  marriage_vision: string | null;
+  interests: string | null;
+};
+type SubInfo = { amount: number | null; plan: string | null };
+
+function toMemberRow(
+  m: AdminMember,
+  extra: Map<string, MemberExtra>,
+  subs: Map<string, SubInfo>,
+): MemberRow {
+  const e = extra.get(m.user_id);
+  const sub = subs.get(m.user_id);
   return {
     id: m.user_id,
     name: fullName(m.first_name, m.last_name),
     email: m.email,
     age: m.age,
     location: location(m.city, m.country),
+    city: m.city,
+    country: m.country,
     status: m.status as MemberStatus,
     plan: m.is_premium ? "premium" : "free",
+    subscriptionAmount: m.is_premium ? sub?.amount ?? null : null,
+    subscriptionPlan: m.is_premium ? sub?.plan ?? null : null,
     joinedAt: m.created_at,
     gender: m.gender,
     job: m.job,
@@ -283,7 +309,55 @@ function toMemberRow(m: AdminMember): MemberRow {
     bio: m.bio,
     avatarUrl: m.avatar_url,
     completion: m.profile_completion,
+    height: e?.height ?? null,
+    languages: e?.languages ?? null,
+    mosqueFrequency: e?.mosque_frequency ?? null,
+    arabicLevel: e?.arabic_level ?? null,
+    hasChildren: e?.has_children ?? null,
+    wantsChildren: e?.wants_children ?? null,
+    canRelocate: e?.can_relocate ?? null,
+    polygamy: e?.polygamy ?? null,
+    seeking: e?.seeking ?? null,
+    marriageVision: e?.marriage_vision ?? null,
+    interests: e?.interests ?? null,
+    lastSignInAt: m.last_sign_in_at,
   };
+}
+
+/** Charge les détails profil enrichis + le dernier abonnement premium par membre. */
+async function loadMemberExtras(
+  supabase: ReturnType<typeof createAdminClient>,
+  userIds: string[],
+): Promise<{ extra: Map<string, MemberExtra>; subs: Map<string, SubInfo> }> {
+  const extra = new Map<string, MemberExtra>();
+  const subs = new Map<string, SubInfo>();
+  if (userIds.length === 0) return { extra, subs };
+
+  const [profileRows, subRows] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("user_id,height,languages,mosque_frequency,arabic_level,has_children,wants_children,can_relocate,polygamy,seeking,marriage_vision,interests")
+      .in("user_id", userIds),
+    supabase
+      .from("subscriptions")
+      .select("user_id,price_usd,duration_months,created_at")
+      .eq("plan", "premium")
+      .in("user_id", userIds)
+      .order("created_at", { ascending: false }),
+  ]);
+
+  for (const p of profileRows.data ?? []) {
+    extra.set(p.user_id, p as unknown as MemberExtra);
+  }
+  // Premier vu = le plus récent (tri desc) : on ne garde que celui-là par membre.
+  for (const s of subRows.data ?? []) {
+    if (subs.has(s.user_id)) continue;
+    subs.set(s.user_id, {
+      amount: s.price_usd != null ? Number(s.price_usd) : null,
+      plan: s.duration_months != null ? `${s.duration_months} mois` : null,
+    });
+  }
+  return { extra, subs };
 }
 
 export async function getMembers(): Promise<MemberRow[]> {
@@ -293,7 +367,10 @@ export async function getMembers(): Promise<MemberRow[]> {
     .order("created_at", { ascending: false })
     .limit(2_000);
   if (error) throw new Error(error.message);
-  return (data ?? []).map(toMemberRow);
+
+  const members = data ?? [];
+  const { extra, subs } = await loadMemberExtras(supabase, members.map((m) => m.user_id));
+  return members.map((m) => toMemberRow(m, extra, subs));
 }
 
 export async function searchMembers(q: string): Promise<MemberRow[]> {
@@ -303,7 +380,9 @@ export async function searchMembers(q: string): Promise<MemberRow[]> {
     .from("admin_members").select("*")
     .or(`first_name.ilike.${like},last_name.ilike.${like},email.ilike.${like},city.ilike.${like}`)
     .limit(8);
-  return (data ?? []).map(toMemberRow);
+  const members = data ?? [];
+  const { extra, subs } = await loadMemberExtras(supabase, members.map((m) => m.user_id));
+  return members.map((m) => toMemberRow(m, extra, subs));
 }
 
 // ── File de validation ────────────────────────────────────────────────────────
@@ -430,12 +509,18 @@ export async function getSubscriptions(): Promise<SubscriptionsData> {
   ]);
 
   const userIds = [...new Set((subs.data ?? []).map((s) => s.user_id))];
-  const nameMap = new Map<string, { name: string; email: string }>();
+  const nameMap = new Map<string, { name: string; email: string; gender: string | null; city: string | null; country: string | null }>();
   if (userIds.length > 0) {
     const { data: members } = await supabase
-      .from("admin_members").select("user_id,first_name,last_name,email").in("user_id", userIds);
+      .from("admin_members").select("user_id,first_name,last_name,email,gender,city,country").in("user_id", userIds);
     for (const m of members ?? []) {
-      nameMap.set(m.user_id, { name: fullName(m.first_name, m.last_name), email: m.email });
+      nameMap.set(m.user_id, {
+        name: fullName(m.first_name, m.last_name),
+        email: m.email,
+        gender: m.gender,
+        city: m.city,
+        country: m.country,
+      });
     }
   }
 
@@ -453,6 +538,11 @@ export async function getSubscriptions(): Promise<SubscriptionsData> {
       status: s.status,
       expires: s.current_period_end ? formatDate(s.current_period_end) : "—",
       canRefund: s.status === "active" && withinRefundWindow && !s.refunded_at,
+      gender: info?.gender ?? null,
+      city: info?.city ?? null,
+      country: info?.country ?? null,
+      location: location(info?.city ?? null, info?.country ?? null),
+      amount: s.price_usd != null ? Number(s.price_usd) : null,
     };
   });
 

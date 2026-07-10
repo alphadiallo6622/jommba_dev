@@ -13,6 +13,7 @@ import {
 import { useToast } from "./toast";
 import { Avatar } from "./avatar";
 import { Badge, PremiumBadge } from "./card";
+import { formatDate } from "@/lib/admin/format";
 
 const STATUS_TONE: Record<string, "green" | "amber" | "red" | "gray"> = {
   validated: "green", pending: "amber", refused: "red", suspended: "gray",
@@ -201,7 +202,7 @@ export function MemberActionsButton({ member }: { member: MemberRow }) {
           <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]" onClick={closeModal} />
 
           <div
-            className={`relative bg-white rounded-2xl w-full shadow-2xl ${view === "profile" ? "max-w-md" : "max-w-xs"}`}
+            className={`relative bg-white rounded-2xl w-full shadow-2xl ${view === "profile" ? "max-w-lg" : "max-w-xs"}`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -263,27 +264,81 @@ export function MemberActionsButton({ member }: { member: MemberRow }) {
                   </div>
                 </div>
 
+                {member.plan === "premium" && (
+                  <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5">
+                    <p className="text-[10px] font-medium text-amber-700">Abonnement Premium</p>
+                    <p className="text-xs font-semibold text-amber-900 mt-0.5">
+                      {member.subscriptionPlan ?? "Premium"}
+                      {" · "}
+                      {member.subscriptionAmount == null
+                        ? "Montant n/c"
+                        : member.subscriptionAmount === 0
+                          ? "Offert"
+                          : `${member.subscriptionAmount} $`}
+                    </p>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-2 gap-2.5">
                   {[
+                    { label: "Email",        value: member.email },
                     { label: "Localisation", value: member.location },
+                    { label: "Ville",        value: member.city?.trim() || "—" },
+                    { label: "Pays",         value: member.country?.trim() || "—" },
                     { label: "Genre",        value: member.gender === "femme" ? "Femme" : member.gender === "homme" ? "Homme" : "—" },
+                    { label: "Âge",          value: member.age != null ? `${member.age} ans` : "—" },
+                    { label: "Taille",       value: member.height != null ? `${member.height} cm` : "—" },
                     { label: "Profession",   value: member.job || "—" },
                     { label: "Études",       value: member.education || "—" },
                     { label: "Situation",    value: member.maritalStatus || "—" },
                     { label: "Madhhab",      value: member.madhhab || "—" },
+                    { label: "Mosquée",      value: member.mosqueFrequency || "—" },
+                    { label: "Niveau d'arabe", value: member.arabicLevel || "—" },
+                    { label: "Langues",      value: member.languages || "—" },
+                    { label: "A des enfants", value: member.hasChildren || "—" },
+                    { label: "Veut des enfants", value: member.wantsChildren || "—" },
+                    { label: "Peut déménager", value: member.canRelocate || "—" },
+                    { label: "Polygamie",    value: member.polygamy || "—" },
                   ].map(({ label, value }) => (
                     <div key={label} className="rounded-xl border border-[var(--color-line)] bg-[var(--color-faint)] px-3 py-2.5">
                       <p className="text-[10px] font-medium text-[var(--color-muted)]">{label}</p>
-                      <p className="text-xs font-semibold text-[var(--color-ink)] mt-0.5">{value}</p>
+                      <p className="text-xs font-semibold text-[var(--color-ink)] mt-0.5 break-words">{value}</p>
                     </div>
                   ))}
                 </div>
+
+                {member.seeking && (
+                  <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-faint)] px-3 py-2.5">
+                    <p className="text-[10px] font-medium text-[var(--color-muted)]">Recherche</p>
+                    <p className="text-xs text-[var(--color-ink)] mt-0.5 leading-relaxed">{member.seeking}</p>
+                  </div>
+                )}
+
+                {member.marriageVision && (
+                  <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-faint)] px-3 py-2.5">
+                    <p className="text-[10px] font-medium text-[var(--color-muted)]">Vision du mariage</p>
+                    <p className="text-xs text-[var(--color-ink)] mt-0.5 leading-relaxed">{member.marriageVision}</p>
+                  </div>
+                )}
+
+                {member.interests && (
+                  <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-faint)] px-3 py-2.5">
+                    <p className="text-[10px] font-medium text-[var(--color-muted)]">Centres d'intérêt</p>
+                    <p className="text-xs text-[var(--color-ink)] mt-0.5 leading-relaxed">{member.interests}</p>
+                  </div>
+                )}
 
                 {member.bio && (
                   <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-faint)] px-3 py-2.5">
                     <p className="text-[10px] font-medium text-[var(--color-muted)]">Bio</p>
                     <p className="text-xs text-[var(--color-ink)] mt-0.5 leading-relaxed">{member.bio}</p>
                   </div>
+                )}
+
+                {member.lastSignInAt && (
+                  <p className="text-[11px] text-[var(--color-muted)]">
+                    Dernière connexion : {formatDate(member.lastSignInAt)}
+                  </p>
                 )}
 
                 <div className="space-y-1">

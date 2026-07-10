@@ -209,7 +209,7 @@ export function PhotosClient({ photos }: { photos: PhotoQueueItem[] }) {
             <p className="text-sm">Aucune photo en attente</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
             {queue.map((ph) => {
               const memberCount = photosByMember(ph.memberId).length;
               return (
@@ -251,23 +251,23 @@ export function PhotosClient({ photos }: { photos: PhotoQueueItem[] }) {
                   </button>
 
                   {/* Info + actions */}
-                  <div className="p-3 space-y-2.5">
+                  <div className="p-2 space-y-1.5">
                     <div>
-                      <p className="text-sm font-medium text-[var(--color-ink)]">{ph.name}</p>
-                      <p className="text-xs text-[var(--color-muted)]">{ph.when}</p>
+                      <p className="text-xs font-medium text-[var(--color-ink)] truncate">{ph.name}</p>
+                      <p className="text-[10px] text-[var(--color-muted)]">{ph.when}</p>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-1.5">
                       <button
                         disabled={busy}
                         onClick={() => handleApprove(ph)}
-                        className="flex-1 py-1.5 text-xs font-semibold rounded-lg border border-emerald-200 text-emerald-700 hover:bg-emerald-50 transition-colors disabled:opacity-50"
+                        className="flex-1 py-1 text-[11px] font-semibold rounded-md border border-emerald-200 text-emerald-700 hover:bg-emerald-50 transition-colors disabled:opacity-50"
                       >
                         Approuver
                       </button>
                       <button
                         disabled={busy}
                         onClick={() => handleReject(ph)}
-                        className="flex-1 py-1.5 text-xs font-semibold rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+                        className="flex-1 py-1 text-[11px] font-semibold rounded-md border border-red-200 text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
                       >
                         Rejeter
                       </button>

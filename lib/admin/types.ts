@@ -47,8 +47,14 @@ export interface MemberRow {
   email: string;
   age: number | null;
   location: string;
+  city: string | null;
+  country: string | null;
   status: MemberStatus;
   plan: Plan;
+  /** Montant de l'abonnement en USD (0 si offert, null si Free/aucun). */
+  subscriptionAmount: number | null;
+  /** Durée de l'abonnement (« 1 mois »…) ou null si Free. */
+  subscriptionPlan: string | null;
   joinedAt: string;
   // détails pour « Voir le profil complet »
   gender: string | null;
@@ -59,6 +65,19 @@ export interface MemberRow {
   bio: string | null;
   avatarUrl: string | null;
   completion: number;
+  // détails enrichis
+  height: number | null;
+  languages: string | null;
+  mosqueFrequency: string | null;
+  arabicLevel: string | null;
+  hasChildren: string | null;
+  wantsChildren: string | null;
+  canRelocate: string | null;
+  polygamy: string | null;
+  seeking: string | null;
+  marriageVision: string | null;
+  interests: string | null;
+  lastSignInAt: string | null;
 }
 
 export interface PendingProfileRow {
@@ -107,6 +126,11 @@ export interface SubscriptionRow {
   status: SubStatus;
   expires: string;
   canRefund?: boolean;
+  gender: string | null;
+  city: string | null;
+  country: string | null;
+  location: string;
+  amount: number | null; // montant payé en USD
 }
 
 export interface BoostRow {

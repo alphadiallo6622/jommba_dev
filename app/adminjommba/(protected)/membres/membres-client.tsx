@@ -20,6 +20,18 @@ const STATUS_LABEL: Record<string, string> = {
   suspended: "Suspendu",
 };
 
+const GENDER_LABEL = (g: string | null) =>
+  g === "femme" ? "Femme" : g === "homme" ? "Homme" : "—";
+
+const amountLabel = (m: MemberRow) =>
+  m.plan !== "premium"
+    ? "—"
+    : m.subscriptionAmount == null
+      ? "Premium"
+      : m.subscriptionAmount === 0
+        ? "Offert"
+        : `${m.subscriptionAmount} $`;
+
 const COLUMNS: Column<MemberRow>[] = [
   {
     key: "name",
@@ -44,9 +56,32 @@ const COLUMNS: Column<MemberRow>[] = [
     csvValue: (m) => `${m.name}${m.age != null ? `, ${m.age}` : ""}`,
   },
   {
+    key: "email",
+    label: "Email",
+    render: (m) => <span className="text-xs text-[var(--color-ink)]">{m.email}</span>,
+    sortable: true,
+    csvValue: (m) => m.email,
+  },
+  {
+    key: "gender",
+    label: "Sexe",
+    render: (m) => <span className="text-xs">{GENDER_LABEL(m.gender)}</span>,
+    sortable: true,
+    csvValue: (m) => GENDER_LABEL(m.gender),
+  },
+  {
+    key: "city",
+    label: "Ville",
+    render: (m) => <span className="text-xs">{m.city?.trim() || "—"}</span>,
+    sortable: true,
+    csvValue: (m) => m.city?.trim() || "—",
+  },
+  {
     key: "location",
     label: "Localisation",
+    render: (m) => <span className="text-xs">{m.location}</span>,
     sortable: true,
+    csvValue: (m) => m.location,
   },
   {
     key: "status",
@@ -66,6 +101,13 @@ const COLUMNS: Column<MemberRow>[] = [
       ),
     sortable: true,
     csvValue: (m) => (m.plan === "premium" ? "Premium" : "Free"),
+  },
+  {
+    key: "subscriptionAmount",
+    label: "Montant",
+    render: (m) => <span className="text-xs">{amountLabel(m)}</span>,
+    sortable: true,
+    csvValue: (m) => amountLabel(m),
   },
   {
     key: "joinedAt",
