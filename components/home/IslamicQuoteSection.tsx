@@ -9,7 +9,7 @@ export default function IslamicQuoteSection() {
   const t = useTranslations("home.quote");
 
   return (
-    <section className="py-20 bg-jommba-bg overflow-hidden relative">
+    <section className="py-12 sm:py-14 bg-jommba-bg overflow-hidden relative">
       {/* Subtle background decoration */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-primary/3 blur-3xl pointer-events-none -z-10" />
 

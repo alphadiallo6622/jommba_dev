@@ -16,7 +16,7 @@ export default function HowItWorksSection() {
   const t = useTranslations("home.howItWorks");
 
   return (
-    <section id="how-it-works" className="py-20 bg-jommba-bg/50 border-t border-primary-light/10 relative overflow-hidden">
+    <section id="how-it-works" className="py-12 sm:py-16 scroll-mt-[76px] bg-jommba-bg/50 border-t border-primary-light/10 relative overflow-hidden">
       <Container className="relative z-10">
         {/* Section Header */}
         <AnimatedSection>
@@ -24,7 +24,7 @@ export default function HowItWorksSection() {
             badge={t("badge")}
             title={t("title")}
             subtitle={t("subtitle")}
-            className="mb-16"
+            className="mb-10 sm:mb-12"
           />
         </AnimatedSection>
 

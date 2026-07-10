@@ -12,14 +12,14 @@ export default function PricingSection() {
   const t = useTranslations("home.pricing");
 
   return (
-    <section id="pricing" className="py-20 bg-jommba-bg/50 border-t border-primary-light/10">
+    <section id="pricing" className="py-12 sm:py-16 scroll-mt-[76px] bg-jommba-bg/50 border-t border-primary-light/10">
       <Container>
         <AnimatedSection>
           <SectionHeading
             badge={t("badge")}
             title={t("title")}
             subtitle={t("subtitle")}
-            className="mb-16"
+            className="mb-10 sm:mb-12"
           />
         </AnimatedSection>
 

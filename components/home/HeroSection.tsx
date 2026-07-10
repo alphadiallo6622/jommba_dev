@@ -11,7 +11,7 @@ export default function HeroSection() {
   const t = useTranslations("home.hero");
 
   return (
-    <section className="relative overflow-hidden bg-jommba-bg py-10 sm:py-16 lg:py-20 flex items-center lg:min-h-[calc(100vh-76px)]">
+    <section className="relative overflow-hidden bg-jommba-bg py-8 sm:py-12 lg:py-14 flex items-center">
       {/* Background: soft radial glows + subtle dot grid */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute -top-24 -right-24 w-[45vw] h-[45vw] rounded-full bg-primary/8 blur-3xl" />

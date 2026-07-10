@@ -10,7 +10,7 @@ export default function CTASection() {
   const t = useTranslations("home.cta");
 
   return (
-    <section className="py-16 sm:py-20 bg-jommba-bg overflow-hidden relative">
+    <section className="py-10 sm:py-14 bg-jommba-bg overflow-hidden relative">
       <Container>
         <AnimatedSection>
           {/* Main Card with Gradient */}

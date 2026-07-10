@@ -79,7 +79,7 @@ export default function StatsSection() {
   const t = useTranslations("home.stats");
 
   return (
-    <section className="bg-jommba-bg/50 py-16 border-y border-primary-light/20 relative">
+    <section className="bg-jommba-bg/50 py-10 sm:py-12 border-y border-primary-light/20 relative">
       <Container>
         <AnimatedSection>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">

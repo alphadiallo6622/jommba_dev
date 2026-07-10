@@ -12,7 +12,7 @@ export default function TestimonialsSection() {
   const t = useTranslations("home.testimonials");
 
   return (
-    <section id="testimonials" className="py-16 sm:py-20 bg-jommba-bg">
+    <section id="testimonials" className="py-12 sm:py-16 bg-jommba-bg">
       <Container>
         {/* Section Header */}
         <AnimatedSection>
@@ -20,7 +20,7 @@ export default function TestimonialsSection() {
             badge={t("badge")}
             title={t("title")}
             subtitle={t("subtitle")}
-            className="mb-10 sm:mb-16"
+            className="mb-8 sm:mb-12"
           />
         </AnimatedSection>
 

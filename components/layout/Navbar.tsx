@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { Menu } from "lucide-react";
+import { Menu, LayoutDashboard } from "lucide-react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { NAV_LINKS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/components/providers/AuthProvider";
 import MobileMenu from "./MobileMenu";
 import { LocaleSwitcher } from "./LocaleSwitcher";
 
@@ -14,6 +15,7 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { user } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -75,18 +77,30 @@ export default function Navbar() {
           {/* Action Buttons (Desktop) */}
           <div className="hidden md:flex items-center gap-4">
             <LocaleSwitcher />
-            <Link
-              href="/connexion"
-              className="text-sm font-semibold text-text-primary hover:text-primary transition-colors duration-200"
-            >
-              {t("login")}
-            </Link>
-            <Link
-              href="/inscription"
-              className="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-primary text-white font-semibold text-sm shadow-green-btn hover:bg-primary-dark hover:-translate-y-0.5 transition-all duration-200"
-            >
-              {t("signup")}
-            </Link>
+            {user ? (
+              <a
+                href="/dashboard"
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white font-semibold text-sm shadow-green-btn hover:bg-primary-dark hover:-translate-y-0.5 transition-all duration-200"
+              >
+                <LayoutDashboard className="w-4 h-4" />
+                {t("dashboard")}
+              </a>
+            ) : (
+              <>
+                <Link
+                  href="/connexion"
+                  className="text-sm font-semibold text-text-primary hover:text-primary transition-colors duration-200"
+                >
+                  {t("login")}
+                </Link>
+                <Link
+                  href="/inscription"
+                  className="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-primary text-white font-semibold text-sm shadow-green-btn hover:bg-primary-dark hover:-translate-y-0.5 transition-all duration-200"
+                >
+                  {t("signup")}
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}

@@ -21,7 +21,7 @@ export default function FeaturesSection() {
   const t = useTranslations("home.features");
 
   return (
-    <section id="features" className="py-20 bg-jommba-bg">
+    <section id="features" className="py-12 sm:py-16 bg-jommba-bg">
       <Container>
         {/* Section Header */}
         <AnimatedSection>
@@ -29,7 +29,7 @@ export default function FeaturesSection() {
             badge={t("badge")}
             title={t("title")}
             subtitle={t("subtitle")}
-            className="mb-16"
+            className="mb-10 sm:mb-12"
           />
         </AnimatedSection>
 

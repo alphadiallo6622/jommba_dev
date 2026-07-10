@@ -16,8 +16,11 @@ export const SITE_METADATA = {
 // `labelKey` référence une clé du namespace "nav" dans messages/<locale>.json.
 export const NAV_LINKS = [
   { labelKey: "home", href: "/" },
+  { labelKey: "howToSignup", href: "/#how-it-works" },
+  { labelKey: "pricing", href: "/#pricing" },
   { labelKey: "blog", href: "/blog" },
   { labelKey: "faq", href: "/faq" },
+  { labelKey: "contact", href: "/contact" },
 ] as const;
 
 export const SOCIAL_LINKS = {
@@ -28,7 +31,7 @@ export const SOCIAL_LINKS = {
 };
 
 export const CONTACT_INFO = {
-  email: "support@jommba.com",
-  address: "Paris, France",
+  email: "jommba224@gmail.com",
+  address: "Conakry, Guinée",
 };
 
