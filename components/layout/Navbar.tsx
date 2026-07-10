@@ -103,14 +103,25 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMobileMenuOpen(true)}
-            className="md:hidden p-2 text-text-primary hover:text-primary transition-colors duration-200"
-            aria-label={t("openMenu")}
-          >
-            <Menu className="w-6 h-6" />
-          </button>
+          {/* Mobile: Dashboard (si connecté) + bouton menu */}
+          <div className="md:hidden flex items-center gap-2">
+            {user && (
+              <a
+                href="/dashboard"
+                className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full bg-primary text-white font-semibold text-sm shadow-green-btn hover:bg-primary-dark transition-all duration-200"
+              >
+                <LayoutDashboard className="w-4 h-4" />
+                {t("dashboard")}
+              </a>
+            )}
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="p-2 text-text-primary hover:text-primary transition-colors duration-200"
+              aria-label={t("openMenu")}
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+          </div>
         </div>
       </header>
 

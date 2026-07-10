@@ -22,7 +22,7 @@ const IconYoutube = () => (
     <path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z" /><polygon fill="white" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" />
   </svg>
 );
-import { SOCIAL_LINKS, NAV_LINKS } from "@/lib/constants";
+import { SOCIAL_LINKS, NAV_LINKS, CONTACT_INFO } from "@/lib/constants";
 
 export default function Footer() {
   const t = useTranslations("footer");
@@ -139,27 +139,39 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-primary transition-colors duration-200">
+                <Link href="/reglement" className="hover:text-primary transition-colors duration-200">
+                  {t("reglement")}
+                </Link>
+              </li>
+              <li>
+                <Link href="/cgv" className="hover:text-primary transition-colors duration-200">
                   {t("terms")}
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-primary transition-colors duration-200">
+                <Link href="/confidentialite" className="hover:text-primary transition-colors duration-200">
                   {t("privacy")}
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-primary transition-colors duration-200">
+                <Link href="/mentions-legales" className="hover:text-primary transition-colors duration-200">
                   {t("legal")}
-                </a>
+                </Link>
+              </li>
+              <li>
+                <Link href="/dpa" className="hover:text-primary transition-colors duration-200">
+                  {t("dpa")}
+                </Link>
               </li>
               <li className="flex items-center gap-2 pt-2 text-white font-medium">
                 <Mail className="w-4 h-4 text-primary" />
-                <span>support@jommba.com</span>
+                <a href={`mailto:${CONTACT_INFO.email}`} className="hover:text-primary transition-colors duration-200">
+                  {CONTACT_INFO.email}
+                </a>
               </li>
               <li className="flex items-center gap-2 text-text-subtle">
                 <MapPin className="w-4 h-4 text-primary" />
-                <span>Paris, France</span>
+                <span>{CONTACT_INFO.address}</span>
               </li>
             </ul>
           </div>

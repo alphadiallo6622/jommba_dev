@@ -32,6 +32,6 @@ export const SOCIAL_LINKS = {
 
 export const CONTACT_INFO = {
   email: "jommba224@gmail.com",
-  address: "Conakry, Guinée",
+  address: "New York, USA",
 };
 
