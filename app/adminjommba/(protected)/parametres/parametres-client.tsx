@@ -5,17 +5,17 @@ import { useRouter } from "next/navigation";
 import {
   UserPlus, MoreHorizontal, Bot, Database, Lock,
   CreditCard, Cloud, Mail, X, Pencil, Trash2,
-  ChevronDown, Globe, Wallet, Eye, EyeOff, Power,
+  ChevronDown, Globe, Wallet, Eye, EyeOff, Power, Wrench,
 } from "lucide-react";
 import { Avatar } from "@/components/admin/ui/avatar";
 import { Card, CardHeader } from "@/components/admin/ui/card";
 import { useToast } from "@/components/admin/ui/toast";
 import type {
-  AdminAccountRow, ApiServiceRow, LimitsSettings, PricingSettings,
+  AdminAccountRow, ApiServiceRow, LimitsSettings, PricingSettings, MaintenanceSettings,
 } from "@/lib/admin/types";
 import {
   createAdminAccount, updateAdminRole, setAdminAccountStatus, deleteAdminAccount,
-  saveApiConnection, saveLimits, savePricing,
+  saveApiConnection, saveLimits, savePricing, setMaintenance,
 } from "@/app/adminjommba/actions";
 
 /* ── Types ─────────────────────────────────────────────────────────────────── */
@@ -522,11 +522,13 @@ export function ParametresClient({
   apiServices,
   initialLimits,
   initialPricing,
+  initialMaintenance,
 }: {
   admins: AdminAccountRow[];
   apiServices: ApiServiceRow[];
   initialLimits: LimitsSettings;
   initialPricing: PricingSettings;
+  initialMaintenance: MaintenanceSettings;
 }) {
   const { show } = useToast();
   const router = useRouter();
@@ -537,6 +539,7 @@ export function ParametresClient({
   const [configuring, setConfiguring] = useState<ApiServiceRow | null>(null);
   const [limits,      setLimits]      = useState<LimitsSettings>(initialLimits);
   const [pricing,     setPricing]     = useState<PricingSettings>(initialPricing);
+  const [maintenance, setMaintenanceState] = useState<MaintenanceSettings>(initialMaintenance);
 
   const act = (
     fn: () => Promise<{ ok: boolean; error?: string }>,
@@ -607,6 +610,23 @@ export function ParametresClient({
     );
   };
 
+  /* Bascule du mode maintenance */
+  const handleToggleMaintenance = () => {
+    const next: MaintenanceSettings = { ...maintenance, enabled: !maintenance.enabled };
+    setMaintenanceState(next); // MAJ optimiste du switch
+    act(
+      () => setMaintenance(next),
+      next.enabled
+        ? "Site mis en maintenance — les visiteurs voient la page dédiée"
+        : "Site remis en ligne",
+      next.enabled ? "warning" : "success",
+      undefined,
+    );
+  };
+
+  const handleSaveMaintenanceMessage = () =>
+    act(() => setMaintenance(maintenance), "Message de maintenance enregistré");
+
   /* Compute payment conflict for the modal */
   const paymentConflict = configuring?.kind === "payment"
     ? (apiServices.find((s) => s.kind === "payment" && s.id !== configuring.id && s.productionActive)?.name ?? null)
@@ -621,6 +641,65 @@ export function ParametresClient({
             Configuration de la plateforme et limites métier.
           </p>
         </div>
+
+        {/* Mode maintenance */}
+        <Card>
+          <div
+            className={`flex items-start gap-4 px-5 py-4 ${
+              maintenance.enabled ? "bg-amber-50" : ""
+            } transition-colors rounded-t-2xl`}
+          >
+            <div
+              className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                maintenance.enabled ? "bg-amber-100" : "bg-[var(--color-faint)]"
+              }`}
+            >
+              <Wrench className={`w-5 h-5 ${maintenance.enabled ? "text-amber-600" : "text-[var(--color-muted)]"}`} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-sm text-[var(--color-ink)]">Mode maintenance</h3>
+                {maintenance.enabled && (
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
+                    ACTIF
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-[var(--color-muted)] mt-0.5 leading-relaxed">
+                {maintenance.enabled
+                  ? "Le site public est actuellement indisponible : les visiteurs voient une page « En maintenance ». La console admin reste accessible."
+                  : "Coupez l'accès public au site le temps d'une mise à jour. La console admin reste toujours accessible."}
+              </p>
+            </div>
+            <div className="shrink-0 pt-1">
+              <Toggle on={maintenance.enabled} onToggle={handleToggleMaintenance} />
+            </div>
+          </div>
+
+          {/* Message personnalisé */}
+          <div className="px-5 pb-5 pt-1 border-t border-[var(--color-line)] space-y-2.5">
+            <label className="text-xs font-semibold text-[var(--color-ink)] block pt-3">
+              Message affiché aux visiteurs{" "}
+              <span className="font-normal text-[var(--color-muted)]">(optionnel)</span>
+            </label>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                type="text"
+                value={maintenance.message ?? ""}
+                onChange={(e) => setMaintenanceState((m) => ({ ...m, message: e.target.value }))}
+                placeholder="Ex. Retour prévu à 18h, in shā’ Allāh."
+                className="flex-1 px-3.5 py-2.5 text-sm border border-[var(--color-line)] rounded-xl bg-[var(--color-faint)] text-[var(--color-ink)] placeholder:text-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-300)] focus:bg-white transition"
+              />
+              <button
+                disabled={busy}
+                onClick={handleSaveMaintenanceMessage}
+                className="px-5 py-2.5 rounded-xl border border-[var(--color-line)] text-sm font-semibold text-[var(--color-ink)] hover:bg-[var(--color-faint)] transition-colors disabled:opacity-50 shrink-0"
+              >
+                Enregistrer le message
+              </button>
+            </div>
+          </div>
+        </Card>
 
         {/* Admin accounts */}
         <Card>

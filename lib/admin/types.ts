@@ -218,6 +218,12 @@ export interface PricingSettings {
   autoValidate: boolean;
 }
 
+export interface MaintenanceSettings {
+  enabled: boolean;
+  /** Message optionnel affiché sur la page de maintenance. */
+  message: string | null;
+}
+
 export interface BroadcastTargetCounts {
   all: number;
   free: number;

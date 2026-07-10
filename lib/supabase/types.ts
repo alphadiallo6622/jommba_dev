@@ -250,10 +250,11 @@ export interface ApiConnection {
 }
 
 export interface PlatformSettings {
-  id:         number
-  limits:     Json
-  pricing:    Json
-  updated_at: string
+  id:          number
+  limits:      Json
+  pricing:     Json
+  maintenance: Json
+  updated_at:  string
 }
 
 export interface AdminMember {
@@ -402,7 +403,7 @@ export type Database = {
       }
       platform_settings: {
         Row:           Indexed<PlatformSettings>
-        Insert:        Indexed<{ id: number; limits?: Json; pricing?: Json; updated_at?: string }>
+        Insert:        Indexed<{ id: number; limits?: Json; pricing?: Json; maintenance?: Json; updated_at?: string }>
         Update:        Indexed<Partial<PlatformSettings>>
         Relationships: []
       }

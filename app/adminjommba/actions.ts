@@ -11,7 +11,7 @@ import { hasPermission, ADMIN_ROLES, type AdminPermission } from "@/lib/admin/pe
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendEmail } from "@/lib/email";
 import type { BroadcastTarget, Json } from "@/lib/supabase/types";
-import type { LimitsSettings, PricingSettings } from "@/lib/admin/types";
+import type { LimitsSettings, PricingSettings, MaintenanceSettings } from "@/lib/admin/types";
 
 export interface ActionResult {
   ok: boolean;
@@ -646,6 +646,25 @@ export async function saveLimits(limits: LimitsSettings): Promise<ActionResult> 
       updated_at: new Date().toISOString(),
     });
     if (error) throw new Error(error.message);
+  }, "settings");
+}
+
+/** Active ou désactive le mode maintenance du site public. */
+export async function setMaintenance(maintenance: MaintenanceSettings): Promise<ActionResult> {
+  return run(async () => {
+    const supabase = createAdminClient();
+    const { error } = await supabase.from("platform_settings").upsert({
+      id: 1,
+      maintenance: {
+        enabled: maintenance.enabled,
+        message: maintenance.message?.trim() || null,
+      } as unknown as Json,
+      updated_at: new Date().toISOString(),
+    });
+    if (error) throw new Error(error.message);
+    // Le middleware lit le drapeau à chaque requête : on invalide tout le cache
+    // pour que la bascule prenne effet immédiatement.
+    revalidatePath("/", "layout");
   }, "settings");
 }
 

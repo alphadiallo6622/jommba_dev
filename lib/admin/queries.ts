@@ -9,12 +9,13 @@ import type {
   FeedItem, AdminNotification, MemberRow, PendingProfileRow, PhotoQueueItem,
   ReportRow, SubscriptionRow, BoostRow, BlogPostRow, TicketRow, BroadcastRow,
   AdminAccountRow, ApiServiceRow, LimitsSettings, PricingSettings,
-  BroadcastTargetCounts, MemberStatus,
+  BroadcastTargetCounts, MemberStatus, MaintenanceSettings,
 } from "@/lib/admin/types";
 import type { AdminMember } from "@/lib/supabase/types";
 
 const DEFAULT_LIMITS: LimitsSettings = { contacts: 3, conversations: 3, coachQuestions: 3, visitors: 2 };
 const DEFAULT_PRICING: PricingSettings = { launchPrice: 10, normalPrice: 15, refundWindow: 7, autoValidate: false };
+const DEFAULT_MAINTENANCE: MaintenanceSettings = { enabled: false, message: null };
 
 function fullName(first: string | null, last: string | null): string {
   return [first, last].filter(Boolean).join(" ") || "Membre";
@@ -43,12 +44,13 @@ const MONTH_LETTERS = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D
 
 // ── Paramètres plateforme ─────────────────────────────────────────────────────
 
-export const getPlatformSettings = cache(async (): Promise<{ limits: LimitsSettings; pricing: PricingSettings }> => {
+export const getPlatformSettings = cache(async (): Promise<{ limits: LimitsSettings; pricing: PricingSettings; maintenance: MaintenanceSettings }> => {
   const supabase = createAdminClient();
   const { data } = await supabase.from("platform_settings").select("*").eq("id", 1).maybeSingle();
   return {
-    limits:  { ...DEFAULT_LIMITS,  ...((data?.limits  ?? {}) as Partial<LimitsSettings>)  },
-    pricing: { ...DEFAULT_PRICING, ...((data?.pricing ?? {}) as Partial<PricingSettings>) },
+    limits:      { ...DEFAULT_LIMITS,      ...((data?.limits      ?? {}) as Partial<LimitsSettings>)      },
+    pricing:     { ...DEFAULT_PRICING,     ...((data?.pricing     ?? {}) as Partial<PricingSettings>)     },
+    maintenance: { ...DEFAULT_MAINTENANCE, ...((data?.maintenance ?? {}) as Partial<MaintenanceSettings>) },
   };
 });
 
