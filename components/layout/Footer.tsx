@@ -1,5 +1,6 @@
-﻿import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Heart, Mail, MapPin } from "lucide-react";
+import { Link } from "@/i18n/navigation";
 
 const IconFacebook = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
@@ -24,6 +25,9 @@ const IconYoutube = () => (
 import { SOCIAL_LINKS, NAV_LINKS } from "@/lib/constants";
 
 export default function Footer() {
+  const t = useTranslations("footer");
+  const tNav = useTranslations("nav");
+
   return (
     <footer className="bg-jommba-dark text-white border-t border-white/5 relative overflow-hidden">
       {/* Decorative accent gradient */}
@@ -42,7 +46,7 @@ export default function Footer() {
               </span>
             </Link>
             <p className="text-sm text-text-subtle leading-relaxed">
-              La plateforme de rencontre musulmane halal de référence. Notre mission est de vous aider à trouver votre moitié pour le mariage (Nikah) dans le respect de nos principes et valeurs.
+              {t("description")}
             </p>
             {/* Social Icons */}
             <div className="flex items-center gap-4">
@@ -88,7 +92,7 @@ export default function Footer() {
           {/* Quick Links */}
           <div className="space-y-6">
             <h3 className="text-base font-semibold text-white tracking-wider uppercase">
-              Navigation
+              {t("navigationTitle")}
             </h3>
             <ul className="space-y-3">
               {NAV_LINKS.map((link) => (
@@ -98,7 +102,7 @@ export default function Footer() {
                     className="text-sm text-text-subtle hover:text-primary transition-colors duration-200 flex items-center gap-2"
                   >
                     <span className="w-1.5 h-1.5 rounded-full bg-primary/40" />
-                    {link.label}
+                    {tNav(link.labelKey)}
                   </Link>
                 </li>
               ))}
@@ -108,7 +112,7 @@ export default function Footer() {
                   className="text-sm text-text-subtle hover:text-primary transition-colors duration-200 flex items-center gap-2"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-primary/40" />
-                  Connexion
+                  {tNav("login")}
                 </Link>
               </li>
               <li>
@@ -117,7 +121,7 @@ export default function Footer() {
                   className="text-sm text-text-subtle hover:text-primary transition-colors duration-200 flex items-center gap-2"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-primary/40" />
-                  S'inscrire
+                  {tNav("signup")}
                 </Link>
               </li>
             </ul>
@@ -126,27 +130,27 @@ export default function Footer() {
           {/* Legal / Contact */}
           <div className="space-y-6">
             <h3 className="text-base font-semibold text-white tracking-wider uppercase">
-              Informations & Aide
+              {t("helpTitle")}
             </h3>
             <ul className="space-y-3 text-sm text-text-subtle">
               <li>
                 <Link href="/faq" className="hover:text-primary transition-colors duration-200">
-                  Centre d'aide & FAQ
+                  {t("helpCenter")}
                 </Link>
               </li>
               <li>
                 <a href="#" className="hover:text-primary transition-colors duration-200">
-                  Conditions Générales d'Utilisation
+                  {t("terms")}
                 </a>
               </li>
               <li>
                 <a href="#" className="hover:text-primary transition-colors duration-200">
-                  Politique de Confidentialité
+                  {t("privacy")}
                 </a>
               </li>
               <li>
                 <a href="#" className="hover:text-primary transition-colors duration-200">
-                  Mentions Légales
+                  {t("legal")}
                 </a>
               </li>
               <li className="flex items-center gap-2 pt-2 text-white font-medium">
@@ -165,12 +169,12 @@ export default function Footer() {
             <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 relative overflow-hidden">
               {/* Decorative arabesque border hint */}
               <div className="absolute inset-0 border border-primary/10 rounded-2xl pointer-events-none m-1" />
-              
+
               <div className="text-xs text-text-subtle leading-relaxed italic text-center relative z-10">
-                « Et parmi Ses signes Il a créé de vous, pour vous, des épouses pour que vous viviez en tranquillité auprès d'elles; et Il a mis entre vous de l'affection et de la bonté. Il y a en cela des preuves pour des gens qui réfléchissent. »
+                {t("quote")}
               </div>
               <div className="text-right text-[10px] text-primary font-semibold mt-3 relative z-10">
-                [Coran — Sourate Ar-Rum, Verset 21]
+                {t("quoteSource")}
               </div>
             </div>
           </div>
@@ -178,11 +182,13 @@ export default function Footer() {
 
         <div className="mt-16 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-text-subtle text-center sm:text-left">
-            &copy; {new Date().getFullYear()} Jommba. Tous droits réservés.
+            {t("copyright", { year: new Date().getFullYear() })}
           </p>
           <div className="text-xs text-text-subtle flex gap-4">
             <span className="flex items-center gap-1">
-              Fait avec <Heart className="w-3.5 h-3.5 text-primary fill-primary" /> pour la communauté
+              {t("madeWithPrefix")}
+              <Heart className="w-3.5 h-3.5 text-primary fill-primary inline" />
+              {t("madeWithSuffix")}
             </span>
           </div>
         </div>
@@ -190,4 +196,3 @@ export default function Footer() {
     </footer>
   );
 }
-

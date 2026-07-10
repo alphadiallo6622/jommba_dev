@@ -1,5 +1,6 @@
-﻿"use client";
+"use client";
 
+import { useTranslations } from "next-intl";
 import { Check, X } from "lucide-react";
 import Container from "@/components/ui/Container";
 import SectionHeading from "@/components/ui/SectionHeading";
@@ -8,21 +9,23 @@ import AnimatedSection from "@/components/ui/AnimatedSection";
 import { PRICING_PLANS, PricingPlan } from "@/data/pricing";
 
 export default function PricingSection() {
+  const t = useTranslations("home.pricing");
+
   return (
     <section id="pricing" className="py-20 bg-jommba-bg/50 border-t border-primary-light/10">
       <Container>
         <AnimatedSection>
           <SectionHeading
-            badge="Tarifs"
-            title="Gratuit pour commencer. Premium pour accélérer."
-            subtitle="Tu peux utiliser Jommba gratuitement. Mais si tu veux maximiser tes chances, passe Premium."
+            badge={t("badge")}
+            title={t("title")}
+            subtitle={t("subtitle")}
             className="mb-16"
           />
         </AnimatedSection>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto items-start">
           {PRICING_PLANS.map((plan: PricingPlan, index: number) => (
-            <AnimatedSection key={plan.name} delay={index * 0.15} className="h-full flex">
+            <AnimatedSection key={plan.planKey} delay={index * 0.15} className="h-full flex">
               <div
                 className={`h-full flex flex-col w-full rounded-2xl border bg-white relative overflow-hidden ${
                   plan.popular
@@ -31,10 +34,10 @@ export default function PricingSection() {
                 }`}
               >
                 {/* Launch badge */}
-                {plan.badge && (
+                {plan.hasBadge && (
                   <div className="flex justify-center pt-4">
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
-                      {plan.badge}
+                      {t(`${plan.planKey}.badge`)}
                     </span>
                   </div>
                 )}
@@ -43,9 +46,9 @@ export default function PricingSection() {
                   {/* Header */}
                   <div className="mb-6">
                     <h3 className="text-xl font-bold text-text-primary font-serif mb-1">
-                      {plan.name}
+                      {t(`${plan.planKey}.name`)}
                     </h3>
-                    <p className="text-sm text-text-muted">{plan.description}</p>
+                    <p className="text-sm text-text-muted">{t(`${plan.planKey}.description`)}</p>
                   </div>
 
                   {/* Price */}
@@ -60,15 +63,15 @@ export default function PricingSection() {
                     </span>
                     <span className="text-lg font-bold text-text-primary ml-1">$</span>
                   </div>
-                  <p className="text-xs text-text-muted mb-6">{plan.period}</p>
+                  <p className="text-xs text-text-muted mb-6">{t(`${plan.planKey}.period`)}</p>
 
                   {/* Divider */}
                   <div className="w-full h-px bg-gray-100 mb-5" />
 
                   {/* Features */}
                   <ul className="space-y-3 mb-8 flex-1">
-                    {plan.features.map((feature, fIndex) => (
-                      <li key={fIndex} className="flex items-start gap-2.5">
+                    {plan.features.map((feature) => (
+                      <li key={feature.key} className="flex items-start gap-2.5">
                         {feature.included ? (
                           <div className="w-4 h-4 rounded-full bg-primary-light flex items-center justify-center text-primary shrink-0 mt-0.5">
                             <Check className="w-2.5 h-2.5 stroke-[3]" />
@@ -85,10 +88,10 @@ export default function PricingSection() {
                               : "text-text-subtle/60 line-through"
                           }`}
                         >
-                          {feature.text}
-                          {feature.tag && (
+                          {t(`${plan.planKey}.features.${feature.key}`)}
+                          {feature.tagged && (
                             <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-primary text-white uppercase tracking-wide">
-                              {feature.tag}
+                              {t(`${plan.planKey}.newTag`)}
                             </span>
                           )}
                         </span>
@@ -99,11 +102,11 @@ export default function PricingSection() {
                   {/* CTA */}
                   <div className="mt-auto space-y-3">
                     <Button href="/inscription" variant={plan.variant} className="w-full">
-                      {plan.buttonText} →
+                      {t(`${plan.planKey}.buttonText`)} →
                     </Button>
-                    {plan.note && (
+                    {plan.hasNote && (
                       <p className="text-[11px] text-text-subtle text-center leading-relaxed">
-                        {plan.note}
+                        {t(`${plan.planKey}.note`)}
                       </p>
                     )}
                   </div>
@@ -116,4 +119,3 @@ export default function PricingSection() {
     </section>
   );
 }
-

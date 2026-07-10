@@ -1,0 +1,401 @@
+{
+  "nav": {
+    "home": "Home",
+    "blog": "Blog",
+    "faq": "FAQ",
+    "login": "Log in",
+    "signup": "Sign up",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "quote": "\"And among His signs is that He created for you spouses from among yourselves so that you may find tranquility in them...\"",
+    "quoteSource": "[Surah Ar-Rum, 21]",
+    "whyJommba": "Why Jommba?",
+    "whyReason1": "Serious, verified community",
+    "whyReason2": "Respect for Islamic values",
+    "whyReason3": "Total discretion guaranteed"
+  },
+  "footer": {
+    "description": "The leading halal Muslim matchmaking platform. Our mission is to help you find your other half for marriage (Nikah) in keeping with our principles and values.",
+    "navigationTitle": "Navigation",
+    "helpTitle": "Information & Help",
+    "helpCenter": "Help Center & FAQ",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "legal": "Legal Notice",
+    "quote": "\"And among His signs is that He created for you spouses from among yourselves so that you may find tranquility in them; and He placed between you affection and mercy. Indeed in that are signs for a people who reflect.\"",
+    "quoteSource": "[Quran — Surah Ar-Rum, Verse 21]",
+    "copyright": "© {year} Jommba. All rights reserved.",
+    "madeWithPrefix": "Made with",
+    "madeWithSuffix": "for the community"
+  },
+  "languageSwitcher": {
+    "label": "Language",
+    "fr": "Français",
+    "en": "English"
+  },
+  "home": {
+    "hero": {
+      "badge": "Halal & Serious Matchmaking",
+      "titleLine1": "Find your other half while honoring your",
+      "titleLine2": "Islamic values",
+      "subtitle": "Jommba is the go-to platform built for serious Muslim singles seeking marriage (Nikah) with modesty, sincerity, and safety.",
+      "ctaSignup": "Sign up for free",
+      "ctaDiscover": "Discover how it works",
+      "badge1": "100% manually verified profiles",
+      "badge2": "Optional guardian (Wali) support",
+      "marriagesLabel": "Marriages celebrated",
+      "marriagesValue": "1,240+ Couples",
+      "securityLabel": "Security & Modesty",
+      "securityValue": "Blurrable Photos",
+      "imageAlt": "Elegant, smiling Muslim couple"
+    },
+    "stats": {
+      "singles": "Muslim Singles",
+      "marriages": "Marriages Celebrated",
+      "verified": "Moderated & Verified Profiles",
+      "countries": "Countries Represented"
+    },
+    "features": {
+      "badge": "Why Choose Us",
+      "title": "A platform that respects your convictions",
+      "subtitle": "We do everything we can to give you a safe space, in line with Islamic values, to approach marriage with complete peace of mind.",
+      "items": {
+        "sharia": {
+          "title": "Sharia-Compliant & Ethical",
+          "description": "A platform built on Islamic principles, with optional guardian (Wali) support and strict respect for the rules of propriety."
+        },
+        "verified": {
+          "title": "Manually Verified Profiles",
+          "description": "Every sign-up and every photo is carefully reviewed by our moderation team to guarantee genuine, serious profiles."
+        },
+        "messaging": {
+          "title": "Secure Messaging",
+          "description": "Chat with complete peace of mind. Our messaging keeps your private information protected until you decide to share it."
+        },
+        "search": {
+          "title": "Advanced Search Filters",
+          "description": "Filter profiles by precise criteria: religious practice, location, occupation, vision of marriage, and much more."
+        },
+        "privacy": {
+          "title": "Absolute Privacy",
+          "description": "Blur your photos so they're only visible to the profiles you approve. Your privacy stays in your hands."
+        },
+        "notifications": {
+          "title": "Real-Time Notifications",
+          "description": "Never miss an opportunity. Get instantly notified of visits, likes, and new messages."
+        }
+      }
+    },
+    "howItWorks": {
+      "badge": "Step by Step",
+      "title": "How does Jommba work?",
+      "subtitle": "We guide you step by step toward meeting your future husband or wife under the best possible conditions.",
+      "steps": {
+        "1": {
+          "title": "Create your profile",
+          "description": "Fill out our detailed questionnaire about your practice, your values, what you're looking for, and your vision of marriage."
+        },
+        "2": {
+          "title": "Find compatible profiles",
+          "description": "Browse profiles that match your aspirations. Filter by location, religious practice, age, and more."
+        },
+        "3": {
+          "title": "Connect & Take It Further",
+          "description": "Start the conversation in our private, secure messaging. Invite your Wali to join the discussion if you wish."
+        }
+      }
+    },
+    "testimonials": {
+      "badge": "Testimonials & Stories",
+      "title": "They found their other half on Jommba",
+      "subtitle": "Discover inspiring stories of Muslim couples who met and were united by the sacred bond of marriage through our platform.",
+      "marriedBadge": "Married"
+    },
+    "pricing": {
+      "badge": "Pricing",
+      "title": "Free to start. Premium to move faster.",
+      "subtitle": "You can use Jommba for free. But if you want to maximize your chances, go Premium.",
+      "free": {
+        "name": "Free",
+        "period": "Forever",
+        "description": "Explore the platform at your own pace",
+        "buttonText": "Get started",
+        "features": {
+          "1": "Full profile creation",
+          "2": "3 profile photos",
+          "3": "3 contact requests per day",
+          "4": "3 active conversations at once",
+          "5": "3 questions per day to Sheikh Moussa (AI Coach)",
+          "6": "Reply to messages you receive",
+          "7": "Ice Breaker: conversation starters",
+          "8": "Access to the Marriage Academy",
+          "9": "Email support",
+          "10": "Unlimited requests & conversations",
+          "11": "Unlimited Sheikh Moussa Coach",
+          "12": "See who favorited you",
+          "13": "See who visited your profile",
+          "14": "Voice messages 🎤",
+          "15": "Custom Flash Message",
+          "16": "Up to 10 HD photos",
+          "17": "Detailed AI compatibility score",
+          "18": "Visibility boosts",
+          "19": "Advanced filters",
+          "20": "Verified Premium badge"
+        }
+      },
+      "premium": {
+        "name": "Premium",
+        "period": "/ month",
+        "description": "Maximize your chances of finding your other half",
+        "badge": "✨ LAUNCH OFFER",
+        "note": "* Limited launch price. Regular price: $15 / month",
+        "buttonText": "Get started",
+        "features": {
+          "1": "Unlimited contact requests",
+          "2": "Unlimited simultaneous conversations",
+          "3": "Sheikh Moussa Coach: unlimited questions",
+          "4": "See who favorited you ⭐",
+          "5": "See who visited your profile 🔴",
+          "6": "Up to 10 HD photos on your profile",
+          "7": "100% unlimited messaging",
+          "8": "Voice messages 🎤",
+          "9": "See who's online 🟢",
+          "10": "Ice Breaker: personalized conversation starters",
+          "11": "Flash Message: make a great first impression",
+          "12": "Detailed AI compatibility score",
+          "13": "Higher ranking in search results",
+          "14": "Advanced filters (madhab, hijra…)",
+          "15": "Profile boosts included",
+          "16": "Verified Premium badge ✓",
+          "17": "Priority support, 7 days a week"
+        },
+        "newTag": "NEW"
+      }
+    },
+    "quote": {
+      "arabic": "وَمِنْ آيَاتِهِ أَنْ خَلَقَ لَكُم مِّنْ أَنفُسِكُمْ أَزْوَاجًا لِّتَسْكُنُوا إِلَيْهَا وَجَعَلَ بَيْنَكُم مَّوَدَّةً وَرَحْمَةً ۚ إِنَّ فِي ذَٰلِكَ لَآيَاتٍ لِّقَوْمٍ يَتَفَكَّرُونَ",
+      "translation": "\"And among His signs is that He created for you spouses from among yourselves so that you may find tranquility in them; and He placed between you affection and mercy. Indeed in that are signs for a people who reflect.\"",
+      "source": "Quran — Surah Ar-Rum (The Romans), Verse 21"
+    },
+    "cta": {
+      "title": "Ready to meet your destiny?",
+      "subtitle": "Join Jommba for free today. Signing up takes less than 3 minutes and connects you directly with serious profiles who share your vision of family.",
+      "button": "Get started for free",
+      "tagline": "Free sign-up • 100% verified profiles • Privacy respected"
+    }
+  },
+  "auth": {
+    "shared": {
+      "brandTagline": "HALAL MARRIAGE • DISCRETION • SERIOUSNESS",
+      "quoteGarment": "\"They are a garment for you and you are a garment for them.\"",
+      "quoteGarmentSource": "— Surah Al-Baqara, 2:187",
+      "quoteTranquility": "\"And among His signs is that He created for you spouses so that you may find tranquility with them\"",
+      "quoteLove": "\"Love for the sake of Allah is the strongest bond of faith.\"",
+      "quoteLoveSource": "— Hadith, Ahmad",
+      "whyJommba": "Why Jommba?",
+      "reason1": "Serious, verified community",
+      "reason2": "Respect for Islamic values",
+      "reason3": "Total discretion guaranteed",
+      "or": "or",
+      "googleLoading": "Signing in…",
+      "emailLabel": "Email",
+      "emailPlaceholder": "your.email@example.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "••••••••"
+    },
+    "login": {
+      "title": "Bismillah, welcome",
+      "subtitle": "Sign in to continue your search.",
+      "googleButton": "Quick sign-in with Google",
+      "forgotPassword": "Forgot your password?",
+      "submit": "Sign in",
+      "noAccount": "Not a member yet?",
+      "signupLink": "Sign up for free",
+      "errorInvalidCredentials": "Incorrect email or password",
+      "errorGeneric": "Sign-in error",
+      "errorNetwork": "Couldn't sign in. Check your internet connection.",
+      "errorEmailInvalid": "Invalid email address",
+      "errorPasswordRequired": "Password is required"
+    },
+    "signup": {
+      "step1": {
+        "title": "Create my account",
+        "subtitle": "Free sign-up, no commitment."
+      },
+      "step2": {
+        "title": "Secure your account",
+        "subtitle": "Choose a strong password."
+      },
+      "consent": "I accept the {terms} and agree to respect Jommba's {charter}.",
+      "termsLink": "Terms of Service",
+      "charterLink": "code of modesty and conduct",
+      "googleButton": "Sign up with Google",
+      "firstNameLabel": "First name",
+      "firstNamePlaceholder": "Your first name",
+      "lastNameLabel": "Last name",
+      "lastNamePlaceholder": "Your last name",
+      "continueButton": "Continue",
+      "alreadyMember": "Already a member?",
+      "loginLink": "Sign in",
+      "passwordLabel": "Password",
+      "confirmPasswordLabel": "Confirm password",
+      "strengthWeak": "Weak",
+      "strengthMedium": "Medium",
+      "strengthStrong": "Strong",
+      "back": "Back",
+      "createAccount": "Create my account",
+      "turnstileRequired": "Please complete the anti-bot check.",
+      "turnstileFailed": "Anti-bot verification failed. Try again.",
+      "accountCreated": "Account created! Check your inbox.",
+      "errorFirstNameMin": "First name required (min. 2 characters)",
+      "errorLastNameMin": "Last name required (min. 2 characters)",
+      "errorEmailInvalid": "Invalid email address",
+      "errorEmailUnreachable": "This email address doesn't exist or can't receive messages",
+      "errorPasswordMin": "Minimum 8 characters",
+      "errorConfirmRequired": "Confirmation required",
+      "errorPasswordMismatch": "Passwords don't match"
+    },
+    "forgotPassword": {
+      "sideTitle": "Don't worry, it happens to everyone",
+      "sideSubtitle": "Enter your email address and we'll send you a secure link to reset your password.",
+      "title": "Forgot your password?",
+      "subtitle": "Enter your email and we'll send you a link to reset it.",
+      "submit": "Send link",
+      "sentTitle": "Check your inbox",
+      "sentSubtitle": "If an account exists for {email}, a reset link has just been sent to it.",
+      "sentHint": "Didn't get it? Check your <strong>Spam</strong> folder. The link is valid for <strong>1 hour</strong>.",
+      "useAnotherEmail": "Use a different email address",
+      "backToLogin": "Back to sign in",
+      "errorSendFailed": "Couldn't send the link right now.",
+      "errorNetwork": "Couldn't send the link. Check your internet connection.",
+      "errorEmailInvalid": "Invalid email address"
+    },
+    "resetPassword": {
+      "checkingLink": "Verifying link…",
+      "invalidTitle": "Invalid or expired link",
+      "invalidSubtitle": "This reset link is no longer valid. Request a new one to continue.",
+      "requestNewLink": "Request a new link",
+      "doneTitle": "All done!",
+      "doneSubtitle": "Your password has been changed. Redirecting…",
+      "title": "New password",
+      "subtitle": "Choose a secure password for your account.",
+      "newPasswordLabel": "New password",
+      "newPasswordPlaceholder": "8 characters minimum",
+      "confirmPasswordLabel": "Confirm password",
+      "submit": "Change my password",
+      "successToast": "Password changed successfully ✓",
+      "errorGeneric": "Couldn't change the password.",
+      "errorUnexpected": "Something went wrong. Try again.",
+      "errorPasswordMin": "Password must be at least 8 characters",
+      "errorConfirmRequired": "Confirm your password",
+      "errorPasswordMismatch": "Passwords don't match"
+    }
+  },
+  "faq": {
+    "hero": {
+      "badge": "Support & Questions",
+      "title": "How can we help you?",
+      "subtitle": "Browse the most frequently asked questions from Jommba members about moderation, security, or our Premium offers.",
+      "searchPlaceholder": "Search a question or topic...",
+      "clearSearch": "Clear search"
+    },
+    "searchResults": "Search results for: \"{query}\" ({count} questions found)",
+    "empty": {
+      "title": "No results found",
+      "subtitle": "We couldn't find any question matching your search. Try different keywords or browse our categories."
+    },
+    "contactCta": {
+      "title": "Still have questions?",
+      "subtitle": "Our customer support team is available 7 days a week to help you and answer all your questions within 24 hours.",
+      "button": "Contact support"
+    },
+    "categories": {
+      "account": "Sign-up & Account",
+      "verification": "Profiles & Verification",
+      "messaging": "Messaging",
+      "premium": "Premium Pass",
+      "security": "Security & Privacy"
+    },
+    "items": {
+      "account": {
+        "1": {
+          "question": "How do I create an account on Jommba?",
+          "answer": "To create an account, click the 'Sign up' button at the top right. Then fill out our detailed form with honest information about your profile, what you're looking for, and your religious expectations. Signing up takes less than 3 minutes."
+        },
+        "2": {
+          "question": "Is sign-up really free?",
+          "answer": "Yes, creating a profile, searching for matches, and receiving visits/likes are completely free. You can use the core features with no time limit. A paid Premium Pass is available to unlock unlimited messaging."
+        },
+        "3": {
+          "question": "Can I delete my account at any time?",
+          "answer": "Absolutely. Whether you've found your other half or simply wish to leave the platform, you can permanently delete your account from your account settings. All your personal data will be erased immediately."
+        }
+      },
+      "verification": {
+        "1": {
+          "question": "Why is my profile pending validation?",
+          "answer": "To ensure a trustworthy environment and prevent fake profiles, every sign-up and every photo is manually reviewed by our moderation team. This process usually takes between 1 and 12 hours."
+        },
+        "2": {
+          "question": "What are the rules regarding photos?",
+          "answer": "Photos must be decent and comply with Islamic standards (visible face, appropriate attire). Jommba offers a unique blurring option: you can choose to blur your photos for all members and only reveal them to people you're seriously talking with."
+        }
+      },
+      "messaging": {
+        "1": {
+          "question": "How do I contact a potential match?",
+          "answer": "When you visit a profile you're interested in, you can send a 'Like' or start a conversation by message if they've liked you back. Premium members can send messages directly without waiting for a match."
+        },
+        "2": {
+          "question": "Can I involve my guardian (Wali) in the conversation?",
+          "answer": "Yes, Jommba encourages family involvement. You can add your guardian's (Wali) email address so they receive notifications and can take part in or supervise the conversation as part of a calm, respectful dialogue."
+        }
+      },
+      "premium": {
+        "1": {
+          "question": "What are the benefits of the Premium Pass?",
+          "answer": "The Premium Pass lets you send unlimited messages, see exactly who liked or visited your profile, hide your photos from unregistered users, get the verified profile badge with priority, and enjoy a weekly visibility boost."
+        },
+        "2": {
+          "question": "Are subscriptions commitment-free?",
+          "answer": "Yes, our subscriptions are monthly with no long-term commitment. You can cancel automatic renewal at any time with one click from your billing settings, at no extra cost."
+        }
+      },
+      "security": {
+        "1": {
+          "question": "How does Jommba protect my data?",
+          "answer": "All your login data and messages are end-to-end encrypted (SSL). We never share your data with third parties and we don't display any ads on our platform. Your privacy stays private."
+        },
+        "2": {
+          "question": "How do I report inappropriate behavior?",
+          "answer": "If you notice disrespectful or suspicious behavior, immediately click the 'Report' button on the user's profile or in the chat window. Our moderators will take priority action to suspend malicious profiles."
+        }
+      }
+    }
+  },
+  "blog": {
+    "hero": {
+      "badge": "Our Journal & Advice",
+      "title": "The Jommba Blog",
+      "subtitle": "Find our practical advice, theological insights, and psychological reflections to help you prepare serenely for Muslim marriage (Nikah).",
+      "searchPlaceholder": "Search an article...",
+      "clearSearch": "Clear search"
+    },
+    "categories": {
+      "all": "All",
+      "spirituality": "Spirituality",
+      "advice": "Advice",
+      "family": "Family",
+      "events": "Events",
+      "news": "News"
+    },
+    "empty": {
+      "title": "No article found",
+      "subtitle": "We couldn't find any results matching your search. Try different keywords or reset the filters."
+    },
+    "backToBlog": "Back to blog",
+    "featuredLabel": "Featured Article",
+    "viewAllArticles": "View all articles",
+    "editorialTeam": "Jommba Editorial Team"
+  }
+}

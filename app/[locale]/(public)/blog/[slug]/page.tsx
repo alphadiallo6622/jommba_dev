@@ -2,13 +2,14 @@
 // Page détail d'un article — sert les articles publiés depuis la console
 // admin (slug = id BDD) et les articles fondateurs statiques (slug texte).
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { ArrowLeft, BookOpen, Calendar, Clock } from "lucide-react";
 import Container from "@/components/ui/Container";
 import Badge from "@/components/ui/Badge";
 import { createClient } from "@/lib/supabase/server";
 import { BLOG_POSTS } from "@/data/blogPosts";
+import { Link } from "@/i18n/navigation";
 
 export const dynamic = "force-dynamic";
 
@@ -130,6 +131,7 @@ export default async function BlogArticlePage(
   const { slug } = await params;
   const article = await loadArticle(decodeURIComponent(slug));
   if (!article) notFound();
+  const t = await getTranslations("blog");
 
   return (
     <article className="bg-jommba-bg pb-20">
@@ -144,7 +146,7 @@ export default async function BlogArticlePage(
               className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-white/75 hover:text-white transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              Retour au blog
+              {t("backToBlog")}
             </Link>
 
             <div className="flex items-center gap-3">
@@ -218,7 +220,7 @@ export default async function BlogArticlePage(
                 </div>
                 <div>
                   <p className="text-xs font-bold text-text-primary">{article.authorName}</p>
-                  <p className="text-[11px] text-text-muted">Équipe éditoriale Jommba</p>
+                  <p className="text-[11px] text-text-muted">{t("editorialTeam")}</p>
                 </div>
               </div>
               <Link
@@ -226,7 +228,7 @@ export default async function BlogArticlePage(
                 className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
               >
                 <BookOpen className="w-3.5 h-3.5" />
-                Voir tous les articles
+                {t("viewAllArticles")}
               </Link>
             </div>
           </div>

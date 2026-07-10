@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -10,17 +10,7 @@ import { Lock, Eye, EyeOff, Heart, Loader2, CheckCircle2, ShieldAlert } from 'lu
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
-
-const schema = z
-  .object({
-    password: z.string().min(8, 'Le mot de passe doit contenir au moins 8 caractères'),
-    confirmPassword: z.string().min(1, 'Confirme ton mot de passe'),
-  })
-  .refine(data => data.password === data.confirmPassword, {
-    message: 'Les mots de passe ne correspondent pas',
-    path: ['confirmPassword'],
-  })
-type FormData = z.infer<typeof schema>
+import { Link } from '@/i18n/navigation'
 
 type SessionState = 'checking' | 'valid' | 'invalid'
 
@@ -37,11 +27,23 @@ function Logo() {
 
 export default function ReinitialiserMotDePassePage() {
   const router = useRouter()
+  const t = useTranslations('auth.resetPassword')
   const [sessionState, setSessionState] = useState<SessionState>('checking')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
+
+  const schema = z
+    .object({
+      password: z.string().min(8, t('errorPasswordMin')),
+      confirmPassword: z.string().min(1, t('errorConfirmRequired')),
+    })
+    .refine(data => data.password === data.confirmPassword, {
+      message: t('errorPasswordMismatch'),
+      path: ['confirmPassword'],
+    })
+  type FormData = z.infer<typeof schema>
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -61,10 +63,10 @@ export default function ReinitialiserMotDePassePage() {
       const { error } = await supabase.auth.updateUser({ password: data.password })
       if (error) {
         console.error('[ReinitialiserMotDePasse] Supabase error:', JSON.stringify(error))
-        toast.error(error.message || 'Impossible de modifier le mot de passe.')
+        toast.error(error.message || t('errorGeneric'))
         return
       }
-      toast.success('Mot de passe modifié avec succès ✓')
+      toast.success(t('successToast'))
       setDone(true)
       setTimeout(() => {
         router.push('/dashboard')
@@ -72,7 +74,7 @@ export default function ReinitialiserMotDePassePage() {
       }, 1500)
     } catch (err) {
       console.error('[ReinitialiserMotDePasse] Exception inattendue:', err)
-      toast.error('Une erreur est survenue. Réessaie.')
+      toast.error(t('errorUnexpected'))
     } finally {
       setLoading(false)
     }
@@ -86,7 +88,7 @@ export default function ReinitialiserMotDePassePage() {
         {sessionState === 'checking' && (
           <div className="flex flex-col items-center gap-3 py-10">
             <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
-            <p className="text-sm text-gray-500">Vérification du lien…</p>
+            <p className="text-sm text-gray-500">{t('checkingLink')}</p>
           </div>
         )}
 
@@ -96,9 +98,9 @@ export default function ReinitialiserMotDePassePage() {
               <ShieldAlert className="w-8 h-8 text-red-500" />
             </div>
             <div>
-              <h1 className="text-2xl font-serif font-bold text-gray-900">Lien invalide ou expiré</h1>
+              <h1 className="text-2xl font-serif font-bold text-gray-900">{t('invalidTitle')}</h1>
               <p className="text-sm text-gray-500 mt-2 leading-relaxed">
-                Ce lien de réinitialisation n&rsquo;est plus valable. Demande-en un nouveau pour continuer.
+                {t('invalidSubtitle')}
               </p>
             </div>
             <Link
@@ -106,7 +108,7 @@ export default function ReinitialiserMotDePassePage() {
               className="inline-flex items-center justify-center w-full py-2.5 rounded-xl text-white font-semibold text-sm transition-opacity hover:opacity-90"
               style={{ background: '#10B981' }}
             >
-              Demander un nouveau lien
+              {t('requestNewLink')}
             </Link>
           </div>
         )}
@@ -117,8 +119,8 @@ export default function ReinitialiserMotDePassePage() {
               <CheckCircle2 className="w-8 h-8 text-emerald-600" />
             </div>
             <div>
-              <h1 className="text-2xl font-serif font-bold text-gray-900">C&rsquo;est fait !</h1>
-              <p className="text-sm text-gray-500 mt-2">Ton mot de passe a été modifié. Redirection…</p>
+              <h1 className="text-2xl font-serif font-bold text-gray-900">{t('doneTitle')}</h1>
+              <p className="text-sm text-gray-500 mt-2">{t('doneSubtitle')}</p>
             </div>
           </div>
         )}
@@ -129,18 +131,18 @@ export default function ReinitialiserMotDePassePage() {
               <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: '#D1FAE5' }}>
                 <Lock className="w-7 h-7 text-emerald-600" />
               </div>
-              <h1 className="text-2xl font-serif font-bold text-gray-900">Nouveau mot de passe</h1>
-              <p className="text-sm text-gray-500 mt-1">Choisis un mot de passe sécurisé pour ton compte.</p>
+              <h1 className="text-2xl font-serif font-bold text-gray-900">{t('title')}</h1>
+              <p className="text-sm text-gray-500 mt-1">{t('subtitle')}</p>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-gray-700 block mb-1">Nouveau mot de passe</label>
+                <label className="text-xs font-semibold text-gray-700 block mb-1">{t('newPasswordLabel')}</label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="8 caractères minimum"
+                    placeholder={t('newPasswordPlaceholder')}
                     {...register('password')}
                     className={cn(
                       'w-full pl-10 pr-10 py-2.5 rounded-xl border text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition-all',
@@ -155,7 +157,7 @@ export default function ReinitialiserMotDePassePage() {
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-gray-700 block mb-1">Confirmer le mot de passe</label>
+                <label className="text-xs font-semibold text-gray-700 block mb-1">{t('confirmPasswordLabel')}</label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
@@ -181,7 +183,7 @@ export default function ReinitialiserMotDePassePage() {
                 style={{ background: '#10B981' }}
               >
                 {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-                Modifier mon mot de passe
+                {t('submit')}
               </button>
             </form>
           </>

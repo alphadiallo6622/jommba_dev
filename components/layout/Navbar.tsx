@@ -1,14 +1,16 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Menu } from "lucide-react";
+import { Link, usePathname } from "@/i18n/navigation";
 import { NAV_LINKS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import MobileMenu from "./MobileMenu";
+import { LocaleSwitcher } from "./LocaleSwitcher";
 
 export default function Navbar() {
+  const t = useTranslations("nav");
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
@@ -61,7 +63,7 @@ export default function Navbar() {
                       : "text-text-secondary hover:text-primary"
                   )}
                 >
-                  {link.label}
+                  {t(link.labelKey)}
                   {isActive && (
                     <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded-full animate-fade-in" />
                   )}
@@ -72,17 +74,18 @@ export default function Navbar() {
 
           {/* Action Buttons (Desktop) */}
           <div className="hidden md:flex items-center gap-4">
+            <LocaleSwitcher />
             <Link
               href="/connexion"
               className="text-sm font-semibold text-text-primary hover:text-primary transition-colors duration-200"
             >
-              Connexion
+              {t("login")}
             </Link>
             <Link
               href="/inscription"
               className="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-primary text-white font-semibold text-sm shadow-green-btn hover:bg-primary-dark hover:-translate-y-0.5 transition-all duration-200"
             >
-              S'inscrire
+              {t("signup")}
             </Link>
           </div>
 
@@ -90,7 +93,7 @@ export default function Navbar() {
           <button
             onClick={() => setIsMobileMenuOpen(true)}
             className="md:hidden p-2 text-text-primary hover:text-primary transition-colors duration-200"
-            aria-label="Ouvrir le menu"
+            aria-label={t("openMenu")}
           >
             <Menu className="w-6 h-6" />
           </button>
@@ -106,4 +109,3 @@ export default function Navbar() {
     </>
   );
 }
-

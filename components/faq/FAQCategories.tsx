@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { User, ShieldAlert, MessageSquare, Star, Lock, LucideIcon } from "lucide-react";
 import { FAQCategory } from "@/data/faqData";
 import { cn } from "@/lib/utils";
@@ -23,6 +24,8 @@ export default function FAQCategories({
   activeCategoryId,
   onSelectCategory,
 }: FAQCategoriesProps) {
+  const t = useTranslations("faq.categories");
+
   return (
     <div className="flex flex-wrap items-center justify-center gap-3">
       {categories.map((category) => {
@@ -41,7 +44,7 @@ export default function FAQCategories({
             )}
           >
             <IconComponent className="w-4 h-4 shrink-0" />
-            <span>{category.label}</span>
+            <span>{t(category.id)}</span>
           </button>
         );
       })}

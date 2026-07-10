@@ -1,5 +1,6 @@
-﻿"use client";
+"use client";
 
+import { useTranslations } from "next-intl";
 import { ShieldCheck, UserCheck, MessageSquare, Flame, Search, Bell, LucideIcon } from "lucide-react";
 import Container from "@/components/ui/Container";
 import SectionHeading from "@/components/ui/SectionHeading";
@@ -17,15 +18,17 @@ const iconMap: Record<string, LucideIcon> = {
 };
 
 export default function FeaturesSection() {
+  const t = useTranslations("home.features");
+
   return (
     <section id="features" className="py-20 bg-jommba-bg">
       <Container>
         {/* Section Header */}
         <AnimatedSection>
           <SectionHeading
-            badge="Pourquoi Nous Choisir"
-            title="Une plateforme respectueuse de vos convictions"
-            subtitle="Nous mettons tout en œuvre pour vous offrir un espace d'échange sécurisé, conforme aux valeurs de l'Islam, pour aborder le mariage en toute sérénité."
+            badge={t("badge")}
+            title={t("title")}
+            subtitle={t("subtitle")}
             className="mb-16"
           />
         </AnimatedSection>
@@ -46,10 +49,10 @@ export default function FeaturesSection() {
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-text-primary font-serif mb-2">
-                      {feature.title}
+                      {t(`items.${feature.key}.title`)}
                     </h3>
                     <p className="text-sm text-text-muted leading-relaxed">
-                      {feature.description}
+                      {t(`items.${feature.key}.description`)}
                     </p>
                   </div>
                 </Card>
@@ -61,4 +64,3 @@ export default function FeaturesSection() {
     </section>
   );
 }
-

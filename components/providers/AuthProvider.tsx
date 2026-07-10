@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
+import { localizedLogin } from '@/lib/i18n/locale-cookie'
 
 type AuthContextValue = {
   user: User | null
@@ -39,7 +40,7 @@ export function AuthProvider({
   const signOut = useCallback(async () => {
     await supabase.auth.signOut()
     setUser(null)
-    window.location.href = '/connexion'
+    window.location.href = localizedLogin()
   }, [supabase])
 
   return (

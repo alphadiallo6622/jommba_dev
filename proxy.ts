@@ -1,8 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createServerClient } from "@supabase/ssr"
+import createIntlMiddleware from "next-intl/middleware"
 import { verifyAdminToken, COOKIE } from "@/lib/admin/auth"
+import { routing, defaultLocale, type Locale } from "@/i18n/routing"
 
 const MAINTENANCE_PATH = "/maintenance"
+
+// Gère la négociation de langue (Accept-Language + cookie NEXT_LOCALE) et la
+// redirection vers /fr, /en… pour les routes localisées (site public + auth).
+const intlMiddleware = createIntlMiddleware(routing)
 
 /** Préfixes toujours accessibles, même quand le mode maintenance est actif. */
 function isMaintenanceExempt(pathname: string): boolean {
@@ -39,6 +45,15 @@ async function isMaintenanceEnabled(): Promise<boolean> {
   }
 }
 
+/** Locale déjà choisie par le visiteur (cookie), sinon la locale par défaut. */
+function preferredLocale(req: NextRequest): Locale {
+  const cookieLocale = req.cookies.get("NEXT_LOCALE")?.value
+  if (routing.locales.includes(cookieLocale as Locale)) {
+    return cookieLocale as Locale
+  }
+  return defaultLocale
+}
+
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl
 
@@ -55,11 +70,22 @@ export async function proxy(req: NextRequest) {
   } else if (pathname === MAINTENANCE_PATH) {
     // Maintenance inactive : personne ne doit rester bloqué sur /maintenance.
     const url = req.nextUrl.clone()
-    url.pathname = "/"
+    url.pathname = `/${preferredLocale(req)}`
     return NextResponse.redirect(url)
   }
 
-  // ── 1. Routes admin (HMAC) ────────────────────────────────────────────────
+  // ── 0bis. Chemins jamais localisés : API et pages hors périmètre i18n ────
+  // Sans ce garde-fou, le middleware next-intl les préfixerait (/fr/api/… ou
+  // /fr/verify-email), cassant les appels API et le flux de vérification email.
+  if (
+    pathname.startsWith("/api") ||
+    pathname.startsWith("/verify-email") ||
+    pathname === MAINTENANCE_PATH
+  ) {
+    return NextResponse.next()
+  }
+
+  // ── 1. Routes admin (HMAC) — jamais localisées ────────────────────────────
   if (pathname.startsWith("/adminjommba")) {
     if (
       pathname.startsWith("/adminjommba/login") ||
@@ -76,7 +102,7 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next()
   }
 
-  // ── 2. Routes protégées utilisateur (Supabase Auth) ──────────────────────
+  // ── 2. Routes protégées utilisateur (Supabase Auth) — jamais localisées ──
   if (
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/onboarding")
@@ -109,8 +135,10 @@ export async function proxy(req: NextRequest) {
     } = await supabase.auth.getUser()
 
     if (!user) {
+      // La page de connexion vit sous /[locale]/connexion : on redirige vers
+      // la langue déjà choisie par le visiteur (cookie), sinon le défaut.
       const url = req.nextUrl.clone()
-      url.pathname = "/connexion"
+      url.pathname = `/${preferredLocale(req)}/connexion`
       url.searchParams.set("redirect", pathname)
       return NextResponse.redirect(url)
     }
@@ -118,12 +146,13 @@ export async function proxy(req: NextRequest) {
     return supabaseResponse
   }
 
-  return NextResponse.next()
+  // ── 3. Tout le reste : site public + auth, gérés par next-intl ───────────
+  // (détection Accept-Language, cookie NEXT_LOCALE, redirection vers /fr, /en…)
+  return intlMiddleware(req)
 }
 
 export const config = {
-  // Couvre tout le site (pour la maintenance) en excluant les assets statiques
-  // et les fichiers publics, où le proxy n'a rien à faire.
+  // Couvre tout le site (maintenance + i18n) en excluant les assets statiques.
   matcher: [
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|svg|gif|webp|ico|txt|xml|woff2?|ttf|css|js|map)$).*)",
   ],

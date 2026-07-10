@@ -1,10 +1,12 @@
-﻿"use client";
+"use client";
 
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "@/i18n/navigation";
 import { NAV_LINKS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import { LocaleSwitcher } from "./LocaleSwitcher";
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -13,6 +15,8 @@ interface MobileMenuProps {
 }
 
 export default function MobileMenu({ isOpen, onClose, pathname }: MobileMenuProps) {
+  const t = useTranslations("nav");
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -42,7 +46,7 @@ export default function MobileMenu({ isOpen, onClose, pathname }: MobileMenuProp
               <button
                 onClick={onClose}
                 className="p-1.5 rounded-lg text-text-primary hover:bg-primary-light hover:text-primary transition-all duration-200"
-                aria-label="Fermer le menu"
+                aria-label={t("closeMenu")}
               >
                 <X className="w-5 h-5" />
               </button>
@@ -64,7 +68,7 @@ export default function MobileMenu({ isOpen, onClose, pathname }: MobileMenuProp
                         : "text-text-secondary hover:bg-primary-light/50 hover:text-primary"
                     )}
                   >
-                    {link.label}
+                    {t(link.labelKey)}
                   </Link>
                 );
               })}
@@ -72,24 +76,27 @@ export default function MobileMenu({ isOpen, onClose, pathname }: MobileMenuProp
 
             {/* Actions & Footer */}
             <div className="flex flex-col gap-4 pt-6 border-t border-text-muted/10">
+              <div className="flex justify-center">
+                <LocaleSwitcher />
+              </div>
               <Link
                 href="/connexion"
                 onClick={onClose}
                 className="inline-flex items-center justify-center w-full py-3 rounded-xl border border-text-muted/20 text-text-primary font-semibold text-sm hover:bg-primary-light hover:border-primary/30 transition-all duration-200"
               >
-                Connexion
+                {t("login")}
               </Link>
               <Link
                 href="/inscription"
                 onClick={onClose}
                 className="inline-flex items-center justify-center w-full py-3 rounded-xl bg-primary text-white font-semibold text-sm shadow-green-btn hover:bg-primary-dark transition-all duration-200"
               >
-                S'inscrire
+                {t("signup")}
               </Link>
-              
+
               <div className="text-center mt-6 text-xs text-text-subtle font-medium">
-                « Et parmi Ses signes Il a créé de vous, pour vous, des épouses pour que vous viviez en tranquillité auprès d'elles... »
-                <div className="text-[10px] text-primary/70 mt-1">[Sourate Ar-Rum, 21]</div>
+                {t("quote")}
+                <div className="text-[10px] text-primary/70 mt-1">{t("quoteSource")}</div>
               </div>
             </div>
           </motion.div>
@@ -98,4 +105,3 @@ export default function MobileMenu({ isOpen, onClose, pathname }: MobileMenuProp
     </AnimatePresence>
   );
 }
-

@@ -20,8 +20,13 @@ export default async function MaintenancePage() {
     <main className="min-h-screen flex items-center justify-center px-6 py-16 bg-gradient-to-br from-[#f4faf7] via-white to-[#eef7f2]">
       <div className="max-w-lg w-full text-center">
         {/* Logo / marque */}
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-8 bg-gradient-to-br from-[#0a7a52] via-[#0d9e6a] to-[#10b981] shadow-lg">
-          <span className="text-white text-2xl font-bold">J</span>
+        <div className="flex justify-center mb-8">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo_jommba.jpeg"
+            alt="Jommba"
+            className="h-16 w-auto"
+          />
         </div>
 
         {/* Icône outils */}

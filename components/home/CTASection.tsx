@@ -1,11 +1,14 @@
-﻿"use client";
+"use client";
 
+import { useTranslations } from "next-intl";
 import { ArrowRight, Heart } from "lucide-react";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 
 export default function CTASection() {
+  const t = useTranslations("home.cta");
+
   return (
     <section className="py-16 sm:py-20 bg-jommba-bg overflow-hidden relative">
       <Container>
@@ -23,12 +26,12 @@ export default function CTASection() {
 
             <div className="relative z-10 max-w-2xl mx-auto flex flex-col items-center space-y-6 sm:space-y-8">
               <h2 className="text-2xl sm:text-4xl lg:text-5xl font-serif font-bold leading-tight">
-                Prêt à rencontrer votre destin ?
+                {t("title")}
               </h2>
               <p className="text-sm sm:text-base text-white/90 leading-relaxed max-w-xl">
-                Rejoignez gratuitement Jommba aujourd'hui. L'inscription prend moins de 3 minutes et vous met en relation directe avec des profils sérieux qui partagent votre vision de la famille.
+                {t("subtitle")}
               </p>
-              
+
               <Button
                 href="/inscription"
                 variant="ghost"
@@ -37,11 +40,11 @@ export default function CTASection() {
                 icon={<ArrowRight className="w-4 h-4" />}
                 iconPosition="right"
               >
-                Commencer gratuitement
+                {t("button")}
               </Button>
 
               <div className="text-xs text-white/70 font-semibold uppercase tracking-wider">
-                Inscription gratuite &bull; Profils 100% vérifiés &bull; Respect de la vie privée
+                {t("tagline")}
               </div>
             </div>
           </div>
@@ -50,4 +53,3 @@ export default function CTASection() {
     </section>
   );
 }
-

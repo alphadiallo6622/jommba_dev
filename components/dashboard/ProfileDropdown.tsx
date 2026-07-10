@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useCurrentUser } from '@/lib/use-current-user'
 import { useProfileStore } from '@/store/profile.store'
 import { useAuthStore } from '@/store/auth.store'
+import { localizedHome } from '@/lib/i18n/locale-cookie'
 
 type Props = { onClose: () => void }
 
@@ -46,7 +47,7 @@ export default function ProfileDropdown({ onClose }: Props) {
     const supabase = createClient()
     await supabase.auth.signOut()
     logout()
-    router.push('/')
+    router.push(localizedHome())
     router.refresh()
   }
 

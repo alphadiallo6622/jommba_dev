@@ -1,6 +1,7 @@
-﻿"use client";
+"use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { SearchSlash } from "lucide-react";
 import FAQHero from "@/components/faq/FAQHero";
 import FAQCategories from "@/components/faq/FAQCategories";
@@ -8,11 +9,29 @@ import FAQAccordion from "@/components/faq/FAQAccordion";
 import FAQContactCTA from "@/components/faq/FAQContactCTA";
 import Container from "@/components/ui/Container";
 import AnimatedSection from "@/components/ui/AnimatedSection";
-import { FAQ_DATA, FAQItem } from "@/data/faqData";
+import { FAQ_DATA } from "@/data/faqData";
+import type { FAQItem } from "@/data/faqData";
 
 export default function FAQPage() {
+  const t = useTranslations("faq");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategoryId, setActiveCategoryId] = useState("account");
+
+  // Résout tous les items traduits, groupés par catégorie, une seule fois.
+  const itemsByCategory = useMemo(() => {
+    const map = new Map<string, FAQItem[]>();
+    for (const category of FAQ_DATA) {
+      const items: FAQItem[] = Array.from({ length: category.itemCount }, (_, i) => {
+        const key = String(i + 1);
+        return {
+          question: t(`items.${category.id}.${key}.question`),
+          answer: t(`items.${category.id}.${key}.answer`),
+        };
+      });
+      map.set(category.id, items);
+    }
+    return map;
+  }, [t]);
 
   // Filtering questions
   let displayedItems: FAQItem[] = [];
@@ -20,17 +39,17 @@ export default function FAQPage() {
 
   if (isSearching) {
     // Search across all categories
+    const q = searchQuery.toLowerCase();
     displayedItems = FAQ_DATA.flatMap((category) =>
-      category.items.filter(
+      (itemsByCategory.get(category.id) ?? []).filter(
         (item) =>
-          item.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.answer.toLowerCase().includes(searchQuery.toLowerCase())
+          item.question.toLowerCase().includes(q) ||
+          item.answer.toLowerCase().includes(q)
       )
     );
   } else {
     // Show items from active category
-    const activeCategory = FAQ_DATA.find((cat) => cat.id === activeCategoryId);
-    displayedItems = activeCategory ? activeCategory.items : [];
+    displayedItems = itemsByCategory.get(activeCategoryId) ?? [];
   }
 
   return (
@@ -54,7 +73,7 @@ export default function FAQPage() {
           {isSearching && (
             <AnimatedSection className="mb-8 max-w-3xl mx-auto text-left">
               <p className="text-sm font-semibold text-text-muted">
-                Résultats de recherche pour : <span className="text-primary">"{searchQuery}"</span> ({displayedItems.length} questions trouvées)
+                {t("searchResults", { query: searchQuery, count: displayedItems.length })}
               </p>
             </AnimatedSection>
           )}
@@ -66,10 +85,10 @@ export default function FAQPage() {
                 <SearchSlash className="w-8 h-8" />
               </div>
               <h3 className="text-lg font-bold font-serif text-text-primary">
-                Aucun résultat trouvé
+                {t("empty.title")}
               </h3>
               <p className="text-xs text-text-muted leading-relaxed">
-                Nous n'avons trouvé aucune question correspondant à votre recherche. Essayez d'autres mots-clés ou parcourez nos catégories.
+                {t("empty.subtitle")}
               </p>
             </AnimatedSection>
           )}
@@ -87,4 +106,3 @@ export default function FAQPage() {
     </>
   );
 }
-

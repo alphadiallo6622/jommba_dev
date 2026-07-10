@@ -1,5 +1,6 @@
-﻿"use client";
+"use client";
 
+import { useTranslations } from "next-intl";
 import { Mail, MessageCircle } from "lucide-react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -7,6 +8,8 @@ import AnimatedSection from "@/components/ui/AnimatedSection";
 import Container from "@/components/ui/Container";
 
 export default function FAQContactCTA() {
+  const t = useTranslations("faq.contactCta");
+
   return (
     <section className="py-12 bg-jommba-bg">
       <Container size="sm">
@@ -21,11 +24,11 @@ export default function FAQContactCTA() {
             </div>
 
             <h3 className="text-xl sm:text-2xl font-bold font-serif text-text-primary mb-3">
-              Vous avez toujours des questions ?
+              {t("title")}
             </h3>
-            
+
             <p className="text-sm text-text-muted leading-relaxed max-w-md mx-auto mb-8">
-              Notre équipe de support client est à votre disposition 7j/7 pour vous aider et répondre à toutes vos interrogations sous 24 heures.
+              {t("subtitle")}
             </p>
 
             <Button
@@ -35,7 +38,7 @@ export default function FAQContactCTA() {
               icon={<Mail className="w-4 h-4" />}
               iconPosition="left"
             >
-              Contacter le support
+              {t("button")}
             </Button>
           </Card>
         </AnimatedSection>
@@ -43,4 +46,3 @@ export default function FAQContactCTA() {
     </section>
   );
 }
-

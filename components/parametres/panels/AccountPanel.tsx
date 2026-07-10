@@ -6,6 +6,7 @@ import { AlertTriangle, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
+import { localizedHome } from '@/lib/i18n/locale-cookie'
 import SettingsDrawer from '../SettingsDrawer'
 
 type Props = { open: boolean; onClose: () => void }
@@ -33,7 +34,7 @@ export default function AccountPanel({ open, onClose }: Props) {
       onClose()
       toast.success('Compte suspendu temporairement')
       await supabase.auth.signOut()
-      router.push('/')
+      router.push(localizedHome())
     } finally {
       setBusy(false)
     }
@@ -54,7 +55,7 @@ export default function AccountPanel({ open, onClose }: Props) {
       toast.success('Compte supprimé définitivement')
       const supabase = createClient()
       await supabase.auth.signOut()
-      router.push('/')
+      router.push(localizedHome())
     } finally {
       setBusy(false)
     }

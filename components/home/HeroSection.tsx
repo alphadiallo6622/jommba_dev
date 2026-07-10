@@ -1,12 +1,15 @@
-﻿"use client";
+"use client";
 
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { CheckCircle2, Shield, Heart } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Container from "@/components/ui/Container";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 
 export default function HeroSection() {
+  const t = useTranslations("home.hero");
+
   return (
     <section className="relative overflow-hidden bg-jommba-bg py-12 sm:py-20 lg:py-24 flex items-center min-h-[calc(100vh-76px)]">
       {/* Background glow effects */}
@@ -21,28 +24,28 @@ export default function HeroSection() {
             <AnimatedSection delay={0.1}>
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide uppercase bg-primary-light text-primary w-fit select-none">
                 <Shield className="w-3.5 h-3.5" />
-                Rencontre Halal & Sérieuse
+                {t("badge")}
               </span>
             </AnimatedSection>
 
             <AnimatedSection delay={0.2} className="space-y-4">
               <h1 className="text-[2rem] sm:text-5xl lg:text-6xl font-serif font-bold text-text-primary leading-[1.1] tracking-tight">
-                Trouvez votre moitié dans le respect de vos{" "}
+                {t("titleLine1")}{" "}
                 <span className="block mt-2 font-display italic text-primary font-normal tracking-wide leading-none py-1">
-                  valeurs islamiques
+                  {t("titleLine2")}
                 </span>
               </h1>
               <p className="text-base sm:text-lg text-text-secondary leading-relaxed max-w-xl">
-                Jommba est la plateforme de référence conçue pour les célibataires musulmans sérieux qui recherchent le mariage (Nikah) avec pudeur, sincérité et sécurité.
+                {t("subtitle")}
               </p>
             </AnimatedSection>
 
             <AnimatedSection delay={0.3} className="flex flex-col sm:flex-row gap-4">
               <Button href="/inscription" variant="primary" size="lg" className="w-full sm:w-auto shadow-green-btn">
-                S'inscrire gratuitement
+                {t("ctaSignup")}
               </Button>
               <Button href="#how-it-works" variant="secondary" size="lg" className="w-full sm:w-auto">
-                Découvrir le concept
+                {t("ctaDiscover")}
               </Button>
             </AnimatedSection>
 
@@ -50,11 +53,11 @@ export default function HeroSection() {
             <AnimatedSection delay={0.4} className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-primary-light/30">
               <div className="flex items-center gap-2.5 text-sm font-semibold text-text-primary">
                 <CheckCircle2 className="w-5 h-5 text-primary shrink-0" />
-                <span>100% de profils vérifiés manuellement</span>
+                <span>{t("badge1")}</span>
               </div>
               <div className="flex items-center gap-2.5 text-sm font-semibold text-text-primary">
                 <CheckCircle2 className="w-5 h-5 text-primary shrink-0" />
-                <span>Option d'accompagnement Tuteur (Wali)</span>
+                <span>{t("badge2")}</span>
               </div>
             </AnimatedSection>
           </div>
@@ -73,7 +76,7 @@ export default function HeroSection() {
                 <div className="relative rounded-[2rem] sm:rounded-[2.5rem] overflow-hidden aspect-[4/5] border border-white/20 shadow-2xl transition-transform duration-500 hover:scale-[1.01]">
                   <Image
                     src="/assets/images/hero-couple.png"
-                    alt="Couple musulman élégant et souriant"
+                    alt={t("imageAlt")}
                     fill
                     priority
                     className="object-cover"
@@ -88,8 +91,8 @@ export default function HeroSection() {
                   <Heart className="w-4 h-4 sm:w-5 sm:h-5 fill-primary" />
                 </div>
                 <div>
-                  <div className="text-[10px] sm:text-xs text-text-muted font-medium">Mariages célébrés</div>
-                  <div className="text-sm sm:text-lg font-bold text-text-primary font-serif">1 240+ Couples</div>
+                  <div className="text-[10px] sm:text-xs text-text-muted font-medium">{t("marriagesLabel")}</div>
+                  <div className="text-sm sm:text-lg font-bold text-text-primary font-serif">{t("marriagesValue")}</div>
                 </div>
               </div>
 
@@ -99,8 +102,8 @@ export default function HeroSection() {
                   <Shield className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
                 <div>
-                  <div className="text-[10px] sm:text-xs text-white/70 font-medium">Sécurité & Pudeur</div>
-                  <div className="text-xs sm:text-sm font-bold text-white">Photos Floutables</div>
+                  <div className="text-[10px] sm:text-xs text-white/70 font-medium">{t("securityLabel")}</div>
+                  <div className="text-xs sm:text-sm font-bold text-white">{t("securityValue")}</div>
                 </div>
               </div>
             </AnimatedSection>
@@ -126,4 +129,3 @@ export default function HeroSection() {
     </section>
   );
 }
-

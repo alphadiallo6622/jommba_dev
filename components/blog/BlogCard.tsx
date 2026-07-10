@@ -1,8 +1,9 @@
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { BookOpen, Calendar, Clock, ArrowUpRight } from "lucide-react";
 import Badge from "@/components/ui/Badge";
 import Card from "@/components/ui/Card";
 import { BlogPost } from "@/data/blogPosts";
+import { Link } from "@/i18n/navigation";
 
 interface BlogCardProps {
   post: BlogPost;
@@ -10,6 +11,7 @@ interface BlogCardProps {
 }
 
 export default function BlogCard({ post, featured = false }: BlogCardProps) {
+  const t = useTranslations("blog");
   const isFeatured = featured && post.featured;
 
   if (isFeatured) {
@@ -34,7 +36,7 @@ export default function BlogCard({ post, featured = false }: BlogCardProps) {
             </>
           )}
           <div className="absolute top-4 left-4 text-xs font-bold tracking-widest uppercase text-white opacity-90 bg-black/20 px-2.5 py-1 rounded-full backdrop-blur-sm">
-            Article à la Une
+            {t("featuredLabel")}
           </div>
         </div>
 

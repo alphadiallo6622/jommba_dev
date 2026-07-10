@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useEffect, useState, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { Users, Heart, ShieldCheck, Globe } from "lucide-react";
 import Container from "@/components/ui/Container";
 import AnimatedSection from "@/components/ui/AnimatedSection";
@@ -75,6 +76,8 @@ function StatCounter({ icon, value, suffix, label }: StatItemProps) {
 }
 
 export default function StatsSection() {
+  const t = useTranslations("home.stats");
+
   return (
     <section className="bg-jommba-bg/50 py-16 border-y border-primary-light/20 relative">
       <Container>
@@ -84,25 +87,25 @@ export default function StatsSection() {
               icon={<Users className="w-6 h-6" />}
               value={50000}
               suffix="+"
-              label="Célibataires Musulmans"
+              label={t("singles")}
             />
             <StatCounter
               icon={<Heart className="w-6 h-6 fill-primary/10" />}
               value={1200}
               suffix="+"
-              label="Mariages Célébrés"
+              label={t("marriages")}
             />
             <StatCounter
               icon={<ShieldCheck className="w-6 h-6" />}
               value={100}
               suffix="%"
-              label="Profils Modérés & Vérifiés"
+              label={t("verified")}
             />
             <StatCounter
               icon={<Globe className="w-6 h-6" />}
               value={15}
               suffix="+"
-              label="Pays Représentés"
+              label={t("countries")}
             />
           </div>
         </AnimatedSection>

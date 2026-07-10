@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getLocale } from "next-intl/server";
 import { inter, playfair, arefRuqaa } from "@/lib/fonts";
 import { SITE_METADATA } from "@/lib/constants";
 import { Toaster } from "sonner";
@@ -22,9 +23,13 @@ export default async function RootLayout({
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
+  // Locale résolue par next-intl : "fr" ou "en" sous /[locale]/…, "fr" par
+  // défaut ailleurs (dashboard, adminjommba…, non localisés).
+  const locale = await getLocale();
+
   return (
     <html
-      lang="fr"
+      lang={locale}
       className={`${inter.variable} ${playfair.variable} ${arefRuqaa.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-jommba-bg text-text-secondary font-sans">

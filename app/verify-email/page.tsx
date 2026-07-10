@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { Suspense } from 'react'
 import { cn } from '@/lib/utils'
+import { readLocaleCookie } from '@/lib/i18n/locale-cookie'
 
 const CODE_LENGTH = 6
 
@@ -20,7 +21,14 @@ function VerifyEmailContent() {
   const [verifying, setVerifying] = useState(false)
   const [resending, setResending] = useState(false)
   const [countdown, setCountdown] = useState(60)
+  // Résolu après hydratation pour éviter un mismatch SSR (le cookie n'existe
+  // pas côté serveur) : "fr" par défaut le temps du premier rendu client.
+  const [locale, setLocale] = useState<'fr' | 'en'>('fr')
   const inputsRef = useRef<(HTMLInputElement | null)[]>([])
+
+  useEffect(() => {
+    setLocale(readLocaleCookie())
+  }, [])
 
   useEffect(() => {
     if (countdown <= 0) return
@@ -204,7 +212,7 @@ function VerifyEmailContent() {
         {/* Back link */}
         <div className="text-center">
           <Link
-            href="/inscription"
+            href={`/${locale}/inscription`}
             className="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" />

@@ -1,44 +1,32 @@
-﻿"use client";
+"use client";
 
+import { useTranslations } from "next-intl";
 import { UserPlus, Search, Milestone } from "lucide-react";
 import Container from "@/components/ui/Container";
 import SectionHeading from "@/components/ui/SectionHeading";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 
 const STEPS = [
-  {
-    number: "01",
-    title: "Créez votre profil",
-    description: "Remplissez notre questionnaire détaillé sur votre pratique, vos valeurs, vos critères de recherche et votre vision du couple.",
-    icon: <UserPlus className="w-6 h-6" />,
-  },
-  {
-    number: "02",
-    title: "Trouvez des profils compatibles",
-    description: "Parcourez les profils qui correspondent à vos aspirations. Filtrez selon la localisation, la pratique religieuse, l'âge, etc.",
-    icon: <Search className="w-6 h-6" />,
-  },
-  {
-    number: "03",
-    title: "Échangez & Concrétisez",
-    description: "Engagez la discussion dans notre messagerie privée et sécurisée. Invitez votre Wali à participer aux échanges si vous le souhaitez.",
-    icon: <Milestone className="w-6 h-6" />,
-  },
+  { number: "01", key: "1" as const, icon: <UserPlus className="w-6 h-6" /> },
+  { number: "02", key: "2" as const, icon: <Search className="w-6 h-6" /> },
+  { number: "03", key: "3" as const, icon: <Milestone className="w-6 h-6" /> },
 ];
 
 export default function HowItWorksSection() {
+  const t = useTranslations("home.howItWorks");
+
   return (
     <section id="how-it-works" className="py-20 bg-jommba-bg/50 border-t border-primary-light/10 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-primary-light/40 -translate-y-1/2 hidden lg:block max-w-6xl mx-auto z-0" />
-      
+
       <Container className="relative z-10">
         {/* Section Header */}
         <AnimatedSection>
           <SectionHeading
-            badge="Étape par Étape"
-            title="Comment fonctionne Jommba ?"
-            subtitle="Nous vous accompagnons pas à pas vers la rencontre de votre futur époux ou épouse dans les meilleures conditions."
+            badge={t("badge")}
+            title={t("title")}
+            subtitle={t("subtitle")}
             className="mb-16"
           />
         </AnimatedSection>
@@ -70,10 +58,10 @@ export default function HowItWorksSection() {
 
                 {/* Title & Description */}
                 <h3 className="text-xl font-bold text-text-primary font-serif mt-5 mb-3">
-                  {step.title}
+                  {t(`steps.${step.key}.title`)}
                 </h3>
                 <p className="text-sm text-text-muted leading-relaxed max-w-sm px-4 lg:px-0">
-                  {step.description}
+                  {t(`steps.${step.key}.description`)}
                 </p>
               </div>
 
@@ -88,4 +76,3 @@ export default function HowItWorksSection() {
     </section>
   );
 }
-

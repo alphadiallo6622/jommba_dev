@@ -1,0 +1,401 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "blog": "Blog",
+    "faq": "FAQ",
+    "login": "Connexion",
+    "signup": "S'inscrire",
+    "openMenu": "Ouvrir le menu",
+    "closeMenu": "Fermer le menu",
+    "quote": "« Et parmi Ses signes Il a créé de vous, pour vous, des épouses pour que vous viviez en tranquillité auprès d'elles... »",
+    "quoteSource": "[Sourate Ar-Rum, 21]",
+    "whyJommba": "Pourquoi Jommba ?",
+    "whyReason1": "Communauté sérieuse et vérifiée",
+    "whyReason2": "Respect des valeurs islamiques",
+    "whyReason3": "Discrétion totale garantie"
+  },
+  "footer": {
+    "description": "La plateforme de rencontre musulmane halal de référence. Notre mission est de vous aider à trouver votre moitié pour le mariage (Nikah) dans le respect de nos principes et valeurs.",
+    "navigationTitle": "Navigation",
+    "helpTitle": "Informations & Aide",
+    "helpCenter": "Centre d'aide & FAQ",
+    "terms": "Conditions Générales d'Utilisation",
+    "privacy": "Politique de Confidentialité",
+    "legal": "Mentions Légales",
+    "quote": "« Et parmi Ses signes Il a créé de vous, pour vous, des épouses pour que vous viviez en tranquillité auprès d'elles; et Il a mis entre vous de l'affection et de la bonté. Il y a en cela des preuves pour des gens qui réfléchissent. »",
+    "quoteSource": "[Coran — Sourate Ar-Rum, Verset 21]",
+    "copyright": "© {year} Jommba. Tous droits réservés.",
+    "madeWithPrefix": "Fait avec",
+    "madeWithSuffix": "pour la communauté"
+  },
+  "languageSwitcher": {
+    "label": "Langue",
+    "fr": "Français",
+    "en": "English"
+  },
+  "home": {
+    "hero": {
+      "badge": "Rencontre Halal & Sérieuse",
+      "titleLine1": "Trouvez votre moitié dans le respect de vos",
+      "titleLine2": "valeurs islamiques",
+      "subtitle": "Jommba est la plateforme de référence conçue pour les célibataires musulmans sérieux qui recherchent le mariage (Nikah) avec pudeur, sincérité et sécurité.",
+      "ctaSignup": "S'inscrire gratuitement",
+      "ctaDiscover": "Découvrir le concept",
+      "badge1": "100% de profils vérifiés manuellement",
+      "badge2": "Option d'accompagnement Tuteur (Wali)",
+      "marriagesLabel": "Mariages célébrés",
+      "marriagesValue": "1 240+ Couples",
+      "securityLabel": "Sécurité & Pudeur",
+      "securityValue": "Photos Floutables",
+      "imageAlt": "Couple musulman élégant et souriant"
+    },
+    "stats": {
+      "singles": "Célibataires Musulmans",
+      "marriages": "Mariages Célébrés",
+      "verified": "Profils Modérés & Vérifiés",
+      "countries": "Pays Représentés"
+    },
+    "features": {
+      "badge": "Pourquoi Nous Choisir",
+      "title": "Une plateforme respectueuse de vos convictions",
+      "subtitle": "Nous mettons tout en œuvre pour vous offrir un espace d'échange sécurisé, conforme aux valeurs de l'Islam, pour aborder le mariage en toute sérénité.",
+      "items": {
+        "sharia": {
+          "title": "Respect de la Charia & Éthique",
+          "description": "Une plateforme conçue selon les principes islamiques avec option d'accompagnement de Tuteur (Wali) et respect strict des règles de bienséance."
+        },
+        "verified": {
+          "title": "Profils Vérifiés Manuellement",
+          "description": "Chaque inscription et chaque photo sont examinées avec soin par notre équipe de modération pour garantir des profils sérieux et réels."
+        },
+        "messaging": {
+          "title": "Messagerie Sécurisée",
+          "description": "Échangez en toute sérénité. Notre messagerie protège vos informations privées jusqu'à ce que vous décidiez de les partager."
+        },
+        "search": {
+          "title": "Recherche Avancée par Critères",
+          "description": "Filtrez les profils selon des critères précis : pratique religieuse, localisation, profession, vision du mariage et bien plus."
+        },
+        "privacy": {
+          "title": "Confidentialité Absolue",
+          "description": "Floutez vos photos pour les rendre visibles uniquement aux profils que vous autorisez. Votre vie privée est sous votre contrôle."
+        },
+        "notifications": {
+          "title": "Notifications en Temps Réel",
+          "description": "Ne manquez aucune opportunité. Soyez immédiatement informé des visites, des likes et des nouveaux messages reçus."
+        }
+      }
+    },
+    "howItWorks": {
+      "badge": "Étape par Étape",
+      "title": "Comment fonctionne Jommba ?",
+      "subtitle": "Nous vous accompagnons pas à pas vers la rencontre de votre futur époux ou épouse dans les meilleures conditions.",
+      "steps": {
+        "1": {
+          "title": "Créez votre profil",
+          "description": "Remplissez notre questionnaire détaillé sur votre pratique, vos valeurs, vos critères de recherche et votre vision du couple."
+        },
+        "2": {
+          "title": "Trouvez des profils compatibles",
+          "description": "Parcourez les profils qui correspondent à vos aspirations. Filtrez selon la localisation, la pratique religieuse, l'âge, etc."
+        },
+        "3": {
+          "title": "Échangez & Concrétisez",
+          "description": "Engagez la discussion dans notre messagerie privée et sécurisée. Invitez votre Wali à participer aux échanges si vous le souhaitez."
+        }
+      }
+    },
+    "testimonials": {
+      "badge": "Témoignages & Histoires",
+      "title": "Ils ont trouvé leur moitié sur Jommba",
+      "subtitle": "Découvrez les récits inspirants de couples musulmans qui se sont rencontrés et unis par les liens sacrés du mariage grâce à notre plateforme.",
+      "marriedBadge": "Mariés"
+    },
+    "pricing": {
+      "badge": "Tarifs",
+      "title": "Gratuit pour commencer. Premium pour accélérer.",
+      "subtitle": "Tu peux utiliser Jommba gratuitement. Mais si tu veux maximiser tes chances, passe Premium.",
+      "free": {
+        "name": "Gratuit",
+        "period": "Pour toujours",
+        "description": "Découvre la plateforme à ton rythme",
+        "buttonText": "Commencer",
+        "features": {
+          "1": "Création de profil complète",
+          "2": "3 photos de profil",
+          "3": "3 demandes de contact par jour",
+          "4": "3 conversations actives en parallèle",
+          "5": "3 questions par jour à Cheikh Moussa (Coach IA)",
+          "6": "Répondre aux messages reçus",
+          "7": "Ice Breaker : idées de messages",
+          "8": "Accès à l'Académie du Mariage",
+          "9": "Support par email",
+          "10": "Demandes & conversations illimitées",
+          "11": "Coach Cheikh Moussa illimité",
+          "12": "Voir qui t'a mis en favori",
+          "13": "Voir qui a visité ton profil",
+          "14": "Messages vocaux 🎤",
+          "15": "Message Flash personnalisé",
+          "16": "Jusqu'à 10 photos HD",
+          "17": "Score de compatibilité IA détaillé",
+          "18": "Boosts de visibilité",
+          "19": "Filtres avancés",
+          "20": "Badge Premium vérifié"
+        }
+      },
+      "premium": {
+        "name": "Premium",
+        "period": "/ mois",
+        "description": "Maximise tes chances de trouver ta moitié",
+        "badge": "✨ OFFRE DE LANCEMENT",
+        "note": "* Tarif de lancement limité. Prix normal : 15 $ / mois",
+        "buttonText": "Commencer",
+        "features": {
+          "1": "Demandes de contact illimitées",
+          "2": "Conversations illimitées en parallèle",
+          "3": "Coach Cheikh Moussa : questions illimitées",
+          "4": "Voir qui t'a ajouté en favoris ⭐",
+          "5": "Voir qui a visité ton profil 🔴",
+          "6": "Jusqu'à 10 photos HD sur ton profil",
+          "7": "Messagerie 100 % illimitée",
+          "8": "Messages vocaux 🎤",
+          "9": "Vois qui est connecté 🟢",
+          "10": "Ice Breaker : idées de messages personnalisées",
+          "11": "Message Flash : fais bonne impression",
+          "12": "Score de compatibilité IA détaillé",
+          "13": "Mieux classé dans les résultats",
+          "14": "Filtres avancés (madhab, hijra…)",
+          "15": "Boosts de profil inclus",
+          "16": "Badge Premium vérifié ✓",
+          "17": "Support prioritaire 7 j/7"
+        },
+        "newTag": "NOUVEAU"
+      }
+    },
+    "quote": {
+      "arabic": "وَمِنْ آيَاتِهِ أَنْ خَلَقَ لَكُم مِّنْ أَنفُسِكُمْ أَزْوَاجًا لِّتَسْكُنُوا إِلَيْهَا وَجَعَلَ بَيْنَكُم مَّوَدَّةً وَرَحْمَةً ۚ إِنَّ فِي ذَٰلِكَ لَآيَاتٍ لِّقَوْمٍ يَتَفَكَّرُونَ",
+      "translation": "« Et parmi Ses signes Il a créé de vous, pour vous, des épouses pour que vous viviez en tranquillité auprès d'elles; et Il a mis entre vous de l'affection et de la bonté. Il y a en cela des preuves pour des gens qui réfléchissent. »",
+      "source": "Coran — Sourate Ar-Rum (Les Romains), Verset 21"
+    },
+    "cta": {
+      "title": "Prêt à rencontrer votre destin ?",
+      "subtitle": "Rejoignez gratuitement Jommba aujourd'hui. L'inscription prend moins de 3 minutes et vous met en relation directe avec des profils sérieux qui partagent votre vision de la famille.",
+      "button": "Commencer gratuitement",
+      "tagline": "Inscription gratuite • Profils 100% vérifiés • Respect de la vie privée"
+    }
+  },
+  "auth": {
+    "shared": {
+      "brandTagline": "MARIAGE HALAL • DISCRÉTION • SÉRIEUX",
+      "quoteGarment": "« Elles sont un vêtement pour vous et vous êtes un vêtement pour elles. »",
+      "quoteGarmentSource": "— Sourate Al-Baqara, 2:187",
+      "quoteTranquility": "« Et parmi Ses signes, Il a créé pour vous des épouses pour que vous viviez en tranquillité avec elles »",
+      "quoteLove": "« L'amour en Allah est le lien le plus solide de la foi. »",
+      "quoteLoveSource": "— Hadith, Ahmad",
+      "whyJommba": "Pourquoi Jommba ?",
+      "reason1": "Communauté sérieuse et vérifiée",
+      "reason2": "Respect des valeurs islamiques",
+      "reason3": "Discrétion totale garantie",
+      "or": "ou",
+      "googleLoading": "Connexion…",
+      "emailLabel": "Email",
+      "emailPlaceholder": "ton.email@exemple.com",
+      "passwordLabel": "Mot de passe",
+      "passwordPlaceholder": "••••••••"
+    },
+    "login": {
+      "title": "Bismillah, bienvenue",
+      "subtitle": "Connecte-toi pour continuer ta recherche.",
+      "googleButton": "Connexion rapide avec Google",
+      "forgotPassword": "Mot de passe oublié ?",
+      "submit": "Se connecter",
+      "noAccount": "Pas encore membre ?",
+      "signupLink": "S'inscrire gratuitement",
+      "errorInvalidCredentials": "Email ou mot de passe incorrect",
+      "errorGeneric": "Erreur de connexion",
+      "errorNetwork": "Impossible de se connecter. Vérifie ta connexion internet.",
+      "errorEmailInvalid": "Adresse email invalide",
+      "errorPasswordRequired": "Le mot de passe est requis"
+    },
+    "signup": {
+      "step1": {
+        "title": "Créer mon compte",
+        "subtitle": "Inscription gratuite et sans engagement."
+      },
+      "step2": {
+        "title": "Sécurise ton compte",
+        "subtitle": "Choisis un mot de passe solide."
+      },
+      "consent": "J'accepte les {terms} et je m'engage à respecter la {charter} de Jommba.",
+      "termsLink": "CGU",
+      "charterLink": "charte de pudeur et de bienséance",
+      "googleButton": "S'inscrire avec Google",
+      "firstNameLabel": "Prénom",
+      "firstNamePlaceholder": "Ton prénom",
+      "lastNameLabel": "Nom",
+      "lastNamePlaceholder": "Ton nom de famille",
+      "continueButton": "Continuer",
+      "alreadyMember": "Déjà membre ?",
+      "loginLink": "Se connecter",
+      "passwordLabel": "Mot de passe",
+      "confirmPasswordLabel": "Confirmer le mot de passe",
+      "strengthWeak": "Faible",
+      "strengthMedium": "Moyen",
+      "strengthStrong": "Fort",
+      "back": "Retour",
+      "createAccount": "Créer mon compte",
+      "turnstileRequired": "Merci de valider le contrôle anti-robot.",
+      "turnstileFailed": "Vérification anti-robot échouée. Réessaie.",
+      "accountCreated": "Compte créé ! Vérifie ta boîte mail.",
+      "errorFirstNameMin": "Prénom requis (min. 2 caractères)",
+      "errorLastNameMin": "Nom requis (min. 2 caractères)",
+      "errorEmailInvalid": "Adresse email invalide",
+      "errorEmailUnreachable": "Cette adresse email n'existe pas ou n'accepte pas les messages",
+      "errorPasswordMin": "Minimum 8 caractères",
+      "errorConfirmRequired": "Confirmation requise",
+      "errorPasswordMismatch": "Les mots de passe ne correspondent pas"
+    },
+    "forgotPassword": {
+      "sideTitle": "Pas de panique, ça arrive à tout le monde",
+      "sideSubtitle": "Entre ton adresse email et nous t'enverrons un lien sécurisé pour réinitialiser ton mot de passe.",
+      "title": "Mot de passe oublié ?",
+      "subtitle": "Entre ton email et nous t'enverrons un lien pour le réinitialiser.",
+      "submit": "Envoyer le lien",
+      "sentTitle": "Vérifie ta boîte mail",
+      "sentSubtitle": "Si un compte existe pour {email}, un lien de réinitialisation vient de lui être envoyé.",
+      "sentHint": "Pas reçu ? Vérifie ton dossier <strong>Spam</strong>. Le lien est valable <strong>1 heure</strong>.",
+      "useAnotherEmail": "Utiliser une autre adresse email",
+      "backToLogin": "Retour à la connexion",
+      "errorSendFailed": "Impossible d'envoyer le lien pour le moment.",
+      "errorNetwork": "Impossible d'envoyer le lien. Vérifie ta connexion internet.",
+      "errorEmailInvalid": "Adresse email invalide"
+    },
+    "resetPassword": {
+      "checkingLink": "Vérification du lien…",
+      "invalidTitle": "Lien invalide ou expiré",
+      "invalidSubtitle": "Ce lien de réinitialisation n'est plus valable. Demande-en un nouveau pour continuer.",
+      "requestNewLink": "Demander un nouveau lien",
+      "doneTitle": "C'est fait !",
+      "doneSubtitle": "Ton mot de passe a été modifié. Redirection…",
+      "title": "Nouveau mot de passe",
+      "subtitle": "Choisis un mot de passe sécurisé pour ton compte.",
+      "newPasswordLabel": "Nouveau mot de passe",
+      "newPasswordPlaceholder": "8 caractères minimum",
+      "confirmPasswordLabel": "Confirmer le mot de passe",
+      "submit": "Modifier mon mot de passe",
+      "successToast": "Mot de passe modifié avec succès ✓",
+      "errorGeneric": "Impossible de modifier le mot de passe.",
+      "errorUnexpected": "Une erreur est survenue. Réessaie.",
+      "errorPasswordMin": "Le mot de passe doit contenir au moins 8 caractères",
+      "errorConfirmRequired": "Confirme ton mot de passe",
+      "errorPasswordMismatch": "Les mots de passe ne correspondent pas"
+    }
+  },
+  "faq": {
+    "hero": {
+      "badge": "Support & Questions",
+      "title": "Comment pouvons-nous vous aider ?",
+      "subtitle": "Parcourez les questions les plus fréquentes posées par les membres de Jommba concernant la modération, la sécurité ou nos offres Premium.",
+      "searchPlaceholder": "Rechercher une question ou un thème...",
+      "clearSearch": "Effacer la recherche"
+    },
+    "searchResults": "Résultats de recherche pour : \"{query}\" ({count} questions trouvées)",
+    "empty": {
+      "title": "Aucun résultat trouvé",
+      "subtitle": "Nous n'avons trouvé aucune question correspondant à votre recherche. Essayez d'autres mots-clés ou parcourez nos catégories."
+    },
+    "contactCta": {
+      "title": "Vous avez toujours des questions ?",
+      "subtitle": "Notre équipe de support client est à votre disposition 7j/7 pour vous aider et répondre à toutes vos interrogations sous 24 heures.",
+      "button": "Contacter le support"
+    },
+    "categories": {
+      "account": "Inscription & Compte",
+      "verification": "Profils & Vérification",
+      "messaging": "Messagerie",
+      "premium": "Premium Pass",
+      "security": "Sécurité & Confidentialité"
+    },
+    "items": {
+      "account": {
+        "1": {
+          "question": "Comment créer un compte sur Jommba ?",
+          "answer": "Pour créer un compte, cliquez sur le bouton 'S'inscrire' en haut à droite. Remplissez ensuite notre formulaire détaillé en fournissant des informations sincères sur votre profil, vos critères de recherche et vos attentes religieuses. L'inscription prend moins de 3 minutes."
+        },
+        "2": {
+          "question": "L'inscription est-elle vraiment gratuite ?",
+          "answer": "Oui, la création de profil, la recherche de partenaires et la réception de visites/likes sont totalement gratuites. Vous pouvez utiliser les fonctionnalités de base sans limite de temps. Un pass Premium payant est disponible pour débloquer les échanges illimités."
+        },
+        "3": {
+          "question": "Puis-je supprimer mon compte à tout moment ?",
+          "answer": "Tout à fait. Si vous avez trouvé votre moitié ou si vous désirez simplement quitter la plateforme, vous pouvez supprimer définitivement votre compte depuis les paramètres de votre espace utilisateur. Toutes vos données personnelles seront immédiatement effacées."
+        }
+      },
+      "verification": {
+        "1": {
+          "question": "Pourquoi mon profil est-il en attente de validation ?",
+          "answer": "Afin de garantir un environnement de confiance et d'éviter les faux profils, chaque inscription et chaque photo sont validées manuellement par nos équipes de modération. Ce processus prend généralement entre 1 et 12 heures."
+        },
+        "2": {
+          "question": "Quelles sont les règles concernant les photos ?",
+          "answer": "Les photos doivent être décentes et conformes à l'éthique islamique (visage visible, tenue correcte). Jommba propose une option unique de floutage : vous pouvez choisir de rendre vos photos floues pour tous les membres et de ne les dévoiler qu'aux personnes avec lesquelles vous avez un échange sérieux."
+        }
+      },
+      "messaging": {
+        "1": {
+          "question": "Comment contacter un prétendant ?",
+          "answer": "Lorsque vous visitez un profil qui vous intéresse, vous pouvez lui envoyer un 'Like' ou engager la discussion par message s'il vous a également aimé en retour. Les membres Premium peuvent envoyer des messages directement sans attendre un match."
+        },
+        "2": {
+          "question": "Puis-je impliquer mon tuteur (Wali) dans la discussion ?",
+          "answer": "Oui, Jommba encourage l'implication de la famille. Vous pouvez ajouter l'adresse e-mail de votre tuteur (Wali) pour qu'il reçoive des notifications et puisse participer ou superviser les échanges dans le cadre d'un dialogue serein et respectueux."
+        }
+      },
+      "premium": {
+        "1": {
+          "question": "Quels sont les avantages du Premium Pass ?",
+          "answer": "Le Pass Premium vous permet d'envoyer des messages illimités, de voir précisément qui a aimé ou visité votre profil, de masquer vos photos aux utilisateurs non enregistrés, d'obtenir le badge de profil vérifié en priorité et de bénéficier d'un boost de visibilité hebdomadaire."
+        },
+        "2": {
+          "question": "Les abonnements sont-ils sans engagement ?",
+          "answer": "Oui, nos abonnements sont mensuels et sans engagement. Vous pouvez annuler le renouvellement automatique à tout moment en un clic depuis vos paramètres de facturation, sans frais supplémentaires."
+        }
+      },
+      "security": {
+        "1": {
+          "question": "Comment Jommba protège-t-il mes données ?",
+          "answer": "Toutes vos données de connexion et vos messages sont chiffrés de bout en bout (SSL). Nous ne partageons jamais vos données avec des tiers et nous n'affichons aucune publicité sur notre plateforme. Votre vie privée reste privée."
+        },
+        "2": {
+          "question": "Comment signaler un comportement inapproprié ?",
+          "answer": "Si vous constatez un comportement irrespectueux ou suspect, cliquez immédiatement sur le bouton 'Signaler' présent sur le profil de l'utilisateur ou dans la fenêtre de discussion. Nos modérateurs interviendront en priorité pour suspendre les profils malveillants."
+        }
+      }
+    }
+  },
+  "blog": {
+    "hero": {
+      "badge": "Notre Journal & Conseils",
+      "title": "Le Blog Jommba",
+      "subtitle": "Retrouvez nos conseils pratiques, analyses théologiques et réflexions psychologiques pour vous préparer sereinement au mariage musulman (Nikah).",
+      "searchPlaceholder": "Rechercher un article...",
+      "clearSearch": "Effacer la recherche"
+    },
+    "categories": {
+      "all": "Tous",
+      "spirituality": "Spiritualité",
+      "advice": "Conseils",
+      "family": "Famille",
+      "events": "Événements",
+      "news": "Actualités"
+    },
+    "empty": {
+      "title": "Aucun article trouvé",
+      "subtitle": "Nous n'avons trouvé aucun résultat correspondant à votre recherche. Essayez d'autres mots-clés ou réinitialisez les filtres."
+    },
+    "backToBlog": "Retour au blog",
+    "featuredLabel": "Article à la Une",
+    "viewAllArticles": "Voir tous les articles",
+    "editorialTeam": "Équipe éditoriale Jommba"
+  }
+}

@@ -13,11 +13,12 @@ export const SITE_METADATA = {
   ogImage: "/assets/images/og-image.jpg",
 };
 
+// `labelKey` référence une clé du namespace "nav" dans messages/<locale>.json.
 export const NAV_LINKS = [
-  { label: "Accueil", href: "/" },
-  { label: "Blog", href: "/blog" },
-  { label: "FAQ", href: "/faq" },
-];
+  { labelKey: "home", href: "/" },
+  { labelKey: "blog", href: "/blog" },
+  { labelKey: "faq", href: "/faq" },
+] as const;
 
 export const SOCIAL_LINKS = {
   facebook: "https://facebook.com/Jommba",

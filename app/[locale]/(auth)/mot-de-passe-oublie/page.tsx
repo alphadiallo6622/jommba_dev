@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -9,13 +9,12 @@ import { Mail, Heart, KeyRound, ArrowLeft, Loader2, AlertCircle } from 'lucide-r
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
-
-const schema = z.object({
-  email: z.email('Adresse email invalide'),
-})
-type FormData = z.infer<typeof schema>
+import { Link } from '@/i18n/navigation'
 
 function SidePanel() {
+  const t = useTranslations('auth.forgotPassword')
+  const tShared = useTranslations('auth.shared')
+
   return (
     <div
       className="hidden lg:flex flex-col justify-between p-10 text-white"
@@ -36,10 +35,10 @@ function SidePanel() {
         </div>
         <div>
           <h2 className="text-2xl font-serif font-bold mb-3 leading-snug">
-            Pas de panique, ça arrive à tout le monde
+            {t('sideTitle')}
           </h2>
           <p className="text-sm text-white/80 leading-relaxed">
-            Entre ton adresse email et nous t&rsquo;enverrons un lien sécurisé pour réinitialiser ton mot de passe.
+            {t('sideSubtitle')}
           </p>
         </div>
       </div>
@@ -47,18 +46,25 @@ function SidePanel() {
       {/* Footer quote */}
       <div className="text-center bg-white/10 rounded-xl p-4">
         <p className="text-xs italic text-white/80 leading-relaxed">
-          « L&rsquo;amour en Allah est le lien le plus solide de la foi. »
+          {tShared('quoteLove')}
         </p>
-        <p className="text-xs text-emerald-300 font-semibold mt-1">— Hadith, Ahmad</p>
+        <p className="text-xs text-emerald-300 font-semibold mt-1">{tShared('quoteLoveSource')}</p>
       </div>
     </div>
   )
 }
 
 export default function MotDePasseOubliePage() {
+  const t = useTranslations('auth.forgotPassword')
+  const tShared = useTranslations('auth.shared')
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
   const [sentEmail, setSentEmail] = useState('')
+
+  const schema = z.object({
+    email: z.email(t('errorEmailInvalid')),
+  })
+  type FormData = z.infer<typeof schema>
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -73,14 +79,14 @@ export default function MotDePasseOubliePage() {
       })
       if (error) {
         console.error('[MotDePasseOublie] Supabase error:', JSON.stringify(error))
-        toast.error(error.message || "Impossible d'envoyer le lien pour le moment.")
+        toast.error(error.message || t('errorSendFailed'))
         return
       }
       setSentEmail(data.email)
       setSent(true)
     } catch (err) {
       console.error('[MotDePasseOublie] Exception inattendue:', err)
-      toast.error('Impossible d\'envoyer le lien. Vérifie ta connexion internet.')
+      toast.error(t('errorNetwork'))
     } finally {
       setLoading(false)
     }
@@ -107,16 +113,17 @@ export default function MotDePasseOubliePage() {
                 <Mail className="w-8 h-8 text-emerald-600" />
               </div>
               <div>
-                <h1 className="text-2xl font-serif font-bold text-gray-900">Vérifie ta boîte mail</h1>
+                <h1 className="text-2xl font-serif font-bold text-gray-900">{t('sentTitle')}</h1>
                 <p className="text-sm text-gray-500 mt-2 leading-relaxed">
-                  Si un compte existe pour <span className="font-semibold text-gray-700">{sentEmail}</span>,
-                  un lien de réinitialisation vient de lui être envoyé.
+                  {t.rich('sentSubtitle', {
+                    email: () => <span className="font-semibold text-gray-700">{sentEmail}</span>,
+                  })}
                 </p>
               </div>
               <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4 text-left">
                 <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                 <p className="text-xs text-amber-700 leading-relaxed">
-                  Pas reçu ? Vérifie ton dossier <strong>Spam</strong>. Le lien est valable <strong>1 heure</strong>.
+                  {t.rich('sentHint', { strong: (chunks) => <strong>{chunks}</strong> })}
                 </p>
               </div>
               <button
@@ -124,7 +131,7 @@ export default function MotDePasseOubliePage() {
                 className="text-sm font-semibold"
                 style={{ color: '#10B981' }}
               >
-                Utiliser une autre adresse email
+                {t('useAnotherEmail')}
               </button>
             </div>
           ) : (
@@ -133,20 +140,20 @@ export default function MotDePasseOubliePage() {
                 <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: '#D1FAE5' }}>
                   <Mail className="w-7 h-7 text-emerald-600" />
                 </div>
-                <h1 className="text-2xl font-serif font-bold text-gray-900">Mot de passe oublié ?</h1>
+                <h1 className="text-2xl font-serif font-bold text-gray-900">{t('title')}</h1>
                 <p className="text-sm text-gray-500 mt-1">
-                  Entre ton email et nous t&rsquo;enverrons un lien pour le réinitialiser.
+                  {t('subtitle')}
                 </p>
               </div>
 
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div>
-                  <label className="text-xs font-semibold text-gray-700 block mb-1">Email</label>
+                  <label className="text-xs font-semibold text-gray-700 block mb-1">{tShared('emailLabel')}</label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input
                       type="email"
-                      placeholder="ton.email@exemple.com"
+                      placeholder={tShared('emailPlaceholder')}
                       {...register('email')}
                       className={cn(
                         'w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition-all',
@@ -164,7 +171,7 @@ export default function MotDePasseOubliePage() {
                   style={{ background: '#10B981' }}
                 >
                   {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-                  Envoyer le lien
+                  {t('submit')}
                 </button>
               </form>
             </>
@@ -173,7 +180,7 @@ export default function MotDePasseOubliePage() {
           <p className="text-center text-xs text-gray-500">
             <Link href="/connexion" className="inline-flex items-center gap-1.5 font-semibold" style={{ color: '#10B981' }}>
               <ArrowLeft className="w-3.5 h-3.5" />
-              Retour à la connexion
+              {t('backToLogin')}
             </Link>
           </p>
         </div>

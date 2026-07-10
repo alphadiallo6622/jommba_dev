@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { useTranslations } from "next-intl";
 import { Heart, Quote } from "lucide-react";
 import Container from "@/components/ui/Container";
 import SectionHeading from "@/components/ui/SectionHeading";
@@ -8,15 +9,17 @@ import AnimatedSection from "@/components/ui/AnimatedSection";
 import { TESTIMONIALS, Testimonial } from "@/data/testimonials";
 
 export default function TestimonialsSection() {
+  const t = useTranslations("home.testimonials");
+
   return (
     <section id="testimonials" className="py-16 sm:py-20 bg-jommba-bg">
       <Container>
         {/* Section Header */}
         <AnimatedSection>
           <SectionHeading
-            badge="Témoignages & Histoires"
-            title="Ils ont trouvé leur moitié sur Jommba"
-            subtitle="Découvrez les récits inspirants de couples musulmans qui se sont rencontrés et unis par les liens sacrés du mariage grâce à notre plateforme."
+            badge={t("badge")}
+            title={t("title")}
+            subtitle={t("subtitle")}
             className="mb-10 sm:mb-16"
           />
         </AnimatedSection>
@@ -56,7 +59,7 @@ export default function TestimonialsSection() {
                     <div className="flex flex-col items-end text-right">
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-primary-light text-primary uppercase select-none">
                         <Heart className="w-3 h-3 fill-primary" />
-                        Mariés
+                        {t("marriedBadge")}
                       </span>
                       <span className="text-[10px] text-text-subtle mt-0.5 font-medium">
                         {testimonial.marriageDate}

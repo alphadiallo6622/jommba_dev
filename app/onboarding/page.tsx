@@ -14,6 +14,7 @@ import { createClient }  from '@/lib/supabase/client'
 import { computeProfileCompletion } from '@/lib/supabase/profile-completion'
 import { useAuth }       from '@/components/providers/AuthProvider'
 import { toast }         from 'sonner'
+import { localizedLogin } from '@/lib/i18n/locale-cookie'
 import { applyModerationPolicy } from './actions'
 
 const TOTAL_STEPS = 7
@@ -49,7 +50,7 @@ export default function OnboardingPage() {
       const { data: { user: authUser }, error: authError } = await supabase.auth.getUser()
       if (authError || !authUser) {
         toast.error('Session expirée. Reconnecte-toi.')
-        router.push('/connexion')
+        router.push(localizedLogin())
         return
       }
 

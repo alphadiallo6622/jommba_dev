@@ -1,6 +1,7 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { SearchSlash } from "lucide-react";
 import Container from "@/components/ui/Container";
 import BlogCard from "./BlogCard";
@@ -13,9 +14,19 @@ interface BlogGridProps {
   posts?: BlogPost[];
 }
 
-const CATEGORIES = ["Tous", "Spiritualité", "Conseils", "Famille", "Événements", "Actualités"];
+// La valeur reste en français : c'est la catégorie stockée en base sur
+// chaque article (blog_posts.category). Seul le libellé affiché est traduit.
+const CATEGORIES = [
+  { value: "Tous", labelKey: "all" as const },
+  { value: "Spiritualité", labelKey: "spirituality" as const },
+  { value: "Conseils", labelKey: "advice" as const },
+  { value: "Famille", labelKey: "family" as const },
+  { value: "Événements", labelKey: "events" as const },
+  { value: "Actualités", labelKey: "news" as const },
+];
 
 export default function BlogGrid({ searchQuery, posts = BLOG_POSTS }: BlogGridProps) {
+  const t = useTranslations("blog");
   const [selectedCategory, setSelectedCategory] = useState("Tous");
 
   // Filter logic
@@ -42,16 +53,16 @@ export default function BlogGrid({ searchQuery, posts = BLOG_POSTS }: BlogGridPr
         <div className="flex flex-wrap items-center justify-center gap-2 mb-12 border-b border-primary-light/20 pb-6">
           {CATEGORIES.map((category) => (
             <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
+              key={category.value}
+              onClick={() => setSelectedCategory(category.value)}
               className={cn(
                 "px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-200 select-none",
-                selectedCategory === category
+                selectedCategory === category.value
                   ? "bg-primary text-white shadow-green-btn"
                   : "bg-white text-text-secondary border border-primary-light/45 hover:bg-primary-light/30 hover:text-primary"
               )}
             >
-              {category}
+              {t(`categories.${category.labelKey}`)}
             </button>
           ))}
         </div>
@@ -63,10 +74,10 @@ export default function BlogGrid({ searchQuery, posts = BLOG_POSTS }: BlogGridPr
               <SearchSlash className="w-8 h-8" />
             </div>
             <h3 className="text-lg font-bold font-serif text-text-primary">
-              Aucun article trouvé
+              {t("empty.title")}
             </h3>
             <p className="text-xs text-text-muted leading-relaxed">
-              Nous n'avons trouvé aucun résultat correspondant à votre recherche. Essayez d'autres mots-clés ou réinitialisez les filtres.
+              {t("empty.subtitle")}
             </p>
           </AnimatedSection>
         )}
@@ -97,4 +108,3 @@ export default function BlogGrid({ searchQuery, posts = BLOG_POSTS }: BlogGridPr
     </section>
   );
 }
-
