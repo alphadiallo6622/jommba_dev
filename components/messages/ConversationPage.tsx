@@ -47,8 +47,29 @@ export default function ConversationPage({ id }: Props) {
   const [loading, setLoading]             = useState(true)
   const [blocked, setBlocked]             = useState(false)
   const [rulesAccepted, setRulesAccepted] = useState(false)
+  const [rulesChecked, setRulesChecked]   = useState(false)
   const [sentCount, setSentCount]         = useState(0)
   const convIdRef = useRef<string | null>(null)
+
+  // Clé de persistance de l'acceptation des règles, propre à la paire (moi ↔ autre).
+  const rulesStorageKey = user ? `jommba:rules-accepted:${user.id}:${id}` : null
+
+  // Au chargement, on relit l'acceptation déjà donnée pour ce contact : le popup
+  // ne doit s'afficher qu'une seule fois par profil, pas à chaque ouverture.
+  useEffect(() => {
+    if (!rulesStorageKey) return
+    try {
+      setRulesAccepted(localStorage.getItem(rulesStorageKey) === '1')
+    } catch { /* localStorage indisponible : on affichera le popup */ }
+    setRulesChecked(true)
+  }, [rulesStorageKey])
+
+  const acceptRules = () => {
+    if (rulesStorageKey) {
+      try { localStorage.setItem(rulesStorageKey, '1') } catch { /* ignore */ }
+    }
+    setRulesAccepted(true)
+  }
 
   // Chargement initial : profil de l'autre, vérification contact, conversation, messages
   useEffect(() => {
@@ -194,12 +215,12 @@ export default function ConversationPage({ id }: Props) {
   return (
     <div className="flex flex-col h-full">
 
-      {/* Rules bottom-sheet on first open */}
-      {!rulesAccepted && (
+      {/* Rules bottom-sheet — affiché une seule fois par contact (persistance localStorage) */}
+      {rulesChecked && !rulesAccepted && (
         <DiscussionRulesModal
           firstName={conv.firstName}
           lastInitial={conv.lastInitial}
-          onConfirm={() => setRulesAccepted(true)}
+          onConfirm={acceptRules}
           onClose={() => router.push('/dashboard/messages')}
         />
       )}

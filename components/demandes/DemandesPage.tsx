@@ -159,6 +159,9 @@ export default function DemandesPage() {
       toast.error("Erreur lors de l'acceptation")
       return
     }
+    // Les règles viennent d'être acceptées dans ce popup : on mémorise pour ce
+    // contact afin que la messagerie ne les redemande pas à l'ouverture.
+    try { localStorage.setItem(`jommba:rules-accepted:${user.id}:${pendingRequest.id}`, '1') } catch { /* ignore */ }
     setRecues(prev => prev.filter(r => r.id !== pendingRequest.id))
     setPendingRequest(null)
     notifyByEmail(pendingRequest.id, 'demande_acceptee', myFirstName || 'Un membre')
