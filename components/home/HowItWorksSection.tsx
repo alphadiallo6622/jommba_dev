@@ -17,9 +17,6 @@ export default function HowItWorksSection() {
 
   return (
     <section id="how-it-works" className="py-20 bg-jommba-bg/50 border-t border-primary-light/10 relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-primary-light/40 -translate-y-1/2 hidden lg:block max-w-6xl mx-auto z-0" />
-
       <Container className="relative z-10">
         {/* Section Header */}
         <AnimatedSection>
@@ -32,7 +29,9 @@ export default function HowItWorksSection() {
         </AnimatedSection>
 
         {/* Steps Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 lg:gap-8">
+        <div className="relative grid grid-cols-1 lg:grid-cols-3 gap-0 lg:gap-8">
+          {/* Connecteur horizontal desktop, aligné sur le centre des cercles */}
+          <div className="hidden lg:block absolute top-10 left-[16%] right-[16%] border-t-2 border-dashed border-primary/20 z-0" />
           {STEPS.map((step, index) => (
             <AnimatedSection
               key={step.number}

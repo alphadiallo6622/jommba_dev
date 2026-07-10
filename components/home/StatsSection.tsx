@@ -61,7 +61,7 @@ function StatCounter({ icon, value, suffix, label }: StatItemProps) {
   return (
     <div
       ref={elementRef}
-      className="flex flex-col items-center justify-center p-4 sm:p-6 text-center bg-white border border-primary-light/35 rounded-2xl shadow-sm hover:shadow-green transition-all duration-300 group"
+      className="flex flex-col items-center justify-center p-4 sm:p-6 text-center bg-white border border-primary-light/35 rounded-2xl shadow-sm hover:shadow-green hover:border-primary/25 hover:-translate-y-1 transition-all duration-300 group"
     >
       <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary-light text-primary flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-110 transition-transform duration-300">
         {icon}
