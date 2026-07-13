@@ -12,11 +12,15 @@ import StatsPanel         from '@/components/dashboard/StatsPanel'
 import VisibilityToggle   from '@/components/dashboard/VisibilityToggle'
 import MarriageAcademy    from '@/components/dashboard/MarriageAcademy'
 import ProfileAppreciation from '@/components/dashboard/ProfileAppreciation'
+import PendingRequestModal from '@/components/dashboard/PendingRequestModal'
 
 export default function DashboardPage() {
   return (
     <>
       <DashboardNavbar />
+
+      {/* Popup automatique : demande de contact en attente */}
+      <PendingRequestModal />
 
       <main className="pt-16 pb-28 md:pb-8 px-4 md:px-6 bg-gray-50 min-h-screen">
         <div className="max-w-5xl mx-auto flex flex-col gap-4 md:gap-5 py-4 md:py-5">
