@@ -70,13 +70,16 @@ export async function sendContactRequest(
     }
   }
 
+  // Le Message Flash est une fonctionnalité Premium : on ne l'attache que si
+  // l'expéditeur est réellement Premium, même si l'UI a été contournée.
+  const flash = isPremium ? (flashMessage?.trim() || null) : null
+
   const { error } = await supabase.from('likes').insert({
     sender_id:   senderId,
     receiver_id: receiverId,
     type:        'request',
     status:      'pending',
-    // Message flash optionnel joint à la demande (Premium uniquement).
-    flash_message: flashMessage?.trim() || null,
+    flash_message: flash,
   })
 
   if (error) return { ok: false, reason: 'error', message: "Erreur lors de l'envoi de la demande" }
