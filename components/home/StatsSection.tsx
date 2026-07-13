@@ -85,13 +85,13 @@ export default function StatsSection() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
             <StatCounter
               icon={<Users className="w-6 h-6" />}
-              value={50000}
+              value={500}
               suffix="+"
               label={t("singles")}
             />
             <StatCounter
               icon={<Heart className="w-6 h-6 fill-primary/10" />}
-              value={1200}
+              value={50}
               suffix="+"
               label={t("marriages")}
             />

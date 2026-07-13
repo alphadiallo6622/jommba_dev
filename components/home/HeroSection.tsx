@@ -34,17 +34,17 @@ export default function HeroSection() {
         {/* ── Mobile layout : titre centré, CTA pleine largeur, photo en bandeau ── */}
         <div className="flex flex-col items-center text-center space-y-5 lg:hidden">
           <AnimatedSection delay={0.1}>
-            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase bg-white text-primary border border-primary/15 shadow-sm w-fit select-none">
-              <Shield className="w-3.5 h-3.5" />
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase bg-white text-[#d4af37] border border-[#d4af37]/15 shadow-sm w-fit select-none">
+              <Shield className="w-3.5 h-3.5" style={{ color: "#d4af37" }} />
               {t("badge")}
-              <Sparkles className="w-3 h-3 text-primary/60" />
+              <Sparkles className="w-3 h-3" style={{ color: "#d4af37" }} />
             </span>
           </AnimatedSection>
 
           <AnimatedSection delay={0.2} className="space-y-3">
             <h1 className="text-[2rem] font-serif font-bold text-text-primary leading-[1.1] tracking-tight">
               {t("titleLine1")}{" "}
-              <span className="block mt-1 font-display italic text-primary font-normal tracking-wide leading-tight">
+              <span className="block mt-1 font-display italic text-[#d4af37] font-normal tracking-wide leading-tight">
                 {t("titleLine2")}
               </span>
             </h1>
@@ -94,20 +94,20 @@ export default function HeroSection() {
           {/* Left Content */}
           <div className="lg:col-span-7 flex flex-col space-y-7 text-left items-start">
             <AnimatedSection delay={0.1}>
-              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase bg-white text-primary border border-primary/15 shadow-sm w-fit select-none">
-                <Shield className="w-3.5 h-3.5" />
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase bg-white text-[#d4af37] border border-[#d4af37]/15 shadow-sm w-fit select-none">
+                <Shield className="w-3.5 h-3.5" style={{ color: "#d4af37" }} />
                 {t("badge")}
-                <Sparkles className="w-3 h-3 text-primary/60" />
+                <Sparkles className="w-3 h-3" style={{ color: "#d4af37" }} />
               </span>
             </AnimatedSection>
 
             <AnimatedSection delay={0.2} className="space-y-5">
               <h1 className="text-6xl xl:text-[4.2rem] font-serif font-bold text-text-primary leading-[1.08] tracking-tight">
                 {t("titleLine1")}{" "}
-                <span className="relative block mt-2 font-display italic text-primary font-normal tracking-wide leading-none py-1.5">
+                <span className="relative block mt-2 font-display italic text-[#d4af37] font-normal tracking-wide leading-none py-1.5">
                   {t("titleLine2")}
                   <svg
-                    className="absolute -bottom-1 left-0 w-56 h-3 text-primary/30"
+                    className="absolute -bottom-1 left-0 w-56 h-3 text-[#d4af37]/30"
                     viewBox="0 0 200 12"
                     fill="none"
                     preserveAspectRatio="none"
@@ -130,9 +130,6 @@ export default function HeroSection() {
             <AnimatedSection delay={0.3} className="flex gap-4 pt-1">
               <Button href="/inscription" variant="primary" size="lg" className="shadow-green-btn hover:-translate-y-0.5 transition-transform">
                 {t("ctaSignup")}
-              </Button>
-              <Button href="#how-it-works" variant="secondary" size="lg">
-                {t("ctaDiscover")}
               </Button>
             </AnimatedSection>
 

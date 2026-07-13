@@ -24,10 +24,11 @@ export const NAV_LINKS = [
 ] as const;
 
 export const SOCIAL_LINKS = {
-  facebook: "https://facebook.com/Jommba",
-  instagram: "https://instagram.com/Jommba",
-  twitter: "https://twitter.com/Jommba",
-  youtube: "https://youtube.com/Jommba",
+  facebook: "https://www.facebook.com/jommba224/",
+  instagram: "https://www.instagram.com/Jommba",
+  twitter: "https://x.com/Jommba224",
+  youtube: "https://www.youtube.com/Jommba224",
+  tiktok: "https://www.tiktok.com/jommba224",
 };
 
 export const CONTACT_INFO = {

@@ -22,6 +22,11 @@ const IconYoutube = () => (
     <path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z" /><polygon fill="white" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" />
   </svg>
 );
+const IconTiktok = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.68v13.67a2.4 2.4 0 0 1-2.4 2.4 2.4 2.4 0 0 1-2.4-2.4 2.4 2.4 0 0 1 2.4-2.4c.34 0 .67.03 1 .1V9.41a5.8 5.8 0 0 0-1-.08A5.8 5.8 0 0 0 5 15a5.8 5.8 0 0 0 5.8 5.8 5.8 5.8 0 0 0 5.81-5.87c0-.01 0-.015.015-.025V8.93a7.6 7.6 0 0 0 4.58 1.51v-3.6a4.8 4.8 0 0 1-1.001-.066z" />
+  </svg>
+);
 import { SOCIAL_LINKS, NAV_LINKS, CONTACT_INFO } from "@/lib/constants";
 
 export default function Footer() {
@@ -85,6 +90,15 @@ export default function Footer() {
                 aria-label="Youtube"
               >
                 <IconYoutube />
+              </a>
+              <a
+                href={SOCIAL_LINKS.tiktok}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-text-subtle hover:bg-primary hover:text-white transition-all duration-200"
+                aria-label="TikTok"
+              >
+                <IconTiktok />
               </a>
             </div>
           </div>
@@ -176,7 +190,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Quran Quote Card */}
+          {/* Quran Quote Card & CTA */}
           <div className="space-y-6 lg:col-span-1">
             <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 relative overflow-hidden">
               {/* Decorative arabesque border hint */}
@@ -189,6 +203,19 @@ export default function Footer() {
                 {t("quoteSource")}
               </div>
             </div>
+
+            {/* RGPD Badge */}
+            <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 text-center">
+              <div className="text-xs font-semibold text-primary mb-2">RGPD</div>
+              <div className="text-[10px] text-text-subtle leading-relaxed">
+                100% Conforme
+              </div>
+            </div>
+
+            {/* Join CTA Button */}
+            <Link href="/inscription" className="inline-flex items-center justify-center w-full px-4 py-3 rounded-lg bg-primary hover:bg-primary-dark text-white font-semibold text-sm transition-colors duration-200">
+              Rejoindre Jommba
+            </Link>
           </div>
         </div>
 
