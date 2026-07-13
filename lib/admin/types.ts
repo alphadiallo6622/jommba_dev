@@ -227,6 +227,20 @@ export interface MaintenanceSettings {
   message: string | null;
 }
 
+export type GeoBlockMode = "block" | "allow";
+
+export interface GeoBlockSettings {
+  /** Le filtrage par pays est-il actif ? */
+  enabled: boolean;
+  /**
+   * "block" : les pays listés sont bloqués (liste noire).
+   * "allow" : SEULS les pays listés sont autorisés (liste blanche).
+   */
+  mode: GeoBlockMode;
+  /** Codes pays ISO 3166-1 alpha-2 en majuscules (ex. "SN", "FR"). */
+  countries: string[];
+}
+
 export interface BroadcastTargetCounts {
   all: number;
   free: number;

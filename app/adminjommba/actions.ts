@@ -11,7 +11,7 @@ import { hasPermission, ADMIN_ROLES, type AdminPermission } from "@/lib/admin/pe
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendEmail } from "@/lib/email";
 import type { BroadcastTarget, Json } from "@/lib/supabase/types";
-import type { LimitsSettings, PricingSettings, MaintenanceSettings } from "@/lib/admin/types";
+import type { LimitsSettings, PricingSettings, MaintenanceSettings, GeoBlockSettings } from "@/lib/admin/types";
 
 export interface ActionResult {
   ok: boolean;
@@ -718,6 +718,36 @@ export async function setMaintenance(maintenance: MaintenanceSettings): Promise<
       maintenance: {
         enabled: maintenance.enabled,
         message: maintenance.message?.trim() || null,
+      } as unknown as Json,
+      updated_at: new Date().toISOString(),
+    });
+    if (error) throw new Error(error.message);
+    // Le middleware lit le drapeau à chaque requête : on invalide tout le cache
+    // pour que la bascule prenne effet immédiatement.
+    revalidatePath("/", "layout");
+  }, "settings");
+}
+
+/** Configure le blocage par pays (liste noire ou liste blanche). */
+export async function setGeoBlock(geoBlock: GeoBlockSettings): Promise<ActionResult> {
+  return run(async () => {
+    const mode = geoBlock.mode === "allow" ? "allow" : "block";
+    // Normalise les codes pays : ISO 3166-1 alpha-2, en majuscules, dédupliqués.
+    const countries = Array.from(
+      new Set(
+        (geoBlock.countries ?? [])
+          .map((c) => c.trim().toUpperCase())
+          .filter((c) => /^[A-Z]{2}$/.test(c)),
+      ),
+    );
+
+    const supabase = createAdminClient();
+    const { error } = await supabase.from("platform_settings").upsert({
+      id: 1,
+      geo_block: {
+        enabled: geoBlock.enabled === true,
+        mode,
+        countries,
       } as unknown as Json,
       updated_at: new Date().toISOString(),
     });

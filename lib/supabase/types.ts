@@ -258,6 +258,7 @@ export interface PlatformSettings {
   limits:      Json
   pricing:     Json
   maintenance: Json
+  geo_block:   Json
   updated_at:  string
 }
 
@@ -413,7 +414,7 @@ export type Database = {
       }
       platform_settings: {
         Row:           Indexed<PlatformSettings>
-        Insert:        Indexed<{ id: number; limits?: Json; pricing?: Json; maintenance?: Json; updated_at?: string }>
+        Insert:        Indexed<{ id: number; limits?: Json; pricing?: Json; maintenance?: Json; geo_block?: Json; updated_at?: string }>
         Update:        Indexed<Partial<PlatformSettings>>
         Relationships: []
       }

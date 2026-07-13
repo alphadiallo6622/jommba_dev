@@ -22,6 +22,7 @@ export default async function ParametresPage() {
       initialLimits={settings.limits}
       initialPricing={settings.pricing}
       initialMaintenance={settings.maintenance}
+      initialGeoBlock={settings.geoBlock}
     />
   );
 }

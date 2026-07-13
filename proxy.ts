@@ -5,6 +5,7 @@ import { verifyAdminToken, COOKIE } from "@/lib/admin/auth"
 import { routing, defaultLocale, type Locale } from "@/i18n/routing"
 
 const MAINTENANCE_PATH = "/maintenance"
+const GEO_BLOCK_PATH = "/indisponible"
 
 // Gère la négociation de langue (Accept-Language + cookie NEXT_LOCALE) et la
 // redirection vers /fr, /en… pour les routes localisées (site public + auth).
@@ -45,6 +46,62 @@ async function isMaintenanceEnabled(): Promise<boolean> {
   }
 }
 
+interface GeoBlockConfig {
+  enabled: boolean
+  mode: "block" | "allow"
+  countries: string[]
+}
+
+/** Lit la configuration de blocage par pays via l'API REST Supabase (lecture publique). */
+async function getGeoBlockConfig(): Promise<GeoBlockConfig | null> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!url || !key) return null
+
+  try {
+    // Vue dédiée qui n'expose que le drapeau, le mode et la liste des pays.
+    const res = await fetch(
+      `${url}/rest/v1/public_geo_block?select=enabled,mode,countries`,
+      {
+        headers: { apikey: key, Authorization: `Bearer ${key}` },
+        // Cache court : la bascule prend effet en quelques secondes.
+        next: { revalidate: 10 },
+      }
+    )
+    if (!res.ok) return null
+    const rows = (await res.json()) as GeoBlockConfig[]
+    return rows[0] ?? null
+  } catch {
+    // En cas d'échec réseau, on ne bloque jamais le site.
+    return null
+  }
+}
+
+/**
+ * Détermine si le visiteur doit être bloqué selon son pays.
+ * Le code pays vient de l'en-tête `x-vercel-ip-country` (géolocalisation
+ * gratuite fournie par Vercel Edge Network). Absent en développement local.
+ */
+function isCountryBlocked(req: NextRequest, cfg: GeoBlockConfig): boolean {
+  if (!cfg.enabled) return false
+  const list = (cfg.countries ?? []).map((c) => c.toUpperCase())
+  if (list.length === 0) return false
+
+  const country = (
+    req.headers.get("x-vercel-ip-country") ?? ""
+  ).toUpperCase()
+  // Pays inconnu (dev local, bots sans géo) : on n'applique jamais la liste
+  // blanche (sinon on bloquerait tout le monde), et on laisse passer.
+  if (!country) return false
+
+  if (cfg.mode === "allow") {
+    // Liste blanche : seuls les pays listés passent.
+    return !list.includes(country)
+  }
+  // Liste noire : les pays listés sont bloqués.
+  return list.includes(country)
+}
+
 /** Locale déjà choisie par le visiteur (cookie), sinon la locale par défaut. */
 function preferredLocale(req: NextRequest): Locale {
   const cookieLocale = req.cookies.get("NEXT_LOCALE")?.value
@@ -57,7 +114,24 @@ function preferredLocale(req: NextRequest): Locale {
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl
 
-  // ── 0. Mode maintenance ───────────────────────────────────────────────────
+  // ── 0. Blocage par pays ───────────────────────────────────────────────────
+  // La console admin et les routes API restent toujours accessibles (pour
+  // pouvoir désactiver le blocage, et pour ne pas casser webhooks/auth).
+  const geoExempt =
+    pathname.startsWith("/adminjommba") ||
+    pathname.startsWith("/api") ||
+    pathname === GEO_BLOCK_PATH
+  if (!geoExempt) {
+    const geoBlock = await getGeoBlockConfig()
+    if (geoBlock && isCountryBlocked(req, geoBlock)) {
+      const url = req.nextUrl.clone()
+      url.pathname = GEO_BLOCK_PATH
+      url.search = ""
+      return NextResponse.rewrite(url)
+    }
+  }
+
+  // ── 0bis. Mode maintenance ────────────────────────────────────────────────
   const maintenance = await isMaintenanceEnabled()
   if (maintenance) {
     // Maintenance active : tout le trafic public bascule vers /maintenance.
@@ -74,13 +148,14 @@ export async function proxy(req: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // ── 0bis. Chemins jamais localisés : API et pages hors périmètre i18n ────
+  // ── 0ter. Chemins jamais localisés : API et pages hors périmètre i18n ────
   // Sans ce garde-fou, le middleware next-intl les préfixerait (/fr/api/… ou
   // /fr/verify-email), cassant les appels API et le flux de vérification email.
   if (
     pathname.startsWith("/api") ||
     pathname.startsWith("/verify-email") ||
-    pathname === MAINTENANCE_PATH
+    pathname === MAINTENANCE_PATH ||
+    pathname === GEO_BLOCK_PATH
   ) {
     return NextResponse.next()
   }

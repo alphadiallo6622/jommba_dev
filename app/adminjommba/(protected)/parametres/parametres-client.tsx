@@ -5,17 +5,19 @@ import { useRouter } from "next/navigation";
 import {
   UserPlus, MoreHorizontal, Bot, Database, Lock,
   CreditCard, Cloud, Mail, X, Pencil, Trash2,
-  ChevronDown, Globe, Wallet, Eye, EyeOff, Power, Wrench,
+  ChevronDown, Globe, Wallet, Eye, EyeOff, Power, Wrench, Search, MapPin,
 } from "lucide-react";
+import { COUNTRIES, countryName } from "@/lib/admin/countries";
 import { Avatar } from "@/components/admin/ui/avatar";
 import { Card, CardHeader } from "@/components/admin/ui/card";
 import { useToast } from "@/components/admin/ui/toast";
 import type {
   AdminAccountRow, ApiServiceRow, LimitsSettings, PricingSettings, MaintenanceSettings,
+  GeoBlockSettings,
 } from "@/lib/admin/types";
 import {
   createAdminAccount, updateAdminRole, setAdminAccountStatus, deleteAdminAccount,
-  saveApiConnection, saveLimits, savePricing, setMaintenance,
+  saveApiConnection, saveLimits, savePricing, setMaintenance, setGeoBlock,
 } from "@/app/adminjommba/actions";
 
 /* ── Types ─────────────────────────────────────────────────────────────────── */
@@ -523,12 +525,14 @@ export function ParametresClient({
   initialLimits,
   initialPricing,
   initialMaintenance,
+  initialGeoBlock,
 }: {
   admins: AdminAccountRow[];
   apiServices: ApiServiceRow[];
   initialLimits: LimitsSettings;
   initialPricing: PricingSettings;
   initialMaintenance: MaintenanceSettings;
+  initialGeoBlock: GeoBlockSettings;
 }) {
   const { show } = useToast();
   const router = useRouter();
@@ -540,6 +544,8 @@ export function ParametresClient({
   const [limits,      setLimits]      = useState<LimitsSettings>(initialLimits);
   const [pricing,     setPricing]     = useState<PricingSettings>(initialPricing);
   const [maintenance, setMaintenanceState] = useState<MaintenanceSettings>(initialMaintenance);
+  const [geoBlock,    setGeoBlockState]    = useState<GeoBlockSettings>(initialGeoBlock);
+  const [countryQuery, setCountryQuery]    = useState("");
 
   const act = (
     fn: () => Promise<{ ok: boolean; error?: string }>,
@@ -627,6 +633,50 @@ export function ParametresClient({
   const handleSaveMaintenanceMessage = () =>
     act(() => setMaintenance(maintenance), "Message de maintenance enregistré");
 
+  /* Disponibilité par pays */
+  const persistGeoBlock = (next: GeoBlockSettings, msg: string, type: "success" | "warning" = "success") => {
+    setGeoBlockState(next); // MAJ optimiste
+    act(() => setGeoBlock(next), msg, type);
+  };
+
+  const handleToggleGeoBlock = () => {
+    const next = { ...geoBlock, enabled: !geoBlock.enabled };
+    persistGeoBlock(
+      next,
+      next.enabled
+        ? "Filtrage par pays activé"
+        : "Filtrage par pays désactivé — le site est accessible partout",
+      next.enabled ? "warning" : "success",
+    );
+  };
+
+  const handleSetGeoMode = (mode: GeoBlockSettings["mode"]) => {
+    if (mode === geoBlock.mode) return;
+    persistGeoBlock(
+      { ...geoBlock, mode },
+      mode === "block"
+        ? "Mode « liste noire » — les pays sélectionnés sont bloqués"
+        : "Mode « liste blanche » — seuls les pays sélectionnés sont autorisés",
+    );
+  };
+
+  const handleToggleCountry = (code: string) => {
+    const has = geoBlock.countries.includes(code);
+    const countries = has
+      ? geoBlock.countries.filter((c) => c !== code)
+      : [...geoBlock.countries, code];
+    persistGeoBlock(
+      { ...geoBlock, countries },
+      has ? `${countryName(code)} retiré de la liste` : `${countryName(code)} ajouté à la liste`,
+    );
+  };
+
+  const filteredCountries = COUNTRIES.filter((c) => {
+    const q = countryQuery.trim().toLowerCase();
+    if (!q) return true;
+    return c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q);
+  });
+
   /* Compute payment conflict for the modal */
   const paymentConflict = configuring?.kind === "payment"
     ? (apiServices.find((s) => s.kind === "payment" && s.id !== configuring.id && s.productionActive)?.name ?? null)
@@ -699,6 +749,146 @@ export function ParametresClient({
               </button>
             </div>
           </div>
+        </Card>
+
+        {/* Disponibilité par pays */}
+        <Card>
+          <div
+            className={`flex items-start gap-4 px-5 py-4 ${
+              geoBlock.enabled ? "bg-amber-50" : ""
+            } transition-colors rounded-t-2xl`}
+          >
+            <div
+              className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                geoBlock.enabled ? "bg-amber-100" : "bg-[var(--color-faint)]"
+              }`}
+            >
+              <Globe className={`w-5 h-5 ${geoBlock.enabled ? "text-amber-600" : "text-[var(--color-muted)]"}`} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-sm text-[var(--color-ink)]">Disponibilité par pays</h3>
+                {geoBlock.enabled && (
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
+                    ACTIF
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-[var(--color-muted)] mt-0.5 leading-relaxed">
+                Rendez le site indisponible dans certains pays. La détection se
+                fait par adresse IP ; la console admin reste toujours accessible.
+              </p>
+            </div>
+            <div className="shrink-0 pt-1">
+              <Toggle on={geoBlock.enabled} onToggle={handleToggleGeoBlock} />
+            </div>
+          </div>
+
+          {geoBlock.enabled && (
+            <div className="px-5 pb-5 pt-1 border-t border-[var(--color-line)] space-y-4">
+              {/* Mode : liste noire / liste blanche */}
+              <div className="pt-3">
+                <p className="text-xs font-semibold text-[var(--color-ink)] mb-2">Mode de filtrage</p>
+                <div className="grid sm:grid-cols-2 gap-2">
+                  <button
+                    onClick={() => handleSetGeoMode("block")}
+                    className={`text-left px-3.5 py-2.5 rounded-xl border text-sm transition-colors ${
+                      geoBlock.mode === "block"
+                        ? "border-[var(--color-brand-600)] bg-[var(--color-brand-50)] text-[var(--color-ink)]"
+                        : "border-[var(--color-line)] text-[var(--color-muted)] hover:bg-[var(--color-faint)]"
+                    }`}
+                  >
+                    <span className="font-semibold block">Bloquer les pays sélectionnés</span>
+                    <span className="text-xs">Liste noire — tout le reste du monde a accès.</span>
+                  </button>
+                  <button
+                    onClick={() => handleSetGeoMode("allow")}
+                    className={`text-left px-3.5 py-2.5 rounded-xl border text-sm transition-colors ${
+                      geoBlock.mode === "allow"
+                        ? "border-[var(--color-brand-600)] bg-[var(--color-brand-50)] text-[var(--color-ink)]"
+                        : "border-[var(--color-line)] text-[var(--color-muted)] hover:bg-[var(--color-faint)]"
+                    }`}
+                  >
+                    <span className="font-semibold block">Autoriser seulement ces pays</span>
+                    <span className="text-xs">Liste blanche — tout le reste est bloqué.</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Pays sélectionnés */}
+              {geoBlock.countries.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {geoBlock.countries.map((code) => (
+                    <button
+                      key={code}
+                      onClick={() => handleToggleCountry(code)}
+                      disabled={busy}
+                      className="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-full bg-[var(--color-brand-600)] text-white text-xs font-medium hover:bg-[var(--color-brand-700)] transition-colors disabled:opacity-50"
+                    >
+                      <MapPin className="w-3 h-3" />
+                      {countryName(code)}
+                      <X className="w-3 h-3" />
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Recherche + liste */}
+              <div className="space-y-2">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted)]" />
+                  <input
+                    type="text"
+                    value={countryQuery}
+                    onChange={(e) => setCountryQuery(e.target.value)}
+                    placeholder="Rechercher un pays…"
+                    className="w-full pl-9 pr-3.5 py-2.5 text-sm border border-[var(--color-line)] rounded-xl bg-[var(--color-faint)] text-[var(--color-ink)] placeholder:text-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-300)] focus:bg-white transition"
+                  />
+                </div>
+                <div className="max-h-64 overflow-y-auto rounded-xl border border-[var(--color-line)] divide-y divide-[var(--color-line)]">
+                  {filteredCountries.length === 0 && (
+                    <p className="px-3.5 py-4 text-sm text-[var(--color-muted)] text-center">Aucun pays trouvé.</p>
+                  )}
+                  {filteredCountries.map((c) => {
+                    const selected = geoBlock.countries.includes(c.code);
+                    return (
+                      <button
+                        key={c.code}
+                        onClick={() => handleToggleCountry(c.code)}
+                        disabled={busy}
+                        className={`w-full flex items-center justify-between gap-3 px-3.5 py-2.5 text-sm text-left transition-colors disabled:opacity-50 ${
+                          selected ? "bg-[var(--color-brand-50)]" : "hover:bg-[var(--color-faint)]"
+                        }`}
+                      >
+                        <span className="text-[var(--color-ink)]">
+                          {c.name} <span className="text-[var(--color-muted)]">· {c.code}</span>
+                        </span>
+                        <span
+                          className={`w-4 h-4 rounded flex items-center justify-center shrink-0 border ${
+                            selected
+                              ? "bg-[var(--color-brand-600)] border-[var(--color-brand-600)] text-white"
+                              : "border-[var(--color-line)]"
+                          }`}
+                        >
+                          {selected && (
+                            <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={3}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="text-xs text-[var(--color-muted)]">
+                  {geoBlock.mode === "block"
+                    ? "Les visiteurs de ces pays verront une page « Indisponible dans votre région »."
+                    : "Seuls les visiteurs de ces pays pourront accéder au site."}{" "}
+                  Un VPN peut contourner ce filtrage : il s&apos;agit d&apos;une barrière, pas d&apos;un blocage absolu.
+                </p>
+              </div>
+            </div>
+          )}
         </Card>
 
         {/* Admin accounts */}
