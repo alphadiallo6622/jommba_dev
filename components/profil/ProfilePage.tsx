@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   ArrowLeft, Camera, Crown, MoreHorizontal, MapPin, Plus,
-  Bot, Lightbulb, Heart, Users, BookOpen, Home, Globe,
+  Zap, Lightbulb, Heart, Users, BookOpen, Home, Globe,
   Star, AlertCircle, XCircle, Languages, Loader2, BadgeCheck,
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -23,6 +23,8 @@ import ProfileGridSection from './ProfileGridSection'
 import PhotoGallery from './PhotoGallery'
 import PhotoUpsellBanner from './PhotoUpsellBanner'
 import MyProfileView from './MyProfileView'
+import MessageIdeasModal from './MessageIdeasModal'
+import FlashMessageModal from './FlashMessageModal'
 
 type Props = { id: string }
 
@@ -66,6 +68,8 @@ export default function ProfilePage({ id }: Props) {
   const [profile, setProfile]   = useState<FullProfile | null>(null)
   const [loading, setLoading]   = useState(true)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [showIdeas, setShowIdeas] = useState(false)
+  const [showFlash, setShowFlash] = useState(false)
 
   const isMyProfile = id === user?.id
 
@@ -145,6 +149,17 @@ export default function ProfilePage({ id }: Props) {
     setProfile(p => p ? { ...p, requestStatus: 'en-attente' } : p)
     notifyByEmail(id, 'demande', myFirstName || 'Un membre')
     toast.success('Demande envoyée ✓')
+  }
+
+  // Envoie une demande de contact accompagnée d'un message flash (Premium).
+  const handleSendFlash = async (flashMessage: string): Promise<boolean> => {
+    if (!user) return false
+    const result = await sendContactRequest(user.id, id, isPremium, flashMessage)
+    if (!result.ok) { toast.error(result.message); return false }
+    setProfile(p => p ? { ...p, requestStatus: 'en-attente' } : p)
+    notifyByEmail(id, 'demande', myFirstName || 'Un membre')
+    toast.success('Demande envoyée avec ton message flash ✓')
+    return true
   }
 
   const handleAcceptIncoming = async () => {
@@ -284,13 +299,13 @@ export default function ProfilePage({ id }: Props) {
 
       <div className="grid grid-cols-2 gap-3 mb-6">
         <button
-          onClick={() => toast('Fonctionnalité bientôt disponible')}
-          className="flex items-center justify-center gap-2 py-3 bg-[#E1F5EE] text-[#10B981] rounded-xl text-sm font-medium hover:bg-green-100 transition-colors"
+          onClick={() => setShowFlash(true)}
+          className="flex items-center justify-center gap-2 py-3 bg-amber-50 text-amber-600 rounded-xl text-sm font-medium hover:bg-amber-100 transition-colors"
         >
-          <Bot className="w-4 h-4" /> Match IA
+          <Zap className="w-4 h-4" /> Message Flash
         </button>
         <button
-          onClick={() => toast('Fonctionnalité bientôt disponible')}
+          onClick={() => setShowIdeas(true)}
           className="flex items-center justify-center gap-2 py-3 bg-[#E1F5EE] text-[#10B981] rounded-xl text-sm font-medium hover:bg-green-100 transition-colors"
         >
           <Lightbulb className="w-4 h-4" /> Idées de message
@@ -325,6 +340,19 @@ export default function ProfilePage({ id }: Props) {
         <ProfileSection icon={XCircle}   iconColor="text-red-500"    iconBg="bg-red-50"    title="Ce que je n'accepte pas"    text={profile.dealbreakers} />
         <ProfileSection icon={Languages} iconColor="text-violet-500" iconBg="bg-violet-50" title="Langues parlées"            text={profile.languages} />
       </div>
+
+      {/* Modals IA */}
+      {showIdeas && (
+        <MessageIdeasModal profile={profile} onClose={() => setShowIdeas(false)} />
+      )}
+      {showFlash && (
+        <FlashMessageModal
+          profile={profile}
+          isPremium={isPremium}
+          onSend={handleSendFlash}
+          onClose={() => setShowFlash(false)}
+        />
+      )}
 
     </div>
   )

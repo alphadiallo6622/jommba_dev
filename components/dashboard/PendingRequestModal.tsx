@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Heart, X, MapPin, Briefcase, Clock, Crown, Check,
-  CheckCircle2, Send, Loader2,
+  CheckCircle2, Send, Loader2, Zap,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
@@ -21,6 +21,7 @@ type PendingRequest = {
   city: string
   job: string | null
   isPremium: boolean
+  flashMessage: string | null
   timeAgo: string
   createdAt: string
 }
@@ -63,7 +64,7 @@ export default function PendingRequestModal() {
     const supabase = createClient()
     const { data: likes } = await supabase
       .from('likes')
-      .select('sender_id, created_at, status, type')
+      .select('sender_id, created_at, status, type, flash_message')
       .eq('receiver_id', user.id)
       .eq('type', 'request')
       .eq('status', 'pending')
@@ -73,7 +74,7 @@ export default function PendingRequestModal() {
     if (pending.length === 0) return
 
     setPendingCount(pending.length)
-    const latest = pending[0] as { sender_id: string; created_at: string }
+    const latest = pending[0] as { sender_id: string; created_at: string; flash_message: string | null }
 
     const { data: profile } = await supabase
       .from('profiles')
@@ -94,6 +95,7 @@ export default function PendingRequestModal() {
       city: p?.city ?? 'Inconnu',
       job: p?.job ?? null,
       isPremium: p?.is_premium === true,
+      flashMessage: latest.flash_message ?? null,
       timeAgo: formatTimeAgo(latest.created_at),
       createdAt: latest.created_at,
     })
@@ -253,6 +255,16 @@ export default function PendingRequestModal() {
                 </span>
               )}
             </div>
+
+            {/* Message flash joint à la demande */}
+            {request.flashMessage && (
+              <div className="mx-5 mt-3 rounded-xl bg-amber-50 border border-amber-200 p-3">
+                <p className="text-[11px] font-semibold text-amber-700 flex items-center gap-1 mb-1">
+                  <Zap className="w-3 h-3" /> Message flash de {request.firstName}
+                </p>
+                <p className="text-sm text-gray-700 leading-relaxed">{request.flashMessage}</p>
+              </div>
+            )}
 
             {/* Actions */}
             <div className="flex gap-3 px-5 pt-4">

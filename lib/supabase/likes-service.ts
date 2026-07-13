@@ -28,6 +28,7 @@ export async function sendContactRequest(
   senderId: string,
   receiverId: string,
   isPremium: boolean,
+  flashMessage?: string,
 ): Promise<SendRequestResult> {
   const supabase = createClient()
 
@@ -74,6 +75,8 @@ export async function sendContactRequest(
     receiver_id: receiverId,
     type:        'request',
     status:      'pending',
+    // Message flash optionnel joint à la demande (Premium uniquement).
+    flash_message: flashMessage?.trim() || null,
   })
 
   if (error) return { ok: false, reason: 'error', message: "Erreur lors de l'envoi de la demande" }

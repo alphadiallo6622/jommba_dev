@@ -113,12 +113,13 @@ export interface Message {
 }
 
 export interface Like {
-  id:          string
-  sender_id:   string
-  receiver_id: string
-  type:        LikeType
-  status:      RequestStatus
-  created_at:  string
+  id:             string
+  sender_id:      string
+  receiver_id:    string
+  type:           LikeType
+  status:         RequestStatus
+  flash_message?: string | null
+  created_at:     string
 }
 
 export interface ProfileVisitor {
