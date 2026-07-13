@@ -386,6 +386,66 @@ export async function deleteBlogPost(id: string): Promise<ActionResult> {
   }, "content");
 }
 
+// ── Académie du Mariage ───────────────────────────────────────────────────────
+// Même modèle éditorial que le blog, sur la table academy_articles.
+
+export async function saveAcademyArticle(input: BlogPostInput): Promise<ActionResult> {
+  return run(async () => {
+    const supabase = createAdminClient();
+    if (!input.title.trim()) throw new Error("Le titre est requis");
+
+    const fields = {
+      title: input.title.trim(),
+      category: input.category,
+      author: input.author,
+      excerpt: input.excerpt,
+      content: input.content,
+      cover_image_url: input.coverImage,
+      featured: input.featured,
+      status: input.status,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (input.id) {
+      const { data: existing } = await supabase
+        .from("academy_articles").select("published_at").eq("id", input.id).single();
+      const published_at =
+        input.status === "published" ? (existing?.published_at ?? new Date().toISOString()) : existing?.published_at ?? null;
+      const { error } = await supabase
+        .from("academy_articles").update({ ...fields, published_at }).eq("id", input.id);
+      if (error) throw new Error(error.message);
+    } else {
+      const { error } = await supabase.from("academy_articles").insert({
+        ...fields,
+        published_at: input.status === "published" ? new Date().toISOString() : null,
+      });
+      if (error) throw new Error(error.message);
+    }
+  }, "content");
+}
+
+export async function setAcademyArticleStatus(id: string, status: "draft" | "published"): Promise<ActionResult> {
+  return run(async () => {
+    const supabase = createAdminClient();
+    const patch: Record<string, unknown> = { status, updated_at: new Date().toISOString() };
+    if (status === "published") {
+      const { data: existing } = await supabase
+        .from("academy_articles").select("published_at").eq("id", id).single();
+      if (!existing?.published_at) patch.published_at = new Date().toISOString();
+    }
+    const { error } = await supabase.from("academy_articles").update(patch).eq("id", id);
+    if (error) throw new Error(error.message);
+  }, "content");
+}
+
+export async function deleteAcademyArticle(id: string): Promise<ActionResult> {
+  return run(async () => {
+    const supabase = createAdminClient();
+    const { error } = await supabase.from("academy_articles").delete().eq("id", id);
+    if (error) throw new Error(error.message);
+  }, "content");
+}
+
 // ── Diffusions (annonces) ─────────────────────────────────────────────────────
 
 export async function sendBroadcast(

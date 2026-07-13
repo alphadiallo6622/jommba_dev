@@ -211,6 +211,9 @@ export interface BlogPost {
   updated_at:      string
 }
 
+/** Article de l'Académie du Mariage — même forme que BlogPost. */
+export type AcademyArticle = BlogPost
+
 export interface Broadcast {
   id:              string
   title:           string
@@ -376,6 +379,12 @@ export type Database = {
         Row:           Indexed<BlogPost>
         Insert:        Indexed<Omit<BlogPost, 'id' | 'created_at' | 'updated_at'> & { id?: string; created_at?: string; updated_at?: string }>
         Update:        Indexed<Partial<BlogPost>>
+        Relationships: []
+      }
+      academy_articles: {
+        Row:           Indexed<AcademyArticle>
+        Insert:        Indexed<Omit<AcademyArticle, 'id' | 'created_at' | 'updated_at'> & { id?: string; created_at?: string; updated_at?: string }>
+        Update:        Indexed<Partial<AcademyArticle>>
         Relationships: []
       }
       broadcasts: {

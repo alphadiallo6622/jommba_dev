@@ -7,7 +7,7 @@ import { timeAgo, formatDate, formatDuration } from "@/lib/admin/format";
 import type {
   Kpi, ChartPoint, DonutSegment, MonthBar, CountryBar, RevenuePoint, DayPoint,
   FeedItem, AdminNotification, MemberRow, PendingProfileRow, PhotoQueueItem,
-  ReportRow, SubscriptionRow, BoostRow, BlogPostRow, TicketRow, BroadcastRow,
+  ReportRow, SubscriptionRow, BoostRow, BlogPostRow, AcademyArticleRow, TicketRow, BroadcastRow,
   AdminAccountRow, ApiServiceRow, LimitsSettings, PricingSettings,
   BroadcastTargetCounts, MemberStatus, MaintenanceSettings,
 } from "@/lib/admin/types";
@@ -601,6 +601,29 @@ export async function getBlogPosts(): Promise<BlogPostRow[]> {
   const supabase = createAdminClient();
   const { data } = await supabase
     .from("blog_posts").select("*")
+    .order("created_at", { ascending: false })
+    .limit(500);
+
+  return (data ?? []).map((p) => ({
+    id: p.id,
+    title: p.title,
+    category: p.category,
+    author: p.author,
+    date: p.published_at ? formatDate(p.published_at) : "—",
+    status: p.status,
+    excerpt: p.excerpt ?? "",
+    content: p.content ?? "",
+    coverImage: p.cover_image_url,
+    featured: p.featured,
+  }));
+}
+
+// ── Académie du Mariage ───────────────────────────────────────────────────────
+
+export async function getAcademyArticles(): Promise<AcademyArticleRow[]> {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("academy_articles").select("*")
     .order("created_at", { ascending: false })
     .limit(500);
 

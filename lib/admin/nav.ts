@@ -2,7 +2,7 @@
 import type { LucideIcon } from "lucide-react";
 import {
   LayoutDashboard, TrendingUp, ShieldCheck, Users, Flag, Image,
-  Crown, Zap, Newspaper, MessageSquareHeart, Megaphone, LifeBuoy, Settings,
+  Crown, Zap, Newspaper, GraduationCap, MessageSquareHeart, Megaphone, LifeBuoy, Settings,
 } from "lucide-react";
 
 export interface NavItem {
@@ -42,6 +42,7 @@ export const NAV: NavSection[] = [
     title: "Contenu & Support",
     items: [
       { label: "Blog",          desc: "Contenu éditorial",   href: "/adminjommba/blog",          icon: Newspaper },
+      { label: "Académie",      desc: "Académie du Mariage", href: "/adminjommba/academie",      icon: GraduationCap },
       { label: "Coach IA",      desc: "Cheikh Abdallah",     href: "/adminjommba/coach",         icon: MessageSquareHeart },
       { label: "Notifications", desc: "Diffusion",           href: "/adminjommba/notifications", icon: Megaphone },
       { label: "Support",       desc: "Tickets utilisateurs", href: "/adminjommba/support",       icon: LifeBuoy },

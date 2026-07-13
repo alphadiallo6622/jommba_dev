@@ -155,6 +155,9 @@ export interface BlogPostRow {
   featured: boolean;
 }
 
+/** Article de l'Académie du Mariage — même forme que les articles de blog. */
+export type AcademyArticleRow = BlogPostRow;
+
 export type TicketUiStatus = "open" | "resolved";
 export interface TicketRow {
   id: string;
