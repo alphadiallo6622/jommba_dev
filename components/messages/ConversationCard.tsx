@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { Conversation } from '@/lib/mock-messages'
 
@@ -8,6 +9,8 @@ type Props = { conv: Conversation }
 
 export default function ConversationCard({ conv }: Props) {
   const router = useRouter()
+  const t = useTranslations('dashboard.messages')
+  const isEmpty = conv.lastMessage === ''
 
   return (
     <div
@@ -26,11 +29,9 @@ export default function ConversationCard({ conv }: Props) {
         </p>
         <p className={cn(
           'text-xs truncate mt-0.5',
-          conv.lastMessage === 'Démarrez la conversation...'
-            ? 'text-gray-300 italic'
-            : 'text-gray-400',
+          isEmpty ? 'text-gray-300 italic' : 'text-gray-400',
         )}>
-          {conv.lastMessage}
+          {isEmpty ? t('startConversation') : conv.lastMessage}
         </p>
       </div>
 

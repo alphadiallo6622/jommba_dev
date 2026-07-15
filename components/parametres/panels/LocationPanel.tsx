@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 import { useCurrentUser } from '@/lib/use-current-user'
@@ -16,6 +17,8 @@ const DAKAR_CITIES = ['Dakar','Thiès','Kaolack','Saint-Louis','Ziguinchor','Dio
 const ETUDES = ['Bac','Bac+2','Bac+3','Bac+5','Doctorat','Autre']
 
 export default function LocationPanel({ open, onClose }: Props) {
+  const t = useTranslations('dashboard.parametres.location')
+  const tp = useTranslations('dashboard.parametres')
   const mockUser = useCurrentUser()
   const { user } = useAuth()
   const [inAfrica, setInAfrica] = useState(true)
@@ -48,8 +51,8 @@ export default function LocationPanel({ open, onClose }: Props) {
       education: etudes,
     })
     setSaving(false)
-    if (err) { toast.error(`Erreur : ${err}`); return }
-    toast.success('Localisation sauvegardée ✓')
+    if (err) { toast.error(t('error', { msg: err })); return }
+    toast.success(t('saved'))
     onClose()
   }
 
@@ -59,7 +62,7 @@ export default function LocationPanel({ open, onClose }: Props) {
   const inputCls = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-[#10B981]'
 
   return (
-    <SettingsDrawer open={open} title="Localisation & parcours" onClose={onClose}
+    <SettingsDrawer open={open} title={t('title')} onClose={onClose}
       footer={
         <button
           onClick={save}
@@ -67,18 +70,18 @@ export default function LocationPanel({ open, onClose }: Props) {
           className="w-full py-3 bg-[#10B981] text-white text-sm font-semibold rounded-xl hover:bg-[#059669] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
         >
           {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-          Sauvegarder
+          {tp('save')}
         </button>
       }
     >
       <div className="px-4 py-5 space-y-4">
         {/* Toggle Afrique/Diaspora */}
         <div>
-          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Où vis-tu ?</label>
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{t('whereLabel')}</label>
           <div className="grid grid-cols-2 gap-2">
             {[
-              { label: 'En Afrique', value: true },
-              { label: 'Diaspora', value: false },
+              { label: t('inAfrica'), value: true },
+              { label: t('diaspora'), value: false },
             ].map(({ label, value }) => (
               <button
                 key={label}
@@ -97,7 +100,7 @@ export default function LocationPanel({ open, onClose }: Props) {
 
         {/* Country */}
         <div>
-          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Pays</label>
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">{t('country')}</label>
           <select value={country} onChange={e => setCountry(e.target.value)} className={select}>
             {countries.map(c => <option key={c}>{c}</option>)}
           </select>
@@ -106,27 +109,27 @@ export default function LocationPanel({ open, onClose }: Props) {
         {/* City */}
         {inAfrica && country === 'Sénégal' ? (
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Ville</label>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">{t('city')}</label>
             <select value={city} onChange={e => setCity(e.target.value)} className={select}>
               {DAKAR_CITIES.map(c => <option key={c}>{c}</option>)}
             </select>
           </div>
         ) : (
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Ville</label>
-            <input value={city} onChange={e => setCity(e.target.value)} placeholder="Ex : Paris" className={inputCls} />
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">{t('city')}</label>
+            <input value={city} onChange={e => setCity(e.target.value)} placeholder={t('cityPlaceholder')} className={inputCls} />
           </div>
         )}
 
         {/* Profession */}
         <div>
-          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Profession</label>
-          <input value={profession} onChange={e => setProfession(e.target.value)} placeholder="Ex : Ingénieur, Médecin…" className={inputCls} />
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">{t('profession')}</label>
+          <input value={profession} onChange={e => setProfession(e.target.value)} placeholder={t('professionPlaceholder')} className={inputCls} />
         </div>
 
         {/* Niveau études */}
         <div>
-          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Niveau d'études</label>
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{t('education')}</label>
           <div className="flex flex-wrap gap-2">
             {ETUDES.map(e => (
               <button

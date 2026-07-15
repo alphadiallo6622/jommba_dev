@@ -1,29 +1,20 @@
 'use client'
 
 import { Crown, Shield, UserCheck, Calendar } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { useCurrentUser } from '@/lib/use-current-user'
 
-const securityBadges = [
-  {
-    icon: Shield,
-    title: 'Paiement 100% sécurisé',
-    sub: 'Bissrys & PayTech certifiés',
-  },
-  {
-    icon: UserCheck,
-    title: 'Profils vérifiés manuellement',
-    sub: 'Notre équipe valide chaque inscription',
-  },
-  {
-    icon: Calendar,
-    title: 'Sans engagement',
-    sub: 'Pas de renouvellement surprise',
-  },
-]
-
 export default function PremiumFooterCTA() {
+  const t = useTranslations('dashboard.premium.footerCta')
+  const tCta = useTranslations('dashboard.premium.cta')
   const { firstName } = useCurrentUser()
+
+  const securityBadges = [
+    { icon: Shield,    title: t('badge1Title'), sub: t('badge1Sub') },
+    { icon: UserCheck, title: t('badge2Title'), sub: t('badge2Sub') },
+    { icon: Calendar,  title: t('badge3Title'), sub: t('badge3Sub') },
+  ]
 
   return (
     <section className="py-6 pb-12">
@@ -41,25 +32,25 @@ export default function PremiumFooterCTA() {
       {/* Dark CTA block */}
       <div className="bg-emerald-900 rounded-2xl p-10 text-center text-white">
         <p className="font-serif text-2xl font-bold mb-4 leading-snug">
-          {firstName}, le bon moment c&apos;est maintenant
+          {t('title', { name: firstName })}
         </p>
         <p className="text-emerald-200 text-sm mb-2">
-          Chaque jour tu l&apos;attends, c&apos;est peut-être la future épouse que tu ne découvres pas.
+          {t('body1')}
         </p>
         <p className="text-emerald-200 text-sm mb-8">
-          Fais le premier pas vers ton avenir.
+          {t('body2')}
         </p>
 
         <button
-          onClick={() => toast.success('Paiement bientôt disponible 🔒')}
+          onClick={() => toast.success(tCta('paymentSoon'))}
           className="bg-white text-emerald-900 font-semibold px-8 py-3 rounded-xl hover:bg-gray-100 transition-colors inline-flex items-center gap-2 mx-auto"
         >
           <Crown className="w-5 h-5" />
-          Passer Premium
+          {t('button')}
         </button>
 
         <p className="text-emerald-300 text-xs mt-8 italic opacity-80">
-          &ldquo;Et parmi Ses signes, il a créé pour vous des épouses.&rdquo; — Sourate Al-Rum, 30:21
+          {t('quote')}
         </p>
       </div>
     </section>

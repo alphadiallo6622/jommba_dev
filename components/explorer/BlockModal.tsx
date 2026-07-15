@@ -1,6 +1,7 @@
 'use client'
 
 import { AlertTriangle, ShieldOff } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
 type Props = {
@@ -9,8 +10,9 @@ type Props = {
 }
 
 export default function BlockModal({ profileName, onClose }: Props) {
+  const t = useTranslations('dashboard.explorer.block')
   const handleBlock = () => {
-    toast.success(`${profileName} a été bloqué. Tu ne verras plus ce profil.`)
+    toast.success(t('blocked', { name: profileName }))
     onClose()
   }
 
@@ -29,12 +31,12 @@ export default function BlockModal({ profileName, onClose }: Props) {
           <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
             <AlertTriangle className="w-5 h-5 text-red-500" />
           </div>
-          <h2 className="text-lg font-bold text-gray-900">Bloquer {profileName} ?</h2>
+          <h2 className="text-lg font-bold text-gray-900">{t('title', { name: profileName })}</h2>
         </div>
 
         {/* Description */}
         <p className="text-sm text-gray-500 leading-relaxed">
-          Cette personne ne pourra plus voir ton profil ni te contacter.
+          {t('desc')}
         </p>
 
         {/* Actions */}
@@ -43,14 +45,14 @@ export default function BlockModal({ profileName, onClose }: Props) {
             onClick={onClose}
             className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
           >
-            Annuler
+            {t('cancel')}
           </button>
           <button
             onClick={handleBlock}
             className="flex-1 py-2.5 rounded-xl bg-red-500 text-white font-semibold text-sm flex items-center justify-center gap-2 hover:bg-red-600 transition-colors"
           >
             <ShieldOff className="w-4 h-4" />
-            Bloquer
+            {t('block')}
           </button>
         </div>
       </div>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import { useTranslations } from 'next-intl'
 import { useOnboardingStore } from '@/store/onboarding.store'
 import { ArrowLeft, Upload, Star, Eye, EyeOff, X, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -11,6 +12,7 @@ type Props = { onNext: () => void; onBack: () => void; isLast?: boolean }
 const MAX_PHOTOS = 3
 
 export default function StepPhotos({ onNext, onBack, isLast }: Props) {
+  const t = useTranslations('onboarding')
   const { photos, setField } = useOnboardingStore()
   const [blurred, setBlurred]       = useState<boolean[]>([false, false, false])
   const [uploading, setUploading]   = useState<boolean[]>([false, false, false])
@@ -27,7 +29,7 @@ export default function StepPhotos({ onNext, onBack, isLast }: Props) {
       const json = await res.json() as { url?: string; error?: string }
 
       if (!res.ok || !json.url) {
-        toast.error(json.error ?? 'Échec du téléversement')
+        toast.error(json.error ?? t('photos.uploadFailed'))
         return
       }
 
@@ -35,7 +37,7 @@ export default function StepPhotos({ onNext, onBack, isLast }: Props) {
       next[index] = json.url
       setField('photos', next)
     } catch {
-      toast.error('Erreur réseau. Réessaie.')
+      toast.error(t('photos.networkError'))
     } finally {
       const u2 = [...uploading]; u2[index] = false; setUploading(u2)
     }
@@ -65,8 +67,8 @@ export default function StepPhotos({ onNext, onBack, isLast }: Props) {
   return (
     <div className="space-y-7">
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-serif font-bold text-gray-900">Tes photos</h2>
-        <p className="text-sm text-gray-500">Ajoute au moins 1 photo. La première est ta photo principale.</p>
+        <h2 className="text-2xl font-serif font-bold text-gray-900">{t('photos.title')}</h2>
+        <p className="text-sm text-gray-500">{t('photos.subtitle')}</p>
       </div>
 
       {/* Photo slots */}
@@ -93,12 +95,12 @@ export default function StepPhotos({ onNext, onBack, isLast }: Props) {
                   {/* Badges */}
                   {isMain && (
                     <div className="absolute top-2 left-2 flex items-center gap-1 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                      <Star className="w-3 h-3 fill-white" /> Principal
+                      <Star className="w-3 h-3 fill-white" /> {t('photos.main')}
                     </div>
                   )}
                   {blurred[i] && (
                     <div className="absolute top-2 right-10 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
-                      Flouté
+                      {t('photos.blurred')}
                     </div>
                   )}
                   {/* Controls */}
@@ -107,7 +109,7 @@ export default function StepPhotos({ onNext, onBack, isLast }: Props) {
                       type="button"
                       onClick={() => toggleBlur(i)}
                       className="p-1.5 rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors"
-                      title={blurred[i] ? 'Voir' : 'Flouter'}
+                      title={blurred[i] ? t('photos.view') : t('photos.blur')}
                     >
                       {blurred[i] ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                     </button>
@@ -133,7 +135,7 @@ export default function StepPhotos({ onNext, onBack, isLast }: Props) {
                     : <Upload className="w-6 h-6" />
                   }
                   <span className="text-xs font-medium">
-                    {uploading[i] ? 'Téléversement…' : isMain ? 'Photo principale (obligatoire)' : `Photo ${i + 1} (optionnelle)`}
+                    {uploading[i] ? t('photos.uploading') : isMain ? t('photos.mainRequired') : t('photos.optional', { n: i + 1 })}
                   </span>
                 </button>
               )}
@@ -153,7 +155,7 @@ export default function StepPhotos({ onNext, onBack, isLast }: Props) {
       <div className="flex items-start gap-2.5 bg-emerald-50 border border-emerald-100 rounded-xl p-3.5">
         <span className="text-lg shrink-0">✅</span>
         <p className="text-xs text-emerald-700 leading-relaxed">
-          Tes photos sont vérifiées par notre équipe avant validation. Seules des photos claires et décentes sont acceptées.
+          {t('photos.validationNote')}
         </p>
       </div>
 
@@ -163,7 +165,7 @@ export default function StepPhotos({ onNext, onBack, isLast }: Props) {
           onClick={onBack}
           className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
         >
-          <ArrowLeft className="w-4 h-4" /> Retour
+          <ArrowLeft className="w-4 h-4" /> {t('nav.back')}
         </button>
         <button
           type="button"
@@ -173,7 +175,7 @@ export default function StepPhotos({ onNext, onBack, isLast }: Props) {
           style={{ background: '#10B981' }}
         >
           {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-          {isLast ? 'Envoyer mon profil' : 'Continuer'}
+          {isLast ? t('photos.submit') : t('nav.continue')}
         </button>
       </div>
     </div>

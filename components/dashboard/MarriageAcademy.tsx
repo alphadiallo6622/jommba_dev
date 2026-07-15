@@ -1,19 +1,17 @@
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 import { BookOpen } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 
-// Repli statique si aucun article n'est encore publié dans l'académie
-const FALLBACK_ARTICLES = [
-  'Les critères essentiels du choix',
-  'Réussir la période de connaissance',
-  "L'Istikhara : guide pratique",
-]
-
 const DOTS = ['bg-green-500', 'bg-red-500', 'bg-amber-500']
 
-const tags = ['Préparation', 'Communication', 'Spiritualité']
-
 export default async function MarriageAcademy() {
+  const t = await getTranslations('dashboard.academy')
+
+  // Repli statique si aucun article n'est encore publié dans l'académie
+  const FALLBACK_ARTICLES = [t('fallback1'), t('fallback2'), t('fallback3')]
+  const tags = [t('tag1'), t('tag2'), t('tag3')]
+
   let titles: string[] = []
   try {
     const supabase = await createClient()
@@ -33,9 +31,9 @@ export default async function MarriageAcademy() {
     <div className="bg-white rounded-xl p-4">
       <div className="flex items-center gap-2 mb-0.5">
         <BookOpen className="w-4 h-4 text-amber-500" />
-        <span className="font-bold text-gray-900 text-sm">Académie du Mariage</span>
+        <span className="font-bold text-gray-900 text-sm">{t('title')}</span>
       </div>
-      <p className="text-xs text-gray-400 mb-3">Apprends et prépare-toi</p>
+      <p className="text-xs text-gray-400 mb-3">{t('subtitle')}</p>
 
       <ul className="space-y-2 mb-3">
         {titles.map((label, i) => (
@@ -61,7 +59,7 @@ export default async function MarriageAcademy() {
         href="/dashboard/academie"
         className="inline-block text-xs font-semibold text-emerald-500 hover:text-emerald-600 transition-colors"
       >
-        Explorer l&rsquo;académie →
+        {t('explore')}
       </Link>
     </div>
   )

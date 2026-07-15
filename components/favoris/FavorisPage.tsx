@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { Heart, Users, HeartOff, Lock, Clock, Crown, MapPin, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
@@ -52,6 +53,7 @@ type ProfileRow = {
 
 export default function FavorisPage() {
   const router = useRouter()
+  const t = useTranslations('dashboard.favoris')
   const { user } = useAuth()
   const { isPremium } = useCurrentUser()
   const [activeTab, setActiveTab] = useState<Tab>('mes-favoris')
@@ -100,7 +102,7 @@ export default function FavorisPage() {
             : {
                 id,
                 firstName: '…', lastInitial: '?', age: 0,
-                location: 'Inconnu', maritalStatus: '', job: '',
+                location: t('unknown'), maritalStatus: '', job: '',
                 photos: ['/avatar-placeholder.svg'],
                 isEnAvant: false, photosBlurred: false,
                 marriageVision: '', ceQueJeRecherche: '',
@@ -121,7 +123,7 @@ export default function FavorisPage() {
             firstName:   p?.first_name ?? '…',
             lastInitial: (p?.last_name ?? '').charAt(0),
             age:         p?.age ?? 0,
-            location:    [p?.city, p?.country].filter(Boolean).join(', ') || 'Inconnu',
+            location:    [p?.city, p?.country].filter(Boolean).join(', ') || t('unknown'),
             hoursAgo:    hrs,
           }
         })
@@ -131,7 +133,7 @@ export default function FavorisPage() {
     } finally {
       setLoading(false)
     }
-  }, [user])
+  }, [user, t])
 
   useEffect(() => { fetchData() }, [fetchData])
 
@@ -144,7 +146,7 @@ export default function FavorisPage() {
       .eq('sender_id', user.id)
       .eq('receiver_id', id)
       .eq('type', 'favorite')
-    toast.success('Retiré des favoris')
+    toast.success(t('removed'))
   }
 
   return (
@@ -152,11 +154,11 @@ export default function FavorisPage() {
 
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-emerald-900 flex items-center gap-2">
-          Favoris
+          {t('title')}
           <Heart className="w-6 h-6 text-emerald-500" />
         </h1>
         <p className="text-gray-500 text-sm mt-1">
-          Tes coups de cœur et ceux qui t&apos;ont remarqué
+          {t('subtitle')}
         </p>
       </div>
 
@@ -170,7 +172,7 @@ export default function FavorisPage() {
           }`}
         >
           <Heart className="w-4 h-4" />
-          Mes favoris ({loading ? '…' : mesFavoris.length})
+          {loading ? t('myFavoritesLoading') : t('myFavorites', { count: mesFavoris.length })}
         </button>
 
         <button
@@ -182,7 +184,7 @@ export default function FavorisPage() {
           }`}
         >
           <Users className="w-4 h-4" />
-          Qui m&apos;aime ({loading ? '…' : quiMAime.length})
+          {loading ? t('whoLikesMeLoading') : t('whoLikesMe', { count: quiMAime.length })}
         </button>
       </div>
 
@@ -207,15 +209,15 @@ export default function FavorisPage() {
         ) : (
           <div className="bg-white rounded-2xl border border-gray-100 text-center py-16 px-8">
             <HeartOff className="w-12 h-12 text-gray-200 mx-auto mb-4" />
-            <p className="font-semibold text-gray-700 mb-1">Aucun favori pour l&apos;instant</p>
+            <p className="font-semibold text-gray-700 mb-1">{t('emptyTitle')}</p>
             <p className="text-gray-400 text-sm mb-6">
-              Explore les profils et ajoute tes coups de cœur en favoris
+              {t('emptyDesc')}
             </p>
             <button
               onClick={() => router.push('/dashboard/explorer')}
               className="bg-emerald-500 text-white font-semibold px-6 py-2.5 rounded-xl hover:bg-emerald-600 transition-colors"
             >
-              Découvrir des profils
+              {t('discoverProfiles')}
             </button>
           </div>
         )
@@ -228,18 +230,17 @@ export default function FavorisPage() {
             <div className="bg-amber-600 rounded-2xl p-8 text-center mb-6">
               <Lock className="w-12 h-12 text-white mx-auto mb-4" />
               <h2 className="text-white font-bold text-xl mb-3">
-                Vois qui a un coup de cœur pour toi
+                {t('unlockTitle')}
               </h2>
               <p className="text-white/90 text-sm mb-6">
-                {quiMAime.length} personne{quiMAime.length > 1 ? 's t\'ont' : ' t\'a'} mis en favori.<br />
-                Passe Premium pour les découvrir !
+                {t('unlockDesc', { count: quiMAime.length })}
               </p>
               <button
                 onClick={() => router.push('/dashboard/premium')}
                 className="bg-white text-amber-600 font-semibold px-6 py-3 rounded-xl flex items-center gap-2 mx-auto hover:bg-gray-50 transition-colors"
               >
                 <Crown className="w-4 h-4" />
-                Débloquer les favoris →
+                {t('unlockCta')}
               </button>
             </div>
           )}
@@ -265,7 +266,7 @@ export default function FavorisPage() {
                     )}
                     <span className="absolute top-2 right-2 bg-emerald-900 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
                       <Clock className="w-3 h-3" />
-                      Il y a {person.hoursAgo}h
+                      {t('hoursAgo', { n: person.hoursAgo })}
                     </span>
                   </div>
 
@@ -274,7 +275,7 @@ export default function FavorisPage() {
                       <>
                         <div className="flex items-baseline gap-1.5 mb-1">
                           <span className="font-semibold text-sm text-gray-900">{person.firstName} {person.lastInitial}.</span>
-                          <span className="text-gray-400 text-xs">{person.age} ans</span>
+                          <span className="text-gray-400 text-xs">{t('yearsOld', { age: person.age })}</span>
                         </div>
                         <div className="flex items-center gap-1 text-gray-400 text-xs mb-2">
                           <MapPin className="w-3 h-3" /> {person.location}
@@ -283,18 +284,18 @@ export default function FavorisPage() {
                           onClick={(e) => { e.stopPropagation(); router.push(`/dashboard/profil/${person.id}`) }}
                           className="w-full bg-emerald-500 text-white text-sm font-medium py-2 rounded-lg flex items-center justify-center gap-1 hover:bg-emerald-600 transition-colors"
                         >
-                          Voir le profil →
+                          {t('viewProfile')}
                         </button>
                       </>
                     ) : (
                       <>
-                        <p className="text-gray-300 text-sm font-medium blur-sm select-none">Nom masqué</p>
-                        <p className="text-gray-200 text-xs blur-sm select-none mt-1">• Ville, Pays</p>
+                        <p className="text-gray-300 text-sm font-medium blur-sm select-none">{t('nameHidden')}</p>
+                        <p className="text-gray-200 text-xs blur-sm select-none mt-1">{t('cityCountry')}</p>
                         <button
                           onClick={() => router.push('/dashboard/premium')}
                           className="w-full mt-3 bg-amber-100 text-amber-600 text-sm font-medium py-2 rounded-lg flex items-center justify-center gap-1 hover:bg-amber-200 transition-colors"
                         >
-                          <Crown className="w-3 h-3" /> Débloquer
+                          <Crown className="w-3 h-3" /> {t('unlock')}
                         </button>
                       </>
                     )}
@@ -305,8 +306,8 @@ export default function FavorisPage() {
           ) : (
             <div className="bg-white rounded-2xl border border-gray-100 text-center py-16 px-8">
               <Heart className="w-12 h-12 text-gray-200 mx-auto mb-4" />
-              <p className="font-semibold text-gray-700 mb-1">Personne ne t&apos;a encore mis en favori</p>
-              <p className="text-gray-400 text-sm">Complète ton profil pour attirer plus d&apos;attention</p>
+              <p className="font-semibold text-gray-700 mb-1">{t('noLikesTitle')}</p>
+              <p className="text-gray-400 text-sm">{t('noLikesDesc')}</p>
             </div>
           )}
         </>

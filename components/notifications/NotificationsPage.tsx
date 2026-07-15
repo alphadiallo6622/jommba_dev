@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { ArrowLeft, Bell, Check, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
@@ -20,13 +21,13 @@ const tabFilters: Record<TabId, (n: Notification) => boolean> = {
   premium:  n  => n.type === 'premium',
 }
 
-const tabs: { id: TabId; label: string }[] = [
-  { id: 'tout',     label: 'Tout'     },
-  { id: 'visites',  label: 'Visites'  },
-  { id: 'demandes', label: 'Demandes' },
-  { id: 'messages', label: 'Messages' },
-  { id: 'profil',   label: 'Profil'   },
-  { id: 'premium',  label: 'Premium'  },
+const tabs: { id: TabId; labelKey: string }[] = [
+  { id: 'tout',     labelKey: 'all'      },
+  { id: 'visites',  labelKey: 'visits'   },
+  { id: 'demandes', labelKey: 'requests' },
+  { id: 'messages', labelKey: 'messages' },
+  { id: 'profil',   labelKey: 'profile'  },
+  { id: 'premium',  labelKey: 'premium'  },
 ]
 
 const DB_TYPE_MAP: Record<string, NotifType> = {
@@ -40,10 +41,21 @@ const DB_TYPE_MAP: Record<string, NotifType> = {
 
 export default function NotificationsPage() {
   const router = useRouter()
+  const t = useTranslations('dashboard.notifications')
   const { user } = useAuth()
   const [notifs, setNotifs]       = useState<Notification[]>([])
   const [loading, setLoading]     = useState(true)
   const [activeTab, setActiveTab] = useState<TabId>('tout')
+
+  // Libellé « il y a … » localisé (dépend de t).
+  const formatDate = useCallback((iso: string): string => {
+    const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000)
+    if (diff < 60)     return t('timeNow')
+    if (diff < 3600)   return t('timeMinutes', { n: Math.floor(diff / 60) })
+    if (diff < 86400)  return t('timeHours', { n: Math.floor(diff / 3600) })
+    if (diff < 172800) return t('timeYesterday')
+    return t('timeDays', { n: Math.floor(diff / 86400) })
+  }, [t])
 
   const fetchNotifs = useCallback(async () => {
     if (!user) return
@@ -73,7 +85,7 @@ export default function NotificationsPage() {
     } finally {
       setLoading(false)
     }
-  }, [user])
+  }, [user, formatDate])
 
   useEffect(() => { fetchNotifs() }, [fetchNotifs])
 
@@ -107,14 +119,14 @@ export default function NotificationsPage() {
             <ArrowLeft className="w-4 h-4 text-gray-600" />
           </button>
           <h1 className="text-2xl font-bold text-[#064E3B] flex items-center gap-2">
-            Notifications <Bell className="w-5 h-5 text-[#10B981]" />
+            {t('title')} <Bell className="w-5 h-5 text-[#10B981]" />
           </h1>
         </div>
         <button
           onClick={markAllAsRead}
           disabled={unreadCount === 0}
           className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors disabled:opacity-40"
-          title="Tout marquer comme lu"
+          title={t('markAllRead')}
         >
           <Check className="w-4 h-4 text-gray-600" />
         </button>
@@ -122,12 +134,12 @@ export default function NotificationsPage() {
 
       {unreadCount > 0 && (
         <p className="text-sm text-[#10B981] font-medium mb-4 ml-12">
-          • {unreadCount} non lue{unreadCount > 1 ? 's' : ''}
+          • {t('unread', { count: unreadCount })}
         </p>
       )}
 
       <div className="flex gap-2 mb-5 flex-wrap">
-        {tabs.map(({ id, label }) => {
+        {tabs.map(({ id, labelKey }) => {
           const count = getCount(id)
           return (
             <button
@@ -140,7 +152,7 @@ export default function NotificationsPage() {
                   : 'bg-white text-gray-500 hover:text-gray-700 border border-gray-100',
               )}
             >
-              {label}
+              {t(`tabs.${labelKey}`)}
               {count > 0 && (
                 <span className={cn(
                   'text-xs w-5 h-5 rounded-full flex items-center justify-center font-semibold',
@@ -162,7 +174,7 @@ export default function NotificationsPage() {
 
       {!loading && filtered.length > 0 && (
         <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-3 px-1">
-          Récentes
+          {t('recent')}
         </p>
       )}
 
@@ -175,8 +187,8 @@ export default function NotificationsPage() {
           ) : (
             <div className="bg-white rounded-xl border border-gray-100 p-12 text-center">
               <Bell className="w-10 h-10 text-gray-200 mx-auto mb-3" />
-              <p className="text-gray-400 text-sm">Aucune notification</p>
-              <p className="text-gray-300 text-xs mt-1">Essayez une autre catégorie</p>
+              <p className="text-gray-400 text-sm">{t('empty')}</p>
+              <p className="text-gray-300 text-xs mt-1">{t('emptyHint')}</p>
             </div>
           )}
         </div>
@@ -184,18 +196,9 @@ export default function NotificationsPage() {
 
       {!loading && notifs.length > 0 && (
         <p className="text-center text-xs text-gray-400 mt-6">
-          {notifs.length} notification{notifs.length > 1 ? 's' : ''} au total
+          {t('total', { count: notifs.length })}
         </p>
       )}
     </div>
   )
-}
-
-function formatDate(iso: string): string {
-  const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000)
-  if (diff < 60)     return "À l'instant"
-  if (diff < 3600)   return `Il y a ${Math.floor(diff / 60)} min`
-  if (diff < 86400)  return `Il y a ${Math.floor(diff / 3600)} h`
-  if (diff < 172800) return 'Hier'
-  return `Il y a ${Math.floor(diff / 86400)} j`
 }

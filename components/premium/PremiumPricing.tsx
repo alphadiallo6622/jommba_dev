@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Tag } from 'lucide-react'
 import { plans } from '@/lib/mock-premium'
 import { cn } from '@/lib/utils'
@@ -11,16 +12,17 @@ interface Props {
 }
 
 export default function PremiumPricing({ selectedPlan, setSelectedPlan }: Props) {
+  const t = useTranslations('dashboard.premium.pricing')
   const [showPromo, setShowPromo] = useState(false)
   const [promoCode, setPromoCode] = useState('')
 
   return (
     <section className="py-6">
       <h2 className="text-center font-bold text-xl text-gray-900 mb-1">
-        Choisis ta durée
+        {t('title')}
       </h2>
       <p className="text-center text-gray-400 text-sm mb-5">
-        Plus c&apos;est long, plus tu économises
+        {t('subtitle')}
       </p>
 
       <div className="flex flex-col gap-3">
@@ -49,19 +51,19 @@ export default function PremiumPricing({ selectedPlan, setSelectedPlan }: Props)
 
                   <div className="flex-1">
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="font-semibold text-sm text-gray-900">{plan.label}</span>
+                      <span className="font-semibold text-sm text-gray-900">{t(`plans.${plan.id}.label`)}</span>
                       {plan.isPopular && (
                         <span className="bg-emerald-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-medium">
-                          POPULAIRE
+                          {t('popular')}
                         </span>
                       )}
-                      {plan.boostBadge && (
+                      {t.has(`plans.${plan.id}.boostBadge`) && (
                         <span className="bg-emerald-50 text-emerald-600 text-[10px] px-1.5 py-0.5 rounded-full font-medium">
-                          {plan.boostBadge}
+                          {t(`plans.${plan.id}.boostBadge`)}
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-400 mt-0.5">{plan.pricePerMonth}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">{t(`plans.${plan.id}.pricePerMonth`)}</p>
                   </div>
                 </div>
 
@@ -90,7 +92,7 @@ export default function PremiumPricing({ selectedPlan, setSelectedPlan }: Props)
             className="text-sm text-gray-400 underline inline-flex items-center gap-1 hover:text-gray-600 transition-colors"
           >
             <Tag className="w-3.5 h-3.5" />
-            J&apos;ai un code promo
+            {t('havePromo')}
           </button>
         ) : (
           <div className="flex gap-2">
@@ -98,11 +100,11 @@ export default function PremiumPricing({ selectedPlan, setSelectedPlan }: Props)
               type="text"
               value={promoCode}
               onChange={(e) => setPromoCode(e.target.value)}
-              placeholder="Entrer le code promo"
+              placeholder={t('promoPlaceholder')}
               className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-400 bg-white"
             />
             <button className="bg-amber-500 text-white text-sm px-4 py-2 rounded-lg font-medium hover:bg-amber-600 transition-colors shrink-0">
-              Appliquer
+              {t('apply')}
             </button>
           </div>
         )}

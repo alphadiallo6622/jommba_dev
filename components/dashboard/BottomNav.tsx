@@ -1,6 +1,7 @@
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { LayoutGrid, UserPlus, Search, MessageCircle, Heart } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useNotifCount } from '@/lib/use-notif-count'
@@ -10,6 +11,7 @@ import { useUnreadMessagesCount } from '@/lib/use-unread-messages'
 export default function BottomNav() {
   const pathname       = usePathname()
   const router         = useRouter()
+  const t              = useTranslations('dashboard.nav')
   const actUnread      = useNotifCount()
   const demandesUnread = useDemandesCount()
 
@@ -19,10 +21,10 @@ export default function BottomNav() {
     path === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(path)
 
   const sideItems = [
-    { id: 'accueil',  label: 'Accueil',  icon: LayoutGrid,    path: '/dashboard',               badge: 0 },
-    { id: 'demandes', label: 'Demandes', icon: UserPlus,      path: '/dashboard/demandes',      badge: demandesUnread },
-    { id: 'messages', label: 'Messages', icon: MessageCircle, path: '/dashboard/messages',      badge: msgUnread },
-    { id: 'activite', label: 'Activite', icon: Heart,         path: '/dashboard/notifications', badge: actUnread },
+    { id: 'accueil',  label: t('home'),     icon: LayoutGrid,    path: '/dashboard',               badge: 0 },
+    { id: 'demandes', label: t('requests'), icon: UserPlus,      path: '/dashboard/demandes',      badge: demandesUnread },
+    { id: 'messages', label: t('messages'), icon: MessageCircle, path: '/dashboard/messages',      badge: msgUnread },
+    { id: 'activite', label: t('activity'), icon: Heart,         path: '/dashboard/notifications', badge: actUnread },
   ]
 
   const isDiscoverActive = isActive('/dashboard/explorer')
@@ -85,7 +87,7 @@ export default function BottomNav() {
             'text-[9px] font-semibold',
             isDiscoverActive ? 'text-emerald-600' : 'text-emerald-500',
           )}>
-            Découvrir
+            {t('discover')}
           </span>
         </button>
 

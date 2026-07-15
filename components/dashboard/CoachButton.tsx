@@ -1,10 +1,12 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useCoachStore } from '@/store/coach.store'
 
 export default function CoachButton() {
   const pathname = usePathname()
+  const t = useTranslations('dashboard.coach')
   const { isOpen, openCoach } = useCoachStore()
 
   if (pathname.startsWith('/dashboard/messages')) return null
@@ -17,14 +19,14 @@ export default function CoachButton() {
           ? 'bg-[#059669] scale-95'
           : 'bg-[#10B981] hover:bg-[#059669] hover:scale-105'
       }`}
-      aria-label="Coach"
+      aria-label={t('aria')}
     >
       <img
         src="/coach.png"
-        alt="Coach Abdallah"
+        alt={t('avatarAlt')}
         className="w-7 h-7 rounded-full object-cover object-top shrink-0"
       />
-      <span className="text-white text-xs font-semibold">Coach</span>
+      <span className="text-white text-xs font-semibold">{t('label')}</span>
     </button>
   )
 }

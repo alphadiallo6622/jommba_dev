@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Smartphone, CreditCard } from 'lucide-react'
 import { plans } from '@/lib/mock-premium'
 import { cn } from '@/lib/utils'
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export default function PremiumPayment({ selectedPlan }: Props) {
+  const t = useTranslations('dashboard.premium.payment')
   const [paymentMethod, setPaymentMethod] = useState<'mobile' | 'card'>('mobile')
 
   const currentPlan = plans.find((p) => p.id === selectedPlan)
@@ -17,7 +19,7 @@ export default function PremiumPayment({ selectedPlan }: Props) {
 
   return (
     <section className="py-4">
-      <h2 className="font-bold text-lg text-gray-900 mb-4">Comment veux-tu payer ?</h2>
+      <h2 className="font-bold text-lg text-gray-900 mb-4">{t('title')}</h2>
 
       <div className="grid grid-cols-2 gap-3 mb-6">
         {/* Mobile Money */}
@@ -31,7 +33,7 @@ export default function PremiumPayment({ selectedPlan }: Props) {
           )}
         >
           <Smartphone className="w-6 h-6 text-orange-500 mx-auto mb-1.5" />
-          <span className="text-sm font-medium text-gray-800 block mb-1.5">Mobile Money</span>
+          <span className="text-sm font-medium text-gray-800 block mb-1.5">{t('mobileMoney')}</span>
           <div className="flex justify-center gap-1 flex-wrap">
             {['Orange', 'Free', 'Wave'].map((b) => (
               <span key={b} className="text-[10px] bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded font-medium">
@@ -52,7 +54,7 @@ export default function PremiumPayment({ selectedPlan }: Props) {
           )}
         >
           <CreditCard className="w-6 h-6 text-blue-500 mx-auto mb-1.5" />
-          <span className="text-sm font-medium text-gray-800 block mb-1.5">Carte bancaire</span>
+          <span className="text-sm font-medium text-gray-800 block mb-1.5">{t('card')}</span>
           <div className="flex justify-center gap-1">
             {['Visa', 'Mastercard'].map((b) => (
               <span key={b} className="text-[10px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded font-medium">
@@ -65,7 +67,7 @@ export default function PremiumPayment({ selectedPlan }: Props) {
 
       {/* Total */}
       <div className="flex justify-between items-center border-t border-gray-100 pt-4">
-        <span className="text-gray-500 text-sm">Total à payer</span>
+        <span className="text-gray-500 text-sm">{t('total')}</span>
         <div className="flex items-baseline gap-1">
           <span className="text-2xl font-bold text-gray-900">
             {total}

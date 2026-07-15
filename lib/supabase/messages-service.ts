@@ -103,14 +103,17 @@ export async function markConversationRead(conversationId: string, myId: string)
     .eq('is_read', false)
 }
 
-function formatTimeAgo(dateStr: string | null): string {
+// Temps relatif localisé (fr/en) via Intl.RelativeTimeFormat — pas de chaînes
+// en dur, donc utilisable côté lib sans hook next-intl. Le composant appelant
+// passe la locale lue via useLocale().
+function formatTimeAgo(dateStr: string | null, locale: string = 'fr'): string {
   if (!dateStr) return ''
-  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
-  if (diff < 60)     return "À l'instant"
-  if (diff < 3600)   return `Il y a ${Math.floor(diff / 60)} min`
-  if (diff < 86400)  return `Il y a ${Math.floor(diff / 3600)} h`
-  if (diff < 172800) return 'Hier'
-  return `Il y a ${Math.floor(diff / 86400)} j`
+  const diffSec = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
+  const rtf = new Intl.RelativeTimeFormat(locale === 'en' ? 'en' : 'fr', { numeric: 'auto' })
+  if (diffSec < 60)     return rtf.format(0, 'minute')            // « maintenant » / « now »
+  if (diffSec < 3600)   return rtf.format(-Math.floor(diffSec / 60), 'minute')
+  if (diffSec < 86400)  return rtf.format(-Math.floor(diffSec / 3600), 'hour')
+  return rtf.format(-Math.floor(diffSec / 86400), 'day')
 }
 
 export { formatTimeAgo }
@@ -171,7 +174,9 @@ export async function fetchConversationList(myId: string): Promise<ConversationL
       firstName:      p?.first_name ?? '…',
       lastInitial:    (p?.last_name ?? '').charAt(0),
       photo:          p?.avatar_url ?? '/avatar-placeholder.svg',
-      lastMessage:    last?.content ?? 'Démarrez la conversation...',
+      // Chaîne vide = « pas encore de message » ; le composant affiche un
+      // placeholder localisé et le style italique dans ce cas.
+      lastMessage:    last?.content ?? '',
       lastMessageAt:  last?.created_at ?? c.last_message_at,
       isRead:         nUnread === 0,
       unreadCount:    nUnread,

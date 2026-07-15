@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { Crown, CheckCircle, ShieldCheck, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -11,14 +12,9 @@ import { createClient } from '@/lib/supabase/client'
 
 type Props = { open: boolean; onClose: () => void }
 
-const BENEFITS = [
-  'Badge ✓ visible sur ton profil',
-  'Plus de confiance des autres membres',
-  'Meilleur classement dans les résultats',
-]
-
 export default function SecurityPanel({ open, onClose }: Props) {
   const router = useRouter()
+  const t = useTranslations('dashboard.parametres.security')
   const { isPremium, firstName, lastName } = useCurrentUser()
   const { user } = useAuth()
   const [currentPwd, setCurrentPwd] = useState('')
@@ -29,8 +25,8 @@ export default function SecurityPanel({ open, onClose }: Props) {
 
   const changePassword = async () => {
     if (!user?.email) return
-    if (!currentPwd || !newPwd) { toast.error('Remplis les deux champs'); return }
-    if (newPwd.length < 8) { toast.error('Mot de passe trop court (8 caractères min)'); return }
+    if (!currentPwd || !newPwd) { toast.error(t('fillBoth')); return }
+    if (newPwd.length < 8) { toast.error(t('pwdTooShort')); return }
 
     setChanging(true)
     try {
@@ -41,12 +37,12 @@ export default function SecurityPanel({ open, onClose }: Props) {
         email:    user.email,
         password: currentPwd,
       })
-      if (verifyErr) { toast.error('Mot de passe actuel incorrect'); return }
+      if (verifyErr) { toast.error(t('currentPwdWrong')); return }
 
       const { error } = await supabase.auth.updateUser({ password: newPwd })
-      if (error) { toast.error(`Erreur : ${error.message}`); return }
+      if (error) { toast.error(t('pwdError', { msg: error.message })); return }
 
-      toast.success('Mot de passe modifié avec succès ✓')
+      toast.success(t('pwdChanged'))
       setCurrentPwd(''); setNewPwd('')
     } finally {
       setChanging(false)
@@ -56,10 +52,10 @@ export default function SecurityPanel({ open, onClose }: Props) {
   const inputCls = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-[#10B981]'
 
   return (
-    <SettingsDrawer open={open} title="Sécurité" onClose={onClose}
+    <SettingsDrawer open={open} title={t('title')} onClose={onClose}
       footer={
         <button onClick={onClose} className="w-full py-3 bg-gray-100 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-200 transition-colors">
-          Fermer
+          {t('close')}
         </button>
       }
     >
@@ -67,31 +63,31 @@ export default function SecurityPanel({ open, onClose }: Props) {
 
         {/* Pseudo */}
         <div>
-          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Pseudo</label>
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">{t('pseudo')}</label>
           <input
             value={pseudo}
             readOnly
             className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-400 bg-gray-50 cursor-not-allowed"
           />
-          <p className="text-xs text-gray-400 mt-1">Le pseudo ne peut pas être modifié.</p>
+          <p className="text-xs text-gray-400 mt-1">{t('pseudoLocked')}</p>
         </div>
 
         {/* Password */}
         <div>
-          <p className="text-sm font-semibold text-gray-800 mb-3">Changer le mot de passe</p>
+          <p className="text-sm font-semibold text-gray-800 mb-3">{t('changePwd')}</p>
           <div className="space-y-2">
             <input
               type="password"
               value={currentPwd}
               onChange={e => setCurrentPwd(e.target.value)}
-              placeholder="Mot de passe actuel"
+              placeholder={t('currentPwd')}
               className={inputCls}
             />
             <input
               type="password"
               value={newPwd}
               onChange={e => setNewPwd(e.target.value)}
-              placeholder="Nouveau mot de passe (8 caractères min)"
+              placeholder={t('newPwd')}
               className={inputCls}
             />
           </div>
@@ -101,7 +97,7 @@ export default function SecurityPanel({ open, onClose }: Props) {
             className="mt-3 w-full py-2.5 bg-[#10B981] text-white text-sm font-semibold rounded-xl hover:bg-[#059669] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
           >
             {changing && <Loader2 className="w-4 h-4 animate-spin" />}
-            Modifier
+            {t('change')}
           </button>
         </div>
 
@@ -115,14 +111,14 @@ export default function SecurityPanel({ open, onClose }: Props) {
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <p className="text-sm font-semibold text-[#064E3B]">Vérification d&apos;identité</p>
-                  <span className="text-[9px] font-bold bg-[#10B981] text-white px-1.5 py-0.5 rounded-full">ACTIF</span>
+                  <p className="text-sm font-semibold text-[#064E3B]">{t('verifTitle')}</p>
+                  <span className="text-[9px] font-bold bg-[#10B981] text-white px-1.5 py-0.5 rounded-full">{t('active')}</span>
                 </div>
-                <p className="text-xs text-[#10B981] mt-0.5">Ton profil est certifié et mis en avant</p>
+                <p className="text-xs text-[#10B981] mt-0.5">{t('verifActiveDesc')}</p>
               </div>
             </div>
             <ul className="space-y-1.5">
-              {BENEFITS.map((item, i) => (
+              {(t.raw('benefits') as string[]).map((item, i) => (
                 <li key={i} className="flex items-center gap-2 text-xs text-[#064E3B] font-medium">
                   <CheckCircle className="w-3.5 h-3.5 text-[#10B981] shrink-0" />
                   {item}
@@ -138,12 +134,12 @@ export default function SecurityPanel({ open, onClose }: Props) {
                 <Crown className="w-5 h-5 text-amber-500" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-gray-800">Vérification d&apos;identité</p>
-                <p className="text-xs text-gray-500">Badge vérifié sur ton profil</p>
+                <p className="text-sm font-semibold text-gray-800">{t('verifTitle')}</p>
+                <p className="text-xs text-gray-500">{t('verifBadgeDesc')}</p>
               </div>
             </div>
             <ul className="space-y-1.5 mb-3">
-              {BENEFITS.map((item, i) => (
+              {(t.raw('benefits') as string[]).map((item, i) => (
                 <li key={i} className="flex items-center gap-2 text-xs text-gray-600">
                   <CheckCircle className="w-3.5 h-3.5 text-[#10B981] shrink-0" />
                   {item}
@@ -154,7 +150,7 @@ export default function SecurityPanel({ open, onClose }: Props) {
               onClick={() => { onClose(); router.push('/dashboard/premium') }}
               className="w-full py-2.5 bg-amber-500 text-white text-sm font-semibold rounded-xl hover:bg-amber-600 transition-colors"
             >
-              Activer avec Premium
+              {t('activateWithPremium')}
             </button>
           </div>
         )}

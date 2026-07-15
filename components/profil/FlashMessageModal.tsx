@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { Zap, X, MessageCircle, Crown, Heart, Send, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { FullProfile } from '@/lib/mock-demandes'
@@ -18,6 +19,7 @@ const MAX = 300
 
 export default function FlashMessageModal({ profile, isPremium, onSend, onClose }: Props) {
   const router = useRouter()
+  const t = useTranslations('dashboard.profil.flash')
   const [text, setText] = useState('')
   const [sending, setSending] = useState(false)
 
@@ -28,7 +30,7 @@ export default function FlashMessageModal({ profile, isPremium, onSend, onClose 
 
   const handleSend = async () => {
     const message = text.trim()
-    if (!message) { toast.error('Écris un message flash'); return }
+    if (!message) { toast.error(t('writeMessage')); return }
     setSending(true)
     const ok = await onSend(message)
     setSending(false)
@@ -48,29 +50,29 @@ export default function FlashMessageModal({ profile, isPremium, onSend, onClose 
               <Zap className="w-8 h-8 text-white" />
             </div>
             <h2 className="text-xl font-bold text-gray-900 flex items-center justify-center gap-1.5">
-              Le Message Flash <span>⚡</span>
+              {t('title')} <span>⚡</span>
             </h2>
-            <p className="text-sm text-gray-500 mt-1.5">Fais la différence dès le premier contact.</p>
+            <p className="text-sm text-gray-500 mt-1.5">{t('subtitle')}</p>
           </div>
 
           <div className="px-6 space-y-4">
             <Benefit
               icon={<MessageCircle className="w-4 h-4 text-[#10B981]" />}
               bg="bg-[#E1F5EE]"
-              title="Présente-toi avant même l'acceptation"
-              text="Ta demande arrive avec ton message personnalisé"
+              title={t('benefit1Title')}
+              text={t('benefit1Text')}
             />
             <Benefit
               icon={<Crown className="w-4 h-4 text-amber-500" />}
               bg="bg-amber-50"
-              title="Montre ton sérieux"
-              text="Un message personnalisé vaut mille demandes vides"
+              title={t('benefit2Title')}
+              text={t('benefit2Text')}
             />
             <Benefit
               icon={<Heart className="w-4 h-4 text-pink-500" />}
               bg="bg-pink-50"
-              title="2x plus de chances d'être accepté"
-              text="Les profils avec message ont bien plus de succès"
+              title={t('benefit3Title')}
+              text={t('benefit3Text')}
             />
           </div>
 
@@ -79,13 +81,13 @@ export default function FlashMessageModal({ profile, isPremium, onSend, onClose 
               onClick={onClose}
               className="flex-1 py-3 rounded-xl border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50 transition-colors"
             >
-              Plus tard
+              {t('later')}
             </button>
             <button
               onClick={handleUpgrade}
               className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-amber-500 text-white text-sm font-bold hover:bg-amber-600 transition-colors"
             >
-              <Crown className="w-4 h-4" /> Débloquer Premium
+              <Crown className="w-4 h-4" /> {t('unlockPremium')}
             </button>
           </div>
         </div>
@@ -111,14 +113,14 @@ export default function FlashMessageModal({ profile, isPremium, onSend, onClose 
               <Zap className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="font-bold text-gray-900 text-base leading-tight flex items-center gap-1">Message Flash <span>⚡</span></h2>
-              <p className="text-gray-400 text-xs">Ta demande à {profile.firstName} arrive avec ton message</p>
+              <h2 className="font-bold text-gray-900 text-base leading-tight flex items-center gap-1">{t('composerTitle')} <span>⚡</span></h2>
+              <p className="text-gray-400 text-xs">{t('composerSubtitle', { name: profile.firstName })}</p>
             </div>
           </div>
           <button
             onClick={onClose}
             className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors shrink-0"
-            aria-label="Fermer"
+            aria-label={t('close')}
           >
             <X className="w-4 h-4" />
           </button>
@@ -129,7 +131,7 @@ export default function FlashMessageModal({ profile, isPremium, onSend, onClose 
             <textarea
               value={text}
               onChange={e => setText(e.target.value.slice(0, MAX))}
-              placeholder={`Présente-toi à ${profile.firstName} en quelques mots…`}
+              placeholder={t('placeholder', { name: profile.firstName })}
               rows={5}
               autoFocus
               className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 transition-all resize-none"
@@ -139,7 +141,7 @@ export default function FlashMessageModal({ profile, isPremium, onSend, onClose 
 
           <p className="text-xs text-gray-400 mt-2 flex items-center gap-1.5">
             <Heart className="w-3 h-3 shrink-0" />
-            Reste pudique et sincère : ton message est modéré.
+            {t('modestNote')}
           </p>
 
           <button
@@ -148,7 +150,7 @@ export default function FlashMessageModal({ profile, isPremium, onSend, onClose 
             className="w-full flex items-center justify-center gap-2 py-3.5 mt-4 rounded-xl bg-amber-500 text-white text-sm font-bold hover:bg-amber-600 transition-colors disabled:opacity-60"
           >
             {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-            Envoyer la demande avec message
+            {t('sendWithMessage')}
           </button>
         </div>
       </div>

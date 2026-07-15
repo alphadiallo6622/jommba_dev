@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { ArrowLeft, Heart, Clock, MoreVertical, ChevronRight, Lock, LockOpen, User } from 'lucide-react'
 import { Conversation } from '@/lib/mock-messages'
 
@@ -12,6 +13,7 @@ type Props = {
 
 export default function ConversationHeader({ conv, msgsRemaining }: Props) {
   const router    = useRouter()
+  const t         = useTranslations('dashboard.messages.conv')
   const [menuOpen,    setMenuOpen]    = useState(false)
   const [showTooltip, setShowTooltip] = useState(false)
 
@@ -62,7 +64,7 @@ export default function ConversationHeader({ conv, msgsRemaining }: Props) {
           className="flex items-center gap-1 bg-[#10B981] text-white text-[11px] px-2.5 py-1.5 rounded-full font-semibold shrink-0"
         >
           <Heart className="w-3 h-3 fill-white" />
-          <span>DÉBUT · {msgsRemaining} msg</span>
+          <span>{t('counter', { count: msgsRemaining })}</span>
           <Clock className="w-3 h-3 opacity-70" />
         </button>
 
@@ -95,7 +97,7 @@ export default function ConversationHeader({ conv, msgsRemaining }: Props) {
                   className="w-full text-left px-4 py-3 text-sm text-gray-700 flex items-center gap-2.5 hover:bg-gray-50 transition-colors"
                 >
                   <User className="w-4 h-4 text-gray-400 shrink-0" />
-                  Voir le profil
+                  {t('viewProfile')}
                 </button>
               </div>
             </>
@@ -107,8 +109,8 @@ export default function ConversationHeader({ conv, msgsRemaining }: Props) {
       {showTooltip && (
         <div className="absolute left-0 right-0 top-full z-30 bg-gray-900/90 text-white text-xs font-medium text-center py-2.5 px-4 shadow-lg">
           {contactsUnlocked
-            ? "Vous pouvez maintenant échanger vos contacts !"
-            : `Encore ${msgsRemaining} message${msgsRemaining > 1 ? 's' : ''} avant de pouvoir échanger vos contacts.`
+            ? t('unlockedTooltip')
+            : t('lockedTooltip', { count: msgsRemaining })
           }
         </div>
       )}

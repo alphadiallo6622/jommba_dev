@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Shield, AlertTriangle, Ban, Heart } from 'lucide-react'
 
 type Props = {
@@ -11,6 +12,7 @@ type Props = {
 }
 
 export default function DiscussionRulesModal({ firstName, lastInitial, onConfirm, onClose }: Props) {
+  const t = useTranslations('dashboard.messages.rules')
   const [accepted, setAccepted] = useState(false)
 
   return (
@@ -35,9 +37,9 @@ export default function DiscussionRulesModal({ firstName, lastInitial, onConfirm
               <Shield className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-white font-bold text-base">Règles de Discussion</h2>
+              <h2 className="text-white font-bold text-base">{t('title')}</h2>
               <p className="text-white/80 text-xs">
-                Avant d&apos;écrire à {firstName} {lastInitial}.
+                {t('beforeWriting', { name: `${firstName} ${lastInitial}.` })}
               </p>
             </div>
           </div>
@@ -50,12 +52,10 @@ export default function DiscussionRulesModal({ firstName, lastInitial, onConfirm
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
             <p className="text-amber-700 font-semibold text-sm flex items-center gap-1.5 mb-1">
               <AlertTriangle className="w-4 h-4 shrink-0" />
-              Attention importante
+              {t('warningTitle')}
             </p>
             <p className="text-amber-600 text-xs leading-relaxed">
-              Le non-respect de ces règles entraîne un{' '}
-              <strong>bannissement définitif</strong> de Jommba. Nos modérateurs
-              surveillent les conversations.
+              {t.rich('warningBody', { b: (chunks) => <strong>{chunks}</strong> })}
             </p>
           </div>
 
@@ -66,11 +66,10 @@ export default function DiscussionRulesModal({ firstName, lastInitial, onConfirm
             </div>
             <div>
               <p className="font-semibold text-gray-900 text-sm">
-                Pas d&apos;échange de contacts immédiat
+                {t('rule1Title')}
               </p>
               <p className="text-gray-400 text-xs leading-relaxed mt-0.5">
-                Il est interdit de demander ou partager numéro de téléphone,
-                WhatsApp, email ou réseaux sociaux dès les premiers échanges.
+                {t('rule1Desc')}
               </p>
             </div>
           </div>
@@ -81,10 +80,9 @@ export default function DiscussionRulesModal({ firstName, lastInitial, onConfirm
               <Heart className="w-4 h-4 text-pink-500" />
             </div>
             <div>
-              <p className="font-semibold text-gray-900 text-sm">Respect et pudeur</p>
+              <p className="font-semibold text-gray-900 text-sm">{t('rule2Title')}</p>
               <p className="text-gray-400 text-xs leading-relaxed mt-0.5">
-                Gardez un ton respectueux et pudique dans vos échanges. Tout propos
-                déplacé, vulgaire ou à connotation inappropriée est strictement interdit.
+                {t('rule2Desc')}
               </p>
             </div>
           </div>
@@ -94,10 +92,10 @@ export default function DiscussionRulesModal({ firstName, lastInitial, onConfirm
             <Heart className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
             <div>
               <p className="text-red-500 font-semibold text-sm">
-                Respect et pudeur obligatoires
+                {t('rule3Title')}
               </p>
               <p className="text-red-400 text-xs leading-relaxed mt-0.5">
-                Gardez un ton respectueux. Tout propos déplacé ou inapproprié est interdit.
+                {t('rule3Desc')}
               </p>
             </div>
           </div>
@@ -113,7 +111,7 @@ export default function DiscussionRulesModal({ firstName, lastInitial, onConfirm
               className="w-4 h-4 rounded accent-[#10B981]"
             />
             <span className="text-gray-700 text-sm">
-              J&apos;accepte ces règles devant Allah 🤲
+              {t('accept')}
             </span>
           </label>
 
@@ -127,7 +125,7 @@ export default function DiscussionRulesModal({ firstName, lastInitial, onConfirm
             }`}
           >
             <Shield className="w-4 h-4" />
-            {accepted ? "J'accepte et je commence" : 'Cochez pour continuer'}
+            {accepted ? t('confirmEnabled') : t('confirmDisabled')}
           </button>
         </div>
       </div>

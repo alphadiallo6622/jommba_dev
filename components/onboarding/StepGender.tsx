@@ -1,12 +1,14 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { useOnboardingStore } from '@/store/onboarding.store'
 import { cn } from '@/lib/utils'
 
 type Props = { onNext: () => void }
 
 export default function StepGender({ onNext }: Props) {
+  const t = useTranslations('onboarding')
   const { gender, setField } = useOnboardingStore()
   const [showModal, setShowModal] = useState(false)
   const [pending, setPending] = useState<'homme' | 'femme' | null>(null)
@@ -29,14 +31,14 @@ export default function StepGender({ onNext }: Props) {
   return (
     <div className="space-y-8">
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-serif font-bold text-gray-900">Tu es…</h2>
-        <p className="text-sm text-gray-500">Ce choix est définitif et ne pourra pas être modifié.</p>
+        <h2 className="text-2xl font-serif font-bold text-gray-900">{t('gender.title')}</h2>
+        <p className="text-sm text-gray-500">{t('gender.subtitle')}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         {([
-          { value: 'homme', emoji: '🧔', label: 'Un homme' },
-          { value: 'femme', emoji: '👩', label: 'Une femme' },
+          { value: 'homme', emoji: '🧔', label: t('gender.man') },
+          { value: 'femme', emoji: '👩', label: t('gender.woman') },
         ] as const).map(({ value, emoji, label }) => (
           <button
             key={value}
@@ -63,10 +65,11 @@ export default function StepGender({ onNext }: Props) {
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
             <div className="text-center space-y-2">
               <div className="text-3xl">{pending === 'homme' ? '🧔' : '👩'}</div>
-              <h3 className="text-lg font-serif font-bold text-gray-900">Confirmer ce choix ?</h3>
+              <h3 className="text-lg font-serif font-bold text-gray-900">{t('gender.confirmTitle')}</h3>
               <p className="text-sm text-gray-500 leading-relaxed">
-                Tu t&rsquo;identifies comme <strong>{pending === 'homme' ? 'un homme' : 'une femme'}</strong>.
-                Ce choix est <strong>irréversible</strong> et ne pourra plus être modifié après confirmation.
+                {t.rich(pending === 'homme' ? 'gender.confirmManDesc' : 'gender.confirmWomanDesc', {
+                  b: (chunks) => <strong>{chunks}</strong>,
+                })}
               </p>
             </div>
             <div className="flex gap-3">
@@ -74,14 +77,14 @@ export default function StepGender({ onNext }: Props) {
                 onClick={() => setShowModal(false)}
                 className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
               >
-                Annuler
+                {t('nav.cancel')}
               </button>
               <button
                 onClick={confirm}
                 className="flex-1 py-2.5 rounded-xl text-white font-semibold text-sm hover:opacity-90 transition-opacity"
                 style={{ background: '#10B981' }}
               >
-                Confirmer
+                {t('nav.confirm')}
               </button>
             </div>
           </div>

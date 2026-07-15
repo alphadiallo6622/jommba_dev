@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Send, Mic } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
 type Props = {
@@ -10,6 +11,7 @@ type Props = {
 }
 
 export default function MessageInput({ onSend, isPremium }: Props) {
+  const t = useTranslations('dashboard.messages')
   const [text, setText] = useState('')
 
   const handleSend = () => {
@@ -19,7 +21,7 @@ export default function MessageInput({ onSend, isPremium }: Props) {
   }
 
   const handleVoice = () => {
-    toast.info('Messages vocaux — disponible dans la prochaine version 🎤')
+    toast.info(t('input.voiceSoon'))
   }
 
   return (
@@ -41,7 +43,7 @@ export default function MessageInput({ onSend, isPremium }: Props) {
         value={text}
         onChange={e => setText(e.target.value)}
         onKeyDown={e => e.key === 'Enter' && handleSend()}
-        placeholder="Écrivez votre message..."
+        placeholder={t('input.placeholder')}
         className="flex-1 px-4 py-2.5 bg-gray-100 rounded-full text-sm focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#10B981]/30 transition-all"
       />
 

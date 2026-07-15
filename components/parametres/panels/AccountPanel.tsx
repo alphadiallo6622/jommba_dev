@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { AlertTriangle, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -13,6 +14,7 @@ type Props = { open: boolean; onClose: () => void }
 
 export default function AccountPanel({ open, onClose }: Props) {
   const router = useRouter()
+  const t = useTranslations('dashboard.parametres.account')
   const { user } = useAuth()
   const [suspendModal, setSuspendModal] = useState(false)
   const [deleteModal1, setDeleteModal1] = useState(false)
@@ -28,11 +30,11 @@ export default function AccountPanel({ open, onClose }: Props) {
         .from('profiles')
         .update({ status: 'suspended' })
         .eq('user_id', user.id)
-      if (error) { toast.error('Erreur lors de la suspension'); return }
+      if (error) { toast.error(t('suspendError')); return }
 
       setSuspendModal(false)
       onClose()
-      toast.success('Compte suspendu temporairement')
+      toast.success(t('suspended'))
       await supabase.auth.signOut()
       router.push(localizedHome())
     } finally {
@@ -46,13 +48,13 @@ export default function AccountPanel({ open, onClose }: Props) {
     try {
       const res = await fetch('/api/account/delete', { method: 'POST' })
       if (!res.ok) {
-        const { error } = await res.json().catch(() => ({ error: 'Erreur inconnue' }))
-        toast.error(error ?? 'Échec de la suppression')
+        const { error } = await res.json().catch(() => ({ error: t('unknownError') }))
+        toast.error(error ?? t('deleteFailed'))
         return
       }
       setDeleteModal2(false)
       onClose()
-      toast.success('Compte supprimé définitivement')
+      toast.success(t('deleted'))
       const supabase = createClient()
       await supabase.auth.signOut()
       router.push(localizedHome())
@@ -63,10 +65,10 @@ export default function AccountPanel({ open, onClose }: Props) {
 
   return (
     <>
-      <SettingsDrawer open={open} title="Mon compte" onClose={onClose}
+      <SettingsDrawer open={open} title={t('title')} onClose={onClose}
         footer={
           <button onClick={onClose} className="w-full py-3 bg-gray-100 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-200 transition-colors">
-            Fermer
+            {t('close')}
           </button>
         }
       >
@@ -78,9 +80,9 @@ export default function AccountPanel({ open, onClose }: Props) {
                 <AlertTriangle className="w-4 h-4 text-amber-500" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-gray-800">Suspendre mon compte</p>
+                <p className="text-sm font-semibold text-gray-800">{t('suspendTitle')}</p>
                 <p className="text-xs text-gray-500 mt-0.5">
-                  Ton profil sera masqué temporairement. Tu peux le réactiver à tout moment en te reconnectant.
+                  {t('suspendDesc')}
                 </p>
               </div>
             </div>
@@ -88,7 +90,7 @@ export default function AccountPanel({ open, onClose }: Props) {
               onClick={() => setSuspendModal(true)}
               className="w-full py-2.5 bg-amber-50 text-amber-700 text-sm font-semibold border border-amber-200 rounded-xl hover:bg-amber-100 transition-colors"
             >
-              Suspendre
+              {t('suspend')}
             </button>
           </div>
 
@@ -99,9 +101,9 @@ export default function AccountPanel({ open, onClose }: Props) {
                 <Trash2 className="w-4 h-4 text-red-500" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-gray-800">Supprimer mon compte</p>
+                <p className="text-sm font-semibold text-gray-800">{t('deleteTitle')}</p>
                 <p className="text-xs text-gray-500 mt-0.5">
-                  Action irréversible. Toutes tes données et conversations seront définitivement supprimées.
+                  {t('deleteDesc')}
                 </p>
               </div>
             </div>
@@ -109,7 +111,7 @@ export default function AccountPanel({ open, onClose }: Props) {
               onClick={() => setDeleteModal1(true)}
               className="w-full py-2.5 bg-red-50 text-red-600 text-sm font-semibold border border-red-200 rounded-xl hover:bg-red-100 transition-colors"
             >
-              Supprimer définitivement
+              {t('deletePermanently')}
             </button>
           </div>
         </div>
@@ -119,11 +121,11 @@ export default function AccountPanel({ open, onClose }: Props) {
       {suspendModal && (
         <div className="fixed inset-0 bg-black/50 z-[80] flex items-center justify-center px-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm">
-            <h3 className="font-semibold text-gray-900 mb-2">Suspendre le compte ?</h3>
-            <p className="text-sm text-gray-500 mb-5">Ton profil sera masqué. Tu pourras te reconnecter à tout moment.</p>
+            <h3 className="font-semibold text-gray-900 mb-2">{t('suspendModalTitle')}</h3>
+            <p className="text-sm text-gray-500 mb-5">{t('suspendModalDesc')}</p>
             <div className="grid grid-cols-2 gap-2">
-              <button onClick={() => setSuspendModal(false)} className="py-2.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-xl">Annuler</button>
-              <button onClick={suspend} className="py-2.5 bg-amber-500 text-white text-sm font-semibold rounded-xl">Confirmer</button>
+              <button onClick={() => setSuspendModal(false)} className="py-2.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-xl">{t('cancel')}</button>
+              <button onClick={suspend} className="py-2.5 bg-amber-500 text-white text-sm font-semibold rounded-xl">{t('confirm')}</button>
             </div>
           </div>
         </div>
@@ -133,11 +135,11 @@ export default function AccountPanel({ open, onClose }: Props) {
       {deleteModal1 && (
         <div className="fixed inset-0 bg-black/50 z-[80] flex items-center justify-center px-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm">
-            <h3 className="font-semibold text-gray-900 mb-2">Es-tu sûr(e) ?</h3>
-            <p className="text-sm text-gray-500 mb-5">Cette action supprimera définitivement ton profil, tes photos et tous tes messages. Elle est irréversible.</p>
+            <h3 className="font-semibold text-gray-900 mb-2">{t('deleteModal1Title')}</h3>
+            <p className="text-sm text-gray-500 mb-5">{t('deleteModal1Desc')}</p>
             <div className="grid grid-cols-2 gap-2">
-              <button onClick={() => setDeleteModal1(false)} className="py-2.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-xl">Annuler</button>
-              <button onClick={() => { setDeleteModal1(false); setDeleteModal2(true) }} className="py-2.5 bg-red-500 text-white text-sm font-semibold rounded-xl">Continuer</button>
+              <button onClick={() => setDeleteModal1(false)} className="py-2.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-xl">{t('cancel')}</button>
+              <button onClick={() => { setDeleteModal1(false); setDeleteModal2(true) }} className="py-2.5 bg-red-500 text-white text-sm font-semibold rounded-xl">{t('continue')}</button>
             </div>
           </div>
         </div>
@@ -147,11 +149,11 @@ export default function AccountPanel({ open, onClose }: Props) {
       {deleteModal2 && (
         <div className="fixed inset-0 bg-black/50 z-[80] flex items-center justify-center px-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm">
-            <h3 className="font-semibold text-red-600 mb-2">Confirmation finale</h3>
-            <p className="text-sm text-gray-500 mb-5">Clique sur "Supprimer" pour confirmer la suppression définitive de ton compte Jommba.</p>
+            <h3 className="font-semibold text-red-600 mb-2">{t('deleteModal2Title')}</h3>
+            <p className="text-sm text-gray-500 mb-5">{t('deleteModal2Desc')}</p>
             <div className="grid grid-cols-2 gap-2">
-              <button onClick={() => setDeleteModal2(false)} className="py-2.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-xl">Annuler</button>
-              <button onClick={deleteAccount} className="py-2.5 bg-red-600 text-white text-sm font-semibold rounded-xl">Supprimer</button>
+              <button onClick={() => setDeleteModal2(false)} className="py-2.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-xl">{t('cancel')}</button>
+              <button onClick={deleteAccount} className="py-2.5 bg-red-600 text-white text-sm font-semibold rounded-xl">{t('delete')}</button>
             </div>
           </div>
         </div>

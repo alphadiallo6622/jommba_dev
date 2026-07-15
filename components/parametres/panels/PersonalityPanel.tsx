@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 import { useCurrentUser } from '@/lib/use-current-user'
@@ -16,6 +17,8 @@ const QUALITY_THEMES  = ['Responsable','Sincère','Patient','Généreux','Fiable
 const FLAW_THEMES     = ['Perfectionniste','Timide','Têtu','Impatient','Désorganisé','Maladroit']
 
 export default function PersonalityPanel({ open, onClose }: Props) {
+  const t = useTranslations('dashboard.parametres.personality')
+  const tp = useTranslations('dashboard.parametres')
   const mockUser = useCurrentUser()
   const { user } = useAuth()
   const [interests, setInterests] = useState(mockUser.interests)
@@ -39,13 +42,13 @@ export default function PersonalityPanel({ open, onClose }: Props) {
       flaws:     flaws.trim() || null,
     })
     setSaving(false)
-    if (err) { toast.error(`Erreur : ${err}`); return }
-    toast.success('Personnalité sauvegardée ✓')
+    if (err) { toast.error(t('error', { msg: err })); return }
+    toast.success(t('saved'))
     onClose()
   }
 
   return (
-    <SettingsDrawer open={open} title="Personnalité" onClose={onClose}
+    <SettingsDrawer open={open} title={t('title')} onClose={onClose}
       footer={
         <button
           onClick={save}
@@ -53,35 +56,35 @@ export default function PersonalityPanel({ open, onClose }: Props) {
           className="w-full py-3 bg-[#10B981] text-white text-sm font-semibold rounded-xl hover:bg-[#059669] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
         >
           {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-          Enregistrer et fermer
+          {tp('saveAndClose')}
         </button>
       }
     >
       <div className="px-4 py-5">
         <ThemeTextSection
-          label="Centres d'intérêt"
+          label={t('interestsLabel')}
           value={interests}
           onChange={setInterests}
           maxLength={300}
-          placeholder="Tes passions, loisirs…"
+          placeholder={t('interestsPlaceholder')}
           themes={INTEREST_THEMES}
         />
         <ThemeTextSection
-          label="Mes qualités"
+          label={t('qualitiesLabel')}
           value={qualities}
           onChange={setQualities}
           maxLength={300}
-          placeholder="Ce qui te décrit le mieux…"
+          placeholder={t('qualitiesPlaceholder')}
           themes={QUALITY_THEMES}
         />
         <ThemeTextSection
-          label="Mes défauts"
+          label={t('flawsLabel')}
           value={flaws}
           onChange={setFlaws}
           maxLength={300}
-          placeholder="L'authenticité est une qualité…"
+          placeholder={t('flawsPlaceholder')}
           themes={FLAW_THEMES}
-          hint="L'honnêteté est appréciée ! Partager tes défauts renforce la confiance."
+          hint={t('flawsHint')}
         />
       </div>
     </SettingsDrawer>

@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations, useLocale } from 'next-intl'
 import { Search, ChevronDown, ChevronUp, Mail, UserPlus, Heart, MessageCircle, Camera, Crown, Shield, Settings, BookOpen, CheckCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { faqCategories, tutorialSteps } from '@/lib/mock-aide'
+import { faqCategories } from '@/lib/mock-aide'
 
 const ICON_MAP: Record<string, React.ElementType> = {
   UserPlus, Heart, MessageCircle, Camera, Crown, Shield, Settings, BookOpen,
@@ -16,7 +17,12 @@ type PlatformStats = {
   matches: number
 }
 
+type FaqEntry = { q: string; a: string }
+type TutorialEntry = { title: string; description: string }
+
 export default function AidePage() {
+  const t = useTranslations('dashboard.aide')
+  const locale = useLocale()
   const [search, setSearch]         = useState('')
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
   const [openItem, setOpenItem]     = useState<string | null>(null)
@@ -31,7 +37,17 @@ export default function AidePage() {
     })
   }, [])
 
-  const filtered = faqCategories.flatMap(cat =>
+  // Catégories (id + icône depuis la structure) enrichies du libellé + Q/R traduits.
+  const categories = faqCategories.map(cat => ({
+    id: cat.id,
+    icon: cat.icon,
+    label: t(`categories.${cat.id}`),
+    items: (t.raw(`faq.${cat.id}`) as FaqEntry[]).map(e => ({ question: e.q, answer: e.a })),
+  }))
+  const tutorialSteps = (t.raw('tutorial') as TutorialEntry[]).map((s, i) => ({ step: i + 1, ...s }))
+  const numberLocale = locale === 'en' ? 'en-GB' : 'fr-FR'
+
+  const filtered = categories.flatMap(cat =>
     cat.items
       .filter(item =>
         item.question.toLowerCase().includes(search.toLowerCase()) ||
@@ -41,8 +57,8 @@ export default function AidePage() {
   )
 
   const displayCategories = activeCategory
-    ? faqCategories.filter(c => c.id === activeCategory)
-    : faqCategories
+    ? categories.filter(c => c.id === activeCategory)
+    : categories
 
   const displayItems = search.trim()
     ? filtered
@@ -52,8 +68,8 @@ export default function AidePage() {
 
   return (
     <div className="max-w-lg mx-auto px-4 py-4 pb-24">
-      <h1 className="text-2xl font-bold text-[#064E3B] mb-1">Aide &amp; FAQ</h1>
-      <p className="text-sm text-gray-500 mb-5">Trouve des réponses à tes questions</p>
+      <h1 className="text-2xl font-bold text-[#064E3B] mb-1">{t('title')}</h1>
+      <p className="text-sm text-gray-500 mb-5">{t('subtitle')}</p>
 
       {/* Search */}
       <div className="relative mb-4">
@@ -61,7 +77,7 @@ export default function AidePage() {
         <input
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder="Recherche une question…"
+          placeholder={t('searchPlaceholder')}
           className="w-full border border-gray-200 rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-[#10B981]"
         />
       </div>
@@ -75,9 +91,9 @@ export default function AidePage() {
               !activeCategory ? 'bg-[#10B981] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
-            Tout
+            {t('all')}
           </button>
-          {faqCategories.map(cat => {
+          {categories.map(cat => {
             const Icon = ICON_MAP[cat.icon] ?? BookOpen
             return (
               <button
@@ -97,7 +113,7 @@ export default function AidePage() {
       {/* FAQ accordion */}
       <div className="space-y-2 mb-6">
         {displayItems.length === 0 ? (
-          <p className="text-center text-gray-400 text-sm py-8">Aucun résultat pour "{search}"</p>
+          <p className="text-center text-gray-400 text-sm py-8">{t('noResults', { query: search })}</p>
         ) : (
           displayItems.map((item, idx) => {
             const key = `${item.catId}-${idx}`
@@ -128,7 +144,7 @@ export default function AidePage() {
       {/* Tutorial steps */}
       {!search.trim() && !activeCategory && (
         <div className="bg-[#E1F5EE] rounded-xl p-4 mb-5">
-          <p className="text-sm font-bold text-[#064E3B] mb-3">Guide de démarrage rapide</p>
+          <p className="text-sm font-bold text-[#064E3B] mb-3">{t('quickStart')}</p>
           <div className="space-y-3">
             {tutorialSteps.map(({ step, title, description }) => (
               <div key={step} className="flex items-start gap-3">
@@ -149,10 +165,10 @@ export default function AidePage() {
       {!search.trim() && !activeCategory && stats && (
         <div className="grid grid-cols-2 gap-3 mb-5">
           {[
-            { label: 'Membres inscrits', value: stats.members_total.toLocaleString('fr-FR') },
-            { label: 'Profils validés', value: stats.members_validated.toLocaleString('fr-FR') },
-            { label: 'Pays représentés', value: String(stats.countries) },
-            { label: 'Mises en relation', value: stats.matches.toLocaleString('fr-FR') },
+            { label: t('statsMembers'), value: stats.members_total.toLocaleString(numberLocale) },
+            { label: t('statsValidated'), value: stats.members_validated.toLocaleString(numberLocale) },
+            { label: t('statsCountries'), value: String(stats.countries) },
+            { label: t('statsMatches'), value: stats.matches.toLocaleString(numberLocale) },
           ].map(({ label, value }) => (
             <div key={label} className="bg-white border border-gray-100 rounded-xl p-3 text-center">
               <p className="text-xl font-bold text-[#10B981]">{value}</p>
@@ -169,15 +185,15 @@ export default function AidePage() {
             <Mail className="w-4 h-4 text-[#10B981]" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-gray-800">Tu n'as pas trouvé ta réponse ?</p>
-            <p className="text-xs text-gray-500">Notre équipe te répond en moins de 24 h</p>
+            <p className="text-sm font-semibold text-gray-800">{t('contactTitle')}</p>
+            <p className="text-xs text-gray-500">{t('contactDesc')}</p>
           </div>
         </div>
         <a
           href="mailto:support@jommba224.com"
           className="block w-full py-2.5 bg-[#10B981] text-white text-sm font-semibold text-center rounded-xl hover:bg-[#059669] transition-colors"
         >
-          Contacter le support
+          {t('contactCta')}
         </a>
       </div>
     </div>

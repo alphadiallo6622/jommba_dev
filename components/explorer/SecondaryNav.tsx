@@ -2,12 +2,14 @@
 
 import { Home, SlidersHorizontal, Layers, LayoutGrid } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useExplorerStore } from '@/store/explorer.store'
 import { useCurrentUser } from '@/lib/use-current-user'
 import { cn } from '@/lib/utils'
 
 export default function SecondaryNav() {
   const router = useRouter()
+  const t = useTranslations('dashboard.explorer.nav')
   const { mode, grillUsesLeft, setMode, setFiltersOpen, setShowPremiumModal, decrementGrillUses } = useExplorerStore()
   const { isPremium } = useCurrentUser()
 
@@ -30,7 +32,7 @@ export default function SecondaryNav() {
       <button
         onClick={() => router.push('/dashboard')}
         className="flex items-center justify-center w-10 h-10 rounded-xl text-gray-500 hover:bg-gray-100 transition-colors"
-        title="Retour à l'accueil"
+        title={t('home')}
       >
         <Home className="w-5 h-5" />
       </button>
@@ -41,7 +43,7 @@ export default function SecondaryNav() {
         className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700"
       >
         <SlidersHorizontal className="w-4 h-4" />
-        Filtres
+        {t('filters')}
       </button>
 
       {/* Swipe mode */}
@@ -53,7 +55,7 @@ export default function SecondaryNav() {
             ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
             : 'text-gray-500 hover:bg-gray-100',
         )}
-        title="Mode swipe"
+        title={t('swipe')}
       >
         <Layers className="w-5 h-5" />
       </button>
@@ -67,7 +69,7 @@ export default function SecondaryNav() {
             ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
             : 'text-gray-500 hover:bg-gray-100',
         )}
-        title="Mode grille"
+        title={t('grid')}
       >
         <LayoutGrid className="w-5 h-5" />
         {!isPremium && grillUsesLeft > 0 && (

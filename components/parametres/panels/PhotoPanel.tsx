@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { Camera, Crown, Eye, X, Plus, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useCurrentUser } from '@/lib/use-current-user'
@@ -16,17 +17,11 @@ import SettingsDrawer from '../SettingsDrawer'
 const MAX_FREE    = 3
 const MAX_PREMIUM = 6
 
-const TIPS = [
-  'Photo récente et de bonne qualité',
-  'Visage dégagé et bien éclairé',
-  'Fond neutre de préférence',
-  'Pas de filtre excessif',
-]
-
 type Props = { open: boolean; onClose: () => void }
 
 export default function PhotoPanel({ open, onClose }: Props) {
   const router = useRouter()
+  const t = useTranslations('dashboard.parametres.photo')
   const currentUser = useCurrentUser()
   const { user } = useAuth()
   const [photos, setPhotos]     = useState<UserPhoto[]>([])
@@ -57,15 +52,15 @@ export default function PhotoPanel({ open, onClose }: Props) {
     if (!photo) return
     setPhotos(prev => prev.map(p => ({ ...p, isMain: p.id === id })))
     const err = await setPrimaryPhoto(user.id, id, photo.src)
-    if (err) { toast.error('Erreur lors de la mise à jour'); fetchPhotos(); return }
+    if (err) { toast.error(t('updateError')); fetchPhotos(); return }
     await refreshProfileInStore(user.id)
-    toast.success('Photo principale mise à jour ✓')
+    toast.success(t('mainUpdated'))
   }
 
   const deletePhoto = async (id: string) => {
     if (!user) return
     if (photos.length === 1) {
-      toast.error('Tu dois conserver au moins une photo')
+      toast.error(t('keepOne'))
       return
     }
     const wasMain = photos.find(p => p.id === id)?.isMain
@@ -73,12 +68,12 @@ export default function PhotoPanel({ open, onClose }: Props) {
     setPhotos(remaining.map((p, i) => wasMain && i === 0 ? { ...p, isMain: true } : p))
 
     const err = await deletePhotoById(user.id, id)
-    if (err) { toast.error('Erreur lors de la suppression'); fetchPhotos(); return }
+    if (err) { toast.error(t('deleteError')); fetchPhotos(); return }
     if (wasMain && remaining[0]) {
       await setPrimaryPhoto(user.id, remaining[0].id, remaining[0].src)
       await refreshProfileInStore(user.id)
     }
-    toast.success('Photo supprimée ✓')
+    toast.success(t('deleted'))
   }
 
   const addPhoto = () => {
@@ -88,7 +83,7 @@ export default function PhotoPanel({ open, onClose }: Props) {
       return
     }
     if (photos.length >= MAX_PREMIUM) {
-      toast.error(`Maximum ${MAX_PREMIUM} photos atteint`)
+      toast.error(t('maxReached', { max: MAX_PREMIUM }))
       return
     }
     fileInputRef.current?.click()
@@ -99,11 +94,11 @@ export default function PhotoPanel({ open, onClose }: Props) {
     e.target.value = ''
     if (!file || !user) return
     if (!file.type.startsWith('image/')) {
-      toast.error('Veuillez sélectionner une image')
+      toast.error(t('selectImage'))
       return
     }
     if (file.size > 10 * 1024 * 1024) {
-      toast.error('Image trop lourde (max 10 Mo)')
+      toast.error(t('tooHeavy'))
       return
     }
 
@@ -112,10 +107,10 @@ export default function PhotoPanel({ open, onClose }: Props) {
     const added  = await uploadPhoto(user.id, file, isMain, photos.length)
     setUploading(false)
 
-    if (!added) { toast.error("Échec de l'upload. Réessaie."); return }
+    if (!added) { toast.error(t('uploadFailed')); return }
     setPhotos(prev => [...prev, added])
     if (isMain) await refreshProfileInStore(user.id)
-    toast.success('Photo ajoutée ✓')
+    toast.success(t('added'))
   }
 
   return (
@@ -129,14 +124,14 @@ export default function PhotoPanel({ open, onClose }: Props) {
     />
     <SettingsDrawer
       open={open}
-      title="Photo de profil"
+      title={t('title')}
       onClose={onClose}
       footer={
         <button
           onClick={onClose}
           className="w-full py-3 bg-[#10B981] text-white text-sm font-semibold rounded-xl hover:bg-[#059669] transition-colors flex items-center justify-center gap-2"
         >
-          <Camera className="w-4 h-4" /> Fermer
+          <Camera className="w-4 h-4" /> {t('close')}
         </button>
       }
     >
@@ -144,13 +139,13 @@ export default function PhotoPanel({ open, onClose }: Props) {
 
         {/* Intro text */}
         <p className="text-sm text-[#10B981] bg-[#E1F5EE] px-4 py-3 rounded-xl leading-relaxed">
-          Ta photo principale est la première chose que les autres membres voient. Choisis une photo claire où ton visage est bien visible.
+          {t('intro')}
         </p>
 
         {/* Section label */}
         <div className="flex items-center gap-2">
           <Camera className="w-4 h-4 text-gray-500" />
-          <span className="text-sm font-semibold text-gray-700">Mes photos</span>
+          <span className="text-sm font-semibold text-gray-700">{t('myPhotos')}</span>
           <span className="text-sm text-gray-400 font-medium">{photos.length}/{maxPhotos}</span>
           {isPremium && (
             <span className="text-[9px] font-bold bg-amber-500 text-white px-1.5 py-0.5 rounded-full">PREMIUM</span>
@@ -170,7 +165,7 @@ export default function PhotoPanel({ open, onClose }: Props) {
                 <img src={photo.src} alt="" className="w-full h-full object-cover" />
                 {photo.isMain && (
                   <span className="absolute top-1.5 left-1.5 bg-[#10B981] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
-                    Principale
+                    {t('main')}
                   </span>
                 )}
               </div>
@@ -179,21 +174,21 @@ export default function PhotoPanel({ open, onClose }: Props) {
               <div className="flex flex-col items-center gap-0.5">
                 {photo.isMain ? (
                   <span className="text-[10px] font-semibold text-[#10B981] flex items-center gap-0.5">
-                    ✓ Principal
+                    {t('mainShort')}
                   </span>
                 ) : (
                   <button
                     onClick={() => setMain(photo.id)}
                     className="text-[10px] font-semibold text-[#10B981] border border-[#10B981] rounded-full px-2 py-0.5 hover:bg-[#E1F5EE] transition-colors"
                   >
-                    ● Principal
+                    {t('makeMain')}
                   </button>
                 )}
                 <button
                   onClick={() => deletePhoto(photo.id)}
                   className="text-[10px] text-red-400 hover:text-red-600 flex items-center gap-0.5 transition-colors"
                 >
-                  <X className="w-2.5 h-2.5" /> Supprimer
+                  <X className="w-2.5 h-2.5" /> {t('delete')}
                 </button>
               </div>
             </div>
@@ -214,7 +209,7 @@ export default function PhotoPanel({ open, onClose }: Props) {
                   }
                 </div>
                 <span className="text-[10px] text-gray-400 group-hover:text-[#10B981] font-medium transition-colors">
-                  {uploading ? 'Envoi…' : 'Ajouter'}
+                  {uploading ? t('sending') : t('add')}
                 </span>
               </button>
             </div>
@@ -233,8 +228,8 @@ export default function PhotoPanel({ open, onClose }: Props) {
                 <Camera className="w-4 h-4 text-amber-500" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-amber-800">Ajoutez jusqu&apos;à {MAX_PREMIUM} photos avec Premium</p>
-                <p className="text-xs text-amber-600">Augmentez vos chances de recevoir des demandes</p>
+                <p className="text-sm font-semibold text-amber-800">{t('upsellTitle', { max: MAX_PREMIUM })}</p>
+                <p className="text-xs text-amber-600">{t('upsellDesc')}</p>
               </div>
             </div>
             <Crown className="w-4 h-4 text-amber-400 shrink-0 ml-2" />
@@ -244,9 +239,7 @@ export default function PhotoPanel({ open, onClose }: Props) {
         {/* Inline tips */}
         <div className="bg-[#E1F5EE] rounded-xl px-4 py-3">
           <p className="text-xs text-[#10B981] leading-relaxed">
-            <span className="font-semibold">Conseils :</span> Choisissez des photos nettes, bien éclairées et récentes.
-            Évitez les photos de groupe ou avec des filtres excessifs.
-            Cliquez sur "Principal" pour changer votre photo de profil visible par tous.
+            {t.rich('tipsInline', { b: (chunks) => <span className="font-semibold">{chunks}</span> })}
           </p>
         </div>
 
@@ -256,16 +249,18 @@ export default function PhotoPanel({ open, onClose }: Props) {
             <Eye className="w-4 h-4 text-amber-500" />
           </div>
           <p className="text-xs text-amber-700 leading-relaxed">
-            <span className="font-semibold">Les profils avec photo ont 5x plus de visibilité</span><br />
-            Ajoute une photo pour apparaître en haut des recherches et recevoir plus de demandes de contact.
+            {t.rich('visibilityInfo', {
+              b: (chunks) => <span className="font-semibold">{chunks}</span>,
+              br: () => <br />,
+            })}
           </p>
         </div>
 
         {/* Detailed tips */}
         <div className="bg-[#E1F5EE] rounded-xl px-4 py-3">
-          <p className="text-sm font-semibold text-[#064E3B] mb-2">Conseils pour une bonne photo :</p>
+          <p className="text-sm font-semibold text-[#064E3B] mb-2">{t('tipsTitle')}</p>
           <ul className="space-y-1">
-            {TIPS.map((tip, i) => (
+            {(t.raw('tips') as string[]).map((tip, i) => (
               <li key={i} className="text-xs text-[#10B981] flex items-start gap-1.5">
                 <span className="mt-0.5 shrink-0">•</span>{tip}
               </li>

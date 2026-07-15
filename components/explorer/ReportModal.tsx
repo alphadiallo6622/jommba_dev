@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Flag } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -11,20 +12,21 @@ type Props = {
 }
 
 const REASONS = [
-  { id: 'fausse_photo', label: 'Fausse photo',  emoji: '📷' },
-  { id: 'faux_nom',     label: 'Faux nom',       emoji: '👤' },
-  { id: 'inapproprie',  label: 'Inapproprié',    emoji: '⚠️' },
-  { id: 'arnaque',      label: 'Arnaque',        emoji: '🔴' },
-  { id: 'harcelement',  label: 'Harcèlement',    emoji: '🚫' },
-  { id: 'autre',        label: 'Autre',          emoji: '🏷️' },
-]
+  { id: 'fausse_photo', key: 'fakePhoto',     emoji: '📷' },
+  { id: 'faux_nom',     key: 'fakeName',      emoji: '👤' },
+  { id: 'inapproprie',  key: 'inappropriate', emoji: '⚠️' },
+  { id: 'arnaque',      key: 'scam',          emoji: '🔴' },
+  { id: 'harcelement',  key: 'harassment',    emoji: '🚫' },
+  { id: 'autre',        key: 'other',         emoji: '🏷️' },
+] as const
 
 export default function ReportModal({ profileName, onClose }: Props) {
+  const t = useTranslations('dashboard.explorer.report')
   const [selected, setSelected] = useState<string | null>(null)
   const [description, setDescription] = useState('')
 
   const handleSubmit = () => {
-    toast.success('Signalement envoyé. Merci de nous aider à garder la communauté saine.')
+    toast.success(t('sent'))
     onClose()
   }
 
@@ -43,12 +45,12 @@ export default function ReportModal({ profileName, onClose }: Props) {
           <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center">
             <Flag className="w-5 h-5 text-amber-500" />
           </div>
-          <h2 className="text-lg font-bold text-gray-900">Signaler {profileName}</h2>
+          <h2 className="text-lg font-bold text-gray-900">{t('title', { name: profileName })}</h2>
         </div>
 
         {/* Reason pills */}
         <div className="grid grid-cols-2 gap-2">
-          {REASONS.map(({ id, label, emoji }) => (
+          {REASONS.map(({ id, key, emoji }) => (
             <button
               key={id}
               onClick={() => setSelected(selected === id ? null : id)}
@@ -60,7 +62,7 @@ export default function ReportModal({ profileName, onClose }: Props) {
               )}
             >
               <span className="text-base leading-none">{emoji}</span>
-              {label}
+              {t(`reasons.${key}`)}
             </button>
           ))}
         </div>
@@ -69,7 +71,7 @@ export default function ReportModal({ profileName, onClose }: Props) {
         <textarea
           value={description}
           onChange={e => setDescription(e.target.value)}
-          placeholder="Décris le problème..."
+          placeholder={t('placeholder')}
           rows={3}
           className="w-full resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200/60 transition-all"
         />
@@ -80,7 +82,7 @@ export default function ReportModal({ profileName, onClose }: Props) {
             onClick={onClose}
             className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
           >
-            Annuler
+            {t('cancel')}
           </button>
           <button
             onClick={handleSubmit}
@@ -88,7 +90,7 @@ export default function ReportModal({ profileName, onClose }: Props) {
             style={{ background: '#D97706' }}
           >
             <Flag className="w-4 h-4" />
-            Signaler
+            {t('submit')}
           </button>
         </div>
       </div>

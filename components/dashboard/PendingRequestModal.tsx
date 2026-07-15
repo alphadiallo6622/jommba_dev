@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import {
   Heart, X, MapPin, Briefcase, Clock, Crown, Check,
   CheckCircle2, Send, Loader2, Zap,
@@ -30,19 +31,21 @@ type PendingRequest = {
 // même visite (rechargements de page inclus via sessionStorage).
 const DISMISS_KEY = 'jommba:pending-request-dismissed'
 
-function formatTimeAgo(dateStr: string): string {
-  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
-  if (diff < 60)     return "À l'instant"
-  if (diff < 3600)   return `Il y a ${Math.floor(diff / 60)} min`
-  if (diff < 86400)  return `Il y a ${Math.floor(diff / 3600)} h`
-  if (diff < 172800) return 'Hier'
-  return `Il y a ${Math.floor(diff / 86400)} j`
-}
-
 export default function PendingRequestModal() {
   const router = useRouter()
+  const t = useTranslations('dashboard.pendingModal')
   const { user } = useAuth()
   const { firstName: myFirstName } = useCurrentUser()
+
+  // Libellé « il y a … » localisé (dépend de t, donc défini dans le composant).
+  const formatTimeAgo = useCallback((dateStr: string): string => {
+    const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
+    if (diff < 60)     return t('timeNow')
+    if (diff < 3600)   return t('timeMinutes', { n: Math.floor(diff / 60) })
+    if (diff < 86400)  return t('timeHours', { n: Math.floor(diff / 3600) })
+    if (diff < 172800) return t('timeYesterday')
+    return t('timeDays', { n: Math.floor(diff / 86400) })
+  }, [t])
 
   const [request, setRequest] = useState<PendingRequest | null>(null)
   const [pendingCount, setPendingCount] = useState(0)
@@ -89,10 +92,10 @@ export default function PendingRequestModal() {
 
     setRequest({
       id: latest.sender_id,
-      firstName: p?.first_name ?? 'Un membre',
+      firstName: p?.first_name ?? t('unknownMember'),
       age: p?.age ?? 0,
       photo: p?.avatar_url ?? '/avatar-placeholder.svg',
-      city: p?.city ?? 'Inconnu',
+      city: p?.city ?? t('unknownCity'),
       job: p?.job ?? null,
       isPremium: p?.is_premium === true,
       flashMessage: latest.flash_message ?? null,
@@ -100,7 +103,7 @@ export default function PendingRequestModal() {
       createdAt: latest.created_at,
     })
     setVisible(true)
-  }, [user])
+  }, [user, t, formatTimeAgo])
 
   useEffect(() => { loadPending() }, [loadPending])
 
@@ -118,7 +121,7 @@ export default function PendingRequestModal() {
       .eq('sender_id', request.id)
       .eq('receiver_id', user.id)
       .eq('type', 'request')
-    toast('Demande refusée')
+    toast(t('refused'))
     dismiss()
   }
 
@@ -134,7 +137,7 @@ export default function PendingRequestModal() {
       .eq('type', 'request')
 
     if (error) {
-      toast.error("Erreur lors de l'acceptation")
+      toast.error(t('acceptError'))
       setAccepting(false)
       return
     }
@@ -196,18 +199,16 @@ export default function PendingRequestModal() {
                   <Heart className="w-5 h-5 text-white fill-white" />
                 </div>
                 <div>
-                  <h2 className="font-bold text-gray-900 text-base leading-tight">Demandes en attente</h2>
+                  <h2 className="font-bold text-gray-900 text-base leading-tight">{t('title')}</h2>
                   <p className="text-gray-400 text-xs">
-                    {pendingCount === 1
-                      ? '1 personne souhaite te contacter'
-                      : `${pendingCount} personnes souhaitent te contacter`}
+                    {t('countDesc', { count: pendingCount })}
                   </p>
                 </div>
               </div>
               <button
                 onClick={dismiss}
                 className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors shrink-0"
-                aria-label="Fermer"
+                aria-label={t('close')}
               >
                 <X className="w-4 h-4" />
               </button>
@@ -232,13 +233,13 @@ export default function PendingRequestModal() {
                 {/* Premium badge */}
                 {request.isPremium && (
                   <span className="absolute top-3 right-3 inline-flex items-center gap-1 bg-amber-400 text-amber-900 text-xs font-bold px-2.5 py-1 rounded-lg">
-                    <Crown className="w-3 h-3" /> Premium
+                    <Crown className="w-3 h-3" /> {t('premium')}
                   </span>
                 )}
                 {/* Name overlay */}
                 <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-4 pt-10 pb-3 text-left">
                   <p className="text-white font-bold text-lg">
-                    {request.firstName} {request.age > 0 && <span className="font-medium">{request.age} ans</span>}
+                    {request.firstName} {request.age > 0 && <span className="font-medium">{t('yearsOld', { age: request.age })}</span>}
                   </p>
                 </div>
               </button>
@@ -260,7 +261,7 @@ export default function PendingRequestModal() {
             {request.flashMessage && (
               <div className="mx-5 mt-3 rounded-xl bg-amber-50 border border-amber-200 p-3">
                 <p className="text-[11px] font-semibold text-amber-700 flex items-center gap-1 mb-1">
-                  <Zap className="w-3 h-3" /> Message flash de {request.firstName}
+                  <Zap className="w-3 h-3" /> {t('flashFrom', { name: request.firstName })}
                 </p>
                 <p className="text-sm text-gray-700 leading-relaxed">{request.flashMessage}</p>
               </div>
@@ -273,7 +274,7 @@ export default function PendingRequestModal() {
                 disabled={accepting}
                 className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
               >
-                <X className="w-4 h-4" /> Refuser
+                <X className="w-4 h-4" /> {t('refuse')}
               </button>
               <button
                 onClick={handleAccept}
@@ -281,7 +282,7 @@ export default function PendingRequestModal() {
                 className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-[#10B981] text-white text-sm font-semibold hover:bg-[#059669] transition-colors disabled:opacity-60"
               >
                 {accepting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                Accepter
+                {t('accept')}
               </button>
             </div>
 
@@ -290,7 +291,7 @@ export default function PendingRequestModal() {
               onClick={() => { dismiss(); router.push('/dashboard/demandes') }}
               className="w-full flex items-center justify-center gap-1.5 py-4 mt-2 text-gray-500 text-sm hover:text-gray-700 transition-colors"
             >
-              <Heart className="w-3.5 h-3.5" /> Voir toutes mes demandes
+              <Heart className="w-3.5 h-3.5" /> {t('seeAllRequests')}
             </button>
           </>
         ) : (
@@ -301,12 +302,12 @@ export default function PendingRequestModal() {
                 <div className="w-10 h-10 rounded-xl bg-[#10B981] flex items-center justify-center shrink-0">
                   <Heart className="w-5 h-5 text-white fill-white" />
                 </div>
-                <h2 className="font-bold text-gray-900 text-base">Demande acceptée !</h2>
+                <h2 className="font-bold text-gray-900 text-base">{t('acceptedTitle')}</h2>
               </div>
               <button
                 onClick={goToConversation}
                 className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors shrink-0"
-                aria-label="Fermer"
+                aria-label={t('close')}
               >
                 <X className="w-4 h-4" />
               </button>
@@ -317,20 +318,20 @@ export default function PendingRequestModal() {
               <div className="flex items-start gap-3 bg-[#E9F9F2] rounded-xl p-3.5 mb-5">
                 <CheckCircle2 className="w-5 h-5 text-[#10B981] shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-semibold text-gray-900 text-sm">Tu as accepté {request.firstName} !</p>
-                  <p className="text-gray-500 text-xs">Une conversation a été créée</p>
+                  <p className="font-semibold text-gray-900 text-sm">{t('acceptedBanner', { name: request.firstName })}</p>
+                  <p className="text-gray-500 text-xs">{t('conversationCreated')}</p>
                 </div>
               </div>
 
               {/* Optional message */}
               <label className="block text-sm font-semibold text-gray-900 mb-2">
-                Envoyer un message ? <span className="text-gray-400 font-normal">(optionnel)</span>
+                {t('sendMessageLabel')} <span className="text-gray-400 font-normal">{t('optional')}</span>
               </label>
               <div className="relative">
                 <textarea
                   value={messageText}
                   onChange={e => setMessageText(e.target.value.slice(0, 500))}
-                  placeholder={`Dis bonjour à ${request.firstName}...`}
+                  placeholder={t('sayHello', { name: request.firstName })}
                   rows={4}
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-[#10B981] focus:ring-2 focus:ring-[#10B981]/15 transition-all resize-none"
                 />
@@ -343,7 +344,7 @@ export default function PendingRequestModal() {
                 className="w-full flex items-center justify-center gap-2 py-3.5 mt-4 rounded-xl bg-[#10B981] text-white text-sm font-semibold hover:bg-[#059669] transition-colors disabled:opacity-60"
               >
                 {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                Envoyer le message
+                {t('sendMessage')}
               </button>
 
               <button
@@ -351,7 +352,7 @@ export default function PendingRequestModal() {
                 disabled={sending}
                 className="w-full text-center py-3 mt-1 text-[#10B981] text-sm font-medium hover:text-[#059669] transition-colors disabled:opacity-60"
               >
-                Aller à la conversation →
+                {t('goToConversation')}
               </button>
             </div>
           </>

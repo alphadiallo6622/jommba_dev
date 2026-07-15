@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations, useLocale } from 'next-intl'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Message, Conversation } from '@/lib/mock-messages'
@@ -27,17 +28,19 @@ const MSGS_REQUIRED = 30
 
 type Props = { id: string }  // id = user_id de l'autre participant
 
-function toUiMessage(m: DbMessage, myId: string): Message {
+function toUiMessage(m: DbMessage, myId: string, locale: string): Message {
   return {
     id:     m.id,
     text:   m.content,
     sender: m.sender_id === myId ? 'me' : 'other',
-    time:   new Date(m.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+    time:   new Date(m.created_at).toLocaleTimeString(locale === 'en' ? 'en-GB' : 'fr-FR', { hour: '2-digit', minute: '2-digit' }),
   }
 }
 
 export default function ConversationPage({ id }: Props) {
   const router        = useRouter()
+  const t             = useTranslations('dashboard.messages')
+  const locale        = useLocale()
   const { isPremium, firstName: myFirstName } = useCurrentUser()
   const { user }      = useAuth()
 
@@ -106,15 +109,15 @@ export default function ConversationPage({ id }: Props) {
         if (cancelled) return
         convIdRef.current = conversation.id
         setConversationId(conversation.id)
-        setMessages(dbMessages.map(m => toUiMessage(m, user.id)))
+        setMessages(dbMessages.map(m => toUiMessage(m, user.id, locale)))
         setSentCount(dbMessages.filter(m => m.sender_id === user.id).length)
         setConv({
           id,
           firstName:   p?.first_name ?? '…',
           lastInitial: (p?.last_name ?? '').charAt(0),
           photo:       p?.avatar_url ?? '/avatar-placeholder.svg',
-          lastMessage: dbMessages.at(-1)?.content ?? 'Démarrez la conversation...',
-          timeAgo:     formatTimeAgo(dbMessages.at(-1)?.created_at ?? null),
+          lastMessage: dbMessages.at(-1)?.content ?? '',
+          timeAgo:     formatTimeAgo(dbMessages.at(-1)?.created_at ?? null, locale),
           isRead:      true,
           unreadCount: 0,
           isArchived:  false,
@@ -128,7 +131,7 @@ export default function ConversationPage({ id }: Props) {
 
     init()
     return () => { cancelled = true }
-  }, [user, id])
+  }, [user, id, locale])
 
   // Temps réel : réception des messages de l'autre participant
   useEffect(() => {
@@ -145,13 +148,13 @@ export default function ConversationPage({ id }: Props) {
       }, (payload) => {
         const m = payload.new as DbMessage
         if (m.sender_id === user.id) return  // déjà affiché localement à l'envoi
-        setMessages(prev => prev.some(x => x.id === m.id) ? prev : [...prev, toUiMessage(m, user.id)])
+        setMessages(prev => prev.some(x => x.id === m.id) ? prev : [...prev, toUiMessage(m, user.id, locale)])
         markConversationRead(conversationId, user.id)
       })
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
-  }, [user, conversationId])
+  }, [user, conversationId, locale])
 
   const msgsRemaining = Math.max(0, MSGS_REQUIRED - sentCount)
 
@@ -161,7 +164,7 @@ export default function ConversationPage({ id }: Props) {
       id:     `tmp-${Date.now()}`,
       text,
       sender: 'me',
-      time:   new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+      time:   new Date().toLocaleTimeString(locale === 'en' ? 'en-GB' : 'fr-FR', { hour: '2-digit', minute: '2-digit' }),
     }
     setMessages(prev => [...prev, optimistic])
     setSentCount(c => c + 1)
@@ -170,11 +173,11 @@ export default function ConversationPage({ id }: Props) {
     if (!saved) {
       setMessages(prev => prev.filter(m => m.id !== optimistic.id))
       setSentCount(c => Math.max(0, c - 1))
-      toast.error("Message non envoyé. Réessaie.")
+      toast.error(t('sendError'))
       return
     }
-    setMessages(prev => prev.map(m => m.id === optimistic.id ? toUiMessage(saved, user.id) : m))
-    notifyByEmail(id, 'message', myFirstName || 'Un membre')
+    setMessages(prev => prev.map(m => m.id === optimistic.id ? toUiMessage(saved, user.id, locale) : m))
+    notifyByEmail(id, 'message', myFirstName || t('unknownMember'))
   }
 
   if (loading) {
@@ -189,16 +192,16 @@ export default function ConversationPage({ id }: Props) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-3 px-6 text-center">
         <p className="text-gray-500 text-sm font-medium">
-          Vous devez être en contact pour discuter.
+          {t('blockedTitle')}
         </p>
         <p className="text-gray-400 text-xs">
-          Envoie une demande de contact et attends son acceptation pour ouvrir la discussion.
+          {t('blockedDesc')}
         </p>
         <button
           onClick={() => router.push(`/dashboard/profil/${id}`)}
           className="mt-2 bg-[#10B981] text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-[#059669] transition-colors"
         >
-          Voir le profil
+          {t('viewProfile')}
         </button>
       </div>
     )
@@ -207,7 +210,7 @@ export default function ConversationPage({ id }: Props) {
   if (!conv) {
     return (
       <div className="flex items-center justify-center h-full">
-        <p className="text-gray-400 text-sm">Conversation introuvable</p>
+        <p className="text-gray-400 text-sm">{t('notFound')}</p>
       </div>
     )
   }

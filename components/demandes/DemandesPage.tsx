@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { Heart, Inbox, Send, Users, Search, Timer, CheckCircle, XCircle, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { ReceivedRequest, SentRequest, ContactEntry } from '@/lib/mock-demandes'
@@ -19,21 +20,12 @@ import DiscussionRulesModal from '@/components/messages/DiscussionRulesModal'
 type MainTab = 'recues' | 'envoyees' | 'contacts'
 type SubFilter = 'toutes' | 'en-attente' | 'acceptees' | 'refusees'
 
-const subFilters: { id: SubFilter; label: string; icon: React.ElementType }[] = [
-  { id: 'toutes',      label: 'Toutes',      icon: Send        },
-  { id: 'en-attente',  label: 'En attente',  icon: Timer       },
-  { id: 'acceptees',   label: 'Acceptées',   icon: CheckCircle },
-  { id: 'refusees',    label: 'Refusées',    icon: XCircle     },
+const subFilters: { id: SubFilter; labelKey: string; icon: React.ElementType }[] = [
+  { id: 'toutes',      labelKey: 'all',      icon: Send        },
+  { id: 'en-attente',  labelKey: 'pending',  icon: Timer       },
+  { id: 'acceptees',   labelKey: 'accepted', icon: CheckCircle },
+  { id: 'refusees',    labelKey: 'rejected', icon: XCircle     },
 ]
-
-function formatTimeAgo(dateStr: string): string {
-  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
-  if (diff < 60)     return "À l'instant"
-  if (diff < 3600)   return `Il y a ${Math.floor(diff / 60)} min`
-  if (diff < 86400)  return `Il y a ${Math.floor(diff / 3600)} h`
-  if (diff < 172800) return 'Hier'
-  return `Il y a ${Math.floor(diff / 86400)} j`
-}
 
 function mapStatus(status: string): 'en-attente' | 'acceptee' | 'refusee' {
   if (status === 'accepted') return 'acceptee'
@@ -43,9 +35,20 @@ function mapStatus(status: string): 'en-attente' | 'acceptee' | 'refusee' {
 
 export default function DemandesPage() {
   const router = useRouter()
+  const t = useTranslations('dashboard.demandes')
   const { user } = useAuth()
   const { firstName: myFirstName } = useCurrentUser()
   const [activeTab, setActiveTab]     = useState<MainTab>('recues')
+
+  // Libellé « il y a … » localisé (dépend de t).
+  const formatTimeAgo = useCallback((dateStr: string): string => {
+    const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
+    if (diff < 60)     return t('timeNow')
+    if (diff < 3600)   return t('timeMinutes', { n: Math.floor(diff / 60) })
+    if (diff < 86400)  return t('timeHours', { n: Math.floor(diff / 3600) })
+    if (diff < 172800) return t('timeYesterday')
+    return t('timeDays', { n: Math.floor(diff / 86400) })
+  }, [t])
   const [subFilter, setSubFilter]     = useState<SubFilter>('toutes')
   const [recues, setRecues]           = useState<ReceivedRequest[]>([])
   const [envoyees, setEnvoyees]       = useState<SentRequest[]>([])
@@ -101,7 +104,7 @@ export default function DemandesPage() {
               lastInitial: (p?.last_name ?? '').charAt(0),
               age:         p?.age ?? 0,
               photo:       buildPhoto(l.sender_id, p?.avatar_url ?? null),
-              city:        p?.city ?? 'Inconnu',
+              city:        p?.city ?? t('unknown'),
               timeAgo:     formatTimeAgo(l.created_at),
               isNew:       Date.now() - new Date(l.created_at).getTime() < 86_400_000,
             }
@@ -128,7 +131,7 @@ export default function DemandesPage() {
         envoyeesData
           .filter((_, i) => (likesEnvoyees ?? [])[i]?.status === 'accepted')
           .map(({ id, firstName, lastInitial, age, photo, timeAgo }) => ({
-            id, firstName, lastInitial, age, photo, city: profileMap.get(id)?.city ?? 'Inconnu', timeAgo,
+            id, firstName, lastInitial, age, photo, city: profileMap.get(id)?.city ?? t('unknown'), timeAgo,
           }))
       )
     } catch (err) {
@@ -136,7 +139,7 @@ export default function DemandesPage() {
     } finally {
       setLoading(false)
     }
-  }, [user])
+  }, [user, t, formatTimeAgo])
 
   useEffect(() => { fetchData() }, [fetchData])
 
@@ -156,7 +159,7 @@ export default function DemandesPage() {
       .eq('type', 'request')
 
     if (error) {
-      toast.error("Erreur lors de l'acceptation")
+      toast.error(t('acceptError'))
       return
     }
     // Les règles viennent d'être acceptées dans ce popup : on mémorise pour ce
@@ -164,8 +167,8 @@ export default function DemandesPage() {
     try { localStorage.setItem(`jommba:rules-accepted:${user.id}:${pendingRequest.id}`, '1') } catch { /* ignore */ }
     setRecues(prev => prev.filter(r => r.id !== pendingRequest.id))
     setPendingRequest(null)
-    notifyByEmail(pendingRequest.id, 'demande_acceptee', myFirstName || 'Un membre')
-    toast.success('Demande acceptée ✓')
+    notifyByEmail(pendingRequest.id, 'demande_acceptee', myFirstName || t('unknownMember'))
+    toast.success(t('accepted'))
     router.push(`/dashboard/messages/${pendingRequest.id}`)
   }
 
@@ -179,7 +182,7 @@ export default function DemandesPage() {
       .eq('receiver_id', user.id)
       .eq('type', 'request')
     setRecues(prev => prev.filter(r => r.id !== id))
-    toast.error('Demande refusée')
+    toast.error(t('refused'))
   }
 
   const filteredEnvoyees = envoyees.filter(r => {
@@ -191,9 +194,9 @@ export default function DemandesPage() {
   })
 
   const mainTabs = [
-    { id: 'recues'   as MainTab, label: 'Reçues',   icon: Inbox, count: recues.length   },
-    { id: 'envoyees' as MainTab, label: 'Envoyées', icon: Send,  count: envoyees.length },
-    { id: 'contacts' as MainTab, label: 'Contacts', icon: Users, count: contacts.length },
+    { id: 'recues'   as MainTab, label: t('tabs.received'), icon: Inbox, count: recues.length   },
+    { id: 'envoyees' as MainTab, label: t('tabs.sent'),     icon: Send,  count: envoyees.length },
+    { id: 'contacts' as MainTab, label: t('tabs.contacts'), icon: Users, count: contacts.length },
   ]
 
   return (
@@ -203,15 +206,15 @@ export default function DemandesPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-[#064E3B] flex items-center gap-2">
-            Demandes <Heart className="w-5 h-5 text-[#10B981]" />
+            {t('title')} <Heart className="w-5 h-5 text-[#10B981]" />
           </h1>
-          <p className="text-gray-400 text-sm mt-1">Gère tes demandes et contacts</p>
+          <p className="text-gray-400 text-sm mt-1">{t('subtitle')}</p>
         </div>
         <button
           onClick={() => router.push('/dashboard/explorer')}
           className="flex items-center gap-2 bg-[#E1F5EE] text-[#10B981] px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-100 transition-colors"
         >
-          <Search className="w-4 h-4" /> Découvrir
+          <Search className="w-4 h-4" /> {t('discover')}
         </button>
       </div>
 
@@ -265,9 +268,9 @@ export default function DemandesPage() {
         ) : (
           <EmptyState
             icon={Inbox}
-            title="Aucune demande reçue"
-            subtitle="Les demandes que tu recevras apparaîtront ici"
-            buttonLabel="Découvrir des profils"
+            title={t('emptyReceivedTitle')}
+            subtitle={t('emptyReceivedSubtitle')}
+            buttonLabel={t('discoverProfiles')}
             onButtonClick={() => router.push('/dashboard/explorer')}
           />
         )
@@ -277,7 +280,7 @@ export default function DemandesPage() {
       {!loading && activeTab === 'envoyees' && (
         <>
           <div className="flex gap-2 mb-5 flex-wrap">
-            {subFilters.map(({ id, label, icon: Icon }) => (
+            {subFilters.map(({ id, labelKey, icon: Icon }) => (
               <button
                 key={id}
                 onClick={() => setSubFilter(id)}
@@ -289,7 +292,7 @@ export default function DemandesPage() {
                 )}
               >
                 <Icon className="w-3.5 h-3.5" />
-                {label}
+                {t(`filters.${labelKey}`)}
               </button>
             ))}
           </div>
@@ -303,9 +306,9 @@ export default function DemandesPage() {
           ) : (
             <EmptyState
               icon={Send}
-              title="Aucune demande dans cette catégorie"
-              subtitle="Les demandes filtrées apparaîtront ici"
-              buttonLabel="Découvrir des profils"
+              title={t('emptySentTitle')}
+              subtitle={t('emptySentSubtitle')}
+              buttonLabel={t('discoverProfiles')}
               onButtonClick={() => router.push('/dashboard/explorer')}
             />
           )}
@@ -323,9 +326,9 @@ export default function DemandesPage() {
         ) : (
           <EmptyState
             icon={Users}
-            title="Aucun contact pour l'instant"
-            subtitle="Tes contacts acceptés apparaîtront ici"
-            buttonLabel="Découvrir des profils"
+            title={t('emptyContactsTitle')}
+            subtitle={t('emptyContactsSubtitle')}
+            buttonLabel={t('discoverProfiles')}
             onButtonClick={() => router.push('/dashboard/explorer')}
           />
         )

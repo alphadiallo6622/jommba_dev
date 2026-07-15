@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { Camera, Crown, Plus } from 'lucide-react'
 
 const MAX_FREE    = 3
@@ -15,6 +16,7 @@ type Props = {
 
 export default function PhotoGallery({ photo, isPremium, onMainPhotoClick, onAddPhoto }: Props) {
   const router = useRouter()
+  const t = useTranslations('dashboard.profil.gallery')
   const max = isPremium ? MAX_PREMIUM : MAX_FREE
   // Extra slots = max - 1 (main already occupies 1 slot)
   const extraSlots = max - 1
@@ -24,7 +26,7 @@ export default function PhotoGallery({ photo, isPremium, onMainPhotoClick, onAdd
       <div className="flex items-center gap-2 mb-3">
         <Camera className="w-4 h-4 text-gray-500" />
         <span className="text-sm font-semibold text-gray-700">
-          Photos (1/{max})
+          {t('photosCount', { max })}
         </span>
         {isPremium && (
           <span className="text-[9px] font-bold bg-amber-500 text-white px-1.5 py-0.5 rounded-full">PREMIUM</span>
@@ -37,9 +39,9 @@ export default function PhotoGallery({ photo, isPremium, onMainPhotoClick, onAdd
           className={`relative w-16 h-16 rounded-xl overflow-hidden shrink-0 ${onMainPhotoClick ? 'cursor-pointer' : ''}`}
           onClick={onMainPhotoClick}
         >
-          <img src={photo} alt="Principale" className="w-full h-full object-cover" />
+          <img src={photo} alt={t('main')} className="w-full h-full object-cover" />
           <span className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[9px] text-center py-0.5">
-            Principale
+            {t('main')}
           </span>
         </div>
 
@@ -63,7 +65,7 @@ export default function PhotoGallery({ photo, isPremium, onMainPhotoClick, onAdd
               className="w-16 h-16 rounded-xl bg-amber-50 border border-amber-200 flex flex-col items-center justify-center shrink-0 hover:bg-amber-100 transition-colors"
             >
               <Crown className="w-4 h-4 text-amber-400 mb-0.5" />
-              <span className="text-[9px] text-amber-500 font-medium">Premium</span>
+              <span className="text-[9px] text-amber-500 font-medium">{t('premium')}</span>
             </button>
           ))
         )}

@@ -2,6 +2,7 @@
 
 import { Clock, ArrowRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { SentRequest } from '@/lib/mock-demandes'
 import StatusBadge from './StatusBadge'
 
@@ -11,6 +12,7 @@ type Props = {
 
 export default function SentRequestCard({ request }: Props) {
   const router = useRouter()
+  const t = useTranslations('dashboard.demandes')
   return (
     <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
       <div className="flex items-center gap-3 mb-3">
@@ -33,7 +35,7 @@ export default function SentRequestCard({ request }: Props) {
         onClick={() => router.push(`/dashboard/profil/${request.id}`)}
         className="w-full py-2 bg-[#E1F5EE] text-[#10B981] rounded-lg text-sm font-medium hover:bg-green-100 flex items-center justify-center gap-1 transition-colors"
       >
-        Voir profil <ArrowRight className="w-4 h-4" />
+        {t('viewProfile')} <ArrowRight className="w-4 h-4" />
       </button>
     </div>
   )

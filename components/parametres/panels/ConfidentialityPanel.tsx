@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { EyeOff, Eye, Crown, Shield, Lock, CheckCircle } from 'lucide-react'
 import SettingsDrawer from '../SettingsDrawer'
 import { useCurrentUser } from '@/lib/use-current-user'
@@ -12,6 +13,7 @@ type Props = { open: boolean; onClose: () => void }
 
 export default function ConfidentialityPanel({ open, onClose }: Props) {
   const router = useRouter()
+  const t = useTranslations('dashboard.parametres.confidentiality')
   const { isPremium } = useCurrentUser()
   const { user } = useAuth()
   const { isPhotosBlurred, togglePhotosBlur } = useProfileStore()
@@ -30,10 +32,10 @@ export default function ConfidentialityPanel({ open, onClose }: Props) {
   }
 
   return (
-    <SettingsDrawer open={open} title="Confidentialité" onClose={onClose}
+    <SettingsDrawer open={open} title={t('title')} onClose={onClose}
       footer={
         <button onClick={onClose} className="w-full py-3 bg-gray-100 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-200 transition-colors">
-          Fermer
+          {t('close')}
         </button>
       }
     >
@@ -48,9 +50,9 @@ export default function ConfidentialityPanel({ open, onClose }: Props) {
               <EyeOff className={`w-5 h-5 ${isPremium && isPhotosBlurred ? 'text-amber-600' : 'text-gray-500'}`} />
             </div>
             <div>
-              <p className="text-sm font-semibold text-gray-800">Flouter mes photos</p>
+              <p className="text-sm font-semibold text-gray-800">{t('blurTitle')}</p>
               <p className="text-xs text-gray-500 mt-0.5">
-                Seules les personnes que tu acceptes pourront voir tes photos en clair.
+                {t('blurDesc')}
               </p>
             </div>
           </div>
@@ -64,7 +66,7 @@ export default function ConfidentialityPanel({ open, onClose }: Props) {
               }`}>
                 <CheckCircle className={`w-4 h-4 shrink-0 ${isPhotosBlurred ? 'text-amber-500' : 'text-[#10B981]'}`} />
                 <p className={`text-sm font-medium flex-1 ${isPhotosBlurred ? 'text-amber-700' : 'text-[#10B981]'}`}>
-                  {isPhotosBlurred ? 'Photos floutées' : 'Photos défloutées'}
+                  {isPhotosBlurred ? t('blurred') : t('unblurred')}
                 </p>
               </div>
 
@@ -83,10 +85,10 @@ export default function ConfidentialityPanel({ open, onClose }: Props) {
                 }
                 <div>
                   <p className={`text-sm font-semibold ${isPhotosBlurred ? 'text-[#10B981]' : 'text-blue-700'}`}>
-                    {isPhotosBlurred ? 'Déflouter mes photos' : 'Flouter mes photos'}
+                    {isPhotosBlurred ? t('unblurAction') : t('blurAction')}
                   </p>
                   <p className={`text-xs mt-0.5 ${isPhotosBlurred ? 'text-[#10B981]/70' : 'text-blue-500'}`}>
-                    {isPhotosBlurred ? 'Rendre visibles à tous' : 'Masquer aux visiteurs'}
+                    {isPhotosBlurred ? t('makeVisible') : t('hideFromVisitors')}
                   </p>
                 </div>
               </button>
@@ -98,7 +100,7 @@ export default function ConfidentialityPanel({ open, onClose }: Props) {
               className="cursor-pointer flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 hover:bg-amber-100 transition-colors"
             >
               <Crown className="w-4 h-4 text-amber-500 shrink-0" />
-              <p className="text-xs text-amber-700 font-medium">Fonctionnalité réservée aux membres Premium</p>
+              <p className="text-xs text-amber-700 font-medium">{t('premiumOnly')}</p>
             </div>
           )}
         </div>
@@ -109,15 +111,10 @@ export default function ConfidentialityPanel({ open, onClose }: Props) {
             <div className="w-10 h-10 bg-[#10B981]/20 rounded-full flex items-center justify-center">
               <Shield className="w-5 h-5 text-[#10B981]" />
             </div>
-            <p className="text-sm font-semibold text-[#064E3B]">Confidentialité garantie</p>
+            <p className="text-sm font-semibold text-[#064E3B]">{t('guaranteeTitle')}</p>
           </div>
           <ul className="space-y-2">
-            {[
-              'Tes données ne sont jamais revendues',
-              'Messages chiffrés de bout en bout',
-              'Tu contrôles qui voit ton profil',
-              'Suppression définitive sur demande',
-            ].map((item, i) => (
+            {(t.raw('guarantees') as string[]).map((item, i) => (
               <li key={i} className="flex items-start gap-2 text-xs text-[#10B981]">
                 <Lock className="w-3 h-3 mt-0.5 shrink-0" />
                 {item}

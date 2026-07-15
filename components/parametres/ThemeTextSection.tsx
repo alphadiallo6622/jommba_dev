@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Sparkles, Loader2 } from 'lucide-react'
 
 type Props = {
@@ -14,6 +15,7 @@ type Props = {
 }
 
 export default function ThemeTextSection({ label, value, onChange, maxLength, placeholder, themes, hint }: Props) {
+  const t = useTranslations('dashboard.parametres.themeSection')
   const [focused, setFocused] = useState(false)
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [generating, setGenerating] = useState(false)
@@ -65,26 +67,26 @@ export default function ThemeTextSection({ label, value, onChange, maxLength, pl
           className="w-full px-3 py-3 text-sm text-gray-700 bg-transparent rounded-xl resize-none outline-none"
         />
         <span className={`absolute bottom-2 right-3 text-xs ${value.length >= maxLength ? 'text-red-400' : 'text-gray-400'}`}>
-          {value.length} · {maxLength} max
+          {t('counter', { count: value.length, max: maxLength })}
         </span>
       </div>
 
       {themes && themes.length > 0 && (
         <div className="mt-2 space-y-2">
-          <p className="text-xs text-gray-500 font-medium">✦ Thèmes :</p>
+          <p className="text-xs text-gray-500 font-medium">{t('themes')}</p>
           <div className="flex flex-wrap gap-1.5">
-            {themes.map(t => (
+            {themes.map(theme => (
               <button
-                key={t}
+                key={theme}
                 type="button"
-                onClick={() => toggleTheme(t)}
+                onClick={() => toggleTheme(theme)}
                 className={`text-xs px-3 py-1 rounded-full border transition-colors ${
-                  selected.has(t)
+                  selected.has(theme)
                     ? 'bg-[#10B981] border-[#10B981] text-white'
                     : 'bg-white border-gray-200 text-gray-600 hover:border-[#10B981] hover:text-[#10B981]'
                 }`}
               >
-                {t}
+                {theme}
               </button>
             ))}
           </div>
@@ -102,15 +104,15 @@ export default function ThemeTextSection({ label, value, onChange, maxLength, pl
             {generating ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Génération…
+                {t('generating')}
               </>
             ) : selected.size > 0 ? (
               <>
                 <Sparkles className="w-4 h-4" />
-                Générer ({selected.size})
+                {t('generate', { count: selected.size })}
               </>
             ) : (
-              'Sélectionne des thèmes'
+              t('selectThemes')
             )}
           </button>
         </div>

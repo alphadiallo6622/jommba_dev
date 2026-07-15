@@ -2,11 +2,13 @@
 
 import { LayoutGrid, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useExplorerStore } from '@/store/explorer.store'
 import { useCurrentUser } from '@/lib/use-current-user'
 
 export default function PremiumGridModal() {
   const router = useRouter()
+  const t = useTranslations('dashboard.explorer.premiumModal')
   const { showPremiumModal, setShowPremiumModal } = useExplorerStore()
   const { isPremium } = useCurrentUser()
 
@@ -38,16 +40,15 @@ export default function PremiumGridModal() {
           <div className="w-16 h-16 rounded-full bg-amber-100 mx-auto flex items-center justify-center">
             <LayoutGrid className="w-7 h-7 text-amber-500" />
           </div>
-          <h2 className="text-xl font-bold text-gray-900">Vue Grille Premium</h2>
+          <h2 className="text-xl font-bold text-gray-900">{t('title')}</h2>
           <p className="text-sm text-gray-500 leading-relaxed">
-            Tu as utilisé tous tes essais gratuits.<br />
-            Passe Premium pour un accès illimité !
+            {t('desc')}
           </p>
         </div>
 
         {/* Avantages */}
         <div className="space-y-2">
-          {['Vue grille illimitée', 'Voir qui visite ton profil', 'Demandes illimitées'].map(avantage => (
+          {[t('benefit1'), t('benefit2'), t('benefit3')].map(avantage => (
             <div key={avantage} className="bg-amber-50 rounded-xl px-4 py-3 flex items-center gap-3">
               <span className="text-amber-500 font-bold">✓</span>
               <span className="text-sm font-medium text-gray-800">{avantage}</span>
@@ -59,7 +60,7 @@ export default function PremiumGridModal() {
           onClick={handlePremium}
           className="w-full bg-amber-600 text-white py-3 rounded-xl font-semibold text-sm hover:bg-amber-500 transition-colors"
         >
-          ⭐ Passer Premium ›
+          {t('cta')}
         </button>
       </div>
     </div>

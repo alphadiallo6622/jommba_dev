@@ -1,9 +1,11 @@
 'use client'
 
 import { Send } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useCurrentUser } from '@/lib/use-current-user'
 
 export default function DailyRequests() {
+  const t = useTranslations('dashboard.dailyRequests')
   const { dailyRequests } = useCurrentUser()
   const { used, total } = dailyRequests
   const remaining = total - used
@@ -15,8 +17,8 @@ export default function DailyRequests() {
         <div className="flex items-center gap-2">
           <Send className="w-4 h-4 text-emerald-500 shrink-0" />
           <div>
-            <p className="font-semibold text-gray-900 text-sm">Demandes aujourd&rsquo;hui</p>
-            <p className="text-xs text-gray-400">{total} demandes disponibles aujourd&rsquo;hui</p>
+            <p className="font-semibold text-gray-900 text-sm">{t('title')}</p>
+            <p className="text-xs text-gray-400">{t('subtitle', { total })}</p>
           </div>
         </div>
         <span className="font-bold text-emerald-500 text-sm">{remaining}/{total}</span>

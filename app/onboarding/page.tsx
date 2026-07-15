@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { Heart } from 'lucide-react'
 import { useOnboardingStore } from '@/store/onboarding.store'
 import StepGender        from '@/components/onboarding/StepGender'
@@ -19,18 +20,19 @@ import { applyModerationPolicy } from './actions'
 
 const TOTAL_STEPS = 7
 
-const STEP_LABELS = [
-  'Genre',
-  'Âge',
-  'Situation',
-  'Profil pro.',
-  'Localisation',
-  'Valeurs',
-  'Photos',
-]
+const STEP_LABEL_KEYS = [
+  'gender',
+  'age',
+  'maritalStatus',
+  'professional',
+  'location',
+  'values',
+  'photos',
+] as const
 
 export default function OnboardingPage() {
   const router              = useRouter()
+  const t                   = useTranslations('onboarding')
   const { user }            = useAuth()
   const { currentStep, setStep, reset } = useOnboardingStore()
 
@@ -49,7 +51,7 @@ export default function OnboardingPage() {
       const supabase = createClient()
       const { data: { user: authUser }, error: authError } = await supabase.auth.getUser()
       if (authError || !authUser) {
-        toast.error('Session expirée. Reconnecte-toi.')
+        toast.error(t('toast.sessionExpired'))
         router.push(localizedLogin())
         return
       }
@@ -120,7 +122,7 @@ export default function OnboardingPage() {
 
       if (updateError) {
         console.error('[Onboarding] profile update failed:', updateError)
-        toast.error('Erreur lors de l\'enregistrement. Réessaie.')
+        toast.error(t('toast.saveError'))
         return
       }
 
@@ -150,7 +152,7 @@ export default function OnboardingPage() {
       router.push('/onboarding/success')
     } catch (err) {
       console.error('[Onboarding] submit error:', err)
-      toast.error('Une erreur est survenue. Réessaie.')
+      toast.error(t('toast.genericError'))
     }
   }
 
@@ -171,19 +173,19 @@ export default function OnboardingPage() {
           <div className="space-y-3">
             <div className="text-5xl">🌙</div>
             <h1 className="text-2xl font-serif font-bold text-gray-900 leading-snug">
-              As-salam alaykum{firstName ? `, ${firstName}` : ''} !
+              {t('welcome.greeting')}{firstName ? `, ${firstName}` : ''} !
             </h1>
             <p className="text-base text-gray-500 leading-relaxed">
-              Ta moitié, par destin et invocation.
+              {t('welcome.tagline')}
             </p>
           </div>
 
           {/* Reassurance points */}
           <div className="space-y-3 text-left">
             {[
-              { icon: '🔒', text: 'Tes informations restent confidentielles' },
-              { icon: '✅', text: 'Profil vérifié sous 12–24 heures' },
-              { icon: '💬', text: 'Aucun contact sans ton accord' },
+              { icon: '🔒', text: t('welcome.point1') },
+              { icon: '✅', text: t('welcome.point2') },
+              { icon: '💬', text: t('welcome.point3') },
             ].map(({ icon, text }) => (
               <div key={text} className="flex items-center gap-3 bg-gray-50 rounded-xl p-3.5">
                 <span className="text-xl">{icon}</span>
@@ -198,15 +200,15 @@ export default function OnboardingPage() {
             className="w-full py-3 rounded-xl text-white font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
             style={{ background: '#10B981' }}
           >
-            Créer mon profil →
+            {t('welcome.cta')}
           </button>
 
           {/* Quranic citation */}
           <div className="border-t border-gray-50 pt-4">
             <p className="text-xs italic text-gray-400 leading-relaxed">
-              « Et parmi Ses signes, Il a créé pour vous des épouses pour que vous viviez en tranquillité avec elles »
+              {t('welcome.quote')}
             </p>
-            <p className="text-xs text-emerald-500 font-medium mt-1">— Sourate Ar-Rum, 30:21</p>
+            <p className="text-xs text-emerald-500 font-medium mt-1">{t('welcome.quoteSource')}</p>
           </div>
         </div>
       </div>
@@ -235,9 +237,13 @@ export default function OnboardingPage() {
 
           <div className="text-right">
             <p className="text-xs font-bold text-gray-700">
-              Étape {currentStep}/{TOTAL_STEPS} — {STEP_LABELS[currentStep - 1]}
+              {t('header.step', {
+                current: currentStep,
+                total: TOTAL_STEPS,
+                label: t(`stepLabels.${STEP_LABEL_KEYS[currentStep - 1]}`),
+              })}
             </p>
-            <p className="text-xs text-gray-400">{progressPct}% complété</p>
+            <p className="text-xs text-gray-400">{t('header.completed', { pct: progressPct })}</p>
           </div>
         </div>
       </header>

@@ -434,5 +434,1428 @@
     "featuredLabel": "Featured Article",
     "viewAllArticles": "View all articles",
     "editorialTeam": "Jommba Editorial Team"
+  },
+  "onboarding": {
+    "welcome": {
+      "greeting": "As-salamu alaykum",
+      "tagline": "Your other half, by destiny and prayer.",
+      "point1": "Your information stays confidential",
+      "point2": "Profile verified within 12–24 hours",
+      "point3": "No contact without your consent",
+      "cta": "Create my profile →",
+      "quote": "“And among His signs is that He created for you spouses so that you may find tranquillity in them”",
+      "quoteSource": "— Surah Ar-Rum, 30:21"
+    },
+    "header": {
+      "step": "Step {current}/{total} — {label}",
+      "completed": "{pct}% complete"
+    },
+    "stepLabels": {
+      "gender": "Gender",
+      "age": "Age",
+      "maritalStatus": "Status",
+      "professional": "Pro. profile",
+      "location": "Location",
+      "values": "Values",
+      "photos": "Photos"
+    },
+    "nav": {
+      "back": "Back",
+      "continue": "Continue",
+      "cancel": "Cancel",
+      "confirm": "Confirm"
+    },
+    "toast": {
+      "sessionExpired": "Session expired. Please log in again.",
+      "saveError": "Error while saving. Please try again.",
+      "genericError": "Something went wrong. Please try again."
+    },
+    "gender": {
+      "title": "You are…",
+      "subtitle": "This choice is final and cannot be changed.",
+      "man": "A man",
+      "woman": "A woman",
+      "confirmTitle": "Confirm this choice?",
+      "confirmManDesc": "You identify as <b>a man</b>. This choice is <b>irreversible</b> and cannot be changed once confirmed.",
+      "confirmWomanDesc": "You identify as <b>a woman</b>. This choice is <b>irreversible</b> and cannot be changed once confirmed."
+    },
+    "age": {
+      "title": "Your date of birth",
+      "subtitle": "You must be at least 18 to sign up.",
+      "yearsOld": "{age} years old",
+      "tooYoung": "You must be at least 18.",
+      "day": "Day",
+      "month": "Month",
+      "year": "Year",
+      "months": {
+        "10": "October",
+        "11": "November",
+        "12": "December",
+        "01": "January",
+        "02": "February",
+        "03": "March",
+        "04": "April",
+        "05": "May",
+        "06": "June",
+        "07": "July",
+        "08": "August",
+        "09": "September"
+      }
+    },
+    "marital": {
+      "title": "Marital status",
+      "subtitle": "Your current situation.",
+      "single": "Single",
+      "singleDesc": "Never married",
+      "divorced": "Divorced",
+      "divorcedDesc": "Legally separated",
+      "widowed": "Widowed",
+      "widowedDesc": "After the passing of a spouse",
+      "married": "Married",
+      "marriedDesc": "Seeking a second union"
+    },
+    "professional": {
+      "title": "Your professional profile",
+      "subtitle": "This info is visible on your profile.",
+      "profession": "Profession",
+      "professionPlaceholder": "e.g. Engineer, Doctor, Teacher…",
+      "education": "Education level",
+      "height": "Height (cm)",
+      "heightPlaceholder": "e.g. 175",
+      "educationOptions": {
+        "none": "No diploma",
+        "brevet": "Middle school",
+        "bac": "High school diploma",
+        "bac2": "Associate degree",
+        "licence": "Bachelor's degree",
+        "master": "Master's degree",
+        "doctorate": "Doctorate"
+      }
+    },
+    "location": {
+      "title": "Where do you live?",
+      "subtitle": "Your location helps find compatible profiles.",
+      "africa": "Africa",
+      "africaDesc": "I live in Africa",
+      "diaspora": "Diaspora",
+      "diasporaDesc": "I live abroad",
+      "countryOfResidence": "Country of residence",
+      "countryOfOrigin": "Country of origin",
+      "selectCountry": "Select a country",
+      "region": "Region",
+      "selectRegion": "Select a region",
+      "city": "City",
+      "cityPlaceholderAfrica": "e.g. Conakry, Bamako…",
+      "currentResidenceCountry": "Current country of residence",
+      "select": "Select",
+      "cityPlaceholderDiaspora": "e.g. Paris, Montreal…"
+    },
+    "values": {
+      "title": "Your values",
+      "subtitle": "Up to 3 choices per section.",
+      "marriageVision": "Vision of marriage",
+      "soughtQualities": "Qualities sought",
+      "polygamy": "Polygamy",
+      "children": "Children",
+      "bioNote": "Your bio will be generated automatically from your answers. You'll be able to personalise it from your profile.",
+      "visions": {
+        "asap": "Marriage as soon as possible",
+        "sixMonths": "Within 6 months",
+        "thisYear": "Within the year",
+        "noRush": "No rush",
+        "afterKnowing": "After getting to know each other",
+        "istikhara": "Need for istikhara"
+      },
+      "qualities": {
+        "practicing": "Practicing",
+        "serious": "Serious",
+        "goodCharacter": "Good character",
+        "unitedFamily": "United family",
+        "hardworking": "Hardworking",
+        "discreet": "Discreet",
+        "patient": "Patient",
+        "generous": "Generous"
+      },
+      "polygamyOptions": {
+        "no": "No, I don't accept",
+        "yes": "Yes, I accept",
+        "conditional": "Depending on conditions"
+      },
+      "childrenOptions": {
+        "have": "Yes, I have some",
+        "none": "No, no children",
+        "want": "I would like some",
+        "dontWant": "I don't want any"
+      }
+    },
+    "photos": {
+      "title": "Your photos",
+      "subtitle": "Add at least 1 photo. The first is your main photo.",
+      "main": "Main",
+      "blurred": "Blurred",
+      "view": "Show",
+      "blur": "Blur",
+      "uploading": "Uploading…",
+      "mainRequired": "Main photo (required)",
+      "optional": "Photo {n} (optional)",
+      "uploadFailed": "Upload failed",
+      "networkError": "Network error. Please try again.",
+      "validationNote": "Your photos are verified by our team before approval. Only clear and decent photos are accepted.",
+      "submit": "Submit my profile"
+    },
+    "success": {
+      "title": "Profile submitted!",
+      "subtitle": "Barak Allahu fik. Your profile is in good hands. Our team is reviewing it carefully.",
+      "submittedTitle": "Profile submitted",
+      "submittedDesc": "Received and awaiting verification",
+      "verifyingTitle": "Verification in progress",
+      "verifyingDesc": "Estimated time: 12–24 hours",
+      "validatedTitle": "Profile approved",
+      "validatedDesc": "You'll be able to access the platform",
+      "cta": "Access the platform →",
+      "premiumTitle": "Go Jommba Premium",
+      "premiumDesc": "Get priority visibility, send unlimited requests and access exclusive profiles.",
+      "perMonth": "/month",
+      "premiumCta": "Discover Premium →",
+      "quote": "“And among His signs is that He created for you spouses so that you may find tranquillity in them”",
+      "quoteSource": "— Surah Ar-Rum, 30:21"
+    }
+  },
+  "dashboard": {
+    "nav": {
+      "home": "Home",
+      "discover": "Discover",
+      "visitors": "Visitors",
+      "favorites": "Favorites",
+      "requests": "Requests",
+      "premium": "Premium",
+      "messages": "Messages",
+      "activity": "Activity",
+      "homeAria": "Jommba home"
+    },
+    "dropdown": {
+      "unlimitedRequests": "→ Unlimited requests",
+      "remainingRequests": "→ Requests left {remaining}/{total}",
+      "myProfile": "My profile",
+      "settings": "Settings",
+      "unblurPhotos": "Unblur my photos",
+      "blurPhotos": "Blur my photos",
+      "soundOn": "Sound on",
+      "soundOff": "Sound off",
+      "help": "Help & FAQ",
+      "logout": "Log out"
+    },
+    "quickNav": {
+      "messages": "Messages",
+      "messagesSub": "Conversations",
+      "requests": "Requests",
+      "requestsSub": "Received",
+      "visitors": "Visitors",
+      "visitorsSub": "Premium",
+      "favorites": "Favorites",
+      "favoritesSub": "My favorites ♥"
+    },
+    "coach": {
+      "label": "Coach",
+      "aria": "Coach",
+      "avatarAlt": "Coach Abdallah"
+    },
+    "dailyReminder": {
+      "badge": "REMINDER OF THE DAY",
+      "quote": "“The best of you is the one who is best to his family, and I am the best of you to my family.”",
+      "source": "— Hadith · At-Tirmidhi"
+    },
+    "dailyRequests": {
+      "title": "Requests today",
+      "subtitle": "{total} requests available today"
+    },
+    "dailyTip": {
+      "badge": "TIP OF THE DAY",
+      "title": "Quality > Quantity",
+      "text": "Three sincere exchanges are worth more than thirty shallow conversations.",
+      "likeAria": "I like this tip"
+    },
+    "invisibleAlert": {
+      "pauseTitle": "Your profile is invisible!",
+      "pauseDesc": "No one can find you in searches.",
+      "pauseModeNote": "⏸️ <b>Pause mode enabled</b> — Reactivate your profile to become visible again.",
+      "discussionTitle": "You're in a serious discussion.",
+      "discussionDesc": "No one can contact you at the moment.",
+      "discussionModeNote": "💬 <b>In Discussion mode enabled</b> — You appear with a special badge.",
+      "incompleteTitle": "Your profile is invisible",
+      "incompleteDesc": "No one can see your profile until it's complete. Fill it in to become visible!",
+      "completeCta": "Complete my profile →"
+    },
+    "boostUnavailable": {
+      "title": "Boost unavailable",
+      "desc": "Profile pending approval. Your profile must be approved by our team before you can boost it. This usually takes less than 24 hours."
+    },
+    "premiumBanner": {
+      "memberTitle": "Premium Member",
+      "active": "ACTIVE",
+      "memberDesc": "Welcome {name}! You enjoy all Premium benefits.",
+      "upgradeTitle": "Go Premium",
+      "upgradeDesc": "Unlimited requests, featured profile, Premium badge",
+      "discover": "Discover →"
+    },
+    "appreciation": {
+      "sisters": "sisters",
+      "brothers": "brothers",
+      "members": "members",
+      "title": "Your profile doesn't go unnoticed",
+      "summary": "{count, plural, one {# {label} likes your profile} other {# {label} like your profile}} · {requests, plural, one {# request} other {# requests}} · {favorites, plural, one {# favorite} other {# favorites}}",
+      "visits": "{count, plural, one {# profile visit} other {# profile visits}}",
+      "cta": "Discover who's interested in you →"
+    },
+    "userCard": {
+      "greeting": "Salam, {name}! 🌙",
+      "profileCompleted": "Profile completed",
+      "clickToComplete": "Click to complete"
+    },
+    "stats": {
+      "title": "Your profile statistics",
+      "last7Days": "Last 7 days ▸",
+      "upgrade": "UPGRADE",
+      "views": "Views",
+      "visitors": "Visitors",
+      "favorites": "Favorites",
+      "requests": "Requests",
+      "viewsEvolution": "Views trend",
+      "viewsTooltip": "{count, plural, one {# view} other {# views}}",
+      "performanceScore": "Performance score",
+      "tipsLabel": "Tips",
+      "tip1": "Add more details to your profile to attract more visitors",
+      "tip2": "Complete the 'Vision of marriage' section to show you're serious",
+      "dayLabels": {
+        "sun": "Sun",
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat"
+      }
+    },
+    "visibility": {
+      "title": "Profile visibility",
+      "subtitle": "Control who can see you",
+      "active": "Active profile",
+      "paused": "Paused",
+      "discussion": "In discussion",
+      "activeBadge": "Active",
+      "persistError": "Error while changing visibility",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "pauseTitle": "Pause your profile?",
+      "pauseBody": "Your profile will be invisible in searches. Members won't be able to find you.",
+      "discussionTitle": "Switch to In Discussion?",
+      "discussionBody": "You'll appear with an 'In discussion' badge. New requests will be blocked."
+    },
+    "academy": {
+      "title": "Marriage Academy",
+      "subtitle": "Learn and prepare",
+      "fallback1": "The essential criteria for choosing",
+      "fallback2": "Succeeding in the getting-to-know period",
+      "fallback3": "Istikhara: a practical guide",
+      "tag1": "Preparation",
+      "tag2": "Communication",
+      "tag3": "Spirituality",
+      "explore": "Explore the academy →"
+    },
+    "grid": {
+      "online": "Online",
+      "verified": "Verified profile",
+      "selectionTitle": "The Jommba selection",
+      "selectionSubtitle": "Profiles chosen for you",
+      "profilesCount": "{count} profiles",
+      "seeAll": "See all profiles →",
+      "allSeen": "You've seen all the profiles!",
+      "restart": "Start over",
+      "pass": "Pass",
+      "alreadyLiked": "Already liked",
+      "like": "Like",
+      "requestSent": "Request sent to {name} ✓",
+      "unknownCity": "Unknown"
+    },
+    "pendingModal": {
+      "title": "Pending requests",
+      "countDesc": "{count, plural, one {# person wants to contact you} other {# people want to contact you}}",
+      "close": "Close",
+      "yearsOld": "{age} years old",
+      "premium": "Premium",
+      "flashFrom": "Flash message from {name}",
+      "refuse": "Decline",
+      "accept": "Accept",
+      "seeAllRequests": "See all my requests",
+      "refused": "Request declined",
+      "acceptError": "Error while accepting",
+      "acceptedTitle": "Request accepted!",
+      "acceptedBanner": "You accepted {name}!",
+      "conversationCreated": "A conversation has been created",
+      "sendMessageLabel": "Send a message?",
+      "optional": "(optional)",
+      "sayHello": "Say hello to {name}...",
+      "sendMessage": "Send message",
+      "goToConversation": "Go to conversation →",
+      "timeNow": "Just now",
+      "timeMinutes": "{n} min ago",
+      "timeHours": "{n} h ago",
+      "timeYesterday": "Yesterday",
+      "timeDays": "{n} d ago",
+      "unknownMember": "A member",
+      "unknownCity": "Unknown"
+    },
+    "favoris": {
+      "unknown": "Unknown",
+      "removed": "Removed from favorites",
+      "title": "Favorites",
+      "subtitle": "Your favorites and those who noticed you",
+      "myFavorites": "My favorites ({count})",
+      "myFavoritesLoading": "My favorites (…)",
+      "whoLikesMe": "Who likes me ({count})",
+      "whoLikesMeLoading": "Who likes me (…)",
+      "emptyTitle": "No favorites yet",
+      "emptyDesc": "Explore profiles and add your favorites",
+      "discoverProfiles": "Discover profiles",
+      "unlockTitle": "See who has a crush on you",
+      "unlockDesc": "{count, plural, one {# person added you to favorites.} other {# people added you to favorites.}} Go Premium to discover them!",
+      "unlockCta": "Unlock favorites →",
+      "hoursAgo": "{n}h ago",
+      "yearsOld": "{age} years old",
+      "viewProfile": "View profile →",
+      "nameHidden": "Name hidden",
+      "cityCountry": "• City, Country",
+      "unlock": "Unlock",
+      "noLikesTitle": "No one has added you to favorites yet",
+      "noLikesDesc": "Complete your profile to attract more attention",
+      "removeTitle": "Remove from favorites",
+      "addedOn": "Added on {date}"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "markAllRead": "Mark all as read",
+      "unread": "{count, plural, one {# unread} other {# unread}}",
+      "tabs": {
+        "all": "All",
+        "visits": "Visits",
+        "requests": "Requests",
+        "messages": "Messages",
+        "profile": "Profile",
+        "premium": "Premium"
+      },
+      "recent": "Recent",
+      "empty": "No notifications",
+      "emptyHint": "Try another category",
+      "total": "{count, plural, one {# notification in total} other {# notifications in total}}",
+      "timeNow": "Just now",
+      "timeMinutes": "{n} min ago",
+      "timeHours": "{n} h ago",
+      "timeYesterday": "Yesterday",
+      "timeDays": "{n} d ago"
+    },
+    "visiteurs": {
+      "unknown": "Unknown",
+      "title": "My visitors",
+      "subtitle": "{count, plural, one {# person viewed your profile} other {# people viewed your profile}}",
+      "emptyTitle": "No visitors yet",
+      "emptyDesc": "Complete your profile to attract more visits",
+      "hoursAgo": "{n}h ago",
+      "new": "New",
+      "nameHidden": "Name hidden",
+      "cityCountry": "• City, Country",
+      "unlockProfile": "Unlock this profile",
+      "viewProfile": "View profile →",
+      "profileSoon": "Profile available soon",
+      "bannerTitle": "Discover who's interested in you",
+      "bannerDesc": "{count, plural, one {# person visited your profile.} other {# people visited your profile.}} Go Premium to see who!",
+      "bannerCta": "See my visitors →"
+    },
+    "demandes": {
+      "unknown": "Unknown",
+      "unknownMember": "A member",
+      "title": "Requests",
+      "subtitle": "Manage your requests and contacts",
+      "discover": "Discover",
+      "tabs": {
+        "received": "Received",
+        "sent": "Sent",
+        "contacts": "Contacts"
+      },
+      "filters": {
+        "all": "All",
+        "pending": "Pending",
+        "accepted": "Accepted",
+        "rejected": "Declined"
+      },
+      "status": {
+        "pending": "Pending",
+        "accepted": "Accepted",
+        "rejected": "Declined"
+      },
+      "acceptError": "Error while accepting",
+      "accepted": "Request accepted ✓",
+      "refused": "Request declined",
+      "emptyReceivedTitle": "No requests received",
+      "emptyReceivedSubtitle": "Requests you receive will appear here",
+      "emptySentTitle": "No requests in this category",
+      "emptySentSubtitle": "Filtered requests will appear here",
+      "emptyContactsTitle": "No contacts yet",
+      "emptyContactsSubtitle": "Your accepted contacts will appear here",
+      "discoverProfiles": "Discover profiles",
+      "newBadge": "♡ New",
+      "refuse": "Decline",
+      "accept": "Accept",
+      "viewProfile": "View profile",
+      "writeMessage": "Write a message",
+      "timeNow": "Just now",
+      "timeMinutes": "{n} min ago",
+      "timeHours": "{n} h ago",
+      "timeYesterday": "Yesterday",
+      "timeDays": "{n} d ago"
+    },
+    "messages": {
+      "unknownMember": "A member",
+      "title": "Messages",
+      "count": "{count, plural, one {# conversation} other {# conversations}}",
+      "tabs": {
+        "all": "All",
+        "unread": "Unread",
+        "read": "Read"
+      },
+      "searchPlaceholder": "Search a conversation...",
+      "empty": "No conversation",
+      "emptyHint": "Accept a contact request to start a chat",
+      "startConversation": "Start the conversation...",
+      "conv": {
+        "viewProfile": "View profile",
+        "counter": "START · {count} msg",
+        "unlockedTooltip": "You can now exchange your contact details!",
+        "lockedTooltip": "{count, plural, one {# more message before you can exchange contact details.} other {# more messages before you can exchange contact details.}}"
+      },
+      "input": {
+        "placeholder": "Write your message...",
+        "voiceSoon": "Voice messages — coming in the next version 🎤"
+      },
+      "sendError": "Message not sent. Please try again.",
+      "blockedTitle": "You must be a contact to chat.",
+      "blockedDesc": "Send a contact request and wait for it to be accepted to open the chat.",
+      "viewProfile": "View profile",
+      "notFound": "Conversation not found",
+      "welcomeGreeting": "Say hello to {name}",
+      "welcomeSubtitle": "Be respectful and kind in your exchanges",
+      "voiceBanner": {
+        "title": "Voice messages",
+        "active": "ACTIVE",
+        "new": "NEW",
+        "activeDesc": "Send voice messages to your contacts →",
+        "upsellDesc": "Make your voice heard! Premium exclusive →"
+      },
+      "rules": {
+        "title": "Discussion Rules",
+        "beforeWriting": "Before writing to {name}",
+        "warningTitle": "Important warning",
+        "warningBody": "Breaking these rules leads to a <b>permanent ban</b> from Jommba. Our moderators monitor conversations.",
+        "rule1Title": "No immediate exchange of contact details",
+        "rule1Desc": "You may not ask for or share a phone number, WhatsApp, email or social media in the first exchanges.",
+        "rule2Title": "Respect and modesty",
+        "rule2Desc": "Keep a respectful and modest tone in your exchanges. Any inappropriate, vulgar or suggestive remark is strictly forbidden.",
+        "rule3Title": "Respect and modesty required",
+        "rule3Desc": "Keep a respectful tone. Any inappropriate or misplaced remark is forbidden.",
+        "accept": "I accept these rules before Allah 🤲",
+        "confirmEnabled": "I accept and I begin",
+        "confirmDisabled": "Tick to continue"
+      }
+    },
+    "aide": {
+      "title": "Help & FAQ",
+      "subtitle": "Find answers to your questions",
+      "searchPlaceholder": "Search a question…",
+      "all": "All",
+      "noResults": "No results for \"{query}\"",
+      "quickStart": "Quick start guide",
+      "statsMembers": "Registered members",
+      "statsValidated": "Approved profiles",
+      "statsCountries": "Countries represented",
+      "statsMatches": "Connections made",
+      "contactTitle": "Didn't find your answer?",
+      "contactDesc": "Our team replies in under 24 h",
+      "contactCta": "Contact support",
+      "categories": {
+        "inscription": "Sign-up",
+        "demandes": "Requests",
+        "messages": "Messages",
+        "photos": "Photos",
+        "premium": "Premium",
+        "securite": "Security",
+        "compte": "My account",
+        "valeurs": "Our values"
+      },
+      "faq": {
+        "inscription": [
+          {
+            "q": "How do I create my profile?",
+            "a": "Download the Jommba app, tap \"Sign up\" and follow the steps. Fill in your personal and religious details and your expectations. The more complete your profile, the more likely you are to be contacted."
+          },
+          {
+            "q": "Which information is required?",
+            "a": "First name, age, city, marital status and your vision of marriage are required. The other details enrich your profile and improve your chances."
+          },
+          {
+            "q": "Can I edit my profile after signing up?",
+            "a": "Yes, you can edit all your information at any time from Settings > My information."
+          }
+        ],
+        "demandes": [
+          {
+            "q": "How many requests can I send per day?",
+            "a": "With a free account you can send 3 requests per day. With Premium this rises to 10 requests per day, with better visibility."
+          },
+          {
+            "q": "What happens when my request is accepted?",
+            "a": "When someone accepts your request, you can start exchanging messages directly. You receive an immediate notification."
+          },
+          {
+            "q": "Can I withdraw a sent request?",
+            "a": "No, a sent request cannot be withdrawn. Be sure of your choice before sending a request."
+          }
+        ],
+        "messages": [
+          {
+            "q": "How do I send a message?",
+            "a": "You can only send a message once a contact request has been accepted on both sides. Go to the Messages tab to access your conversations."
+          },
+          {
+            "q": "Are messages private?",
+            "a": "Yes, all messages are private and encrypted. Only you and the person you're chatting with can read them. The Jommba team has no access."
+          },
+          {
+            "q": "Can I delete a conversation?",
+            "a": "Yes, you can delete a conversation from the messaging screen. This removes the messages on your side only."
+          }
+        ],
+        "photos": [
+          {
+            "q": "Why blur my photos?",
+            "a": "Blurring your photos protects your privacy. Only the people you accept can see your photos unblurred. This option is available in Settings > Privacy."
+          },
+          {
+            "q": "How many photos can I add?",
+            "a": "With a free account you can add 1 main photo. With Premium you can add up to 6 photos to enrich your profile."
+          },
+          {
+            "q": "What types of photos are accepted?",
+            "a": "Photos must respect Islamic values: modest clothing, visible face. Inappropriate photos will be removed and may lead to account suspension."
+          }
+        ],
+        "premium": [
+          {
+            "q": "What are the Premium benefits?",
+            "a": "Premium offers: up to 6 photos, 10 requests/day, seeing who visited your profile, blurring your photos, priority in results, a visible Premium badge, and access to AI features."
+          },
+          {
+            "q": "How much does Premium cost?",
+            "a": "Jommba Premium is $10/month (regular price $15/month). You can cancel at any time from Settings > Account."
+          },
+          {
+            "q": "How do I pay for the Premium subscription?",
+            "a": "Payment is by bank card, Mobile Money (Wave, Orange Money) or PayPal. All payments are secure."
+          }
+        ],
+        "securite": [
+          {
+            "q": "How do I report a suspicious profile?",
+            "a": "On each profile, tap the menu (...) then \"Report\". Our team reviews each report within 24 hours."
+          },
+          {
+            "q": "How do I block someone?",
+            "a": "From the person's profile, tap the menu (...) then \"Block\". That person will no longer be able to see or contact you."
+          },
+          {
+            "q": "Is my profile visible to everyone?",
+            "a": "Your profile is visible to members registered on Jommba. You can choose to blur your photos (Premium) for more privacy."
+          }
+        ],
+        "compte": [
+          {
+            "q": "How do I suspend my account?",
+            "a": "Go to Settings > Account > Suspend account. Your profile will be hidden temporarily. You can reactivate it at any time by logging back in."
+          },
+          {
+            "q": "How do I delete my account?",
+            "a": "Go to Settings > Account > Delete account. This action is irreversible: all your data and conversations will be permanently deleted."
+          },
+          {
+            "q": "I forgot my password, what do I do?",
+            "a": "On the login page, tap \"Forgot password\" and enter your email. You'll receive a reset link."
+          }
+        ],
+        "valeurs": [
+          {
+            "q": "Does Jommba respect Islamic values?",
+            "a": "Yes, Jommba is designed to respect the Islamic values of marriage. All features aim to facilitate a serious meeting while respecting modesty and religion."
+          },
+          {
+            "q": "Is there support for marriage?",
+            "a": "Jommba offers an AI coach to help you write your profile and messages. We are also working on human support with certified mediators."
+          },
+          {
+            "q": "How does Jommba verify profiles?",
+            "a": "Profiles can earn a verification badge by submitting an ID document. This verification builds trust in exchanges."
+          }
+        ]
+      },
+      "tutorial": [
+        {
+          "title": "Complete your profile",
+          "description": "Fill in all sections to maximise your visibility."
+        },
+        {
+          "title": "Add a nice photo",
+          "description": "A profile photo increases the chance of contact by 3x."
+        },
+        {
+          "title": "Send requests",
+          "description": "Explore profiles and send up to 3 requests per day."
+        },
+        {
+          "title": "Exchange messages",
+          "description": "When a request is accepted, start the conversation."
+        }
+      ]
+    },
+    "parametres": {
+      "title": "Settings",
+      "completion": "Profile completion",
+      "completionHint": "Complete your profile for +{n}% visibility",
+      "completionDone": "Profile complete · Congratulations!",
+      "save": "Save",
+      "saveAndClose": "Save and close",
+      "close": "Close",
+      "sections": {
+        "photo": "My photos",
+        "photoSub": "1 photo added",
+        "infos": "My information",
+        "infosSub": "First name, age, height, status",
+        "location": "Location & background",
+        "locationSub": "City, profession, studies",
+        "vision": "My vision",
+        "visionSub": "Marriage, expectations, deal-breakers",
+        "personality": "Personality",
+        "personalitySub": "Interests, qualities, flaws",
+        "confidentiality": "Privacy",
+        "confidentialitySub": "Blurred photos, data",
+        "notifications": "Notifications",
+        "notificationsSub": "Push and email",
+        "security": "Security",
+        "securitySub": "Password, verification",
+        "account": "My account",
+        "accountSub": "Suspend, delete"
+      },
+      "themeSection": {
+        "themes": "✦ Themes:",
+        "generating": "Generating…",
+        "generate": "Generate ({count})",
+        "selectThemes": "Select themes",
+        "counter": "{count} · {max} max"
+      },
+      "infos": {
+        "title": "My information",
+        "firstNameRequired": "First name is required",
+        "saved": "Information saved ✓",
+        "error": "Error: {msg}",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "age": "Age",
+        "ageValue": "{age} years old",
+        "ageLocked": "Your age was calculated at sign-up and can no longer be changed.",
+        "height": "Height (cm)",
+        "maritalStatus": "Marital status",
+        "children": "Children",
+        "situations": {
+          "single": "Single",
+          "divorced": "Divorced",
+          "widowed": "Widowed",
+          "polygamy": "Married - polygamy"
+        },
+        "childrenOptions": {
+          "none": "None"
+        }
+      },
+      "photo": {
+        "title": "Profile photo",
+        "close": "Close",
+        "updateError": "Error while updating",
+        "mainUpdated": "Main photo updated ✓",
+        "keepOne": "You must keep at least one photo",
+        "deleteError": "Error while deleting",
+        "deleted": "Photo deleted ✓",
+        "maxReached": "Maximum of {max} photos reached",
+        "selectImage": "Please select an image",
+        "tooHeavy": "Image too large (max 10 MB)",
+        "uploadFailed": "Upload failed. Please try again.",
+        "added": "Photo added ✓",
+        "intro": "Your main photo is the first thing other members see. Choose a clear photo where your face is clearly visible.",
+        "myPhotos": "My photos",
+        "main": "Main",
+        "mainShort": "✓ Main",
+        "makeMain": "● Main",
+        "delete": "Delete",
+        "sending": "Sending…",
+        "add": "Add",
+        "upsellTitle": "Add up to {max} photos with Premium",
+        "upsellDesc": "Increase your chances of receiving requests",
+        "tipsInline": "<b>Tips:</b> Choose sharp, well-lit and recent photos. Avoid group photos or excessive filters. Tap \"Main\" to change your profile photo visible to everyone.",
+        "visibilityInfo": "<b>Profiles with a photo get 5x more visibility</b><br></br>Add a photo to appear at the top of searches and receive more contact requests.",
+        "tipsTitle": "Tips for a good photo:",
+        "tips": [
+          "Recent, good-quality photo",
+          "Uncovered, well-lit face",
+          "Neutral background preferred",
+          "No excessive filter"
+        ]
+      },
+      "location": {
+        "title": "Location & background",
+        "saved": "Location saved ✓",
+        "error": "Error: {msg}",
+        "whereLabel": "Where do you live?",
+        "inAfrica": "In Africa",
+        "diaspora": "Diaspora",
+        "country": "Country",
+        "city": "City",
+        "cityPlaceholder": "e.g. Paris",
+        "profession": "Profession",
+        "professionPlaceholder": "e.g. Engineer, Doctor…",
+        "education": "Education level"
+      },
+      "vision": {
+        "title": "My vision",
+        "saved": "Vision saved ✓",
+        "error": "Error: {msg}",
+        "visionLabel": "My vision of marriage",
+        "visionPlaceholder": "Describe what marriage means to you…",
+        "seekingLabel": "What I'm looking for",
+        "seekingPlaceholder": "Describe the profile you're looking for…",
+        "dealbreakersLabel": "What I don't accept",
+        "dealbreakersPlaceholder": "Your red lines…"
+      },
+      "personality": {
+        "title": "Personality",
+        "saved": "Personality saved ✓",
+        "error": "Error: {msg}",
+        "interestsLabel": "Interests",
+        "interestsPlaceholder": "Your passions, hobbies…",
+        "qualitiesLabel": "My qualities",
+        "qualitiesPlaceholder": "What describes you best…",
+        "flawsLabel": "My flaws",
+        "flawsPlaceholder": "Authenticity is a quality…",
+        "flawsHint": "Honesty is appreciated! Sharing your flaws builds trust."
+      },
+      "confidentiality": {
+        "title": "Privacy",
+        "close": "Close",
+        "blurTitle": "Blur my photos",
+        "blurDesc": "Only the people you accept will be able to see your photos unblurred.",
+        "blurred": "Photos blurred",
+        "unblurred": "Photos unblurred",
+        "unblurAction": "Unblur my photos",
+        "blurAction": "Blur my photos",
+        "makeVisible": "Make visible to all",
+        "hideFromVisitors": "Hide from visitors",
+        "premiumOnly": "Feature reserved for Premium members",
+        "guaranteeTitle": "Privacy guaranteed",
+        "guarantees": [
+          "Your data is never resold",
+          "End-to-end encrypted messages",
+          "You control who sees your profile",
+          "Permanent deletion on request"
+        ]
+      },
+      "notifications": {
+        "title": "Notifications",
+        "close": "Close",
+        "pushTitle": "Push notifications",
+        "pushDesc": "Get real-time alerts on your phone.",
+        "pushWarning": "Enable notifications so you don't miss any important contact.",
+        "emailTitle": "Email notifications",
+        "emailRequests": "New contact requests",
+        "emailMessages": "New messages",
+        "emailPromos": "Offers and promotions"
+      },
+      "security": {
+        "title": "Security",
+        "close": "Close",
+        "fillBoth": "Fill in both fields",
+        "pwdTooShort": "Password too short (8 characters min)",
+        "currentPwdWrong": "Current password is incorrect",
+        "pwdError": "Error: {msg}",
+        "pwdChanged": "Password changed successfully ✓",
+        "pseudo": "Username",
+        "pseudoLocked": "The username cannot be changed.",
+        "changePwd": "Change password",
+        "currentPwd": "Current password",
+        "newPwd": "New password (8 characters min)",
+        "change": "Change",
+        "verifTitle": "Identity verification",
+        "active": "ACTIVE",
+        "verifActiveDesc": "Your profile is certified and featured",
+        "verifBadgeDesc": "Verified badge on your profile",
+        "activateWithPremium": "Activate with Premium",
+        "benefits": [
+          "✓ badge visible on your profile",
+          "More trust from other members",
+          "Better ranking in results"
+        ]
+      },
+      "account": {
+        "title": "My account",
+        "close": "Close",
+        "suspendError": "Error while suspending",
+        "suspended": "Account suspended temporarily",
+        "unknownError": "Unknown error",
+        "deleteFailed": "Deletion failed",
+        "deleted": "Account permanently deleted",
+        "suspendTitle": "Suspend my account",
+        "suspendDesc": "Your profile will be hidden temporarily. You can reactivate it at any time by logging back in.",
+        "suspend": "Suspend",
+        "deleteTitle": "Delete my account",
+        "deleteDesc": "Irreversible action. All your data and conversations will be permanently deleted.",
+        "deletePermanently": "Delete permanently",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "continue": "Continue",
+        "delete": "Delete",
+        "suspendModalTitle": "Suspend account?",
+        "suspendModalDesc": "Your profile will be hidden. You can log back in at any time.",
+        "deleteModal1Title": "Are you sure?",
+        "deleteModal1Desc": "This action will permanently delete your profile, photos and all your messages. It is irreversible.",
+        "deleteModal2Title": "Final confirmation",
+        "deleteModal2Desc": "Tap \"Delete\" to confirm the permanent deletion of your Jommba account."
+      }
+    },
+    "academie": {
+      "badge": "Marriage Academy",
+      "heading": "Learn and prepare",
+      "intro": "Practical advice, prophetic wisdom and concrete guides to build a fulfilling marriage.",
+      "all": "All",
+      "empty": "No articles yet — check back soon!",
+      "readMin": "{n} min",
+      "readTime": "{n} min read",
+      "prevPage": "Previous page",
+      "nextPage": "Next page",
+      "backToAcademy": "Back to the academy",
+      "seeAllArticles": "See all articles",
+      "metaSuffix": "Marriage Academy",
+      "metaNotFound": "Article not found | Jommba"
+    },
+    "explorer": {
+      "unknownMember": "A member",
+      "nav": {
+        "home": "Back to home",
+        "filters": "Filters",
+        "swipe": "Swipe mode",
+        "grid": "Grid mode"
+      },
+      "empty": {
+        "title": "No profiles to discover right now",
+        "desc": "Come back a bit later — new members join us every day, in sha Allah."
+      },
+      "verified": "Verified profile",
+      "online": "Online",
+      "featured": "Featured",
+      "featuredStar": "⭐ Featured",
+      "premium": "Premium",
+      "marriageVisionLabel": "⚡ MY VISION OF MARRIAGE",
+      "swipe": {
+        "flashSent": "Flash message sent ⚡",
+        "requestSent": "Request sent ✓",
+        "errorRetry": "Error, please retry",
+        "removedFavorite": "Removed from favorites",
+        "addedFavorite": "Added to favorites ⭐",
+        "confirmTitle": "Wait a second!",
+        "confirmBody": "You're about to skip <b>{name}</b>. Maybe they're the right person for you?",
+        "addProfile": "Add this profile",
+        "skipAnyway": "Skip anyway",
+        "skip": "Skip",
+        "flash": "Flash message",
+        "add": "Add"
+      },
+      "grid": {
+        "requestSent": "Request sent ✓",
+        "profilesCount": "{count} profiles",
+        "allVisible": "All visible",
+        "freeVisible": "{count} visible for free"
+      },
+      "filters": {
+        "title": "Filters",
+        "tabFilters": "⚡ Filters",
+        "tabCountry": "🌍 Country",
+        "quickFilters": "Quick filters",
+        "country": "Country",
+        "apply": "Apply filters",
+        "quick": {
+          "photo": "Photo",
+          "single": "Single",
+          "age1825": "18-25",
+          "age2635": "26-35",
+          "age36": "36+"
+        }
+      },
+      "details": {
+        "seeking": "💫 WHAT I'M LOOKING FOR",
+        "interests": "⚡ INTERESTS",
+        "qualities": "✨ MY QUALITIES",
+        "information": "ℹ️ INFORMATION",
+        "madhhab": "MADHHAB",
+        "education": "EDUCATION",
+        "children": "CHILDREN",
+        "wantsChildren": "WANTS CHILDREN",
+        "canRelocate": "CAN RELOCATE",
+        "polygamy": "POLYGAMY",
+        "aiMatch": "AI Match ✦",
+        "block": "⛔ Block",
+        "report": "🚩 Report"
+      },
+      "premiumModal": {
+        "title": "Premium Grid View",
+        "desc": "You've used all your free trials. Go Premium for unlimited access!",
+        "benefit1": "Unlimited grid view",
+        "benefit2": "See who visits your profile",
+        "benefit3": "Unlimited requests",
+        "cta": "⭐ Go Premium ›"
+      },
+      "report": {
+        "title": "Report {name}",
+        "reasons": {
+          "fakePhoto": "Fake photo",
+          "fakeName": "Fake name",
+          "inappropriate": "Inappropriate",
+          "scam": "Scam",
+          "harassment": "Harassment",
+          "other": "Other"
+        },
+        "placeholder": "Describe the problem...",
+        "cancel": "Cancel",
+        "submit": "Report",
+        "sent": "Report sent. Thank you for helping us keep the community healthy."
+      },
+      "block": {
+        "title": "Block {name}?",
+        "desc": "This person will no longer be able to see your profile or contact you.",
+        "cancel": "Cancel",
+        "block": "Block",
+        "blocked": "{name} has been blocked. You'll no longer see this profile."
+      },
+      "tour": {
+        "step1Title": "Welcome to Jommba! 🌙",
+        "step1Body": "Discover how to find your other half in a few simple steps.",
+        "step1Button": "Start →",
+        "step2Title": "Members' photos",
+        "step2Body": "This is where you'll see photos of the community's members.",
+        "step2Button": "Next →",
+        "step3Title": "Add as a friend",
+        "step3Body": "Interested? Tap the green button to send a request. If they accept, you'll be able to chat!",
+        "step3Button": "Next →",
+        "step4Title": "Flash Message ⚡",
+        "step4Body": "Send a flash message to stand out! The person will receive it even when offline.",
+        "step4Button": "Next →",
+        "step5Title": "You're ready! 🎉",
+        "step5Body": "Happy exploring! May this journey lead you to a beautiful match, insha'Allah.",
+        "step5Button": "✓ Let's go!"
+      }
+    },
+    "profil": {
+      "unknownMember": "A member",
+      "unknownLocation": "Unknown",
+      "notFound": "Profile not found.",
+      "back": "← Back",
+      "backToProfiles": "Back to profiles",
+      "photoBlurred": "Photo blurred",
+      "online": "Online",
+      "block": "Block",
+      "report": "Report",
+      "blocked": "Profile blocked",
+      "reportReason": "Report from profile",
+      "reportError": "Error while reporting",
+      "reportSent": "Report sent. Our team will review this profile.",
+      "verified": "Verified profile",
+      "requestSent": "Request sent ✓",
+      "requestSentFlash": "Request sent with your flash message ✓",
+      "requestAccepted": "Request accepted ✓",
+      "requestRefused": "Request declined",
+      "flashMessage": "Flash Message",
+      "messageIdeas": "Message ideas",
+      "banner": {
+        "incoming": "This person wants to contact you",
+        "accept": "Accept ✓",
+        "refuse": "Decline",
+        "refused": "Request declined",
+        "pending": "Request sent — Pending",
+        "accepted": "✓ Contact accepted",
+        "add": "Add"
+      },
+      "sections": {
+        "marriageVision": "My vision of marriage",
+        "seeking": "What I'm looking for",
+        "religion": "Religious practice",
+        "lifeProject": "Life project",
+        "interests": "Interests",
+        "qualities": "My qualities",
+        "flaws": "My flaws",
+        "dealbreakers": "What I don't accept",
+        "languages": "Languages spoken"
+      },
+      "fields": {
+        "madhhab": "MADHHAB",
+        "mosque": "MOSQUE",
+        "arabic": "ARABIC",
+        "hasChildren": "HAS CHILDREN",
+        "wantsChildren": "WANTS CHILDREN",
+        "canRelocate": "CAN RELOCATE",
+        "polygamy": "POLYGAMY"
+      },
+      "my": {
+        "title": "My profile",
+        "edit": "✎ Edit",
+        "nameLine": "{name}, {age} yrs · {height} cm",
+        "editImages": "Edit my images",
+        "boost": "Boost my profile ›"
+      },
+      "gallery": {
+        "photosCount": "Photos (1/{max})",
+        "main": "Main",
+        "premium": "Premium"
+      },
+      "upsell": {
+        "title": "Add up to {max} photos with Premium",
+        "desc": "Increase your chances of finding your other half"
+      },
+      "flash": {
+        "writeMessage": "Write a flash message",
+        "title": "The Flash Message",
+        "subtitle": "Make the difference from the first contact.",
+        "benefit1Title": "Introduce yourself before acceptance",
+        "benefit1Text": "Your request arrives with your personalised message",
+        "benefit2Title": "Show you're serious",
+        "benefit2Text": "A personalised message is worth a thousand empty requests",
+        "benefit3Title": "2x more likely to be accepted",
+        "benefit3Text": "Profiles with a message are far more successful",
+        "later": "Later",
+        "unlockPremium": "Unlock Premium",
+        "composerTitle": "Flash Message",
+        "composerSubtitle": "Your request to {name} arrives with your message",
+        "close": "Close",
+        "placeholder": "Introduce yourself to {name} in a few words…",
+        "modestNote": "Stay modest and sincere: your message is moderated.",
+        "sendWithMessage": "Send request with message"
+      },
+      "ideas": {
+        "title": "Message ideas",
+        "personalizedFor": "Personalised for {name}",
+        "close": "Close",
+        "generating": "Claude is generating personalised ideas…",
+        "retry": "Retry",
+        "genError": "Generation error",
+        "unknownError": "Unknown error",
+        "copied": "Copied",
+        "copy": "Copy",
+        "copiedToast": "Message copied ✓",
+        "copyError": "Unable to copy",
+        "footerHint": "Copy and personalise before sending"
+      },
+      "photoEdit": {
+        "updateError": "Error while updating",
+        "mainUpdated": "Main photo updated ✓",
+        "keepOne": "You must keep at least one photo",
+        "deleteError": "Error while deleting",
+        "deleted": "Photo deleted ✓",
+        "maxReached": "Maximum of {max} photos reached",
+        "selectImage": "Please select an image",
+        "tooHeavy": "Image too large (max 10 MB)",
+        "uploadFailed": "Upload failed. Please try again.",
+        "added": "Photo added ✓",
+        "title": "Edit my photos",
+        "countPremium": "{count}/{max} photos · Premium",
+        "countFree": "{count}/{max} free photos",
+        "blurred": "Photos blurred",
+        "unblurred": "Photos unblurred",
+        "unblurAction": "Unblur my photos",
+        "blurAction": "Blur my photos",
+        "makeVisible": "Make visible to all",
+        "hideFromVisitors": "Hide from visitors",
+        "main": "Main",
+        "makeMain": "● Set as main",
+        "add": "Add",
+        "premium": "Premium",
+        "upsellTitle": "Add up to {max} photos with Premium",
+        "upsellDesc": "Increase your chances of receiving requests",
+        "tip": "💡 <b>Tip:</b> Blurred photos are only visible to people you've exchanged messages with.",
+        "advancedSettings": "Advanced management in settings",
+        "saveAndClose": "Save and close"
+      }
+    },
+    "premium": {
+      "hero": {
+        "badge": "Halal, serious, hand-verified",
+        "titleName": "{name},",
+        "titleLine": "your future wife is waiting.",
+        "titleHighlight": "Don't miss her.",
+        "subtitle": "Without Premium, your profile stays buried. With Premium, you appear first, you see who's interested in you, and you reply without limits.",
+        "stat1Label": "more replies",
+        "stat2Label": "verified profiles",
+        "stat3Label": "halal guaranteed"
+      },
+      "features": {
+        "title": "What Premium unlocks for you",
+        "subtitle": "Everything that changes to find your future spouse faster",
+        "new": "NEW",
+        "items": [
+          {
+            "title": "See who added you to favorites",
+            "description": "Discover everyone who finds you interesting. The strongest signal of interest.",
+            "free": "Locked",
+            "premium": "Unlocked"
+          },
+          {
+            "title": "See who spotted you",
+            "description": "Find out who clicked on your profile. No more doubts.",
+            "free": "Locked",
+            "premium": "Unlocked"
+          },
+          {
+            "title": "Unlimited contacts",
+            "description": "Found a match on a profile? You can contact them, without waiting for tomorrow.",
+            "free": "Limited",
+            "premium": "Unlimited"
+          },
+          {
+            "title": "See who's online",
+            "description": "Your profile appears in real time. Message at the right moment, get replies faster.",
+            "free": "Locked",
+            "premium": "Unlocked"
+          },
+          {
+            "title": "Be seen first",
+            "description": "Your profile appears at the top of searches. More visibility, more chances.",
+            "free": "Locked",
+            "premium": "Unlocked"
+          },
+          {
+            "title": "Profile boosts included",
+            "description": "Push your profile to first position for 24h. Boosts included with your plan.",
+            "free": "Locked",
+            "premium": "Unlocked"
+          },
+          {
+            "title": "Instant approval",
+            "description": "Your account is approved instantly, without waiting the usual 24h.",
+            "free": "Up to 24h",
+            "premium": "Instant"
+          },
+          {
+            "title": "Unlimited Coach Sheikh Abdallah",
+            "description": "Ask all your questions about halal marriage, first impressions, your profile — AI is with you 24/7.",
+            "free": "1 personalised",
+            "premium": "Unlimited"
+          },
+          {
+            "title": "Voice messages",
+            "description": "Let your voice be heard. Send voice messages to build a more authentic connection.",
+            "free": "Locked",
+            "premium": "Unlocked"
+          },
+          {
+            "title": "Show who you really are",
+            "description": "3 photos to show your personality; a complete profile attracts 4x more.",
+            "free": "Only 1",
+            "premium": "4 photos"
+          },
+          {
+            "title": "Seriousness badge",
+            "description": "The green badge shows you're here for real. It filters out the curious.",
+            "free": "Locked",
+            "premium": "Unlocked"
+          }
+        ]
+      },
+      "guarantees": [
+        "Cancel any time, in 1 click from settings",
+        "No commitment, you keep your benefits until the end",
+        "100% secure payment, data never shared"
+      ],
+      "pricing": {
+        "title": "Choose your duration",
+        "subtitle": "The longer it is, the more you save",
+        "popular": "POPULAR",
+        "havePromo": "I have a promo code",
+        "promoPlaceholder": "Enter promo code",
+        "apply": "Apply",
+        "plans": {
+          "15j": {
+            "label": "Premium 15 Days",
+            "pricePerMonth": "$12/month"
+          },
+          "1m": {
+            "label": "Premium 1 Month",
+            "pricePerMonth": "$10/month",
+            "boostBadge": "x3 boost"
+          },
+          "3m": {
+            "label": "Premium 3 Months",
+            "pricePerMonth": "$5/month",
+            "boostBadge": "x5 boosts"
+          },
+          "6m": {
+            "label": "Premium 6 Months",
+            "pricePerMonth": "$4.17/month",
+            "boostBadge": "x8 boosts"
+          }
+        }
+      },
+      "payment": {
+        "title": "How would you like to pay?",
+        "mobileMoney": "Mobile Money",
+        "card": "Bank card",
+        "total": "Total to pay"
+      },
+      "cta": {
+        "button": "Become a Premium member",
+        "instant": "Instant activation • Cancel in 1 click",
+        "certified": "Bissrys & PayTech certified",
+        "paymentSoon": "Payment coming soon 🔒"
+      },
+      "testimonials": {
+        "badge": "❤️ True stories",
+        "title": "They found their other half",
+        "items": [
+          {
+            "daysLabel": "2 days",
+            "statusLabel": "In discussion",
+            "quote": "Before Premium, my profile was invisible. By the 2nd day, I saw 12 brothers had visited my profile. I contacted the one who kept coming back.",
+            "author": "Fatou N.",
+            "city": "Dakar"
+          },
+          {
+            "daysLabel": "1 day",
+            "statusLabel": "Engaged",
+            "quote": "I'd almost lost hope, but Jommba surprised me. In under 24h after going Premium, I had 3 serious contacts.",
+            "author": "Aminata K.",
+            "city": "Thiès"
+          },
+          {
+            "daysLabel": "3 days",
+            "statusLabel": "Married",
+            "quote": "Instant approval let me get started quickly. The coach helped me a lot to write my profile.",
+            "author": "Ibrahim S.",
+            "city": "Paris, FR"
+          },
+          {
+            "daysLabel": "5 days",
+            "statusLabel": "In discussion",
+            "quote": "The seriousness badge changes everything. The people who message me are truly here to marry.",
+            "author": "Mariama D.",
+            "city": "Abidjan"
+          },
+          {
+            "daysLabel": "7 days",
+            "statusLabel": "Engaged",
+            "quote": "Thanks to the included boosts, my profile appeared at the top. I got 20 visits on the first day.",
+            "author": "Moussa B.",
+            "city": "Dakar"
+          }
+        ]
+      },
+      "faq": {
+        "title": "Frequently asked questions",
+        "items": [
+          {
+            "question": "Which payment methods are accepted?",
+            "answer": "Mobile Money (Orange Money, Free Money, Wave) and bank card (Visa, Mastercard). Secure payment via Bissrys & PayTech."
+          },
+          {
+            "question": "Is my payment secure?",
+            "answer": "Yes, 100%. We use certified providers. Your bank details are never stored on our servers."
+          },
+          {
+            "question": "Can I cancel my subscription?",
+            "answer": "Yes, any time from Settings → Subscription → Cancel. You keep your benefits until the end of the paid period."
+          },
+          {
+            "question": "How does renewal work?",
+            "answer": "Renewal is automatic unless you cancel before the renewal date."
+          },
+          {
+            "question": "How long before I see results?",
+            "answer": "Most Premium members receive contacts within 24-48h of activation."
+          },
+          {
+            "question": "Can I trust Jommba?",
+            "answer": "Jommba is a serious, verified platform. All profiles are manually approved by our team."
+          },
+          {
+            "question": "What if I don't find anyone?",
+            "answer": "Our advisors are available to support you. The AI coach is included in Premium to guide you."
+          }
+        ]
+      },
+      "footerCta": {
+        "badge1Title": "100% secure payment",
+        "badge1Sub": "Bissrys & PayTech certified",
+        "badge2Title": "Manually verified profiles",
+        "badge2Sub": "Our team reviews every sign-up",
+        "badge3Title": "No commitment",
+        "badge3Sub": "No surprise renewal",
+        "title": "{name}, the right moment is now",
+        "body1": "Every day you wait might be the future spouse you're not discovering.",
+        "body2": "Take the first step towards your future.",
+        "button": "Go Premium",
+        "quote": "“And among His signs, He created spouses for you.” — Surah Al-Rum, 30:21"
+      },
+      "member": {
+        "title": "{name}, you're Premium ✓",
+        "allActive": "All your benefits are active",
+        "expiresOn": "Expires on",
+        "daysLeft": "{n}d left",
+        "planLine": "{plan} · Automatic renewal",
+        "planLabel": "Premium {n} Month(s)",
+        "impactTitle": "Your impact since Premium",
+        "visitors": "Visitors",
+        "favorites": "Favorites",
+        "contacts": "Contacts",
+        "activeFeaturesTitle": "Your active benefits",
+        "new": "NEW",
+        "manageTitle": "Manage my subscription",
+        "renewTitle": "Renew now",
+        "renewSub": "Extend before {date}",
+        "renewOffer": "-33% offer",
+        "renewToast": "Renewal — available from settings in the next version",
+        "boostTitle": "Buy boosts",
+        "boostSub": "Push your profile to the top for 24h",
+        "boostToast": "Boosts — coming in the next version ⚡",
+        "cancelTitle": "Cancel subscription",
+        "cancelSub": "You stay Premium until {date}",
+        "faqTitle": "Frequently asked questions",
+        "cancelledToast": "Subscription cancelled. You keep access until {date}.",
+        "cancelModalTitle": "Cancel Premium?",
+        "cancelModalBodyPrefix": "You'll keep all your benefits until ",
+        "cancelModalBodySuffix": ". After that date, your profile will revert to the free version.",
+        "cancelConfirm": "Yes, cancel my subscription",
+        "cancelKeep": "Keep my Premium",
+        "months": [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December"
+        ]
+      }
+    }
   }
 }

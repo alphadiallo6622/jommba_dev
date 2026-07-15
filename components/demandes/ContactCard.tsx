@@ -2,6 +2,7 @@
 
 import { MapPin, MessageCircle, ArrowRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { ContactEntry } from '@/lib/mock-demandes'
 
 type Props = {
@@ -10,6 +11,7 @@ type Props = {
 
 export default function ContactCard({ contact }: Props) {
   const router = useRouter()
+  const t = useTranslations('dashboard.demandes')
   return (
     <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
       <div className="flex items-center gap-3 mb-3">
@@ -32,7 +34,7 @@ export default function ContactCard({ contact }: Props) {
           onClick={() => router.push(`/dashboard/messages/${contact.id}`)}
           className="flex-1 py-2 bg-[#10B981] text-white rounded-lg text-sm font-medium hover:bg-[#059669] flex items-center justify-center gap-1 transition-colors"
         >
-          <MessageCircle className="w-4 h-4" /> Écrire un message
+          <MessageCircle className="w-4 h-4" /> {t('writeMessage')}
         </button>
         <button
           onClick={() => router.push(`/dashboard/profil/${contact.id}`)}

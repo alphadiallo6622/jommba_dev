@@ -1,7 +1,9 @@
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 import { CheckCircle2, Clock, Heart, Shield, Star } from 'lucide-react'
 
-export default function OnboardingSuccessPage() {
+export default async function OnboardingSuccessPage() {
+  const t = await getTranslations('onboarding.success')
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6 py-12">
       <div className="w-full max-w-sm space-y-8 text-center">
@@ -23,10 +25,9 @@ export default function OnboardingSuccessPage() {
             <CheckCircle2 className="w-12 h-12 text-white" />
           </div>
           <div className="space-y-1.5">
-            <h1 className="text-2xl font-serif font-bold text-gray-900">Profil envoyé !</h1>
+            <h1 className="text-2xl font-serif font-bold text-gray-900">{t('title')}</h1>
             <p className="text-sm text-gray-500 leading-relaxed">
-              Barak Allahu fik. Ton profil est entre de bonnes mains.<br />
-              Notre équipe le vérifie avec soin.
+              {t('subtitle')}
             </p>
           </div>
         </div>
@@ -38,8 +39,8 @@ export default function OnboardingSuccessPage() {
               <CheckCircle2 className="w-4 h-4 text-emerald-600" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-gray-800">Profil soumis</p>
-              <p className="text-xs text-gray-400">Reçu et en attente de vérification</p>
+              <p className="text-sm font-semibold text-gray-800">{t('submittedTitle')}</p>
+              <p className="text-xs text-gray-400">{t('submittedDesc')}</p>
             </div>
           </div>
 
@@ -48,8 +49,8 @@ export default function OnboardingSuccessPage() {
               <Clock className="w-4 h-4 text-amber-600" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-gray-800">Vérification en cours</p>
-              <p className="text-xs text-gray-400">Délai estimé : 12–24 heures</p>
+              <p className="text-sm font-semibold text-gray-800">{t('verifyingTitle')}</p>
+              <p className="text-xs text-gray-400">{t('verifyingDesc')}</p>
             </div>
           </div>
 
@@ -58,8 +59,8 @@ export default function OnboardingSuccessPage() {
               <Shield className="w-4 h-4 text-gray-400" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-gray-800">Profil validé</p>
-              <p className="text-xs text-gray-400">Tu pourras accéder à la plateforme</p>
+              <p className="text-sm font-semibold text-gray-800">{t('validatedTitle')}</p>
+              <p className="text-xs text-gray-400">{t('validatedDesc')}</p>
             </div>
           </div>
         </div>
@@ -70,7 +71,7 @@ export default function OnboardingSuccessPage() {
           className="w-full block py-3 rounded-xl text-white font-semibold text-sm hover:opacity-90 transition-opacity text-center"
           style={{ background: '#10B981' }}
         >
-          Accéder à la plateforme →
+          {t('cta')}
         </Link>
 
         {/* Premium upsell */}
@@ -80,27 +81,27 @@ export default function OnboardingSuccessPage() {
         >
           <div className="flex items-center gap-2">
             <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
-            <p className="text-sm font-bold text-white">Passe à Jommba Premium</p>
+            <p className="text-sm font-bold text-white">{t('premiumTitle')}</p>
           </div>
           <p className="text-xs text-white/80 leading-relaxed">
-            Sois visible en priorité, envoie des demandes illimitées et accède à des profils exclusifs.
+            {t('premiumDesc')}
           </p>
           <div className="flex items-baseline gap-1">
             <span className="text-2xl font-bold text-white">10 $</span>
-            <span className="text-xs text-white/70">/mois</span>
+            <span className="text-xs text-white/70">{t('perMonth')}</span>
             <span className="ml-2 text-xs line-through text-white/50">15 $</span>
           </div>
           <button className="w-full py-2 rounded-xl bg-amber-400 text-gray-900 font-bold text-sm hover:bg-amber-300 transition-colors">
-            Découvrir Premium →
+            {t('premiumCta')}
           </button>
         </div>
 
         {/* Quranic citation */}
         <div className="border-t border-gray-50 pt-4">
           <p className="text-xs italic text-gray-400 leading-relaxed">
-            « Et parmi Ses signes, Il a créé pour vous des épouses pour que vous viviez en tranquillité avec elles »
+            {t('quote')}
           </p>
-          <p className="text-xs text-emerald-500 font-medium mt-1">— Sourate Ar-Rum, 30:21</p>
+          <p className="text-xs text-emerald-500 font-medium mt-1">{t('quoteSource')}</p>
         </div>
       </div>
     </div>

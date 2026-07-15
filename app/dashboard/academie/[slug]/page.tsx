@@ -3,6 +3,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { getTranslations, getLocale } from 'next-intl/server'
 import { ArrowLeft, BookOpen, Calendar, Clock } from 'lucide-react'
 import DashboardNavbar from '@/components/dashboard/Navbar'
 import { createClient } from '@/lib/supabase/server'
@@ -11,11 +12,11 @@ export const dynamic = 'force-dynamic'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
-const MONTHS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
-
-function frDate(iso: string): string {
-  const d = new Date(iso)
-  return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`
+// Date localisée via Intl (fr/en) — pas de mois codés en dur.
+function localizedDate(iso: string, locale: string): string {
+  return new Date(iso).toLocaleDateString(locale === 'en' ? 'en-GB' : 'fr-FR', {
+    day: 'numeric', month: 'long', year: 'numeric',
+  })
 }
 
 function stripHtml(html: string): string {
@@ -41,6 +42,7 @@ interface ArticleView {
 async function loadArticle(slug: string): Promise<ArticleView | null> {
   if (!UUID_RE.test(slug)) return null
   try {
+    const [locale, t] = await Promise.all([getLocale(), getTranslations('dashboard.academie')])
     const supabase = await createClient()
     const { data: p } = await supabase
       .from('academy_articles')
@@ -60,8 +62,8 @@ async function loadArticle(slug: string): Promise<ArticleView | null> {
       html: p.content ?? '',
       authorName: p.author,
       authorAvatar: initials(p.author),
-      date: p.published_at ? frDate(p.published_at) : '',
-      readTime: `${minutes} min de lecture`,
+      date: p.published_at ? localizedDate(p.published_at, locale) : '',
+      readTime: t('readTime', { n: minutes }),
       coverImage: p.cover_image_url,
     }
   } catch {
@@ -73,10 +75,11 @@ export async function generateMetadata(
   { params }: { params: Promise<{ slug: string }> },
 ): Promise<Metadata> {
   const { slug } = await params
+  const t = await getTranslations('dashboard.academie')
   const article = await loadArticle(decodeURIComponent(slug))
-  if (!article) return { title: 'Article introuvable | Jommba' }
+  if (!article) return { title: t('metaNotFound') }
   return {
-    title: `${article.title} | Académie du Mariage`,
+    title: `${article.title} | ${t('metaSuffix')}`,
     description: article.excerpt || undefined,
   }
 }
@@ -85,6 +88,7 @@ export default async function AcademieArticlePage(
   { params }: { params: Promise<{ slug: string }> },
 ) {
   const { slug } = await params
+  const t = await getTranslations('dashboard.academie')
   const article = await loadArticle(decodeURIComponent(slug))
   if (!article) notFound()
 
@@ -103,7 +107,7 @@ export default async function AcademieArticlePage(
               className="relative inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-white/75 hover:text-white transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              Retour à l&rsquo;académie
+              {t('backToAcademy')}
             </Link>
 
             <div className="relative flex flex-wrap items-center gap-2">
@@ -169,7 +173,7 @@ export default async function AcademieArticlePage(
                 </div>
                 <div>
                   <p className="text-xs font-bold text-gray-900">{article.authorName}</p>
-                  <p className="text-[11px] text-gray-400">Académie du Mariage</p>
+                  <p className="text-[11px] text-gray-400">{t('metaSuffix')}</p>
                 </div>
               </div>
               <Link
@@ -177,7 +181,7 @@ export default async function AcademieArticlePage(
                 className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 hover:underline"
               >
                 <BookOpen className="w-3.5 h-3.5" />
-                Voir tous les articles
+                {t('seeAllArticles')}
               </Link>
             </div>
           </div>

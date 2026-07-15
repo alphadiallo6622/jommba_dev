@@ -1,3 +1,4 @@
+import { NextIntlClientProvider } from 'next-intl'
 import { createClient } from '@/lib/supabase/server'
 import { profileToMockUser } from '@/lib/supabase/profile-service'
 import ProfileInitializer from '@/components/providers/ProfileInitializer'
@@ -51,14 +52,19 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Initialise les stores Zustand avec les données réelles Supabase */}
-      <ProfileInitializer profile={mockUser} prefs={prefs} />
-      {children}
-      <BoostModal />
-      <CoachButton />
-      <CoachModal />
-      <BottomNav />
-    </div>
+    // /dashboard vit hors de app/[locale]/ : le provider fournit les
+    // traductions au client (locale + messages résolus par i18n/request.ts via
+    // le cookie NEXT_LOCALE).
+    <NextIntlClientProvider>
+      <div className="min-h-screen bg-gray-50">
+        {/* Initialise les stores Zustand avec les données réelles Supabase */}
+        <ProfileInitializer profile={mockUser} prefs={prefs} />
+        {children}
+        <BoostModal />
+        <CoachButton />
+        <CoachModal />
+        <BottomNav />
+      </div>
+    </NextIntlClientProvider>
   )
 }

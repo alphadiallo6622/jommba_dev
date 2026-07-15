@@ -1,18 +1,22 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { ChevronDown } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { faqs } from '@/lib/mock-premium'
 import { cn } from '@/lib/utils'
 
+type FaqItem = { question: string; answer: string }
+
 export default function PremiumFAQ() {
+  const t = useTranslations('dashboard.premium.faq')
+  const faqs = t.raw('items') as FaqItem[]
   const [open, setOpen] = useState<number | null>(null)
 
   return (
     <section className="py-6">
       <h2 className="text-center font-bold text-xl text-gray-900 mb-6">
-        Questions fréquentes
+        {t('title')}
       </h2>
 
       <div className="border border-gray-100 rounded-xl overflow-hidden divide-y divide-gray-100">

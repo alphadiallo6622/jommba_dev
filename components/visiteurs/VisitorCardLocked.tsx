@@ -1,6 +1,7 @@
 'use client'
 
 import { Lock, Clock, Crown } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import type { Visitor } from '@/lib/mock-visitors'
 
 interface Props {
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export default function VisitorCardLocked({ visitor, onUnlock }: Props) {
+  const t = useTranslations('dashboard.visiteurs')
   return (
     <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
       {/* Blurred photo zone */}
@@ -25,12 +27,12 @@ export default function VisitorCardLocked({ visitor, onUnlock }: Props) {
         {/* Time badge */}
         <span className="absolute top-2 right-2 bg-emerald-900 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
           <Clock className="w-3 h-3" />
-          Il y a {visitor.hoursAgo}h
+          {t('hoursAgo', { n: visitor.hoursAgo })}
         </span>
         {/* New badge */}
         {visitor.isNew && (
           <span className="absolute bottom-2 left-2 bg-emerald-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-            Nouveau
+            {t('new')}
           </span>
         )}
       </div>
@@ -38,10 +40,10 @@ export default function VisitorCardLocked({ visitor, onUnlock }: Props) {
       {/* Blurred info */}
       <div className="p-3">
         <p className="text-gray-300 text-sm font-medium blur-sm select-none">
-          Nom masqué
+          {t('nameHidden')}
         </p>
         <p className="text-gray-200 text-xs blur-sm select-none mt-1">
-          • Ville, Pays
+          {t('cityCountry')}
         </p>
 
         {/* Unlock button */}
@@ -50,7 +52,7 @@ export default function VisitorCardLocked({ visitor, onUnlock }: Props) {
           className="w-full mt-3 bg-amber-100 text-amber-600 text-sm font-medium py-2 rounded-lg flex items-center justify-center gap-1 hover:bg-amber-200 transition-colors"
         >
           <Crown className="w-3 h-3" />
-          Débloquer ce profil
+          {t('unlockProfile')}
         </button>
       </div>
     </div>

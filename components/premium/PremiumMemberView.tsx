@@ -1,30 +1,39 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations, useLocale } from 'next-intl'
 import { CheckCircle, Crown, RefreshCw, X, ChevronDown, ChevronUp, Calendar, Zap } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { useCurrentUser } from '@/lib/use-current-user'
-import { features, faqs } from '@/lib/mock-premium'
+import { features } from '@/lib/mock-premium'
 
-const MONTHS_FR = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre']
-
-function frDate(iso: string): string {
-  const d = new Date(iso)
-  return `${d.getDate()} ${MONTHS_FR[d.getMonth()]} ${d.getFullYear()}`
-}
-
-type SubInfo = { expiry: string; daysLeft: number; planLabel: string }
+type SubInfo = { expiry: string; daysLeft: number; durationMonths: number }
+type FeatureItem = { title: string; description: string; free: string; premium: string }
+type FaqItem = { question: string; answer: string }
 
 export default function PremiumMemberView() {
   const router = useRouter()
+  const t = useTranslations('dashboard.premium.member')
+  const tf = useTranslations('dashboard.premium.features')
+  const tFaq = useTranslations('dashboard.premium.faq')
+  const locale = useLocale()
   const { user } = useAuth()
   const { firstName, stats } = useCurrentUser()
   const [openFaq, setOpenFaq] = useState<number | null>(null)
   const [showCancelConfirm, setShowCancelConfirm] = useState(false)
   const [sub, setSub] = useState<SubInfo | null>(null)
+
+  const featureItems = tf.raw('items') as FeatureItem[]
+  const faqs = tFaq.raw('items') as FaqItem[]
+
+  // Date localisée via Intl (fr/en) — pas de mois codés en dur.
+  const localizedDate = (iso: string): string =>
+    new Date(iso).toLocaleDateString(locale === 'en' ? 'en-GB' : 'fr-FR', {
+      day: 'numeric', month: 'long', year: 'numeric',
+    })
 
   // Abonnement réel du membre (subscriptions — RLS : propriétaire uniquement)
   useEffect(() => {
@@ -40,22 +49,22 @@ export default function PremiumMemberView() {
         const end = new Date(data.current_period_end)
         const daysLeft = Math.max(0, Math.ceil((end.getTime() - Date.now()) / 86_400_000))
         setSub({
-          expiry: frDate(data.current_period_end),
+          expiry: localizedDate(data.current_period_end),
           daysLeft,
-          planLabel: `Premium ${data.duration_months ?? 1} Mois`,
+          durationMonths: data.duration_months ?? 1,
         })
       })
-  }, [user])
+  }, [user, locale])
 
   const expiry = sub?.expiry ?? '—'
 
   const handleRenew = () => {
-    toast.success('Renouvellement — disponible depuis les paramètres dans la prochaine version')
+    toast.success(t('renewToast'))
   }
 
   const handleCancel = () => {
     setShowCancelConfirm(false)
-    toast.info(`Abonnement annulé. Tu conserves l'accès jusqu'au ${expiry}.`)
+    toast.info(t('cancelledToast', { date: expiry }))
   }
 
   return (
@@ -67,34 +76,34 @@ export default function PremiumMemberView() {
           <Crown className="w-7 h-7 text-amber-400" />
         </div>
         <div>
-          <h1 className="text-xl font-bold">{firstName}, tu es Premium ✓</h1>
+          <h1 className="text-xl font-bold">{t('title', { name: firstName })}</h1>
           <p className="text-emerald-300 text-sm mt-1">
-            Tous tes avantages sont actifs
+            {t('allActive')}
           </p>
         </div>
         {sub && (
           <div className="bg-white/10 rounded-xl px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm">
               <Calendar className="w-4 h-4 text-emerald-300" />
-              <span className="text-white/80">Expire le</span>
+              <span className="text-white/80">{t('expiresOn')}</span>
               <span className="font-semibold">{sub.expiry}</span>
             </div>
             <span className="text-xs bg-emerald-500 text-white px-2 py-0.5 rounded-full font-medium">
-              {sub.daysLeft}j restants
+              {t('daysLeft', { n: sub.daysLeft })}
             </span>
           </div>
         )}
-        {sub && <div className="text-xs text-white/50">{sub.planLabel} · Renouvellement automatique</div>}
+        {sub && <div className="text-xs text-white/50">{t('planLine', { plan: t('planLabel', { n: sub.durationMonths }) })}</div>}
       </section>
 
       {/* Impact stats since premium */}
       <section>
-        <h2 className="font-bold text-gray-900 text-base mb-3">Ton impact depuis Premium</h2>
+        <h2 className="font-bold text-gray-900 text-base mb-3">{t('impactTitle')}</h2>
         <div className="grid grid-cols-3 gap-3">
           {[
-            { value: stats?.visitors ?? 0,  label: 'Visiteurs' },
-            { value: stats?.favorites ?? 0, label: 'Favoris' },
-            { value: stats?.requests ?? 0,  label: 'Contacts' },
+            { value: stats?.visitors ?? 0,  label: t('visitors') },
+            { value: stats?.favorites ?? 0, label: t('favorites') },
+            { value: stats?.requests ?? 0,  label: t('contacts') },
           ].map(({ value, label }) => (
             <div key={label} className="bg-emerald-50 border border-emerald-100 rounded-xl py-4 flex flex-col items-center gap-1">
               <span className="text-2xl font-bold text-emerald-600">{value}</span>
@@ -106,13 +115,14 @@ export default function PremiumMemberView() {
 
       {/* Active features */}
       <section>
-        <h2 className="font-bold text-gray-900 text-base mb-3">Tes avantages actifs</h2>
+        <h2 className="font-bold text-gray-900 text-base mb-3">{t('activeFeaturesTitle')}</h2>
         <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
           {features.map((feature, i) => {
             const Icon = feature.icon
+            const item = featureItems[i]
             return (
               <div
-                key={feature.title}
+                key={i}
                 className={`flex items-start gap-3 p-4 ${i < features.length - 1 ? 'border-b border-gray-50' : ''}`}
               >
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${feature.iconBg}`}>
@@ -120,17 +130,17 @@ export default function PremiumMemberView() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
-                    <span className="font-semibold text-sm text-gray-900">{feature.title}</span>
+                    <span className="font-semibold text-sm text-gray-900">{item.title}</span>
                     {feature.isNew && (
                       <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-600 font-medium">
-                        NOUVEAU
+                        {t('new')}
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-gray-400 leading-relaxed mb-1.5">{feature.description}</p>
+                  <p className="text-xs text-gray-400 leading-relaxed mb-1.5">{item.description}</p>
                   <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 font-medium">
                     <CheckCircle className="w-3 h-3" />
-                    {feature.badge.premium}
+                    {item.premium}
                   </span>
                 </div>
               </div>
@@ -142,7 +152,7 @@ export default function PremiumMemberView() {
       {/* Subscription management */}
       <section className="bg-white border border-gray-100 rounded-xl overflow-hidden">
         <div className="px-4 py-3 border-b border-gray-50">
-          <h2 className="font-bold text-gray-900 text-sm">Gérer mon abonnement</h2>
+          <h2 className="font-bold text-gray-900 text-sm">{t('manageTitle')}</h2>
         </div>
 
         {/* Renew */}
@@ -154,25 +164,25 @@ export default function PremiumMemberView() {
             <RefreshCw className="w-4 h-4 text-emerald-600" />
           </div>
           <div className="flex-1 text-left">
-            <p className="text-sm font-semibold text-gray-900">Renouveler maintenant</p>
-            <p className="text-xs text-gray-400">Prolonger avant le {expiry}</p>
+            <p className="text-sm font-semibold text-gray-900">{t('renewTitle')}</p>
+            <p className="text-xs text-gray-400">{t('renewSub', { date: expiry })}</p>
           </div>
           <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">
-            Offre -33%
+            {t('renewOffer')}
           </span>
         </button>
 
         {/* Boost */}
         <button
-          onClick={() => toast.info('Boosts — disponible dans la prochaine version ⚡')}
+          onClick={() => toast.info(t('boostToast'))}
           className="w-full flex items-center gap-3 px-4 py-4 hover:bg-gray-50 transition-colors border-b border-gray-50"
         >
           <div className="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center shrink-0">
             <Zap className="w-4 h-4 text-amber-500" />
           </div>
           <div className="flex-1 text-left">
-            <p className="text-sm font-semibold text-gray-900">Acheter des boosts</p>
-            <p className="text-xs text-gray-400">Propulse ton profil en tête pendant 24h</p>
+            <p className="text-sm font-semibold text-gray-900">{t('boostTitle')}</p>
+            <p className="text-xs text-gray-400">{t('boostSub')}</p>
           </div>
         </button>
 
@@ -185,15 +195,15 @@ export default function PremiumMemberView() {
             <X className="w-4 h-4 text-red-400" />
           </div>
           <div className="flex-1 text-left">
-            <p className="text-sm font-semibold text-red-500">Annuler l&apos;abonnement</p>
-            <p className="text-xs text-gray-400">Tu restes Premium jusqu&apos;au {expiry}</p>
+            <p className="text-sm font-semibold text-red-500">{t('cancelTitle')}</p>
+            <p className="text-xs text-gray-400">{t('cancelSub', { date: expiry })}</p>
           </div>
         </button>
       </section>
 
       {/* FAQ */}
       <section>
-        <h2 className="font-bold text-gray-900 text-base mb-3">Questions fréquentes</h2>
+        <h2 className="font-bold text-gray-900 text-base mb-3">{t('faqTitle')}</h2>
         <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
           {faqs.map((faq, i) => (
             <div key={i} className={i < faqs.length - 1 ? 'border-b border-gray-50' : ''}>
@@ -231,23 +241,22 @@ export default function PremiumMemberView() {
             className="bg-white rounded-2xl p-6 w-full max-w-sm space-y-4"
             onClick={e => e.stopPropagation()}
           >
-            <h3 className="font-bold text-gray-900 text-lg">Annuler le Premium ?</h3>
+            <h3 className="font-bold text-gray-900 text-lg">{t('cancelModalTitle')}</h3>
             <p className="text-sm text-gray-500 leading-relaxed">
-              Tu conserveras tous tes avantages jusqu&apos;au <span className="font-semibold text-gray-800">{expiry}</span>.
-              Après cette date, ton profil repassera en version gratuite.
+              {t('cancelModalBodyPrefix')}<span className="font-semibold text-gray-800">{expiry}</span>{t('cancelModalBodySuffix')}
             </p>
             <div className="space-y-2 pt-1">
               <button
                 onClick={handleCancel}
                 className="w-full py-3 rounded-xl bg-red-500 text-white font-semibold text-sm hover:bg-red-600 transition-colors"
               >
-                Oui, annuler mon abonnement
+                {t('cancelConfirm')}
               </button>
               <button
                 onClick={() => setShowCancelConfirm(false)}
                 className="w-full py-3 rounded-xl bg-gray-100 text-gray-700 font-semibold text-sm hover:bg-gray-200 transition-colors"
               >
-                Garder mon Premium
+                {t('cancelKeep')}
               </button>
             </div>
           </div>

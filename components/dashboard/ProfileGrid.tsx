@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Heart, Crown, MapPin, Briefcase, X, Star, BadgeCheck } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
@@ -39,6 +40,7 @@ function GridCard({ profile, liked, onLike, viewerIsPremium }: {
   viewerIsPremium: boolean
 }) {
   const router = useRouter()
+  const t = useTranslations('dashboard.grid')
   const isOnline = useIsOnline(profile.id)
   return (
     <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer group">
@@ -65,7 +67,7 @@ function GridCard({ profile, liked, onLike, viewerIsPremium }: {
         {viewerIsPremium && isOnline && (
           <div className="absolute top-2 right-11 flex items-center gap-1 bg-white/90 text-emerald-600 text-[10px] font-bold px-2 py-1 rounded-full shadow">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            En ligne
+            {t('online')}
           </div>
         )}
 
@@ -90,7 +92,7 @@ function GridCard({ profile, liked, onLike, viewerIsPremium }: {
         <div className="absolute bottom-0 left-0 right-0 p-3 pointer-events-none">
           <p className="text-white font-bold text-base leading-tight flex items-center gap-1">
             {profile.name} <span className="font-normal opacity-90">{profile.age}</span>
-            <BadgeCheck className="w-4 h-4 text-sky-400 shrink-0" aria-label="Profil vérifié" />
+            <BadgeCheck className="w-4 h-4 text-sky-400 shrink-0" aria-label={t('verified')} />
           </p>
           <div className="flex items-center gap-1 mt-0.5">
             <MapPin className="w-3 h-3 text-white/70 shrink-0" />
@@ -109,6 +111,7 @@ function GridCard({ profile, liked, onLike, viewerIsPremium }: {
 
 export default function ProfileGrid() {
   const router  = useRouter()
+  const t = useTranslations('dashboard.grid')
   const { user } = useAuth()
   const { isPremium, gender, firstName: myFirstName } = useCurrentUser()
   const [profiles, setProfiles] = useState<GridProfile[]>([])
@@ -139,7 +142,7 @@ export default function ProfileGrid() {
                 id:           p.user_id,
                 name:         `${p.first_name} ${(p.last_name ?? '').charAt(0)}.`,
                 age:          p.age ?? 0,
-                city:         p.city ?? 'Inconnu',
+                city:         p.city ?? t('unknownCity'),
                 job:          p.job ?? '',
                 score:        p.profile_completion ?? 80,
                 photo:        p.avatar_url ?? '/avatar-placeholder.svg',
@@ -171,7 +174,7 @@ export default function ProfileGrid() {
     }
     setLiked(prev => new Set([...prev, id]))
     notifyByEmail(id, 'demande', myFirstName || 'Un membre')
-    toast.success(`Demande envoyée à ${name} ✓`)
+    toast.success(t('requestSent', { name }))
     return true
   }
 
@@ -194,11 +197,11 @@ export default function ProfileGrid() {
               <Heart className="w-4 h-4 text-pink-500 fill-pink-500" />
             </div>
             <div>
-              <h2 className="font-semibold text-gray-900 text-sm leading-tight">La sélection Jommba</h2>
-              <p className="text-xs text-gray-400">Des profils choisis pour toi</p>
+              <h2 className="font-semibold text-gray-900 text-sm leading-tight">{t('selectionTitle')}</h2>
+              <p className="text-xs text-gray-400">{t('selectionSubtitle')}</p>
             </div>
           </div>
-          <span className="text-xs text-gray-400">{profiles.length} profils</span>
+          <span className="text-xs text-gray-400">{t('profilesCount', { count: profiles.length })}</span>
         </div>
 
         <div className="grid grid-cols-4 gap-3">
@@ -218,7 +221,7 @@ export default function ProfileGrid() {
             onClick={() => router.push('/dashboard/explorer')}
             className="text-sm font-medium text-emerald-500 hover:text-emerald-600 transition-colors"
           >
-            Voir tous les profils →
+            {t('seeAll')}
           </button>
         </div>
       </div>
@@ -233,20 +236,20 @@ export default function ProfileGrid() {
                 <Heart className="w-4 h-4 text-pink-500 fill-pink-500" />
               </div>
               <div>
-                <h2 className="font-semibold text-gray-900 text-sm">La sélection Jommba</h2>
-                <p className="text-xs text-gray-400">Des profils choisis pour toi</p>
+                <h2 className="font-semibold text-gray-900 text-sm">{t('selectionTitle')}</h2>
+                <p className="text-xs text-gray-400">{t('selectionSubtitle')}</p>
               </div>
             </div>
             <div className="text-center py-10 space-y-3">
               <div className="w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center mx-auto">
                 <Heart className="w-7 h-7 text-emerald-400" />
               </div>
-              <p className="font-semibold text-gray-800 text-sm">Tu as vu tous les profils !</p>
+              <p className="font-semibold text-gray-800 text-sm">{t('allSeen')}</p>
               <button
                 onClick={() => setIndex(0)}
                 className="text-sm font-medium text-emerald-500 hover:text-emerald-600 transition-colors"
               >
-                Recommencer
+                {t('restart')}
               </button>
             </div>
             <div className="text-center">
@@ -254,7 +257,7 @@ export default function ProfileGrid() {
                 onClick={() => router.push('/dashboard/explorer')}
                 className="text-sm font-medium text-emerald-500 hover:text-emerald-600 transition-colors"
               >
-                Voir tous les profils →
+                {t('seeAll')}
               </button>
             </div>
           </>
@@ -266,8 +269,8 @@ export default function ProfileGrid() {
                   <Heart className="w-4 h-4 text-pink-500 fill-pink-500" />
                 </div>
                 <div>
-                  <h2 className="font-semibold text-gray-900 text-sm leading-tight">La sélection Jommba</h2>
-                  <p className="text-xs text-gray-400">Des profils choisis pour toi</p>
+                  <h2 className="font-semibold text-gray-900 text-sm leading-tight">{t('selectionTitle')}</h2>
+                  <p className="text-xs text-gray-400">{t('selectionSubtitle')}</p>
                 </div>
               </div>
               <span className="text-sm text-gray-400 font-medium tabular-nums">{index + 1}/{total}</span>
@@ -331,7 +334,7 @@ export default function ProfileGrid() {
                 className="flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 active:scale-95 transition-all flex-1"
               >
                 <X className="w-5 h-5 text-gray-500" />
-                <span className="text-[11px] font-semibold text-gray-500">Passer</span>
+                <span className="text-[11px] font-semibold text-gray-500">{t('pass')}</span>
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); handleLikeCarousel() }}
@@ -342,7 +345,7 @@ export default function ProfileGrid() {
               >
                 <Star className="w-5 h-5 text-white fill-white" />
                 <span className="text-[11px] font-semibold text-white">
-                  {liked.has(profile.id) ? "Déjà liké" : "J'aime"}
+                  {liked.has(profile.id) ? t('alreadyLiked') : t('like')}
                 </span>
               </button>
             </div>
@@ -352,7 +355,7 @@ export default function ProfileGrid() {
                 onClick={() => router.push('/dashboard/explorer')}
                 className="text-sm font-medium text-emerald-500 hover:text-emerald-600 transition-colors"
               >
-                Voir tous les profils →
+                {t('seeAll')}
               </button>
             </div>
           </>

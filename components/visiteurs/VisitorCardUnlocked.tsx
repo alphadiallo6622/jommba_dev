@@ -1,6 +1,7 @@
 'use client'
 
 import { Clock, MapPin } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import type { Visitor } from '@/lib/mock-visitors'
 
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export default function VisitorCardUnlocked({ visitor }: Props) {
+  const t = useTranslations('dashboard.visiteurs')
   return (
     <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
       {/* Normal photo */}
@@ -21,12 +23,12 @@ export default function VisitorCardUnlocked({ visitor }: Props) {
         {/* Time badge */}
         <span className="absolute top-2 right-2 bg-emerald-900 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
           <Clock className="w-3 h-3" />
-          Il y a {visitor.hoursAgo}h
+          {t('hoursAgo', { n: visitor.hoursAgo })}
         </span>
         {/* New badge */}
         {visitor.isNew && (
           <span className="absolute bottom-2 left-2 bg-emerald-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-            Nouveau
+            {t('new')}
           </span>
         )}
       </div>
@@ -43,10 +45,10 @@ export default function VisitorCardUnlocked({ visitor }: Props) {
 
         {/* View profile button */}
         <button
-          onClick={() => toast.success('Profil bientôt accessible')}
+          onClick={() => toast.success(t('profileSoon'))}
           className="w-full mt-3 bg-emerald-500 text-white text-sm font-medium py-2 rounded-lg flex items-center justify-center gap-1 hover:bg-emerald-600 transition-colors"
         >
-          Voir le profil →
+          {t('viewProfile')}
         </button>
       </div>
     </div>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { Volume2, VolumeX, EyeOff, Eye, LogOut, Settings, HelpCircle, User } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useCurrentUser } from '@/lib/use-current-user'
@@ -12,6 +13,7 @@ type Props = { onClose: () => void }
 
 export default function ProfileDropdown({ onClose }: Props) {
   const router = useRouter()
+  const t = useTranslations('dashboard.dropdown')
   const mockUser = useCurrentUser()
   const logout = useAuthStore(s => s.logout)
   const { isPhotosBlurred, isSoundEnabled, togglePhotosBlur, toggleSound } = useProfileStore()
@@ -66,8 +68,11 @@ export default function ProfileDropdown({ onClose }: Props) {
         </div>
         <p className="text-xs text-[#10B981] mt-0.5">
           {mockUser.isPremium
-            ? '→ Demandes illimitées'
-            : `→ Demandes restantes ${Math.max(0, mockUser.dailyRequests.total - mockUser.dailyRequests.used)}/${mockUser.dailyRequests.total}`}
+            ? t('unlimitedRequests')
+            : t('remainingRequests', {
+                remaining: Math.max(0, mockUser.dailyRequests.total - mockUser.dailyRequests.used),
+                total: mockUser.dailyRequests.total,
+              })}
         </p>
       </div>
 
@@ -77,7 +82,7 @@ export default function ProfileDropdown({ onClose }: Props) {
         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
       >
         <User className="w-4 h-4 text-gray-400" />
-        Mon profil
+        {t('myProfile')}
       </button>
 
       {/* Paramètres */}
@@ -86,7 +91,7 @@ export default function ProfileDropdown({ onClose }: Props) {
         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
       >
         <Settings className="w-4 h-4 text-gray-400" />
-        Paramètres
+        {t('settings')}
       </button>
 
       {/* Toggle flouter photos */}
@@ -102,7 +107,7 @@ export default function ProfileDropdown({ onClose }: Props) {
           ? <EyeOff className="w-4 h-4 text-amber-500" />
           : <Eye className="w-4 h-4 text-gray-400" />
         }
-        {isPhotosBlurred ? 'Déflouter mes photos' : 'Flouter mes photos'}
+        {isPhotosBlurred ? t('unblurPhotos') : t('blurPhotos')}
       </button>
 
       {/* Toggle son */}
@@ -114,7 +119,7 @@ export default function ProfileDropdown({ onClose }: Props) {
           ? <Volume2 className="w-4 h-4 text-gray-400" />
           : <VolumeX className="w-4 h-4 text-gray-400" />
         }
-        {isSoundEnabled ? 'Sons activés' : 'Sons désactivés'}
+        {isSoundEnabled ? t('soundOn') : t('soundOff')}
       </button>
 
       {/* Aide & FAQ */}
@@ -123,7 +128,7 @@ export default function ProfileDropdown({ onClose }: Props) {
         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
       >
         <HelpCircle className="w-4 h-4 text-gray-400" />
-        Aide &amp; FAQ
+        {t('help')}
       </button>
 
       <div className="border-t border-gray-100 my-1" />
@@ -134,7 +139,7 @@ export default function ProfileDropdown({ onClose }: Props) {
         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
       >
         <LogOut className="w-4 h-4" />
-        Déconnexion
+        {t('logout')}
       </button>
     </div>
   )

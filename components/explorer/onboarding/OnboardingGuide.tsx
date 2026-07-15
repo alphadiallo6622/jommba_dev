@@ -1,11 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { TOUR_STEPS, TOUR_STORAGE_KEY } from './steps'
+import { useTranslations } from 'next-intl'
+import { TOUR_STEPS, TOUR_STORAGE_KEY, type TourStep } from './steps'
 import TourModal from './TourModal'
 import { useExplorerStore } from '@/store/explorer.store'
 
 export default function OnboardingGuide() {
+  const t = useTranslations('dashboard.explorer.tour')
   const [tourDone, setTourDone] = useState(true) // true by default to avoid SSR flash
   const [stepIndex, setStepIndex] = useState(0)
   const setTourHighlight = useExplorerStore(s => s.setTourHighlight)
@@ -32,9 +34,17 @@ export default function OnboardingGuide() {
 
   if (tourDone) return null
 
+  const meta = TOUR_STEPS[stepIndex]
+  const resolvedStep: TourStep = {
+    ...meta,
+    title:       t(`step${meta.id}Title`),
+    body:        t(`step${meta.id}Body`),
+    buttonLabel: t(`step${meta.id}Button`),
+  }
+
   return (
     <TourModal
-      step={TOUR_STEPS[stepIndex]}
+      step={resolvedStep}
       stepIndex={stepIndex}
       totalSteps={TOUR_STEPS.length}
       onNext={handleNext}

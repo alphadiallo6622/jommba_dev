@@ -2,9 +2,11 @@
 
 import { useState } from 'react'
 import { MessageCircle, Heart } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 
 export default function DailyTip() {
+  const t = useTranslations('dashboard.dailyTip')
   const [liked, setLiked] = useState(false)
 
   return (
@@ -14,17 +16,17 @@ export default function DailyTip() {
       </div>
 
       <div className="flex-1 min-w-0">
-        <span className="text-[10px] font-bold tracking-wider text-gray-400 block mb-0.5">CONSEIL DU JOUR</span>
-        <h3 className="font-bold text-gray-900 text-sm">Qualité &gt; Quantité</h3>
+        <span className="text-[10px] font-bold tracking-wider text-gray-400 block mb-0.5">{t('badge')}</span>
+        <h3 className="font-bold text-gray-900 text-sm">{t('title')}</h3>
         <p className="text-gray-500 text-xs mt-1 leading-relaxed">
-          Mieux vaut 3 échanges sincères que 30 conversations superficielles.
+          {t('text')}
         </p>
       </div>
 
       <button
         onClick={() => setLiked(l => !l)}
         className="shrink-0 mt-1 transition-transform active:scale-90"
-        aria-label="J'aime ce conseil"
+        aria-label={t('likeAria')}
       >
         <Heart
           className={cn(

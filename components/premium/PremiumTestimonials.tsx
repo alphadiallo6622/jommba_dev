@@ -1,10 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { motion, AnimatePresence } from 'framer-motion'
-import { testimonials } from '@/lib/mock-premium'
+
+type Testimonial = { daysLabel: string; statusLabel: string; quote: string; author: string; city: string }
 
 export default function PremiumTestimonials() {
+  const tr = useTranslations('dashboard.premium.testimonials')
+  const testimonials = tr.raw('items') as Testimonial[]
   const [current, setCurrent] = useState(0)
 
   useEffect(() => {
@@ -12,7 +16,7 @@ export default function PremiumTestimonials() {
       setCurrent((prev) => (prev + 1) % testimonials.length)
     }, 4000)
     return () => clearInterval(timer)
-  }, [])
+  }, [testimonials.length])
 
   const t = testimonials[current]
 
@@ -21,11 +25,11 @@ export default function PremiumTestimonials() {
       {/* Header */}
       <div className="flex justify-center mb-3">
         <span className="bg-emerald-100 text-emerald-700 text-xs font-medium px-3 py-1 rounded-full">
-          ❤️ Histoires vraies
+          {tr('badge')}
         </span>
       </div>
       <h2 className="text-center font-bold text-xl text-gray-900 mb-6">
-        Ils ont trouvé leur moitié
+        {tr('title')}
       </h2>
 
       {/* Card carousel */}

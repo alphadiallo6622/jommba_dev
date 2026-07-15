@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useTranslations, useLocale } from 'next-intl'
 import { MessageCircle, Search, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/components/providers/AuthProvider'
@@ -15,6 +16,8 @@ import ConversationCard from './ConversationCard'
 type Tab = 'tous' | 'non-lus' | 'lus'
 
 export default function MessagesPage() {
+  const t = useTranslations('dashboard.messages')
+  const locale = useLocale()
   const { user } = useAuth()
   const [activeTab, setActiveTab]     = useState<Tab>('tous')
   const [searchQuery, setSearchQuery] = useState('')
@@ -36,9 +39,9 @@ export default function MessagesPage() {
   useEffect(() => { fetchData() }, [fetchData])
 
   const tabs = [
-    { id: 'tous'    as Tab, label: 'Tous',    count: conversations.length                       },
-    { id: 'non-lus' as Tab, label: 'Non lus', count: conversations.filter(c => !c.isRead).length },
-    { id: 'lus'     as Tab, label: 'Lus',     count: conversations.filter(c =>  c.isRead).length },
+    { id: 'tous'    as Tab, label: t('tabs.all'),    count: conversations.length                       },
+    { id: 'non-lus' as Tab, label: t('tabs.unread'), count: conversations.filter(c => !c.isRead).length },
+    { id: 'lus'     as Tab, label: t('tabs.read'),   count: conversations.filter(c =>  c.isRead).length },
   ]
 
   const filtered = useMemo(() => {
@@ -60,11 +63,11 @@ export default function MessagesPage() {
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-[#064E3B] flex items-center gap-2">
-          Messages
+          {t('title')}
           <MessageCircle className="w-6 h-6 text-[#10B981]" />
         </h1>
         <p className="text-gray-400 text-sm mt-1">
-          {loading ? '…' : `${conversations.length} conversation${conversations.length > 1 ? 's' : ''}`}
+          {loading ? '…' : t('count', { count: conversations.length })}
         </p>
       </div>
 
@@ -104,7 +107,7 @@ export default function MessagesPage() {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
         <input
           type="text"
-          placeholder="Rechercher une conversation..."
+          placeholder={t('searchPlaceholder')}
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
           className="w-full pl-10 pr-4 py-3 bg-white border border-gray-100 rounded-xl text-sm focus:outline-none focus:border-[#10B981] transition-colors"
@@ -131,7 +134,7 @@ export default function MessagesPage() {
                   lastInitial: conv.lastInitial,
                   photo:       conv.photo,
                   lastMessage: conv.lastMessage,
-                  timeAgo:     formatTimeAgo(conv.lastMessageAt),
+                  timeAgo:     formatTimeAgo(conv.lastMessageAt, locale),
                   isRead:      conv.isRead,
                   unreadCount: conv.unreadCount,
                   isArchived:  false,
@@ -141,9 +144,9 @@ export default function MessagesPage() {
           ) : (
             <div className="bg-white rounded-xl border border-gray-100 p-12 text-center">
               <MessageCircle className="w-10 h-10 text-gray-200 mx-auto mb-3" />
-              <p className="text-gray-400 text-sm">Aucune conversation</p>
+              <p className="text-gray-400 text-sm">{t('empty')}</p>
               <p className="text-gray-300 text-xs mt-1">
-                Accepte une demande de contact pour démarrer une discussion
+                {t('emptyHint')}
               </p>
             </div>
           )}

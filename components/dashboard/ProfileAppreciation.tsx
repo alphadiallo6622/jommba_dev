@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { Heart, Eye, User } from 'lucide-react'
 import { useCurrentUser } from '@/lib/use-current-user'
 
@@ -9,12 +10,13 @@ import { useCurrentUser } from '@/lib/use-current-user'
 // activité réelle : on n'invente jamais d'intérêt fictif.
 export default function ProfileAppreciation() {
   const router = useRouter()
+  const t = useTranslations('dashboard.appreciation')
   const { isPremium, gender, stats } = useCurrentUser()
 
   const interested = stats.favorites + stats.requests
   if (isPremium || interested === 0) return null
 
-  const label = gender === 'homme' ? 'sœurs' : gender === 'femme' ? 'frères' : 'membres'
+  const label = gender === 'homme' ? t('sisters') : gender === 'femme' ? t('brothers') : t('members')
   const avatarCount = Math.min(interested, 4)
   const extra = interested - avatarCount
 
@@ -26,11 +28,14 @@ export default function ProfileAppreciation() {
           <Heart className="w-4 h-4 text-pink-500" />
         </div>
         <div>
-          <h2 className="font-semibold text-gray-900 text-sm">Ton profil ne passe pas inaperçu</h2>
+          <h2 className="font-semibold text-gray-900 text-sm">{t('title')}</h2>
           <p className="text-xs text-gray-400">
-            {interested} {label} {interested > 1 ? 'apprécient' : 'apprécie'} ton profil
-            {' · '}{stats.requests} demande{stats.requests > 1 ? 's' : ''}
-            {' · '}{stats.favorites} favori{stats.favorites > 1 ? 's' : ''}
+            {t('summary', {
+              count: interested,
+              label,
+              requests: stats.requests,
+              favorites: stats.favorites,
+            })}
           </p>
         </div>
       </div>
@@ -56,7 +61,7 @@ export default function ProfileAppreciation() {
         {stats.visitors > 0 && (
           <div className="flex items-center gap-1 text-xs text-gray-500 ml-1">
             <Eye className="w-3.5 h-3.5 text-violet-400" />
-            <span>{stats.visitors} visite{stats.visitors > 1 ? 's' : ''} de profil</span>
+            <span>{t('visits', { count: stats.visitors })}</span>
           </div>
         )}
       </div>
@@ -66,7 +71,7 @@ export default function ProfileAppreciation() {
         onClick={() => router.push('/dashboard/premium')}
         className="w-full py-2.5 rounded-xl bg-amber-500 text-white text-sm font-semibold hover:bg-amber-600 transition-colors"
       >
-        Découvrir qui s&apos;intéresse à toi →
+        {t('cta')}
       </button>
     </div>
   )

@@ -3,6 +3,7 @@
 // Grille d'articles de l'Académie du Mariage : filtre par catégorie + pagination.
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import {
   BookOpen, Lightbulb, BookMarked, Users, Compass, Sparkles, Scale,
   Clock, ChevronRight, ChevronLeft, GraduationCap,
@@ -32,6 +33,7 @@ const CATEGORY_STYLE: Record<string, { icon: LucideIcon; iconBg: string; iconCol
 const DEFAULT_STYLE = { icon: Users, iconBg: 'bg-gray-50', iconColor: 'text-gray-500', chip: 'bg-gray-100 text-gray-600' }
 
 export default function AcademieListClient({ articles }: { articles: AcademyArticleCard[] }) {
+  const t = useTranslations('dashboard.academie')
   const [category, setCategory] = useState<string>('Tous')
   const [page, setPage] = useState(1)
 
@@ -50,11 +52,11 @@ export default function AcademieListClient({ articles }: { articles: AcademyArti
       <div className="text-center space-y-2">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-xs font-semibold">
           <GraduationCap className="w-3.5 h-3.5" />
-          Académie du Mariage
+          {t('badge')}
         </div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Apprends et prépare-toi</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{t('heading')}</h1>
         <p className="text-sm text-gray-500 max-w-xl mx-auto">
-          Conseils pratiques, sagesse prophétique et guides concrets pour construire un mariage épanoui.
+          {t('intro')}
         </p>
       </div>
 
@@ -71,7 +73,7 @@ export default function AcademieListClient({ articles }: { articles: AcademyArti
                   : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
               }`}
             >
-              {c}
+              {c === 'Tous' ? t('all') : c}
             </button>
           ))}
         </div>
@@ -81,7 +83,7 @@ export default function AcademieListClient({ articles }: { articles: AcademyArti
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-gray-400 bg-white rounded-2xl border border-gray-100">
           <BookOpen className="w-10 h-10 mb-3 opacity-40" />
-          <p className="text-sm">Aucun article pour le moment — reviens bientôt !</p>
+          <p className="text-sm">{t('empty')}</p>
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -100,7 +102,7 @@ export default function AcademieListClient({ articles }: { articles: AcademyArti
                   </div>
                   <span className="flex items-center gap-1 text-[11px] text-gray-400 font-medium">
                     <Clock className="w-3 h-3" />
-                    {article.readMinutes} min
+                    {t('readMin', { n: article.readMinutes })}
                   </span>
                 </div>
 
@@ -134,7 +136,7 @@ export default function AcademieListClient({ articles }: { articles: AcademyArti
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
             className="w-9 h-9 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-500 disabled:opacity-40 hover:bg-gray-50 transition-colors"
-            aria-label="Page précédente"
+            aria-label={t('prevPage')}
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -155,7 +157,7 @@ export default function AcademieListClient({ articles }: { articles: AcademyArti
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
             className="w-9 h-9 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-500 disabled:opacity-40 hover:bg-gray-50 transition-colors"
-            aria-label="Page suivante"
+            aria-label={t('nextPage')}
           >
             <ChevronRight className="w-4 h-4" />
           </button>

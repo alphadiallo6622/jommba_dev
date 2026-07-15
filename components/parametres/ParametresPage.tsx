@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { ChevronRight, Camera, User, MapPin, Heart, Smile, EyeOff, Bell, Shield, Settings } from 'lucide-react'
 import { useCurrentUser } from '@/lib/use-current-user'
 import PhotoPanel        from './panels/PhotoPanel'
@@ -16,18 +17,19 @@ import AccountPanel      from './panels/AccountPanel'
 type PanelId = 'photo' | 'infos' | 'location' | 'vision' | 'personality' | 'religion' | 'lifeproject' | 'confidentiality' | 'notifications' | 'security' | 'account' | null
 
 const SECTIONS = [
-  { id: 'photo'           as PanelId, icon: Camera,   label: 'Mes photos',              sub: '1 photo ajoutée' },
-  { id: 'infos'           as PanelId, icon: User,     label: 'Mes informations',         sub: 'Prénom, âge, taille, situation' },
-  { id: 'location'        as PanelId, icon: MapPin,   label: 'Localisation & parcours',  sub: 'Ville, profession, études' },
-  { id: 'vision'          as PanelId, icon: Heart,    label: 'Ma vision',                sub: 'Mariage, attentes, deal-breakers' },
-  { id: 'personality'     as PanelId, icon: Smile,    label: 'Personnalité',             sub: 'Intérêts, qualités, défauts' },
-  { id: 'confidentiality' as PanelId, icon: EyeOff,   label: 'Confidentialité',          sub: 'Photos floutées, données' },
-  { id: 'notifications'   as PanelId, icon: Bell,     label: 'Notifications',            sub: 'Push et email' },
-  { id: 'security'        as PanelId, icon: Shield,   label: 'Sécurité',                 sub: 'Mot de passe, vérification' },
-  { id: 'account'         as PanelId, icon: Settings, label: 'Mon compte',               sub: 'Suspendre, supprimer' },
-]
+  { id: 'photo'           as PanelId, icon: Camera,   key: 'photo' },
+  { id: 'infos'           as PanelId, icon: User,     key: 'infos' },
+  { id: 'location'        as PanelId, icon: MapPin,   key: 'location' },
+  { id: 'vision'          as PanelId, icon: Heart,    key: 'vision' },
+  { id: 'personality'     as PanelId, icon: Smile,    key: 'personality' },
+  { id: 'confidentiality' as PanelId, icon: EyeOff,   key: 'confidentiality' },
+  { id: 'notifications'   as PanelId, icon: Bell,     key: 'notifications' },
+  { id: 'security'        as PanelId, icon: Shield,   key: 'security' },
+  { id: 'account'         as PanelId, icon: Settings, key: 'account' },
+] as const
 
 export default function ParametresPage() {
+  const t = useTranslations('dashboard.parametres')
   const [activePanel, setActivePanel] = useState<PanelId>(null)
   const { profileCompletion: completion } = useCurrentUser()
 
@@ -35,7 +37,7 @@ export default function ParametresPage() {
 
   return (
     <div className="max-w-lg mx-auto px-4 py-4 pb-24">
-      <h1 className="text-2xl font-bold text-[#064E3B] mb-5">Paramètres</h1>
+      <h1 className="text-2xl font-bold text-[#064E3B] mb-5">{t('title')}</h1>
 
       {/* Completion bar */}
       <div
@@ -43,7 +45,7 @@ export default function ParametresPage() {
         onClick={() => setActivePanel('infos')}
       >
         <div className="flex items-center justify-between mb-2">
-          <p className="text-sm font-semibold text-gray-800">Complétion du profil</p>
+          <p className="text-sm font-semibold text-gray-800">{t('completion')}</p>
           <span className="text-sm font-bold text-[#10B981]">{completion}%</span>
         </div>
         <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
@@ -54,14 +56,14 @@ export default function ParametresPage() {
         </div>
         <p className="text-xs text-gray-400 mt-1.5">
           {completion < 100
-            ? `Complète ton profil pour +${100 - completion}% de visibilité`
-            : 'Profil complet · Félicitations !'}
+            ? t('completionHint', { n: 100 - completion })
+            : t('completionDone')}
         </p>
       </div>
 
       {/* Sections */}
       <div className="space-y-1">
-        {SECTIONS.map(({ id, icon: Icon, label, sub }) => (
+        {SECTIONS.map(({ id, icon: Icon, key }) => (
           <button
             key={id}
             onClick={() => setActivePanel(id)}
@@ -71,8 +73,8 @@ export default function ParametresPage() {
               <Icon className="w-4 h-4 text-[#10B981]" />
             </div>
             <div className="flex-1 text-left">
-              <p className="text-sm font-medium text-gray-800">{label}</p>
-              <p className="text-xs text-gray-400">{sub}</p>
+              <p className="text-sm font-medium text-gray-800">{t(`sections.${key}`)}</p>
+              <p className="text-xs text-gray-400">{t(`sections.${key}Sub`)}</p>
             </div>
             <ChevronRight className="w-4 h-4 text-gray-400" />
           </button>

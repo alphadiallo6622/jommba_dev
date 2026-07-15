@@ -1,6 +1,7 @@
 'use client'
 
 import { Star, BadgeCheck } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { ExplorerProfile } from '@/lib/mock-explorer'
 import { cn } from '@/lib/utils'
 import { useIsOnline } from '@/components/providers/PresenceProvider'
@@ -14,6 +15,7 @@ type Props = {
 }
 
 export default function ProfileSwipeCard({ profile, highlightPhoto, isFavorite, onToggleFavorite, viewerIsPremium }: Props) {
+  const t = useTranslations('dashboard.explorer')
   const photoUrl   = profile.photos[0] ?? '/avatar-placeholder.svg'
   const photoCount = profile.photos.length
   const isOnline   = useIsOnline(profile.id)
@@ -32,14 +34,14 @@ export default function ProfileSwipeCard({ profile, highlightPhoto, isFavorite, 
         {/* En avant pill */}
         {profile.isEnAvant && (
           <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 bg-violet-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">
-            ⭐ En avant
+            {t('featuredStar')}
           </div>
         )}
 
         {viewerIsPremium && isOnline && (
           <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 bg-white/90 text-emerald-600 text-xs font-bold px-2.5 py-1 rounded-full shadow-sm">
             <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            En ligne
+            {t('online')}
           </div>
         )}
 
@@ -66,7 +68,7 @@ export default function ProfileSwipeCard({ profile, highlightPhoto, isFavorite, 
           <div className="flex items-center justify-between mb-1">
             <h2 className="text-xl font-bold drop-shadow-sm flex items-center gap-1.5">
               {profile.firstName} {profile.lastInitial}., {profile.age}
-              <BadgeCheck className="w-4 h-4 text-sky-400 shrink-0" aria-label="Profil vérifié" />
+              <BadgeCheck className="w-4 h-4 text-sky-400 shrink-0" aria-label={t('verified')} />
             </h2>
 
             {/* Star / Favorite button */}
@@ -100,7 +102,7 @@ export default function ProfileSwipeCard({ profile, highlightPhoto, isFavorite, 
       {/* Marriage vision */}
       <div className="px-4 py-3 border-t border-gray-100">
         <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-1">
-          ⚡ MA VISION DU MARIAGE
+          {t('marriageVisionLabel')}
         </p>
         <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
           {profile.marriageVision}

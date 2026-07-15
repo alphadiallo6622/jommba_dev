@@ -3,49 +3,38 @@
 import { useState } from 'react'
 import { Eye, PauseCircle, MessageCircle, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { useVisibilityStore, VisibilityMode } from '@/store/visibility.store'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 
-type Option = { id: VisibilityMode; label: string; icon: string }
-
-const options: Option[] = [
-  { id: 'actif',      label: 'Profil actif',  icon: '👁️' },
-  { id: 'pause',      label: 'En pause',       icon: '⏸️' },
-  { id: 'discussion', label: 'En discussion',  icon: '💬' },
+const options: { id: VisibilityMode; labelKey: string; icon: string }[] = [
+  { id: 'actif',      labelKey: 'active',     icon: '👁️' },
+  { id: 'pause',      labelKey: 'paused',     icon: '⏸️' },
+  { id: 'discussion', labelKey: 'discussion', icon: '💬' },
 ]
 
-type ConfirmConfig = {
-  mode: VisibilityMode
-  title: string
-  body: string
-  confirmLabel: string
-  confirmClass: string
-  icon: React.ReactNode
-}
-
-const confirmConfigs: Record<'pause' | 'discussion', ConfirmConfig> = {
+const confirmConfigs: Record<'pause' | 'discussion', {
+  titleKey: string; bodyKey: string; confirmClass: string; icon: React.ReactNode
+}> = {
   pause: {
-    mode: 'pause',
-    title: 'Mettre en pause ?',
-    body: 'Ton profil sera invisible dans les recherches. Les membres ne pourront plus te trouver.',
-    confirmLabel: 'Confirmer',
+    titleKey: 'pauseTitle',
+    bodyKey: 'pauseBody',
     confirmClass: 'bg-red-500 hover:bg-red-600',
     icon: <PauseCircle className="w-8 h-8 text-red-500" />,
   },
   discussion: {
-    mode: 'discussion',
-    title: 'Passer En Discussion ?',
-    body: "Tu apparaîtras avec un badge 'En discussion'. Les nouvelles demandes seront bloquées.",
-    confirmLabel: 'Confirmer',
+    titleKey: 'discussionTitle',
+    bodyKey: 'discussionBody',
     confirmClass: 'bg-pink-500 hover:bg-pink-600',
     icon: <MessageCircle className="w-8 h-8 text-pink-500" />,
   },
 }
 
 export default function VisibilityToggle() {
+  const t = useTranslations('dashboard.visibility')
   const { mode, setMode } = useVisibilityStore()
   const { user } = useAuth()
   const [pending, setPending] = useState<'pause' | 'discussion' | null>(null)
@@ -62,7 +51,7 @@ export default function VisibilityToggle() {
       .eq('user_id', user.id)
     if (error) {
       setMode(previous)
-      toast.error('Erreur lors du changement de visibilité')
+      toast.error(t('persistError'))
     }
   }
 
@@ -87,12 +76,12 @@ export default function VisibilityToggle() {
       <div className="bg-white rounded-xl p-4">
         <div className="flex items-center gap-2 mb-1">
           <Eye className="w-4 h-4 text-emerald-500" />
-          <span className="font-bold text-gray-900 text-sm">Visibilité du profil</span>
+          <span className="font-bold text-gray-900 text-sm">{t('title')}</span>
         </div>
-        <p className="text-xs text-gray-400 mb-3">Contrôle qui peut te voir</p>
+        <p className="text-xs text-gray-400 mb-3">{t('subtitle')}</p>
 
         <div className="grid grid-cols-3 gap-2">
-          {options.map(({ id, label, icon }) => (
+          {options.map(({ id, labelKey, icon }) => (
             <button
               key={id}
               onClick={() => handleSelect(id)}
@@ -105,11 +94,11 @@ export default function VisibilityToggle() {
             >
               <span className="text-lg">{icon}</span>
               <span className={cn('text-[10px] font-semibold leading-tight text-center', mode === id ? 'text-emerald-700' : 'text-gray-500')}>
-                {label}
+                {t(labelKey)}
               </span>
               {mode === id && (
                 <span className="text-[9px] bg-emerald-500 text-white px-1.5 py-0.5 rounded-full font-bold">
-                  Actif
+                  {t('activeBadge')}
                 </span>
               )}
             </button>
@@ -150,8 +139,8 @@ export default function VisibilityToggle() {
                 {/* Icon + title */}
                 <div className="flex flex-col items-center text-center gap-3 mb-4">
                   {config.icon}
-                  <h3 className="font-bold text-gray-900 text-base">{config.title}</h3>
-                  <p className="text-sm text-gray-500 leading-relaxed">{config.body}</p>
+                  <h3 className="font-bold text-gray-900 text-base">{t(config.titleKey)}</h3>
+                  <p className="text-sm text-gray-500 leading-relaxed">{t(config.bodyKey)}</p>
                 </div>
 
                 {/* Buttons */}
@@ -160,13 +149,13 @@ export default function VisibilityToggle() {
                     onClick={confirm}
                     className={cn('w-full py-3 rounded-xl text-white text-sm font-semibold transition-colors', config.confirmClass)}
                   >
-                    {config.confirmLabel}
+                    {t('confirm')}
                   </button>
                   <button
                     onClick={() => setPending(null)}
                     className="w-full py-3 rounded-xl bg-gray-100 text-gray-600 text-sm font-semibold hover:bg-gray-200 transition-colors"
                   >
-                    Annuler
+                    {t('cancel')}
                   </button>
                 </div>
               </div>

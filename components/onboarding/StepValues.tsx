@@ -1,34 +1,47 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useOnboardingStore } from '@/store/onboarding.store'
 import { ArrowLeft, ArrowRight, Info } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type Props = { onNext: () => void; onBack: () => void }
 
+// La valeur stockée reste stable (canonique FR) ; seul le libellé est traduit.
 const MARRIAGE_VISIONS = [
-  'Mariage dès que possible', 'Dans les 6 mois', 'Dans l\'année', 'Pas pressé(e)',
-  'Après connaissance sérieuse', 'Besoin d\'istikhara',
-]
+  { value: 'Mariage dès que possible',   key: 'asap' },
+  { value: 'Dans les 6 mois',            key: 'sixMonths' },
+  { value: 'Dans l\'année',              key: 'thisYear' },
+  { value: 'Pas pressé(e)',              key: 'noRush' },
+  { value: 'Après connaissance sérieuse', key: 'afterKnowing' },
+  { value: 'Besoin d\'istikhara',        key: 'istikhara' },
+] as const
 const SOUGHT_QUALITIES = [
-  'Pratiquant(e)', 'Sérieux(se)', 'Bon caractère', 'Famille unie', 'Travailleur(se)',
-  'Discret(e)', 'Patient(e)', 'Généreux(se)',
-]
+  { value: 'Pratiquant(e)',  key: 'practicing' },
+  { value: 'Sérieux(se)',    key: 'serious' },
+  { value: 'Bon caractère',  key: 'goodCharacter' },
+  { value: 'Famille unie',   key: 'unitedFamily' },
+  { value: 'Travailleur(se)', key: 'hardworking' },
+  { value: 'Discret(e)',     key: 'discreet' },
+  { value: 'Patient(e)',     key: 'patient' },
+  { value: 'Généreux(se)',   key: 'generous' },
+] as const
 const POLYGAMY_OPTIONS = [
-  { value: 'non', label: 'Non, je n\'accepte pas' },
-  { value: 'oui', label: 'Oui, j\'accepte' },
-  { value: 'selon', label: 'Selon les conditions' },
-]
+  { value: 'non',   key: 'no' },
+  { value: 'oui',   key: 'yes' },
+  { value: 'selon', key: 'conditional' },
+] as const
 const CHILDREN_OPTIONS = [
-  { value: 'oui', label: 'Oui, j\'en ai' },
-  { value: 'non', label: 'Non, pas d\'enfants' },
-  { value: 'souhaite', label: 'Je souhaite en avoir' },
-  { value: 'ne_souhaite_pas', label: 'Je ne souhaite pas en avoir' },
-]
+  { value: 'oui',             key: 'have' },
+  { value: 'non',             key: 'none' },
+  { value: 'souhaite',        key: 'want' },
+  { value: 'ne_souhaite_pas', key: 'dontWant' },
+] as const
 
 const MAX_PILLS = 3
 
 export default function StepValues({ onNext, onBack }: Props) {
+  const t = useTranslations('onboarding')
   const { values, setField } = useOnboardingStore()
 
   const toggle = (group: 'marriageVision' | 'soughtQualities', item: string) => {
@@ -49,25 +62,25 @@ export default function StepValues({ onNext, onBack }: Props) {
   return (
     <div className="space-y-7">
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-serif font-bold text-gray-900">Tes valeurs</h2>
-        <p className="text-sm text-gray-500">Jusqu&rsquo;à 3 choix par section.</p>
+        <h2 className="text-2xl font-serif font-bold text-gray-900">{t('values.title')}</h2>
+        <p className="text-sm text-gray-500">{t('values.subtitle')}</p>
       </div>
 
       {/* Marriage vision */}
       <div>
         <label className="text-xs font-semibold text-gray-700 block mb-2">
-          Vision du mariage
+          {t('values.marriageVision')}
           <span className="ml-2 font-normal text-gray-400">({values.marriageVision.length}/{MAX_PILLS})</span>
         </label>
         <div className="flex flex-wrap gap-2">
-          {MARRIAGE_VISIONS.map(item => {
-            const selected = values.marriageVision.includes(item)
+          {MARRIAGE_VISIONS.map(({ value, key }) => {
+            const selected = values.marriageVision.includes(value)
             const disabled = !selected && values.marriageVision.length >= MAX_PILLS
             return (
               <button
-                key={item}
+                key={value}
                 type="button"
-                onClick={() => toggle('marriageVision', item)}
+                onClick={() => toggle('marriageVision', value)}
                 disabled={disabled}
                 className={cn(
                   'px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
@@ -76,7 +89,7 @@ export default function StepValues({ onNext, onBack }: Props) {
                   disabled  ? 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed' : '',
                 )}
               >
-                {item}
+                {t(`values.visions.${key}`)}
               </button>
             )
           })}
@@ -86,18 +99,18 @@ export default function StepValues({ onNext, onBack }: Props) {
       {/* Sought qualities */}
       <div>
         <label className="text-xs font-semibold text-gray-700 block mb-2">
-          Qualités recherchées
+          {t('values.soughtQualities')}
           <span className="ml-2 font-normal text-gray-400">({values.soughtQualities.length}/{MAX_PILLS})</span>
         </label>
         <div className="flex flex-wrap gap-2">
-          {SOUGHT_QUALITIES.map(item => {
-            const selected = values.soughtQualities.includes(item)
+          {SOUGHT_QUALITIES.map(({ value, key }) => {
+            const selected = values.soughtQualities.includes(value)
             const disabled = !selected && values.soughtQualities.length >= MAX_PILLS
             return (
               <button
-                key={item}
+                key={value}
                 type="button"
-                onClick={() => toggle('soughtQualities', item)}
+                onClick={() => toggle('soughtQualities', value)}
                 disabled={disabled}
                 className={cn(
                   'px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
@@ -106,7 +119,7 @@ export default function StepValues({ onNext, onBack }: Props) {
                   disabled  ? 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed' : '',
                 )}
               >
-                {item}
+                {t(`values.qualities.${key}`)}
               </button>
             )
           })}
@@ -115,9 +128,9 @@ export default function StepValues({ onNext, onBack }: Props) {
 
       {/* Polygamy */}
       <div>
-        <label className="text-xs font-semibold text-gray-700 block mb-2">Polygamie</label>
+        <label className="text-xs font-semibold text-gray-700 block mb-2">{t('values.polygamy')}</label>
         <div className="space-y-2">
-          {POLYGAMY_OPTIONS.map(({ value, label }) => (
+          {POLYGAMY_OPTIONS.map(({ value, key }) => (
             <button
               key={value}
               type="button"
@@ -135,7 +148,7 @@ export default function StepValues({ onNext, onBack }: Props) {
               )}>
                 {values.polygamy === value && <div className="w-2 h-2 rounded-full bg-emerald-500" />}
               </div>
-              {label}
+              {t(`values.polygamyOptions.${key}`)}
             </button>
           ))}
         </div>
@@ -143,9 +156,9 @@ export default function StepValues({ onNext, onBack }: Props) {
 
       {/* Children */}
       <div>
-        <label className="text-xs font-semibold text-gray-700 block mb-2">Enfants</label>
+        <label className="text-xs font-semibold text-gray-700 block mb-2">{t('values.children')}</label>
         <div className="grid grid-cols-2 gap-2">
-          {CHILDREN_OPTIONS.map(({ value, label }) => (
+          {CHILDREN_OPTIONS.map(({ value, key }) => (
             <button
               key={value}
               type="button"
@@ -157,7 +170,7 @@ export default function StepValues({ onNext, onBack }: Props) {
                   : 'border-gray-200 bg-white text-gray-600 hover:border-emerald-300',
               )}
             >
-              {label}
+              {t(`values.childrenOptions.${key}`)}
             </button>
           ))}
         </div>
@@ -167,7 +180,7 @@ export default function StepValues({ onNext, onBack }: Props) {
       <div className="flex items-start gap-2.5 bg-blue-50 border border-blue-100 rounded-xl p-3.5">
         <Info className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
         <p className="text-xs text-blue-600 leading-relaxed">
-          Ta biographie sera générée automatiquement à partir de tes réponses. Tu pourras la personnaliser depuis ton profil.
+          {t('values.bioNote')}
         </p>
       </div>
 
@@ -177,7 +190,7 @@ export default function StepValues({ onNext, onBack }: Props) {
           onClick={onBack}
           className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
         >
-          <ArrowLeft className="w-4 h-4" /> Retour
+          <ArrowLeft className="w-4 h-4" /> {t('nav.back')}
         </button>
         <button
           type="button"
@@ -186,7 +199,7 @@ export default function StepValues({ onNext, onBack }: Props) {
           className="flex-1 py-2.5 rounded-xl text-white font-semibold text-sm transition-opacity hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
           style={{ background: '#10B981' }}
         >
-          Continuer <ArrowRight className="w-4 h-4" />
+          {t('nav.continue')} <ArrowRight className="w-4 h-4" />
         </button>
       </div>
     </div>

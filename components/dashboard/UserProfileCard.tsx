@@ -1,10 +1,12 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useCurrentUser } from '@/lib/use-current-user'
 
 export default function UserProfileCard() {
   const router = useRouter()
+  const t = useTranslations('dashboard.userCard')
   const mockUser = useCurrentUser()
   const { firstName, city, country, avatar, profileCompletion } = mockUser
   const isComplete = profileCompletion >= 100
@@ -23,7 +25,7 @@ export default function UserProfileCard() {
         />
         <div>
           <p className="text-white font-bold text-base">
-            Salam, <span>{firstName}</span> ! 🌙
+            {t('greeting', { name: firstName })}
           </p>
           <p className="text-emerald-100 text-xs mt-0.5">
             🇸🇳 {city}, {country}
@@ -37,7 +39,7 @@ export default function UserProfileCard() {
       {/* Progress */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <span className="text-white font-medium text-xs">Profil complété</span>
+          <span className="text-white font-medium text-xs">{t('profileCompleted')}</span>
           <span className="text-white font-bold text-lg">{profileCompletion}%</span>
         </div>
         <div className="h-2 bg-white/30 rounded-full overflow-hidden">
@@ -51,7 +53,7 @@ export default function UserProfileCard() {
             onClick={() => router.push('/dashboard/parametres')}
             className="text-center text-xs text-emerald-200 mt-2 italic cursor-pointer hover:text-white transition-colors"
           >
-            Cliquez pour compléter
+            {t('clickToComplete')}
           </p>
         )}
       </div>

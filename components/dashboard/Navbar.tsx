@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { Home, Compass, Eye, Star, Heart, Crown, Zap, MessageCircle, Bell, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useCurrentUser } from '@/lib/use-current-user'
@@ -31,16 +32,17 @@ const TAB_TO_ROUTE: Partial<Record<TabId, string>> = {
 }
 
 const mainTabs = [
-  { id: 'accueil' as TabId,   label: 'Accueil',   icon: Home    },
-  { id: 'decouvrir' as TabId, label: 'Découvrir', icon: Compass },
-  { id: 'visiteurs' as TabId, label: 'Visiteurs', icon: Eye     },
-  { id: 'favoris' as TabId,   label: 'Favoris',   icon: Star    },
-  { id: 'demandes' as TabId,  label: 'Demandes',  icon: Heart   },
-]
+  { id: 'accueil' as TabId,   labelKey: 'home',      icon: Home    },
+  { id: 'decouvrir' as TabId, labelKey: 'discover',  icon: Compass },
+  { id: 'visiteurs' as TabId, labelKey: 'visitors',  icon: Eye     },
+  { id: 'favoris' as TabId,   labelKey: 'favorites', icon: Star    },
+  { id: 'demandes' as TabId,  labelKey: 'requests',  icon: Heart   },
+] as const
 
 export default function DashboardNavbar() {
   const pathname    = usePathname()
   const router      = useRouter()
+  const t           = useTranslations('dashboard.nav')
   const currentUser = useCurrentUser()
   const openBoost   = useBoostStore(s => s.openBoost)
   const totalUnread = useUnreadMessagesCount()
@@ -66,7 +68,7 @@ export default function DashboardNavbar() {
           <button
             onClick={() => router.push('/dashboard')}
             className="flex items-center mr-2 shrink-0 focus:outline-none"
-            aria-label="Accueil Jommba"
+            aria-label={t('homeAria')}
           >
             <img
               src="/logo_jommba.jpeg"
@@ -77,7 +79,7 @@ export default function DashboardNavbar() {
 
           {/* Main tabs — desktop only */}
           <div className="hidden md:flex items-center">
-            {mainTabs.map(({ id, label, icon: Icon }) => (
+            {mainTabs.map(({ id, labelKey, icon: Icon }) => (
               <button
                 key={id}
                 onClick={() => handleTabClick(id)}
@@ -87,7 +89,7 @@ export default function DashboardNavbar() {
                 )}
               >
                 <Icon className="w-[18px] h-[18px]" />
-                <span className="text-[10px] font-medium leading-none">{label}</span>
+                <span className="text-[10px] font-medium leading-none">{t(labelKey)}</span>
                 {activeTab === id && (
                   <span className="absolute bottom-0 left-1 right-1 h-0.5 bg-emerald-500 rounded-t" />
                 )}
@@ -102,7 +104,7 @@ export default function DashboardNavbar() {
               )}
             >
               <Crown className="w-[18px] h-[18px]" />
-              <span className="text-[10px] font-medium leading-none">Premium</span>
+              <span className="text-[10px] font-medium leading-none">{t('premium')}</span>
               {activeTab === 'premium' && (
                 <span className="absolute bottom-0 left-1 right-1 h-0.5 bg-amber-500 rounded-t" />
               )}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { Eye, Loader2 } from 'lucide-react'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { useCurrentUser } from '@/lib/use-current-user'
@@ -17,6 +18,7 @@ function hoursAgo(dateStr: string): number {
 
 export default function VisiteursPage() {
   const router = useRouter()
+  const t = useTranslations('dashboard.visiteurs')
   const { user } = useAuth()
   const { isPremium } = useCurrentUser()
   const [visitors, setVisitors] = useState<Visitor[]>([])
@@ -62,7 +64,7 @@ export default function VisiteursPage() {
             firstName:   p?.first_name ?? '…',
             lastInitial: (p?.last_name ?? '').charAt(0),
             age:         p?.age ?? 0,
-            city:        p?.city ?? 'Inconnu',
+            city:        p?.city ?? t('unknown'),
             country:     p?.country ?? '',
             hoursAgo:    hrs,
             isNew:       hrs < 24,
@@ -74,7 +76,7 @@ export default function VisiteursPage() {
     } finally {
       setLoading(false)
     }
-  }, [user])
+  }, [user, t])
 
   useEffect(() => { fetchVisitors() }, [fetchVisitors])
 
@@ -83,11 +85,11 @@ export default function VisiteursPage() {
 
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-emerald-900 flex items-center gap-2">
-          Mes visiteurs
+          {t('title')}
           <Eye className="w-6 h-6 text-emerald-500" />
         </h1>
         <p className="text-gray-500 text-sm mt-1">
-          {loading ? '…' : `${visitors.length} personne${visitors.length > 1 ? 's ont' : ' a'} consulté ton profil`}
+          {loading ? '…' : t('subtitle', { count: visitors.length })}
         </p>
       </div>
 
@@ -123,9 +125,9 @@ export default function VisiteursPage() {
       {!loading && visitors.length === 0 && isPremium && (
         <div className="text-center py-20">
           <Eye className="w-12 h-12 text-gray-200 mx-auto mb-4" />
-          <p className="text-gray-400 font-medium">Aucun visiteur pour l&apos;instant</p>
+          <p className="text-gray-400 font-medium">{t('emptyTitle')}</p>
           <p className="text-gray-300 text-sm mt-2">
-            Complète ton profil pour attirer plus de visites
+            {t('emptyDesc')}
           </p>
         </div>
       )}

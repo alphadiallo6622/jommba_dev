@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useTranslations } from 'next-intl'
 import { Sparkles, X, Copy, Check, Loader2, RefreshCw, Lightbulb } from 'lucide-react'
 import { toast } from 'sonner'
 import type { FullProfile } from '@/lib/mock-demandes'
@@ -26,6 +27,7 @@ const TONE_EMOJI: Record<string, string> = {
 }
 
 export default function MessageIdeasModal({ profile, onClose }: Props) {
+  const t = useTranslations('dashboard.profil.ideas')
   const [ideas, setIdeas] = useState<Idea[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -53,15 +55,15 @@ export default function MessageIdeasModal({ profile, onClose }: Props) {
       })
       const data = await res.json()
       if (!res.ok || !data.ideas) {
-        throw new Error(data.error || 'Erreur de génération')
+        throw new Error(data.error || t('genError'))
       }
       setIdeas(data.ideas)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erreur inconnue')
+      setError(e instanceof Error ? e.message : t('unknownError'))
     } finally {
       setLoading(false)
     }
-  }, [profile])
+  }, [profile, t])
 
   useEffect(() => { generate() }, [generate])
 
@@ -69,10 +71,10 @@ export default function MessageIdeasModal({ profile, onClose }: Props) {
     try {
       await navigator.clipboard.writeText(text)
       setCopiedIndex(index)
-      toast.success('Message copié ✓')
+      toast.success(t('copiedToast'))
       setTimeout(() => setCopiedIndex(null), 2000)
     } catch {
-      toast.error('Impossible de copier')
+      toast.error(t('copyError'))
     }
   }
 
@@ -98,14 +100,14 @@ export default function MessageIdeasModal({ profile, onClose }: Props) {
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-white font-bold text-base leading-tight">Idées de message</h2>
-              <p className="text-white/80 text-xs">Personnalisées pour {profile.firstName}</p>
+              <h2 className="text-white font-bold text-base leading-tight">{t('title')}</h2>
+              <p className="text-white/80 text-xs">{t('personalizedFor', { name: profile.firstName })}</p>
             </div>
           </div>
           <button
             onClick={onClose}
             className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-white hover:bg-white/30 transition-colors shrink-0"
-            aria-label="Fermer"
+            aria-label={t('close')}
           >
             <X className="w-4 h-4" />
           </button>
@@ -116,7 +118,7 @@ export default function MessageIdeasModal({ profile, onClose }: Props) {
           {loading && (
             <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
               <Loader2 className="w-7 h-7 animate-spin text-[#10B981]" />
-              <p className="text-sm text-gray-500">Claude génère des idées personnalisées…</p>
+              <p className="text-sm text-gray-500">{t('generating')}</p>
             </div>
           )}
 
@@ -127,7 +129,7 @@ export default function MessageIdeasModal({ profile, onClose }: Props) {
                 onClick={generate}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#10B981] text-white text-sm font-medium hover:bg-[#059669] transition-colors"
               >
-                <RefreshCw className="w-4 h-4" /> Réessayer
+                <RefreshCw className="w-4 h-4" /> {t('retry')}
               </button>
             </div>
           )}
@@ -145,7 +147,7 @@ export default function MessageIdeasModal({ profile, onClose }: Props) {
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#10B981]/40 text-[#10B981] text-xs font-semibold hover:bg-[#E1F5EE] transition-colors shrink-0"
                 >
                   {copiedIndex === i ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  {copiedIndex === i ? 'Copié' : 'Copier'}
+                  {copiedIndex === i ? t('copied') : t('copy')}
                 </button>
               </div>
             </div>
@@ -155,7 +157,7 @@ export default function MessageIdeasModal({ profile, onClose }: Props) {
         {/* Footer hint */}
         <div className="shrink-0 px-5 py-3 border-t border-gray-100 bg-white flex items-center justify-center gap-1.5 text-xs text-gray-400">
           <Lightbulb className="w-3.5 h-3.5" />
-          Copie et personnalise avant d&apos;envoyer
+          {t('footerHint')}
         </div>
       </div>
     </div>

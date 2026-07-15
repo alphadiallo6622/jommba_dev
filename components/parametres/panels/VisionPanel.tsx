@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 import { useCurrentUser } from '@/lib/use-current-user'
@@ -16,6 +17,8 @@ const SEEKING_THEMES = ['Piété','Douceur','Sérieux','Maturité','Sincérité'
 const DEALBREAKER_THEMES = ['Malhonnêteté','Manque de respect','Absence de piété','Infidélité','Violence']
 
 export default function VisionPanel({ open, onClose }: Props) {
+  const t = useTranslations('dashboard.parametres.vision')
+  const tp = useTranslations('dashboard.parametres')
   const mockUser = useCurrentUser()
   const { user } = useAuth()
   const [vision, setVision]             = useState(mockUser.marriageVision)
@@ -39,13 +42,13 @@ export default function VisionPanel({ open, onClose }: Props) {
       dealbreakers:    dealbreakers.trim() || null,
     })
     setSaving(false)
-    if (err) { toast.error(`Erreur : ${err}`); return }
-    toast.success('Vision sauvegardée ✓')
+    if (err) { toast.error(t('error', { msg: err })); return }
+    toast.success(t('saved'))
     onClose()
   }
 
   return (
-    <SettingsDrawer open={open} title="Ma vision" onClose={onClose}
+    <SettingsDrawer open={open} title={t('title')} onClose={onClose}
       footer={
         <button
           onClick={save}
@@ -53,33 +56,33 @@ export default function VisionPanel({ open, onClose }: Props) {
           className="w-full py-3 bg-[#10B981] text-white text-sm font-semibold rounded-xl hover:bg-[#059669] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
         >
           {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-          Enregistrer et fermer
+          {tp('saveAndClose')}
         </button>
       }
     >
       <div className="px-4 py-5">
         <ThemeTextSection
-          label="Ma vision du mariage"
+          label={t('visionLabel')}
           value={vision}
           onChange={setVision}
           maxLength={500}
-          placeholder="Décris ce que le mariage représente pour toi…"
+          placeholder={t('visionPlaceholder')}
           themes={VISION_THEMES}
         />
         <ThemeTextSection
-          label="Ce que je recherche"
+          label={t('seekingLabel')}
           value={seeking}
           onChange={setSeeking}
           maxLength={500}
-          placeholder="Décris le profil que tu recherches…"
+          placeholder={t('seekingPlaceholder')}
           themes={SEEKING_THEMES}
         />
         <ThemeTextSection
-          label="Ce que je n'accepte pas"
+          label={t('dealbreakersLabel')}
           value={dealbreakers}
           onChange={setDealbreakers}
           maxLength={300}
-          placeholder="Tes lignes rouges…"
+          placeholder={t('dealbreakersPlaceholder')}
           themes={DEALBREAKER_THEMES}
         />
       </div>

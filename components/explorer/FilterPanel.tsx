@@ -1,18 +1,27 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useExplorerStore } from '@/store/explorer.store'
 import { cn } from '@/lib/utils'
 
-const QUICK_FILTERS = ['Photo', 'Célibataire', '18-25', '26-35', '36+']
+// Valeur canonique (utilisée pour le filtrage) + clé de libellé traduit.
+const QUICK_FILTERS = [
+  { value: 'Photo',       key: 'photo' },
+  { value: 'Célibataire', key: 'single' },
+  { value: '18-25',       key: 'age1825' },
+  { value: '26-35',       key: 'age2635' },
+  { value: '36+',         key: 'age36' },
+] as const
 const FILTER_TABS = [
-  { id: 'filters', label: '⚡ Filtres' },
-  { id: 'country', label: '🌍 Pays' },
-]
+  { id: 'filters', labelKey: 'tabFilters' },
+  { id: 'country', labelKey: 'tabCountry' },
+] as const
 
 export default function FilterPanel() {
+  const t = useTranslations('dashboard.explorer.filters')
   const { filtersOpen, activeFilters, setFiltersOpen, toggleFilter } = useExplorerStore()
   const [activeTab, setActiveTab] = useState('filters')
 
@@ -46,7 +55,7 @@ export default function FilterPanel() {
             <div className="px-6 pb-8 pt-3 space-y-5">
               {/* Header */}
               <div className="flex items-center justify-between">
-                <h3 className="font-bold text-gray-900 text-lg">Filtres</h3>
+                <h3 className="font-bold text-gray-900 text-lg">{t('title')}</h3>
                 <button
                   onClick={() => setFiltersOpen(false)}
                   className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
@@ -68,7 +77,7 @@ export default function FilterPanel() {
                         : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300',
                     )}
                   >
-                    {tab.label}
+                    {t(tab.labelKey)}
                   </button>
                 ))}
               </div>
@@ -76,14 +85,14 @@ export default function FilterPanel() {
               {/* Quick filters */}
               {activeTab === 'filters' && (
                 <div>
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Filtres rapides</p>
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">{t('quickFilters')}</p>
                   <div className="flex flex-wrap gap-2">
-                    {QUICK_FILTERS.map(filter => {
-                      const active = activeFilters.includes(filter)
+                    {QUICK_FILTERS.map(({ value, key }) => {
+                      const active = activeFilters.includes(value)
                       return (
                         <button
-                          key={filter}
-                          onClick={() => toggleFilter(filter)}
+                          key={value}
+                          onClick={() => toggleFilter(value)}
                           className={cn(
                             'px-4 py-2 rounded-full text-sm font-medium border transition-all',
                             active
@@ -91,7 +100,7 @@ export default function FilterPanel() {
                               : 'bg-white border-gray-200 text-gray-600 hover:border-emerald-300',
                           )}
                         >
-                          {filter}
+                          {t(`quick.${key}`)}
                         </button>
                       )
                     })}
@@ -101,7 +110,7 @@ export default function FilterPanel() {
 
               {activeTab === 'country' && (
                 <div>
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Pays</p>
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">{t('country')}</p>
                   <div className="flex flex-wrap gap-2">
                     {['Sénégal', 'France', 'Guinée', 'Canada', 'Belgique', 'Maroc'].map(c => {
                       const active = activeFilters.includes(c)
@@ -129,7 +138,7 @@ export default function FilterPanel() {
                 className="w-full py-3 rounded-xl text-white font-semibold text-sm hover:opacity-90 transition-opacity"
                 style={{ background: '#10B981' }}
               >
-                Appliquer les filtres
+                {t('apply')}
                 {activeFilters.length > 0 && ` (${activeFilters.length})`}
               </button>
             </div>

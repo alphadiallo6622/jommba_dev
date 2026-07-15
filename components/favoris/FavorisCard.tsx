@@ -2,6 +2,7 @@
 
 import { Trash2, MapPin, Briefcase } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useTranslations, useLocale } from 'next-intl'
 import type { FavoriteEntry } from '@/store/favoris.store'
 
 interface Props {
@@ -9,8 +10,8 @@ interface Props {
   onRemove: (id: string) => void
 }
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('fr-FR', {
+function formatDate(iso: string, locale: string) {
+  return new Date(iso).toLocaleDateString(locale === 'en' ? 'en-GB' : 'fr-FR', {
     day: '2-digit', month: '2-digit', year: 'numeric',
   })
 }
@@ -27,6 +28,8 @@ function parseLocation(location: string): string {
 
 export default function FavorisCard({ entry, onRemove }: Props) {
   const router = useRouter()
+  const t = useTranslations('dashboard.favoris')
+  const locale = useLocale()
   const { profile, addedAt } = entry
   const photo = profile.photos[0] ?? '/avatar-placeholder.svg'
 
@@ -46,7 +49,7 @@ export default function FavorisCard({ entry, onRemove }: Props) {
         <button
           onClick={(e) => { e.stopPropagation(); onRemove(profile.id) }}
           className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white shadow flex items-center justify-center hover:bg-red-50 transition-colors group"
-          title="Retirer des favoris"
+          title={t('removeTitle')}
         >
           <Trash2 className="w-3.5 h-3.5 text-gray-400 group-hover:text-red-500 transition-colors" />
         </button>
@@ -58,7 +61,7 @@ export default function FavorisCard({ entry, onRemove }: Props) {
           <span className="font-semibold text-sm text-gray-900">
             {profile.firstName} {profile.lastInitial}.
           </span>
-          <span className="text-gray-400 text-xs">{profile.age} ans</span>
+          <span className="text-gray-400 text-xs">{t('yearsOld', { age: profile.age })}</span>
         </div>
 
         <div className="flex items-center gap-1 text-gray-400 text-xs mb-0.5">
@@ -71,7 +74,7 @@ export default function FavorisCard({ entry, onRemove }: Props) {
           <span className="truncate">{profile.job}</span>
         </div>
 
-        <p className="text-gray-300 text-[10px]">Ajouté le {formatDate(addedAt)}</p>
+        <p className="text-gray-300 text-[10px]">{t('addedOn', { date: formatDate(addedAt, locale) })}</p>
       </div>
     </div>
   )

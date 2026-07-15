@@ -2,6 +2,7 @@
 
 import { Plus, Crown, BadgeCheck } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { ExplorerProfile } from '@/lib/mock-explorer'
 import { cn } from '@/lib/utils'
@@ -15,6 +16,7 @@ type Props = {
 
 export default function ProfileGridCard({ profile, blurred, viewerIsPremium }: Props) {
   const router  = useRouter()
+  const t = useTranslations('dashboard.explorer')
   const photoUrl = profile.photos[0] ?? '/avatar-placeholder.svg'
   const isOnline = useIsOnline(profile.id)
 
@@ -28,7 +30,7 @@ export default function ProfileGridCard({ profile, blurred, viewerIsPremium }: P
         {/* En avant badge */}
         {profile.isEnAvant && !blurred && (
           <div className="absolute top-2 left-2 z-10 bg-violet-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
-            En avant
+            {t('featured')}
           </div>
         )}
 
@@ -46,7 +48,7 @@ export default function ProfileGridCard({ profile, blurred, viewerIsPremium }: P
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 gap-1">
               <Crown className="w-8 h-8 text-amber-400 drop-shadow-lg" />
               <span className="text-[10px] text-white font-semibold bg-black/40 px-2 py-0.5 rounded-full">
-                Premium
+                {t('premium')}
               </span>
             </div>
           </button>
@@ -63,13 +65,13 @@ export default function ProfileGridCard({ profile, blurred, viewerIsPremium }: P
             {viewerIsPremium && isOnline && (
               <div className="absolute top-2 right-2 flex items-center gap-1 bg-white/90 text-emerald-600 text-[9px] font-bold px-1.5 py-0.5 rounded-full">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                En ligne
+                {t('online')}
               </div>
             )}
 
             {/* Add button */}
             <button
-              onClick={() => toast.success('Demande envoyée ✓')}
+              onClick={() => toast.success(t('grid.requestSent'))}
               className="absolute bottom-2 right-2 w-8 h-8 rounded-full flex items-center justify-center shadow-md hover:opacity-90 transition-opacity"
               style={{ background: '#10B981' }}
             >
@@ -83,7 +85,7 @@ export default function ProfileGridCard({ profile, blurred, viewerIsPremium }: P
       <div className={cn('p-2.5 space-y-1', blurred && 'opacity-50')}>
         <p className="text-sm font-semibold text-gray-900 truncate flex items-center gap-1">
           {profile.firstName} {profile.lastInitial}., {profile.age}
-          <BadgeCheck className="w-3.5 h-3.5 text-sky-500 shrink-0" aria-label="Profil vérifié" />
+          <BadgeCheck className="w-3.5 h-3.5 text-sky-500 shrink-0" aria-label={t('verified')} />
         </p>
         <p className="text-xs text-gray-400 flex items-center gap-1 truncate">
           📍 {profile.location}

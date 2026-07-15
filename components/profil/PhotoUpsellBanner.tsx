@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { Crown } from 'lucide-react'
 import { useCurrentUser } from '@/lib/use-current-user'
 
@@ -8,6 +9,7 @@ const MAX_PREMIUM = 6
 
 export default function PhotoUpsellBanner() {
   const router = useRouter()
+  const t = useTranslations('dashboard.profil.upsell')
   const { isPremium } = useCurrentUser()
 
   if (isPremium) return null
@@ -22,10 +24,10 @@ export default function PhotoUpsellBanner() {
       </div>
       <div className="flex-1">
         <p className="text-amber-700 text-sm font-semibold leading-snug">
-          Ajoute jusqu&apos;à {MAX_PREMIUM} photos avec Premium
+          {t('title', { max: MAX_PREMIUM })}
         </p>
         <p className="text-amber-500 text-xs mt-0.5">
-          Augmente tes chances de trouver ta moitié
+          {t('desc')}
         </p>
       </div>
       <Crown className="w-4 h-4 text-amber-400 shrink-0" />

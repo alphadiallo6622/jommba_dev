@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Eye, EyeOff, Trash2, Settings, CheckCircle, Crown, Plus, Star } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { useProfileStore } from '@/store/profile.store'
 import { useCurrentUser } from '@/lib/use-current-user'
@@ -22,6 +23,7 @@ type Props = { open: boolean; onClose: () => void }
 
 export default function PhotoEditModal({ open, onClose }: Props) {
   const router = useRouter()
+  const t = useTranslations('dashboard.profil.photoEdit')
   const { isPhotosBlurred, togglePhotosBlur } = useProfileStore()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const currentUser = useCurrentUser()
@@ -46,15 +48,15 @@ export default function PhotoEditModal({ open, onClose }: Props) {
     if (!photo) return
     setPhotos(prev => prev.map(p => ({ ...p, isMain: p.id === id })))
     const err = await setPrimaryPhoto(user.id, id, photo.src)
-    if (err) { toast.error('Erreur lors de la mise à jour'); fetchPhotos(); return }
+    if (err) { toast.error(t('updateError')); fetchPhotos(); return }
     await refreshProfileInStore(user.id)
-    toast.success('Photo principale mise à jour ✓')
+    toast.success(t('mainUpdated'))
   }
 
   const deletePhoto = async (id: string) => {
     if (!user) return
     if (photos.length === 1) {
-      toast.error('Tu dois conserver au moins une photo')
+      toast.error(t('keepOne'))
       return
     }
     const wasMain   = photos.find(p => p.id === id)?.isMain
@@ -62,12 +64,12 @@ export default function PhotoEditModal({ open, onClose }: Props) {
     setPhotos(remaining.map((p, i) => wasMain && i === 0 ? { ...p, isMain: true } : p))
 
     const err = await deletePhotoById(user.id, id)
-    if (err) { toast.error('Erreur lors de la suppression'); fetchPhotos(); return }
+    if (err) { toast.error(t('deleteError')); fetchPhotos(); return }
     if (wasMain && remaining[0]) {
       await setPrimaryPhoto(user.id, remaining[0].id, remaining[0].src)
       await refreshProfileInStore(user.id)
     }
-    toast.success('Photo supprimée ✓')
+    toast.success(t('deleted'))
   }
 
   const addPhoto = () => {
@@ -77,7 +79,7 @@ export default function PhotoEditModal({ open, onClose }: Props) {
       return
     }
     if (photos.length >= MAX_PREMIUM) {
-      toast.error(`Maximum ${MAX_PREMIUM} photos atteint`)
+      toast.error(t('maxReached', { max: MAX_PREMIUM }))
       return
     }
     fileInputRef.current?.click()
@@ -87,15 +89,15 @@ export default function PhotoEditModal({ open, onClose }: Props) {
     const file = e.target.files?.[0]
     e.target.value = ''
     if (!file || !user) return
-    if (!file.type.startsWith('image/')) { toast.error('Veuillez sélectionner une image'); return }
-    if (file.size > 10 * 1024 * 1024)   { toast.error('Image trop lourde (max 10 Mo)');  return }
+    if (!file.type.startsWith('image/')) { toast.error(t('selectImage')); return }
+    if (file.size > 10 * 1024 * 1024)   { toast.error(t('tooHeavy'));  return }
 
     const isMain = photos.length === 0
     const added  = await uploadPhoto(user.id, file, isMain, photos.length)
-    if (!added) { toast.error("Échec de l'upload. Réessaie."); return }
+    if (!added) { toast.error(t('uploadFailed')); return }
     setPhotos(prev => [...prev, added])
     if (isMain) await refreshProfileInStore(user.id)
-    toast.success('Photo ajoutée ✓')
+    toast.success(t('added'))
   }
 
   // Persiste le flou : profiles.photos_blurred est la source lue par les
@@ -148,10 +150,11 @@ export default function PhotoEditModal({ open, onClose }: Props) {
               {/* Header */}
               <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
                 <div>
-                  <h3 className="font-semibold text-gray-900">Modifier mes photos</h3>
+                  <h3 className="font-semibold text-gray-900">{t('title')}</h3>
                   <p className="text-xs text-gray-400 mt-0.5">
-                    {photos.length}/{maxPhotos} photo{photos.length > 1 ? 's' : ''}
-                    {isPremium ? ' · Premium' : ' gratuites'}
+                    {isPremium
+                      ? t('countPremium', { count: photos.length, max: maxPhotos })
+                      : t('countFree', { count: photos.length, max: maxPhotos })}
                   </p>
                 </div>
                 <button
@@ -171,7 +174,7 @@ export default function PhotoEditModal({ open, onClose }: Props) {
                 }`}>
                   <CheckCircle className={`w-4 h-4 shrink-0 ${isPhotosBlurred ? 'text-amber-500' : 'text-[#10B981]'}`} />
                   <p className={`text-sm font-medium flex-1 ${isPhotosBlurred ? 'text-amber-700' : 'text-[#10B981]'}`}>
-                    {isPhotosBlurred ? 'Photos floutées' : 'Photos défloutées'}
+                    {isPhotosBlurred ? t('blurred') : t('unblurred')}
                   </p>
                 </div>
 
@@ -189,10 +192,10 @@ export default function PhotoEditModal({ open, onClose }: Props) {
                   }
                   <div>
                     <p className={`text-sm font-semibold ${isPhotosBlurred ? 'text-[#10B981]' : 'text-blue-700'}`}>
-                      {isPhotosBlurred ? 'Déflouter mes photos' : 'Flouter mes photos'}
+                      {isPhotosBlurred ? t('unblurAction') : t('blurAction')}
                     </p>
                     <p className={`text-xs mt-0.5 ${isPhotosBlurred ? 'text-[#10B981]/70' : 'text-blue-500'}`}>
-                      {isPhotosBlurred ? 'Rendre visibles à tous' : 'Masquer aux visiteurs'}
+                      {isPhotosBlurred ? t('makeVisible') : t('hideFromVisitors')}
                     </p>
                   </div>
                 </button>
@@ -205,7 +208,7 @@ export default function PhotoEditModal({ open, onClose }: Props) {
                         <img src={photo.src} alt="" className="w-full h-full object-cover" />
                         {photo.isMain && (
                           <span className="absolute top-1 left-1 bg-[#10B981] text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full">
-                            Principale
+                            {t('main')}
                           </span>
                         )}
                         {photo.isMain && (
@@ -225,7 +228,7 @@ export default function PhotoEditModal({ open, onClose }: Props) {
                           onClick={() => setMain(photo.id)}
                           className="text-[9px] font-semibold text-[#10B981] border border-[#10B981] rounded-full px-2 py-0.5 hover:bg-[#E1F5EE] transition-colors text-center"
                         >
-                          ● Définir principale
+                          {t('makeMain')}
                         </button>
                       )}
                     </div>
@@ -240,7 +243,7 @@ export default function PhotoEditModal({ open, onClose }: Props) {
                       <div className="w-7 h-7 rounded-full bg-gray-100 group-hover:bg-[#10B981]/15 flex items-center justify-center">
                         <Plus className="w-4 h-4 text-gray-400 group-hover:text-[#10B981]" />
                       </div>
-                      <span className="text-[9px] text-gray-400 group-hover:text-[#10B981] font-medium">Ajouter</span>
+                      <span className="text-[9px] text-gray-400 group-hover:text-[#10B981] font-medium">{t('add')}</span>
                     </button>
                   )}
 
@@ -252,7 +255,7 @@ export default function PhotoEditModal({ open, onClose }: Props) {
                       className="aspect-square rounded-xl bg-amber-50 border-2 border-dashed border-amber-200 flex flex-col items-center justify-center gap-0.5 hover:bg-amber-100 transition-colors"
                     >
                       <Crown className="w-4 h-4 text-amber-400" />
-                      <span className="text-[8px] text-amber-500 font-medium">Premium</span>
+                      <span className="text-[8px] text-amber-500 font-medium">{t('premium')}</span>
                     </button>
                   ))}
                 </div>
@@ -265,15 +268,15 @@ export default function PhotoEditModal({ open, onClose }: Props) {
                   >
                     <Crown className="w-8 h-8 text-amber-400 shrink-0" />
                     <div>
-                      <p className="text-sm font-semibold text-amber-800">Ajoutez jusqu'à {MAX_PREMIUM} photos avec Premium</p>
-                      <p className="text-xs text-amber-600">Augmentez vos chances de recevoir des demandes</p>
+                      <p className="text-sm font-semibold text-amber-800">{t('upsellTitle', { max: MAX_PREMIUM })}</p>
+                      <p className="text-xs text-amber-600">{t('upsellDesc')}</p>
                     </div>
                   </button>
                 )}
 
                 {/* Tip */}
                 <p className="text-xs text-amber-700 bg-amber-50 px-3 py-2.5 rounded-xl leading-relaxed">
-                  💡 <span className="font-medium">Astuce :</span> Les photos floutées sont visibles uniquement par les personnes avec qui vous avez échangé des messages.
+                  {t.rich('tip', { b: (chunks) => <span className="font-medium">{chunks}</span> })}
                 </p>
 
                 {/* Advanced settings */}
@@ -282,7 +285,7 @@ export default function PhotoEditModal({ open, onClose }: Props) {
                   className="w-full flex items-center justify-center gap-2 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition-colors"
                 >
                   <Settings className="w-4 h-4 text-gray-400" />
-                  Gestion avancée dans les paramètres
+                  {t('advancedSettings')}
                 </button>
               </div>
 
@@ -292,7 +295,7 @@ export default function PhotoEditModal({ open, onClose }: Props) {
                   onClick={handleSave}
                   className="w-full py-3 bg-[#10B981] text-white text-sm font-semibold rounded-xl hover:bg-[#059669] transition-colors"
                 >
-                  Enregistrer et fermer
+                  {t('saveAndClose')}
                 </button>
               </div>
             </motion.div>
