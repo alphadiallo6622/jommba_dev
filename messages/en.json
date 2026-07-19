@@ -521,7 +521,8 @@
       "professionPlaceholder": "e.g. Engineer, Doctor, Teacher…",
       "education": "Education level",
       "height": "Height (cm)",
-      "heightPlaceholder": "e.g. 175",
+      "heightPlaceholder": "e.g. 175 or 1.75",
+      "heightInvalid": "Invalid height (between 140 and 220 cm)",
       "educationOptions": {
         "none": "No diploma",
         "brevet": "Middle school",
@@ -548,7 +549,8 @@
       "cityPlaceholderAfrica": "e.g. Conakry, Bamako…",
       "currentResidenceCountry": "Current country of residence",
       "select": "Select",
-      "cityPlaceholderDiaspora": "e.g. Paris, Montreal…"
+      "cityPlaceholderDiaspora": "e.g. Paris, Montreal…",
+      "optional": "optional"
     },
     "values": {
       "title": "Your values",
@@ -1169,6 +1171,7 @@
         "ageValue": "{age} years old",
         "ageLocked": "Your age was calculated at sign-up and can no longer be changed.",
         "height": "Height (cm)",
+        "heightInvalid": "Invalid height (between 140 and 220 cm)",
         "maritalStatus": "Marital status",
         "children": "Children",
         "situations": {

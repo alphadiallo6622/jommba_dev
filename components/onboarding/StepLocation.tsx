@@ -4,17 +4,10 @@ import { useTranslations } from 'next-intl'
 import { useOnboardingStore } from '@/store/onboarding.store'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { COUNTRIES, AFRICAN_COUNTRIES, NON_AFRICAN_COUNTRIES } from '@/lib/countries'
 
 type Props = { onNext: () => void; onBack: () => void }
 
-const AFRICA_COUNTRIES = [
-  'Algérie', 'Cameroun', 'Côte d\'Ivoire', 'Guinée', 'Mali', 'Maroc',
-  'Mauritanie', 'Niger', 'Sénégal', 'Somalie', 'Tchad', 'Tunisie',
-]
-const DIASPORA_COUNTRIES = [
-  'Belgique', 'Canada', 'Espagne', 'États-Unis', 'France', 'Allemagne',
-  'Italie', 'Pays-Bas', 'Royaume-Uni', 'Suisse',
-]
 const SENEGAL_REGIONS = [
   'Dakar', 'Thiès', 'Diourbel', 'Saint-Louis', 'Tambacounda',
   'Kaolack', 'Ziguinchor', 'Louga', 'Fatick', 'Kolda',
@@ -30,7 +23,7 @@ export default function StepLocation({ onNext, onBack }: Props) {
   }
 
   const setCountry = (country: string) => {
-    setField('location', { ...location!, country, region: '' })
+    setField('location', { ...location!, country, region: type === 'afrique' ? '' : location?.region })
   }
 
   const setRegion = (region: string) => {
@@ -38,10 +31,16 @@ export default function StepLocation({ onNext, onBack }: Props) {
   }
 
   const setResidenceCountry = (residenceCountry: string) => {
-    setField('location', { ...location!, residenceCountry })
+    setField('location', { ...location!, residenceCountry, region: '' })
   }
 
-  const valid = !!location?.type && !!location?.country
+  // Afrique : pays de résidence + (région Sénégal OU ville) tous obligatoires.
+  // Diaspora : pays de résidence actuel + ville obligatoires ; pays d'origine facultatif.
+  const valid = type === 'afrique'
+    ? !!location?.country && !!location?.region?.trim()
+    : type === 'diaspora'
+      ? !!location?.residenceCountry && !!location?.region?.trim()
+      : false
 
   return (
     <div className="space-y-7">
@@ -74,79 +73,99 @@ export default function StepLocation({ onNext, onBack }: Props) {
         ))}
       </div>
 
-      {/* Country select */}
-      {type && (
-        <div>
-          <label className="text-xs font-semibold text-gray-700 block mb-1.5">
-            {type === 'afrique' ? t('location.countryOfResidence') : t('location.countryOfOrigin')}
-          </label>
-          <select
-            value={location?.country ?? ''}
-            onChange={e => setCountry(e.target.value)}
-            className="w-full py-2.5 px-3 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 bg-white"
-          >
-            <option value="">{t('location.selectCountry')}</option>
-            {(type === 'afrique' ? AFRICA_COUNTRIES : AFRICA_COUNTRIES).map(c => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
-        </div>
+      {/* ── Afrique ────────────────────────────────────────────────────── */}
+      {type === 'afrique' && (
+        <>
+          <div>
+            <label className="text-xs font-semibold text-gray-700 block mb-1.5">
+              {t('location.countryOfResidence')}
+            </label>
+            <select
+              value={location?.country ?? ''}
+              onChange={e => setCountry(e.target.value)}
+              className="w-full py-2.5 px-3 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 bg-white"
+            >
+              <option value="">{t('location.selectCountry')}</option>
+              {AFRICAN_COUNTRIES.map(c => (
+                <option key={c.code} value={c.name}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Region — dropdown pour le Sénégal, champ libre pour les autres pays africains */}
+          {location?.country === 'Sénégal' && (
+            <div>
+              <label className="text-xs font-semibold text-gray-700 block mb-1.5">{t('location.region')}</label>
+              <select
+                value={location?.region ?? ''}
+                onChange={e => setRegion(e.target.value)}
+                className="w-full py-2.5 px-3 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 bg-white"
+              >
+                <option value="">{t('location.selectRegion')}</option>
+                {SENEGAL_REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
+              </select>
+            </div>
+          )}
+          {location?.country && location.country !== 'Sénégal' && (
+            <div>
+              <label className="text-xs font-semibold text-gray-700 block mb-1.5">{t('location.city')}</label>
+              <input
+                type="text"
+                value={location?.region ?? ''}
+                onChange={e => setRegion(e.target.value)}
+                placeholder={t('location.cityPlaceholderAfrica')}
+                className="w-full py-2.5 px-3 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 bg-white"
+              />
+            </div>
+          )}
+        </>
       )}
 
-      {/* Region — dropdown pour le Sénégal, champ libre pour les autres pays africains */}
-      {type === 'afrique' && location?.country === 'Sénégal' && (
-        <div>
-          <label className="text-xs font-semibold text-gray-700 block mb-1.5">{t('location.region')}</label>
-          <select
-            value={location?.region ?? ''}
-            onChange={e => setRegion(e.target.value)}
-            className="w-full py-2.5 px-3 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 bg-white"
-          >
-            <option value="">{t('location.selectRegion')}</option>
-            {SENEGAL_REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
-          </select>
-        </div>
-      )}
-      {type === 'afrique' && location?.country && location.country !== 'Sénégal' && (
-        <div>
-          <label className="text-xs font-semibold text-gray-700 block mb-1.5">{t('location.city')}</label>
-          <input
-            type="text"
-            value={location?.region ?? ''}
-            onChange={e => setRegion(e.target.value)}
-            placeholder={t('location.cityPlaceholderAfrica')}
-            className="w-full py-2.5 px-3 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 bg-white"
-          />
-        </div>
-      )}
+      {/* ── Diaspora ───────────────────────────────────────────────────── */}
+      {type === 'diaspora' && (
+        <>
+          {/* Pays de résidence actuel — obligatoire, en premier */}
+          <div>
+            <label className="text-xs font-semibold text-gray-700 block mb-1.5">{t('location.currentResidenceCountry')}</label>
+            <select
+              value={location?.residenceCountry ?? ''}
+              onChange={e => setResidenceCountry(e.target.value)}
+              className="w-full py-2.5 px-3 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 bg-white"
+            >
+              <option value="">{t('location.select')}</option>
+              {NON_AFRICAN_COUNTRIES.map(c => <option key={c.code} value={c.name}>{c.name}</option>)}
+            </select>
+          </div>
 
-      {/* Diaspora residence country */}
-      {type === 'diaspora' && location?.country && (
-        <div>
-          <label className="text-xs font-semibold text-gray-700 block mb-1.5">{t('location.currentResidenceCountry')}</label>
-          <select
-            value={location?.residenceCountry ?? ''}
-            onChange={e => setResidenceCountry(e.target.value)}
-            className="w-full py-2.5 px-3 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 bg-white"
-          >
-            <option value="">{t('location.select')}</option>
-            {DIASPORA_COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
-        </div>
-      )}
+          {/* Ville — obligatoire, juste après le pays de résidence */}
+          {location?.residenceCountry && (
+            <div>
+              <label className="text-xs font-semibold text-gray-700 block mb-1.5">{t('location.city')}</label>
+              <input
+                type="text"
+                value={location?.region ?? ''}
+                onChange={e => setRegion(e.target.value)}
+                placeholder={t('location.cityPlaceholderDiaspora')}
+                className="w-full py-2.5 px-3 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 bg-white"
+              />
+            </div>
+          )}
 
-      {/* Diaspora ville */}
-      {type === 'diaspora' && location?.residenceCountry && (
-        <div>
-          <label className="text-xs font-semibold text-gray-700 block mb-1.5">{t('location.city')}</label>
-          <input
-            type="text"
-            value={location?.region ?? ''}
-            onChange={e => setRegion(e.target.value)}
-            placeholder={t('location.cityPlaceholderDiaspora')}
-            className="w-full py-2.5 px-3 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 bg-white"
-          />
-        </div>
+          {/* Pays d'origine — facultatif, en dernier */}
+          <div>
+            <label className="text-xs font-semibold text-gray-700 block mb-1.5">
+              {t('location.countryOfOrigin')} <span className="font-normal text-gray-400">({t('location.optional')})</span>
+            </label>
+            <select
+              value={location?.country ?? ''}
+              onChange={e => setCountry(e.target.value)}
+              className="w-full py-2.5 px-3 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 bg-white"
+            >
+              <option value="">{t('location.selectCountry')}</option>
+              {COUNTRIES.map(c => <option key={c.code} value={c.name}>{c.name}</option>)}
+            </select>
+          </div>
+        </>
       )}
 
       <div className="flex gap-3">

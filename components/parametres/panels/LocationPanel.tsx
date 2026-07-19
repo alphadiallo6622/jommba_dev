@@ -7,12 +7,13 @@ import { Loader2 } from 'lucide-react'
 import { useCurrentUser } from '@/lib/use-current-user'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { updateMyProfile } from '@/lib/supabase/profile-actions'
+import { AFRICAN_COUNTRIES, NON_AFRICAN_COUNTRIES } from '@/lib/countries'
 import SettingsDrawer from '../SettingsDrawer'
 
 type Props = { open: boolean; onClose: () => void }
 
-const AFRICA_COUNTRIES  = ['Sénégal','Mali','Côte d\'Ivoire','Guinée','Mauritanie','Niger','Burkina Faso','Cameroun','Maroc','Algérie','Tunisie','Égypte']
-const DIASPORA_COUNTRIES = ['France','Belgique','Suisse','Canada','États-Unis','Royaume-Uni','Espagne','Italie','Allemagne','Pays-Bas','Portugal']
+const AFRICA_COUNTRIES  = AFRICAN_COUNTRIES.map(c => c.name)
+const DIASPORA_COUNTRIES = NON_AFRICAN_COUNTRIES.map(c => c.name)
 const DAKAR_CITIES = ['Dakar','Thiès','Kaolack','Saint-Louis','Ziguinchor','Diourbel','Louga','Fatick','Kolda','Tambacounda']
 const ETUDES = ['Bac','Bac+2','Bac+3','Bac+5','Doctorat','Autre']
 

@@ -521,7 +521,8 @@
       "professionPlaceholder": "Ex: Ingénieur, Médecin, Enseignant…",
       "education": "Niveau d'études",
       "height": "Taille (cm)",
-      "heightPlaceholder": "Ex: 175",
+      "heightPlaceholder": "Ex: 175 ou 1,75",
+      "heightInvalid": "Taille invalide (entre 140 et 220 cm)",
       "educationOptions": {
         "none": "Aucun diplôme",
         "brevet": "Brevet",
@@ -548,7 +549,8 @@
       "cityPlaceholderAfrica": "Ex : Conakry, Bamako…",
       "currentResidenceCountry": "Pays de résidence actuel",
       "select": "Sélectionner",
-      "cityPlaceholderDiaspora": "Ex : Paris, Montréal…"
+      "cityPlaceholderDiaspora": "Ex : Paris, Montréal…",
+      "optional": "facultatif"
     },
     "values": {
       "title": "Tes valeurs",
@@ -1169,6 +1171,7 @@
         "ageValue": "{age} ans",
         "ageLocked": "Ton âge a été calculé à l'inscription et n'est plus modifiable.",
         "height": "Taille (cm)",
+        "heightInvalid": "Taille invalide (entre 140 et 220 cm)",
         "maritalStatus": "Situation matrimoniale",
         "children": "Enfants",
         "situations": {

@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl'
 import { useOnboardingStore } from '@/store/onboarding.store'
 import { ArrowLeft, ArrowRight, Briefcase, Ruler } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn, normalizeHeightCm } from '@/lib/utils'
 
 type Props = { onNext: () => void; onBack: () => void }
 
@@ -22,7 +22,9 @@ export default function StepProfessional({ onNext, onBack }: Props) {
   const t = useTranslations('onboarding')
   const { profession, educationLevel, height, setField } = useOnboardingStore()
 
-  const valid = profession.trim().length >= 2 && educationLevel !== '' && height !== ''
+  const normalizedHeight = normalizeHeightCm(height)
+  const heightValid = normalizedHeight !== null && normalizedHeight >= 140 && normalizedHeight <= 220
+  const valid = profession.trim().length >= 2 && educationLevel !== '' && heightValid
 
   return (
     <div className="space-y-7">
@@ -74,15 +76,17 @@ export default function StepProfessional({ onNext, onBack }: Props) {
         <div className="relative">
           <Ruler className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
-            type="number"
+            type="text"
+            inputMode="decimal"
             placeholder={t('professional.heightPlaceholder')}
-            min={140}
-            max={220}
             value={height}
             onChange={e => setField('height', e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
           />
         </div>
+        {height !== '' && !heightValid && (
+          <p className="text-xs text-red-500 mt-1.5">{t('professional.heightInvalid')}</p>
+        )}
       </div>
 
       <div className="flex gap-3">

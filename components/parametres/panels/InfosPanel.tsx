@@ -7,6 +7,7 @@ import { CheckCircle, Loader2 } from 'lucide-react'
 import { useCurrentUser } from '@/lib/use-current-user'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { updateMyProfile } from '@/lib/supabase/profile-actions'
+import { normalizeHeightCm } from '@/lib/utils'
 import SettingsDrawer from '../SettingsDrawer'
 
 type Props = { open: boolean; onClose: () => void }
@@ -44,9 +45,13 @@ export default function InfosPanel({ open, onClose }: Props) {
     else if (h === 'Non') setEnfants('Aucun')
   }, [mockUser])
 
+  const normalizedHeight = normalizeHeightCm(height)
+  const heightValid = normalizedHeight === null || (normalizedHeight >= 140 && normalizedHeight <= 220)
+
   const save = async () => {
     if (!user) return
     if (!firstName.trim()) { toast.error(t('firstNameRequired')); return }
+    if (!heightValid) { toast.error(t('heightInvalid')); return }
 
     setSaving(true)
     // L'âge n'est jamais renvoyé ici : il est fixé à l'onboarding et la date
@@ -55,7 +60,7 @@ export default function InfosPanel({ open, onClose }: Props) {
     const err = await updateMyProfile(user.id, {
       first_name:     firstName.trim(),
       last_name:      lastName.trim() || null,
-      height:         height ? parseInt(height) : null,
+      height:         normalizedHeight,
       marital_status: situation,
       has_children:   enfants === 'Aucun' ? 'Non' : enfants,
     })
@@ -107,7 +112,10 @@ export default function InfosPanel({ open, onClose }: Props) {
         {/* Height */}
         <div>
           <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">{t('height')}</label>
-          <input type="number" value={height} onChange={e => setHeight(e.target.value)} className={input} min={140} max={220} />
+          <input type="text" inputMode="decimal" value={height} onChange={e => setHeight(e.target.value)} className={input} />
+          {!heightValid && (
+            <p className="text-xs text-red-500 mt-1.5">{t('heightInvalid')}</p>
+          )}
         </div>
 
         {/* Situation */}

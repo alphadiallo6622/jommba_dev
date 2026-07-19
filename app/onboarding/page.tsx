@@ -16,6 +16,7 @@ import { computeProfileCompletion } from '@/lib/supabase/profile-completion'
 import { useAuth }       from '@/components/providers/AuthProvider'
 import { toast }         from 'sonner'
 import { localizedLogin } from '@/lib/i18n/locale-cookie'
+import { normalizeHeightCm } from '@/lib/utils'
 import { applyModerationPolicy } from './actions'
 
 const TOTAL_STEPS = 7
@@ -90,7 +91,7 @@ export default function OnboardingPage() {
         marital_status:  store.maritalStatus,
         job:             store.profession || null,
         education:       store.educationLevel || null,
-        height:          store.height ? parseInt(store.height) : null,
+        height:          normalizeHeightCm(store.height),
         city,
         country,
         marriage_vision: store.values.marriageVision.length > 0 ? store.values.marriageVision.join(',') : null,
@@ -106,7 +107,7 @@ export default function OnboardingPage() {
           marital_status:   store.maritalStatus ?? null,
           job:              store.profession     || null,
           education:        store.educationLevel || null,
-          height:           store.height ? parseInt(store.height) : null,
+          height:           normalizeHeightCm(store.height),
           city,
           country,
           marriage_vision:  store.values.marriageVision.length
