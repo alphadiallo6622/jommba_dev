@@ -44,6 +44,8 @@ export default function ExplorerPage() {
           .eq('status', 'validated')
           .eq('visibility', 'active')
           .eq('gender', targetGender)
+          // Sans photo de profil (avatar_url), le membre n'est pas visible.
+          .not('avatar_url', 'is', null)
           .gte('profile_completion', MIN_VISIBLE_PROFILE_COMPLETION)
           .order('created_at', { ascending: false })
           .limit(50),

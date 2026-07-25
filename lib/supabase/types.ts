@@ -57,16 +57,18 @@ export interface Profile {
   photos_blurred:     boolean
   validated_at:       string | null
   refusal_reason:     string | null
+  last_photo_reminder_at: string | null
   created_at:         string
   updated_at:         string
 }
 
-export type ProfileInsert = Omit<Profile, 'id' | 'created_at' | 'updated_at' | 'validated_at' | 'refusal_reason' | 'photos_blurred'> & {
+export type ProfileInsert = Omit<Profile, 'id' | 'created_at' | 'updated_at' | 'validated_at' | 'refusal_reason' | 'photos_blurred' | 'last_photo_reminder_at'> & {
   id?:             string
   created_at?:     string
   updated_at?:     string
   validated_at?:   string | null
   refusal_reason?: string | null
+  last_photo_reminder_at?: string | null
   photos_blurred?: boolean
 }
 export type ProfileUpdate = Partial<ProfileInsert>
@@ -88,6 +90,7 @@ export interface ProfilePhoto {
   id:         string
   user_id:    string
   url:        string
+  public_id:  string | null
   is_primary: boolean
   order:      number
   status:     PhotoStatus
@@ -312,7 +315,7 @@ export type Database = {
       }
       profile_photos: {
         Row:           Indexed<ProfilePhoto>
-        Insert:        Indexed<Omit<ProfilePhoto, 'id' | 'created_at' | 'status'> & { id?: string; created_at?: string; status?: PhotoStatus }>
+        Insert:        Indexed<Omit<ProfilePhoto, 'id' | 'created_at' | 'status' | 'public_id'> & { id?: string; created_at?: string; status?: PhotoStatus; public_id?: string | null }>
         Update:        Indexed<Partial<ProfilePhoto>>
         Relationships: []
       }

@@ -10,6 +10,8 @@ import { verifyAdminToken, COOKIE, type AdminSession, type AdminRole } from "@/l
 import { hasPermission, ADMIN_ROLES, type AdminPermission } from "@/lib/admin/permissions";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendEmail } from "@/lib/email";
+import { deleteCloudinaryImage, publicIdFromUrl } from "@/lib/cloudinary";
+import { PHOTO_REJECTED_MESSAGE } from "@/lib/photo-messages";
 import type { BroadcastTarget, Json } from "@/lib/supabase/types";
 import type { LimitsSettings, PricingSettings, MaintenanceSettings, GeoBlockSettings } from "@/lib/admin/types";
 
@@ -161,15 +163,45 @@ export async function rejectPhoto(photoId: string): Promise<ActionResult> {
       .from("profile_photos").select("*").eq("id", photoId).single();
     if (readErr || !photo) throw new Error(readErr?.message ?? "Photo introuvable");
 
+    // 1. Suppression du fichier Cloudinary (non bloquant en cas d'échec).
+    const publicId = photo.public_id ?? publicIdFromUrl(photo.url);
+    if (publicId) {
+      await deleteCloudinaryImage(publicId);
+    }
+
+    // 2. Suppression de la ligne en BDD.
     const { error } = await supabase.from("profile_photos").delete().eq("id", photoId);
     if (error) throw new Error(error.message);
 
-    // Si c'était la photo principale, on retire aussi l'avatar du profil.
+    // 3. Si c'était la photo principale, on retire l'avatar du profil : sans
+    //    avatar, le profil n'est plus visible par les autres membres (filtre
+    //    avatar_url IS NOT NULL sur les surfaces de navigation).
     if (photo.is_primary) {
       await supabase.from("profiles").update({ avatar_url: null }).eq("user_id", photo.user_id);
     }
-    await notifyUser(photo.user_id, "moderation", "Photo retirée",
-      "Une de vos photos a été retirée car elle ne respecte pas les règles de la communauté.");
+
+    // 4. Notification in-app + email pour inviter à reposer une photo conforme.
+    await notifyUser(
+      photo.user_id,
+      "moderation",
+      "Photo de profil non conforme",
+      PHOTO_REJECTED_MESSAGE,
+    );
+
+    try {
+      const contact = await getMemberContact(photo.user_id);
+      await sendEmail({
+        to: contact.email,
+        toName: contact.name,
+        subject: "Votre photo de profil n'est pas conforme",
+        text: PHOTO_REJECTED_MESSAGE,
+        signatureName: "Équipe Jommba",
+        signatureRole: "Modération · contact@jommba.com",
+      });
+    } catch (err) {
+      // L'email ne doit pas faire échouer le rejet : la notif in-app est déjà posée.
+      console.error("[rejectPhoto] email non envoyé:", err);
+    }
   }, "moderation");
 }
 

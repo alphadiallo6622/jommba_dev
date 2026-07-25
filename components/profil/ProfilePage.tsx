@@ -106,6 +106,12 @@ export default function ProfilePage({ id }: Props) {
         return
       }
 
+      // Sans photo de profil, le membre n'est pas visible (même via un lien direct).
+      if (!(p as Profile).avatar_url) {
+        setProfile(null)
+        return
+      }
+
       let status: FullProfile['requestStatus'] = 'none'
       if (outgoing) {
         status = outgoing.status === 'accepted' ? 'acceptee' : outgoing.status === 'rejected' ? 'refusee' : 'en-attente'

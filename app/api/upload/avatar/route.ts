@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
     { method: 'POST', body: formData }
   )
 
-  const json = await res.json() as { secure_url?: string; error?: { message: string } }
+  const json = await res.json() as { secure_url?: string; public_id?: string; error?: { message: string } }
 
   if (!res.ok || !json.secure_url) {
     console.error('[upload/avatar] Cloudinary error:', json.error)
@@ -57,5 +57,6 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  return NextResponse.json({ url: json.secure_url })
+  // public_id nécessaire pour supprimer proprement la photo lors d'un rejet admin.
+  return NextResponse.json({ url: json.secure_url, publicId: json.public_id })
 }

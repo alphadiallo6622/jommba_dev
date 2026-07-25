@@ -131,6 +131,8 @@ export default function ProfileGrid() {
       .eq('status', 'validated')
       .eq('visibility', 'active')
       .eq('gender', targetGender)
+      // Sans photo de profil (avatar_url), le membre n'est pas visible.
+      .not('avatar_url', 'is', null)
       .gte('profile_completion', MIN_VISIBLE_PROFILE_COMPLETION)
       .order('profile_completion', { ascending: false })
       .limit(12)

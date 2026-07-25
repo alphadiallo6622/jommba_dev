@@ -37,13 +37,13 @@ export async function uploadPhoto(userId: string, file: File, isMain: boolean, o
   formData.append('file', file)
 
   const res  = await fetch('/api/upload/avatar', { method: 'POST', body: formData })
-  const json = await res.json() as { url?: string; error?: string }
+  const json = await res.json() as { url?: string; publicId?: string; error?: string }
   if (!res.ok || !json.url) return null
 
   const supabase = createClient()
   const { data, error } = await supabase
     .from('profile_photos')
-    .insert({ user_id: userId, url: json.url, is_primary: isMain, order })
+    .insert({ user_id: userId, url: json.url, public_id: json.publicId ?? null, is_primary: isMain, order })
     .select()
     .single()
 

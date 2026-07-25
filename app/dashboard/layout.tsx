@@ -6,6 +6,7 @@ import BoostModal from '@/components/boost/BoostModal'
 import CoachButton from '@/components/dashboard/CoachButton'
 import CoachModal from '@/components/coach/CoachModal'
 import BottomNav from '@/components/dashboard/BottomNav'
+import AddPhotoReminderModal from '@/components/dashboard/AddPhotoReminderModal'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   // Récupère le profil Supabase côté serveur — le middleware garantit qu'un
@@ -15,6 +16,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   let mockUser = null
   let prefs: { photosBlurred: boolean; soundEnabled: boolean } | null = null
+  let hasPhoto = true // par défaut on n'affiche pas le rappel (ex. user absent)
   if (user) {
     const [{ data: profile }, { count: views }, { count: visitors }, { count: favorites }, { count: requests }, { count: likesUsedToday }, { data: preferences }, { data: settings }] = await Promise.all([
       supabase.from('profiles').select('*').eq('user_id', user.id).single(),
@@ -32,6 +34,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       Number((settings?.limits as { contacts?: number } | null)?.contacts) || 3
 
     if (profile) {
+      hasPhoto = Boolean(profile.avatar_url)
       mockUser = profileToMockUser(profile, user.email ?? '')
       mockUser.stats = {
         views:     views     ?? 0,
@@ -59,6 +62,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <div className="min-h-screen bg-gray-50">
         {/* Initialise les stores Zustand avec les données réelles Supabase */}
         <ProfileInitializer profile={mockUser} prefs={prefs} />
+        <AddPhotoReminderModal hasPhoto={hasPhoto} />
         {children}
         <BoostModal />
         <CoachButton />
