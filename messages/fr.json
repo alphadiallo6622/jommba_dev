@@ -1719,7 +1719,10 @@
         "title": "Comment veux-tu payer ?",
         "mobileMoney": "Mobile Money",
         "card": "Carte bancaire",
-        "total": "Total à payer"
+        "total": "Total à payer",
+        "subscribe": "Devenir membre Premium",
+        "success": "Bienvenue chez Premium ! 🎉",
+        "mobileSoon": "Le paiement Mobile Money arrive bientôt."
       },
       "cta": {
         "button": "Devenir membre Premium",

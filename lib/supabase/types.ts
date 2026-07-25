@@ -140,10 +140,12 @@ export interface ProfileView {
 }
 
 export interface Boost {
-  id:         string
-  user_id:    string
-  expires_at: string
-  created_at: string
+  id:                string
+  user_id:           string
+  expires_at:        string
+  created_at:        string
+  square_payment_id: string | null
+  amount_usd:        number | null
 }
 
 export interface Subscription {
@@ -152,6 +154,9 @@ export interface Subscription {
   plan:                  SubscriptionPlan
   status:                SubscriptionStatus
   stripe_subscription_id: string | null
+  square_subscription_id: string | null
+  square_customer_id:    string | null
+  square_card_id:        string | null
   current_period_end:    string | null
   duration_months:       number
   payment_method:        string | null

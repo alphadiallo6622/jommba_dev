@@ -1,10 +1,13 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Smartphone, CreditCard } from 'lucide-react'
+import { toast } from 'sonner'
 import { plans } from '@/lib/mock-premium'
 import { cn } from '@/lib/utils'
+import SquareCardForm from '@/components/payments/SquareCardForm'
 
 interface Props {
   selectedPlan: string
@@ -12,7 +15,8 @@ interface Props {
 
 export default function PremiumPayment({ selectedPlan }: Props) {
   const t = useTranslations('dashboard.premium.payment')
-  const [paymentMethod, setPaymentMethod] = useState<'mobile' | 'card'>('mobile')
+  const router = useRouter()
+  const [paymentMethod, setPaymentMethod] = useState<'mobile' | 'card'>('card')
 
   const currentPlan = plans.find((p) => p.id === selectedPlan)
   const total = currentPlan?.totalPrice ?? 10
@@ -75,6 +79,29 @@ export default function PremiumPayment({ selectedPlan }: Props) {
           <span className="text-sm text-gray-500">$</span>
         </div>
       </div>
+
+      {/* Formulaire de paiement selon la méthode choisie */}
+      {paymentMethod === 'card' ? (
+        <div className="mt-5">
+          <SquareCardForm
+            mode="subscribe"
+            planId={selectedPlan}
+            submitLabel={`${t('subscribe')} · ${total} $`}
+            onSuccess={() => {
+              toast.success(t('success'))
+              router.refresh()
+            }}
+          />
+        </div>
+      ) : (
+        // Mobile Money : prestataire non encore branché (Square ne le gère pas).
+        <button
+          onClick={() => toast.info(t('mobileSoon'))}
+          className="mt-5 w-full rounded-xl bg-orange-500 py-3 font-semibold text-white transition-colors hover:bg-orange-600"
+        >
+          {t('subscribe')} · {total} $
+        </button>
+      )}
     </section>
   )
 }

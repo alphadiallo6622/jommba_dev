@@ -7,7 +7,6 @@ import PremiumFeatures     from '@/components/premium/PremiumFeatures'
 import PremiumGuarantees   from '@/components/premium/PremiumGuarantees'
 import PremiumPricing      from '@/components/premium/PremiumPricing'
 import PremiumPayment      from '@/components/premium/PremiumPayment'
-import PremiumCTA          from '@/components/premium/PremiumCTA'
 import PremiumTestimonials from '@/components/premium/PremiumTestimonials'
 import PremiumFAQ          from '@/components/premium/PremiumFAQ'
 import PremiumFooterCTA    from '@/components/premium/PremiumFooterCTA'
@@ -32,7 +31,6 @@ export default function PremiumPage() {
               <PremiumGuarantees />
               <PremiumPricing selectedPlan={selectedPlan} setSelectedPlan={setSelectedPlan} />
               <PremiumPayment selectedPlan={selectedPlan} />
-              <PremiumCTA />
               <PremiumTestimonials />
               <PremiumFAQ />
               <PremiumFooterCTA />
