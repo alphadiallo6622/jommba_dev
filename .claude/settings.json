@@ -11,7 +11,8 @@
       "Bash(git commit -m ' *)",
       "Bash(git push *)",
       "Bash(node -e \"const p = require\\('./node_modules/@supabase/supabase-js/package.json'\\); console.log\\('supabase-js:', p.version\\)\")",
-      "Bash(node -e \"const p = require\\('./node_modules/@supabase/ssr/package.json'\\); console.log\\('supabase/ssr:', p.version\\)\")"
+      "Bash(node -e \"const p = require\\('./node_modules/@supabase/ssr/package.json'\\); console.log\\('supabase/ssr:', p.version\\)\")",
+      "PowerShell(cd C:\\\\ANTIGRAVITY\\\\Jommba_dev; foreach \\($p in @\\(\"/fr/connexion\",\"/dashboard\"\\)\\) { try { $r = Invoke-WebRequest -Uri \"http://localhost:3001$p\" -MaximumRedirection 0 -UseBasicParsing; \"$p -> $\\($r.StatusCode\\)\" } catch { $c = if \\($_.Exception.Response\\) { [int]$_.Exception.Response.StatusCode } else { \"ERR\" }; \"$p -> $c \\(redirect/auth attendu\\)\" } }; \"--- cron sans secret \\(doit etre 401\\) ---\"; try { $r = Invoke-WebRequest -Uri \"http://localhost:3001/api/cron/photo-reminders\" -UseBasicParsing; \"cron -> $\\($r.StatusCode\\)\" } catch { \"cron -> $\\([int]$_.Exception.Response.StatusCode\\) \\(401 attendu\\)\" })"
     ]
   }
 }
