@@ -84,7 +84,7 @@ export function AbonnementsClient({
     { label: "Résiliations (total)",  value: String(kpis.totalCancellations), icon: Ban,        color: "#df4548", bg: "#fceceb" },
     { label: "Expirés (total)",       value: String(kpis.totalExpired),     icon: Clock,        color: "#6b7280", bg: "#f3f4f6" },
     { label: "Remboursements (total)", value: String(kpis.totalRefunds),    icon: RotateCcw,    color: "#df4548", bg: "#fceceb" },
-    { label: "Annulations (30 j)",    value: String(kpis.cancellations30d), icon: XCircle,      color: "#df4548", bg: "#fceceb" },
+    { label: "Résiliations (30 j)",   value: String(kpis.cancellations30d), icon: XCircle,      color: "#df4548", bg: "#fceceb" },
   ];
 
   const runConfirmed = () => {
