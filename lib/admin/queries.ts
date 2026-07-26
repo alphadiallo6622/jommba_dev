@@ -494,25 +494,34 @@ export async function getReports(): Promise<ReportRow[]> {
 
 export interface SubscriptionsData {
   rows: SubscriptionRow[];
-  kpis: { activeCount: number; monthRevenue: number; cancellations30d: number; refunds30d: number };
+  kpis: {
+    activeCount: number;
+    monthRevenue: number;
+    totalRevenue: number;
+    yearRevenue: number;
+    cancellations30d: number;
+    refunds30d: number;
+    totalCancellations: number;
+    totalExpired: number;
+    totalRefunds: number;
+  };
 }
 
 export async function getSubscriptions(): Promise<SubscriptionsData> {
   const supabase = createAdminClient();
-  const settings = await getPlatformSettings();
   const since30 = new Date(Date.now() - 30 * 86_400_000).toISOString();
-  const monthStart = new Date();
-  monthStart.setDate(1);
-  monthStart.setHours(0, 0, 0, 0);
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const yearStart = new Date(now.getFullYear(), 0, 1);
 
-  const [subs, cancelled, refunded, monthSubs] = await Promise.all([
+  const [subs, cancelled, refunded] = await Promise.all([
     supabase.from("subscriptions").select("*").eq("plan", "premium").order("created_at", { ascending: false }).limit(1_000),
     supabase.from("subscriptions").select("id", { count: "exact", head: true }).gte("cancelled_at", since30),
     supabase.from("subscriptions").select("id", { count: "exact", head: true }).gte("refunded_at", since30),
-    supabase.from("subscriptions").select("duration_months,price_usd").eq("plan", "premium").gte("created_at", monthStart.toISOString()),
   ]);
 
-  const userIds = [...new Set((subs.data ?? []).map((s) => s.user_id))];
+  const allSubs = subs.data ?? [];
+  const userIds = [...new Set(allSubs.map((s) => s.user_id))];
   const nameMap = new Map<string, { name: string; email: string; gender: string | null; city: string | null; country: string | null }>();
   if (userIds.length > 0) {
     const { data: members } = await supabase
@@ -528,10 +537,14 @@ export async function getSubscriptions(): Promise<SubscriptionsData> {
     }
   }
 
-  const refundMs = settings.pricing.refundWindow * 86_400_000;
-  const rows: SubscriptionRow[] = (subs.data ?? []).map((s) => {
+  const rows: SubscriptionRow[] = allSubs.map((s) => {
     const info = nameMap.get(s.user_id);
-    const withinRefundWindow = Date.now() - Date.parse(s.created_at) <= refundMs;
+    // Remboursable via le bouton : paiement Square uniquement (les autres moyens
+    // de paiement se remboursent manuellement). Doit être réellement payé
+    // (montant > 0), rattaché à un customer Square, et pas déjà remboursé.
+    // La résiliation seule ne donne pas de remboursement.
+    const paid = s.price_usd != null && Number(s.price_usd) > 0;
+    const isSquare = s.payment_method === "square" && !!s.square_customer_id;
     return {
       id: s.id,
       userId: s.user_id,
@@ -541,7 +554,7 @@ export async function getSubscriptions(): Promise<SubscriptionsData> {
       payment: s.payment_method ?? "—",
       status: s.status,
       expires: s.current_period_end ? formatDate(s.current_period_end) : "—",
-      canRefund: s.status === "active" && withinRefundWindow && !s.refunded_at,
+      canRefund: paid && isSquare && !s.refunded_at,
       gender: info?.gender ?? null,
       city: info?.city ?? null,
       country: info?.country ?? null,
@@ -551,17 +564,34 @@ export async function getSubscriptions(): Promise<SubscriptionsData> {
   });
 
   const activeCount = rows.filter((r) => r.status === "active").length;
-  const monthRevenue = (monthSubs.data ?? []).reduce(
-    (sum, s) => sum + Number(s.price_usd ?? settings.pricing.launchPrice * (s.duration_months ?? 1)), 0,
-  );
+
+  // Revenu = somme des montants réellement encaissés (montant > 0), déduction faite
+  // des abonnements remboursés. Les abonnements offerts (montant 0) ne comptent pas.
+  const paidUsd = (s: (typeof allSubs)[number]) => Number(s.price_usd ?? 0);
+  const isRevenue = (s: (typeof allSubs)[number]) => paidUsd(s) > 0 && !s.refunded_at;
+  const sumRevenue = (predicate: (s: (typeof allSubs)[number]) => boolean) =>
+    Math.round(allSubs.filter((s) => isRevenue(s) && predicate(s)).reduce((sum, s) => sum + paidUsd(s), 0));
+
+  const totalRevenue = sumRevenue(() => true);
+  const monthRevenue = sumRevenue((s) => Date.parse(s.created_at) >= monthStart.getTime());
+  const yearRevenue = sumRevenue((s) => Date.parse(s.created_at) >= yearStart.getTime());
+
+  const totalCancellations = allSubs.filter((s) => s.status === "cancelled" || s.cancelled_at).length;
+  const totalExpired = allSubs.filter((s) => s.status === "expired").length;
+  const totalRefunds = allSubs.filter((s) => s.refunded_at).length;
 
   return {
     rows,
     kpis: {
       activeCount,
-      monthRevenue: Math.round(monthRevenue),
+      monthRevenue,
+      totalRevenue,
+      yearRevenue,
       cancellations30d: cancelled.count ?? 0,
       refunds30d: refunded.count ?? 0,
+      totalCancellations,
+      totalExpired,
+      totalRefunds,
     },
   };
 }

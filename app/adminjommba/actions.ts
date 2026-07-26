@@ -325,17 +325,78 @@ export async function cancelSubscription(subscriptionId: string): Promise<Action
 export async function refundSubscription(subscriptionId: string): Promise<ActionResult> {
   return run(async () => {
     const supabase = createAdminClient();
+
+    // 1) Charge l'abonnement AVANT toute écriture : on a besoin du montant payé et
+    //    du customer Square pour déclencher le remboursement réel.
+    const { data: sub, error: readErr } = await supabase
+      .from("subscriptions").select("*").eq("id", subscriptionId).single();
+    if (readErr || !sub) throw new Error(readErr?.message ?? "Abonnement introuvable");
+    if (sub.refunded_at) throw new Error("Cet abonnement a déjà été remboursé");
+
+    const paidUsd = Number(sub.price_usd ?? 0);
+    if (paidUsd <= 0) {
+      throw new Error("Aucun montant payé : cet abonnement ne peut pas être remboursé (ex. Premium offert).");
+    }
+
+    // Seuls les paiements Square se remboursent depuis ce bouton ; les autres
+    // moyens de paiement (carte hors Square, etc.) se remboursent manuellement.
+    if (sub.payment_method !== "square" || !sub.square_customer_id) {
+      throw new Error(
+        "Seuls les paiements Square sont remboursables ici. Ce paiement doit être remboursé manuellement.",
+      );
+    }
+
+    // 2) Remboursement réel de 70 % via Square (30 % = frais de service).
+    //    Si le paiement Square est introuvable, on stoppe : rien n'est marqué en base.
+    const { refundSquareSubscription } = await import("@/lib/square/refund");
+    const { refundedUsd } = await refundSquareSubscription({
+      squareCustomerId: sub.square_customer_id,
+      paidUsd,
+    });
+
+    // 3) Marque l'abonnement remboursé + résilié et coupe le Premium.
     const now = new Date().toISOString();
-    const { data: sub, error } = await supabase
+    const { error: updErr } = await supabase
       .from("subscriptions")
       .update({ status: "cancelled", cancelled_at: now, refunded_at: now, updated_at: now })
-      .eq("id", subscriptionId)
-      .select().single();
-    if (error || !sub) throw new Error(error?.message ?? "Abonnement introuvable");
-
+      .eq("id", subscriptionId);
+    if (updErr) throw new Error(updErr.message);
     await supabase.from("profiles").update({ is_premium: false }).eq("user_id", sub.user_id);
-    await notifyUser(sub.user_id, "premium", "Remboursement initié",
-      "Votre demande de remboursement Premium a été acceptée. Le montant vous sera reversé sous 5 à 10 jours ouvrés.");
+
+    // 4) Notification in-app + email au membre.
+    const amountLabel = `${refundedUsd.toLocaleString("fr-FR")} $`;
+    await notifyUser(sub.user_id, "premium", "Remboursement confirmé",
+      `Votre abonnement Premium a été remboursé à hauteur de ${amountLabel} (70 % du montant payé ; les 30 % restants correspondent aux frais de service). Le montant sera crédité sous 5 à 10 jours ouvrés.`);
+
+    const contact = await getMemberContact(sub.user_id).catch(() => null);
+    if (contact) {
+      await sendEmail({
+        to: contact.email,
+        toName: contact.name,
+        subject: "Votre remboursement Premium est confirmé",
+        text:
+          `Nous vous confirmons le remboursement de votre abonnement Premium.\n\n` +
+          `Montant remboursé : ${amountLabel} (70 % du montant payé).\n` +
+          `Les 30 % restants correspondent aux frais de service, non remboursables.\n\n` +
+          `Le crédit apparaîtra sur votre moyen de paiement sous 5 à 10 jours ouvrés.`,
+        signatureName: "Équipe Jommba",
+        signatureRole: "Facturation · contact@jommba.com",
+      }).catch((err) => console.error("[refundSubscription] email membre non envoyé:", err));
+    }
+
+    // 5) Email de confirmation à l'administration.
+    await sendEmail({
+      to: "contact@jommba.com",
+      subject: `Remboursement effectué · ${contact?.name ?? sub.user_id}`,
+      text:
+        `Un remboursement Premium vient d'être effectué depuis la console admin.\n\n` +
+        `Membre : ${contact?.name ?? "—"} (${contact?.email ?? "—"})\n` +
+        `Montant payé : ${paidUsd.toLocaleString("fr-FR")} $\n` +
+        `Montant remboursé : ${amountLabel} (70 %)\n` +
+        `Frais de service conservés : ${(Math.round((paidUsd - refundedUsd) * 100) / 100).toLocaleString("fr-FR")} $ (30 %)`,
+      signatureName: "Console Jommba",
+      signatureRole: "Notification automatique",
+    }).catch((err) => console.error("[refundSubscription] email admin non envoyé:", err));
   }, "monetization");
 }
 

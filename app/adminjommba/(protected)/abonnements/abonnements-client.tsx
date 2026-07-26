@@ -1,13 +1,18 @@
 "use client";
 // app/adminjommba/(protected)/abonnements/abonnements-client.tsx
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { DataTable, type Column } from "@/components/admin/ui/data-table";
 import { Avatar } from "@/components/admin/ui/avatar";
-import { Crown, DollarSign, XCircle, RotateCcw } from "lucide-react";
+import { Crown, DollarSign, XCircle, RotateCcw, Wallet, CalendarDays, Ban, Clock } from "lucide-react";
 import type { SubscriptionRow } from "@/lib/admin/types";
 import { cancelSubscription, refundSubscription } from "@/app/adminjommba/actions";
 import { useToast } from "@/components/admin/ui/toast";
+
+type Confirm = {
+  kind: "refund" | "cancel";
+  sub: SubscriptionRow;
+};
 
 const STATUS_STYLE: Record<string, string> = {
   active:    "text-emerald-600",
@@ -37,35 +42,57 @@ export function AbonnementsClient({
   kpis,
 }: {
   rows: SubscriptionRow[];
-  kpis: { activeCount: number; monthRevenue: number; cancellations30d: number; refunds30d: number };
+  kpis: {
+    activeCount: number;
+    monthRevenue: number;
+    totalRevenue: number;
+    yearRevenue: number;
+    cancellations30d: number;
+    refunds30d: number;
+    totalCancellations: number;
+    totalExpired: number;
+    totalRefunds: number;
+  };
 }) {
   const { show } = useToast();
   const router = useRouter();
   const [busy, startTransition] = useTransition();
+  const [confirm, setConfirm] = useState<Confirm | null>(null);
+
+  const usd = (n: number) => `${n.toLocaleString("fr-FR")} $`;
 
   const KPIS = [
-    { label: "Abonnés actifs",        value: String(kpis.activeCount),                          icon: Crown,      color: "#e8920c", bg: "#fdf3e3" },
-    { label: "Revenu du mois",        value: `${kpis.monthRevenue.toLocaleString("fr-FR")} $`, icon: DollarSign, color: "#10b981", bg: "#ecfdf5" },
-    { label: "Annulations (30 j)",    value: String(kpis.cancellations30d),                     icon: XCircle,    color: "#df4548", bg: "#fceceb" },
-    { label: "Remboursements (30 j)", value: String(kpis.refunds30d),                           icon: RotateCcw,  color: "#df4548", bg: "#fceceb" },
+    { label: "Abonnés actifs",        value: String(kpis.activeCount),      icon: Crown,        color: "#e8920c", bg: "#fdf3e3" },
+    { label: "Revenu du mois",        value: usd(kpis.monthRevenue),        icon: DollarSign,   color: "#10b981", bg: "#ecfdf5" },
+    { label: "Revenu de l'année",     value: usd(kpis.yearRevenue),         icon: CalendarDays, color: "#10b981", bg: "#ecfdf5" },
+    { label: "Revenu total",          value: usd(kpis.totalRevenue),        icon: Wallet,       color: "#0a7a52", bg: "#ecfdf5" },
+    { label: "Résiliations (total)",  value: String(kpis.totalCancellations), icon: Ban,        color: "#df4548", bg: "#fceceb" },
+    { label: "Expirés (total)",       value: String(kpis.totalExpired),     icon: Clock,        color: "#6b7280", bg: "#f3f4f6" },
+    { label: "Remboursements (total)", value: String(kpis.totalRefunds),    icon: RotateCcw,    color: "#df4548", bg: "#fceceb" },
+    { label: "Annulations (30 j)",    value: String(kpis.cancellations30d), icon: XCircle,      color: "#df4548", bg: "#fceceb" },
   ];
 
-  const act = (
-    s: SubscriptionRow,
-    fn: (id: string) => Promise<{ ok: boolean; error?: string }>,
-    msg: string,
-    type: "success" | "error",
-  ) => {
+  const runConfirmed = () => {
+    if (!confirm) return;
+    const { kind, sub } = confirm;
+    const fn = kind === "refund" ? refundSubscription : cancelSubscription;
     startTransition(async () => {
-      const res = await fn(s.id);
+      const res = await fn(sub.id);
       if (res.ok) {
-        show(msg, type);
+        show(
+          kind === "refund" ? `Remboursement effectué · ${sub.name}` : `Abonnement résilié · ${sub.name}`,
+          kind === "refund" ? "success" : "error",
+        );
+        setConfirm(null);
         router.refresh();
       } else {
         show(res.error ?? "Une erreur est survenue", "error");
       }
     });
   };
+
+  const refundAmount = (s: SubscriptionRow) =>
+    s.amount != null && s.amount > 0 ? Math.round(s.amount * 0.7 * 100) / 100 : 0;
 
   const COLUMNS: Column<SubscriptionRow>[] = [
     {
@@ -145,7 +172,7 @@ export function AbonnementsClient({
           {s.canRefund && (
             <button
               disabled={busy}
-              onClick={() => act(s, refundSubscription, `Remboursement initié · ${s.name}`, "success")}
+              onClick={() => setConfirm({ kind: "refund", sub: s })}
               className="text-xs font-medium text-[var(--color-brand-600)] hover:underline disabled:opacity-50"
             >
               Rembourser
@@ -154,7 +181,7 @@ export function AbonnementsClient({
           {s.status === "active" && (
             <button
               disabled={busy}
-              onClick={() => act(s, cancelSubscription, `Abonnement résilié · ${s.name}`, "error")}
+              onClick={() => setConfirm({ kind: "cancel", sub: s })}
               className="text-xs font-medium text-red-600 hover:underline disabled:opacity-50"
             >
               Résilier
@@ -171,12 +198,12 @@ export function AbonnementsClient({
       <div>
         <h1 className="text-xl font-bold text-[var(--color-ink)]">Abonnements Premium</h1>
         <p className="text-sm text-[var(--color-muted)] mt-0.5">
-          Historique, annulations et remboursements (fenêtre 7 jours).
+          Historique des abonnements, résiliations et remboursements.
         </p>
       </div>
 
       {/* Mini KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {KPIS.map((k) => {
           const Icon = k.icon;
           return (
@@ -208,6 +235,76 @@ export function AbonnementsClient({
         xlsFilename="abonnements.xls"
         rowKey={(s) => s.id}
       />
+
+      {/* Popup de confirmation (remboursement / résiliation) */}
+      {confirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]" onClick={() => !busy && setConfirm(null)} />
+          <div className="relative bg-white rounded-2xl w-full max-w-sm shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="px-5 pt-4 pb-3 border-b border-[var(--color-line)]">
+              <h3 className="font-semibold text-base text-[var(--color-ink)]">
+                {confirm.kind === "refund" ? "Rembourser l'abonnement" : "Résilier l'abonnement"}
+              </h3>
+            </div>
+
+            <div className="p-5 space-y-3">
+              {confirm.kind === "refund" ? (
+                <>
+                  <p className="text-sm text-[var(--color-ink)]">
+                    Rembourser <strong>{confirm.sub.name}</strong> ?
+                  </p>
+                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-xs text-emerald-900">
+                    Montant payé : <strong>{confirm.sub.amount != null ? usd(confirm.sub.amount) : "—"}</strong><br />
+                    Remboursé au client (70 %) : <strong>{usd(refundAmount(confirm.sub))}</strong><br />
+                    Frais de service conservés (30 %) : <strong>
+                      {usd(Math.round(((confirm.sub.amount ?? 0) - refundAmount(confirm.sub)) * 100) / 100)}
+                    </strong>
+                  </div>
+                  <p className="text-xs text-[var(--color-muted)]">
+                    Le membre est remboursé, perd son accès Premium, et reçoit un email + une notification.
+                    L&apos;administration est notifiée sur contact@jommba.com.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-[var(--color-ink)]">
+                    Résilier l&apos;abonnement de <strong>{confirm.sub.name}</strong> ?
+                  </p>
+                  <p className="text-xs text-[var(--color-muted)]">
+                    L&apos;accès Premium est coupé immédiatement. <strong>Une résiliation ne donne droit à aucun
+                    remboursement.</strong>
+                  </p>
+                </>
+              )}
+
+              <div className="flex gap-2 pt-1">
+                <button
+                  disabled={busy}
+                  onClick={() => setConfirm(null)}
+                  className="flex-1 py-2 rounded-xl border border-[var(--color-line)] text-sm text-[var(--color-ink)] hover:bg-[var(--color-faint)] transition-colors disabled:opacity-50"
+                >
+                  Annuler
+                </button>
+                <button
+                  disabled={busy}
+                  onClick={runConfirmed}
+                  className={`flex-1 py-2 rounded-xl text-white text-sm font-semibold transition-colors disabled:opacity-50 ${
+                    confirm.kind === "refund"
+                      ? "bg-[var(--color-brand-600)] hover:bg-[var(--color-brand-700)]"
+                      : "bg-red-600 hover:bg-red-700"
+                  }`}
+                >
+                  {busy
+                    ? "Traitement…"
+                    : confirm.kind === "refund"
+                      ? "Confirmer le remboursement"
+                      : "Confirmer la résiliation"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
