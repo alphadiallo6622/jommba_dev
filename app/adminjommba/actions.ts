@@ -354,16 +354,35 @@ export async function refundSubscription(subscriptionId: string): Promise<Action
       paidUsd,
     });
 
-    // 3) Marque l'abonnement remboursé + résilié et coupe le Premium.
+    // 3) Annule l'abonnement récurrent côté Square : sans cela, le renouvellement
+    //    automatique repaie et le webhook (invoice.payment_made) réactiverait le
+    //    Premium. Non bloquant : un échec Square ne doit pas empêcher la coupure locale.
+    if (sub.square_subscription_id) {
+      try {
+        const { square } = await import("@/lib/square/client");
+        await square.subscriptions.cancel({ subscriptionId: sub.square_subscription_id });
+      } catch (err) {
+        console.error("[refundSubscription] annulation Square échouée:", err);
+      }
+    }
+
+    // 4) Marque l'abonnement remboursé + résilié, coupe la période en cours et
+    //    retire le Premium immédiatement.
     const now = new Date().toISOString();
     const { error: updErr } = await supabase
       .from("subscriptions")
-      .update({ status: "cancelled", cancelled_at: now, refunded_at: now, updated_at: now })
+      .update({
+        status: "cancelled",
+        cancelled_at: now,
+        refunded_at: now,
+        current_period_end: now,
+        updated_at: now,
+      })
       .eq("id", subscriptionId);
     if (updErr) throw new Error(updErr.message);
     await supabase.from("profiles").update({ is_premium: false }).eq("user_id", sub.user_id);
 
-    // 4) Notification in-app + email au membre.
+    // 5) Notification in-app + email au membre.
     const amountLabel = `${refundedUsd.toLocaleString("fr-FR")} $`;
     await notifyUser(sub.user_id, "premium", "Remboursement confirmé",
       `Votre abonnement Premium a été remboursé à hauteur de ${amountLabel} (70 % du montant payé ; les 30 % restants correspondent aux frais de service). Le montant sera crédité sous 5 à 10 jours ouvrés.`);
@@ -384,7 +403,7 @@ export async function refundSubscription(subscriptionId: string): Promise<Action
       }).catch((err) => console.error("[refundSubscription] email membre non envoyé:", err));
     }
 
-    // 5) Email de confirmation à l'administration.
+    // 6) Email de confirmation à l'administration.
     await sendEmail({
       to: "contact@jommba.com",
       subject: `Remboursement effectué · ${contact?.name ?? sub.user_id}`,
