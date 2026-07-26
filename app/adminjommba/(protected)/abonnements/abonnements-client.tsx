@@ -18,24 +18,39 @@ const STATUS_STYLE: Record<string, string> = {
   active:    "text-emerald-600",
   cancelled: "text-amber-600",
   expired:   "text-gray-400",
+  refunded:  "text-red-600",
 };
 const STATUS_DOT: Record<string, string> = {
   active:    "bg-emerald-500",
   cancelled: "bg-amber-400",
   expired:   "bg-gray-300",
+  refunded:  "bg-red-500",
 };
 const STATUS_LABEL: Record<string, string> = {
   active:    "Actif",
   cancelled: "Résilié",
   expired:   "Expiré",
+  refunded:  "Remboursé",
 };
 
+/** Un abonnement remboursé (statut "cancelled" + refunded_at) est affiché « Remboursé ». */
+const displayStatus = (s: SubscriptionRow): string => (s.refunded ? "refunded" : s.status);
+
 const FILTER_CHIPS = [
-  { label: "Tous",     value: "all"       },
-  { label: "Actifs",   value: "active"    },
-  { label: "Résiliés", value: "cancelled" },
-  { label: "Expirés",  value: "expired"   },
+  { label: "Tous",       value: "all"       },
+  { label: "Actifs",     value: "active"    },
+  { label: "Résiliés",   value: "cancelled" },
+  { label: "Remboursés", value: "refunded"  },
+  { label: "Expirés",    value: "expired"   },
 ];
+
+// Un abonnement remboursé porte le statut "cancelled" : on le range dans
+// « Remboursés » et on l'exclut de « Résiliés » pour éviter le double comptage.
+function matchesChip(s: SubscriptionRow, chip: string): boolean {
+  if (chip === "refunded")  return s.refunded === true;
+  if (chip === "cancelled") return s.status === "cancelled" && !s.refunded;
+  return s.status === chip;
+}
 
 export function AbonnementsClient({
   rows,
@@ -154,14 +169,17 @@ export function AbonnementsClient({
     {
       key: "status",
       label: "Statut",
-      render: (s) => (
-        <span className={`flex items-center gap-1.5 text-sm font-medium ${STATUS_STYLE[s.status]}`}>
-          <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[s.status]}`} />
-          {STATUS_LABEL[s.status]}
-        </span>
-      ),
+      render: (s) => {
+        const st = displayStatus(s);
+        return (
+          <span className={`flex items-center gap-1.5 text-sm font-medium ${STATUS_STYLE[st]}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[st]}`} />
+            {STATUS_LABEL[st]}
+          </span>
+        );
+      },
       sortable: true,
-      csvValue: (s) => STATUS_LABEL[s.status],
+      csvValue: (s) => STATUS_LABEL[displayStatus(s)],
     },
     { key: "expires", label: "Échéance", sortable: false },
     {
@@ -231,7 +249,7 @@ export function AbonnementsClient({
         data={rows}
         columns={COLUMNS}
         filterChips={FILTER_CHIPS}
-        filterKey="status"
+        customFilterFn={matchesChip}
         xlsFilename="abonnements.xls"
         rowKey={(s) => s.id}
       />

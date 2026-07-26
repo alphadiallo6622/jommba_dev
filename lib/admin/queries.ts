@@ -3,7 +3,7 @@
 
 import { cache } from "react";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { timeAgo, formatDate, formatDuration } from "@/lib/admin/format";
+import { timeAgo, formatDate, formatDateTime, formatDuration } from "@/lib/admin/format";
 import type {
   Kpi, ChartPoint, DonutSegment, MonthBar, CountryBar, RevenuePoint, DayPoint,
   FeedItem, AdminNotification, MemberRow, PendingProfileRow, PhotoQueueItem,
@@ -553,8 +553,9 @@ export async function getSubscriptions(): Promise<SubscriptionsData> {
       plan: `${s.duration_months} mois`,
       payment: s.payment_method ?? "—",
       status: s.status,
-      expires: s.current_period_end ? formatDate(s.current_period_end) : "—",
+      expires: s.current_period_end ? formatDateTime(s.current_period_end) : "—",
       canRefund: paid && isSquare && !s.refunded_at,
+      refunded: !!s.refunded_at,
       gender: info?.gender ?? null,
       city: info?.city ?? null,
       country: info?.country ?? null,

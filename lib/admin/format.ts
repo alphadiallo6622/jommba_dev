@@ -15,6 +15,14 @@ export function formatDate(iso: string): string {
   return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 }
 
+/** "12 aoû 2026 à 14 h 05" — date et heure. */
+export function formatDateTime(iso: string): string {
+  const d = new Date(iso);
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()} à ${hh} h ${mm}`;
+}
+
 /** "Il y a 3 h", "Il y a 22 min", "Hier", "12 juin 2026"… */
 export function timeAgo(iso: string): string {
   const diffMs = Date.now() - new Date(iso).getTime();

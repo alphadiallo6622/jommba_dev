@@ -126,6 +126,8 @@ export interface SubscriptionRow {
   status: SubStatus;
   expires: string;
   canRefund?: boolean;
+  /** true si l'abonnement a été remboursé (refunded_at présent). */
+  refunded?: boolean;
   gender: string | null;
   city: string | null;
   country: string | null;
