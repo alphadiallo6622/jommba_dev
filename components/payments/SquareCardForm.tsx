@@ -6,6 +6,8 @@
 // qu'on envoie à nos routes API (/api/payments/boost ou /subscribe).
 import { useEffect, useRef, useState } from 'react'
 import Script from 'next/script'
+import { Lock } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 // URL du SDK selon l'environnement (sandbox vs production).
 const SDK_SRC =
@@ -32,11 +34,19 @@ interface Props {
   boostId?: string
   /** Libellé du bouton (ex. « Payer 2,5 $ »). */
   submitLabel: string
+  /** Couleur d'accent du bouton et du focus. 'green' (défaut) ou 'orange'. */
+  accent?: 'green' | 'orange'
   /** Appelé après un paiement réussi. */
   onSuccess: () => void
 }
 
-export default function SquareCardForm({ mode, planId, boostId, submitLabel, onSuccess }: Props) {
+// Classes du bouton selon l'accent (dégradé + ombre teintée).
+const ACCENT = {
+  green: 'bg-gradient-to-b from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 shadow-emerald-500/30',
+  orange: 'bg-gradient-to-b from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-orange-500/30',
+} as const
+
+export default function SquareCardForm({ mode, planId, boostId, submitLabel, accent = 'green', onSuccess }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const cardRef = useRef<(SquareCard & { attach: (el: HTMLElement) => Promise<void> }) | null>(null)
   const [ready, setReady] = useState(false)
@@ -115,18 +125,39 @@ export default function SquareCardForm({ mode, planId, boostId, submitLabel, onS
       {/* Le SDK injecte l'iframe de saisie carte ici. */}
       <div
         ref={containerRef}
-        className="rounded-xl border border-gray-200 p-3 min-h-[56px] bg-white"
+        className="rounded-2xl border border-gray-200 bg-white px-4 py-3.5 min-h-[56px] shadow-sm transition-all focus-within:border-emerald-400 focus-within:ring-2 focus-within:ring-emerald-100"
       />
 
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+      {error && (
+        <p className="mt-2.5 flex items-center gap-1.5 text-sm text-red-600">
+          <span className="inline-block h-1.5 w-1.5 rounded-full bg-red-500" />
+          {error}
+        </p>
+      )}
 
       <button
         onClick={handlePay}
         disabled={!ready || loading}
-        className="mt-4 w-full rounded-xl bg-orange-500 py-3 font-semibold text-white transition-colors hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+        className={cn(
+          'mt-5 w-full rounded-2xl py-4 text-base font-semibold text-white shadow-lg transition-all duration-200 hover:shadow-xl active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none',
+          ACCENT[accent],
+        )}
       >
-        {loading ? 'Traitement…' : submitLabel}
+        {loading ? (
+          <span className="flex items-center justify-center gap-2">
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+            Traitement…
+          </span>
+        ) : (
+          submitLabel
+        )}
       </button>
+
+      {/* Réassurance : paiement sécurisé. */}
+      <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-gray-400">
+        <Lock className="h-3 w-3" />
+        Paiement 100 % sécurisé
+      </p>
     </div>
   )
 }

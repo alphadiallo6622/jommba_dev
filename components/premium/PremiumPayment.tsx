@@ -70,13 +70,13 @@ export default function PremiumPayment({ selectedPlan }: Props) {
       </div>
 
       {/* Total */}
-      <div className="flex justify-between items-center border-t border-gray-100 pt-4">
-        <span className="text-gray-500 text-sm">{t('total')}</span>
+      <div className="mt-1 flex items-center justify-between rounded-2xl bg-emerald-50/60 px-4 py-3">
+        <span className="text-sm font-medium text-gray-600">{t('total')}</span>
         <div className="flex items-baseline gap-1">
-          <span className="text-2xl font-bold text-gray-900">
+          <span className="text-3xl font-extrabold tracking-tight text-emerald-600">
             {total}
           </span>
-          <span className="text-sm text-gray-500">$</span>
+          <span className="text-base font-semibold text-emerald-500">$</span>
         </div>
       </div>
 
@@ -86,6 +86,7 @@ export default function PremiumPayment({ selectedPlan }: Props) {
           <SquareCardForm
             mode="subscribe"
             planId={selectedPlan}
+            accent="green"
             submitLabel={`${t('subscribe')} · ${total} $`}
             onSuccess={() => {
               toast.success(t('success'))
@@ -97,7 +98,7 @@ export default function PremiumPayment({ selectedPlan }: Props) {
         // Mobile Money : prestataire non encore branché (Square ne le gère pas).
         <button
           onClick={() => toast.info(t('mobileSoon'))}
-          className="mt-5 w-full rounded-xl bg-orange-500 py-3 font-semibold text-white transition-colors hover:bg-orange-600"
+          className="mt-5 w-full rounded-2xl bg-gradient-to-b from-emerald-500 to-emerald-600 py-4 font-semibold text-white shadow-lg shadow-emerald-500/30 transition-all hover:from-emerald-600 hover:to-emerald-700 hover:shadow-xl active:scale-[0.99]"
         >
           {t('subscribe')} · {total} $
         </button>
