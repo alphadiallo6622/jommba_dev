@@ -514,11 +514,9 @@ export async function getSubscriptions(): Promise<SubscriptionsData> {
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const yearStart = new Date(now.getFullYear(), 0, 1);
 
-  const [subs, cancelled, refunded] = await Promise.all([
-    supabase.from("subscriptions").select("*").eq("plan", "premium").order("created_at", { ascending: false }).limit(1_000),
-    supabase.from("subscriptions").select("id", { count: "exact", head: true }).gte("cancelled_at", since30),
-    supabase.from("subscriptions").select("id", { count: "exact", head: true }).gte("refunded_at", since30),
-  ]);
+  const subs = await supabase
+    .from("subscriptions").select("*").eq("plan", "premium")
+    .order("created_at", { ascending: false }).limit(1_000);
 
   const allSubs = subs.data ?? [];
   const userIds = [...new Set(allSubs.map((s) => s.user_id))];
@@ -577,9 +575,18 @@ export async function getSubscriptions(): Promise<SubscriptionsData> {
   const monthRevenue = sumRevenue((s) => Date.parse(s.created_at) >= monthStart.getTime());
   const yearRevenue = sumRevenue((s) => Date.parse(s.created_at) >= yearStart.getTime());
 
-  const totalCancellations = allSubs.filter((s) => s.status === "cancelled" || s.cancelled_at).length;
+  // Convention alignée sur les filtres du tableau : une « résiliation » est un
+  // abonnement annulé mais NON remboursé (le remboursé est sa propre catégorie).
+  const isRefunded = (s: (typeof allSubs)[number]) => !!s.refunded_at;
+  const isCancelled = (s: (typeof allSubs)[number]) =>
+    (s.status === "cancelled" || !!s.cancelled_at) && !isRefunded(s);
+  const within30 = (iso: string | null) => !!iso && Date.parse(iso) >= Date.parse(since30);
+
+  const totalCancellations = allSubs.filter(isCancelled).length;
   const totalExpired = allSubs.filter((s) => s.status === "expired").length;
-  const totalRefunds = allSubs.filter((s) => s.refunded_at).length;
+  const totalRefunds = allSubs.filter(isRefunded).length;
+  const cancellations30d = allSubs.filter((s) => isCancelled(s) && within30(s.cancelled_at)).length;
+  const refunds30d = allSubs.filter((s) => within30(s.refunded_at)).length;
 
   return {
     rows,
@@ -588,8 +595,8 @@ export async function getSubscriptions(): Promise<SubscriptionsData> {
       monthRevenue,
       totalRevenue,
       yearRevenue,
-      cancellations30d: cancelled.count ?? 0,
-      refunds30d: refunded.count ?? 0,
+      cancellations30d,
+      refunds30d,
       totalCancellations,
       totalExpired,
       totalRefunds,
