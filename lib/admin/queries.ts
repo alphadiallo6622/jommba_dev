@@ -512,7 +512,9 @@ export async function getSubscriptions(): Promise<SubscriptionsData> {
   const since30 = new Date(Date.now() - 30 * 86_400_000).toISOString();
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1);
   const yearStart = new Date(now.getFullYear(), 0, 1);
+  const nextYearStart = new Date(now.getFullYear() + 1, 0, 1);
 
   const subs = await supabase
     .from("subscriptions").select("*").eq("plan", "premium")
@@ -562,18 +564,24 @@ export async function getSubscriptions(): Promise<SubscriptionsData> {
     };
   });
 
-  const activeCount = rows.filter((r) => r.status === "active").length;
+  // Actif = statut actif ET non remboursé (le remboursé est rangé à part, comme
+  // dans le tableau et le filtre « Remboursés »).
+  const activeCount = allSubs.filter((s) => s.status === "active" && !s.refunded_at).length;
 
   // Revenu = somme des montants réellement encaissés (montant > 0), déduction faite
   // des abonnements remboursés. Les abonnements offerts (montant 0) ne comptent pas.
+  // La période de rattachement est celle de la facturation en cours
+  // (current_period_end = l'échéance affichée), avec repli sur created_at.
   const paidUsd = (s: (typeof allSubs)[number]) => Number(s.price_usd ?? 0);
   const isRevenue = (s: (typeof allSubs)[number]) => paidUsd(s) > 0 && !s.refunded_at;
+  const periodMs = (s: (typeof allSubs)[number]) =>
+    Date.parse(s.current_period_end ?? s.created_at);
   const sumRevenue = (predicate: (s: (typeof allSubs)[number]) => boolean) =>
     Math.round(allSubs.filter((s) => isRevenue(s) && predicate(s)).reduce((sum, s) => sum + paidUsd(s), 0));
 
   const totalRevenue = sumRevenue(() => true);
-  const monthRevenue = sumRevenue((s) => Date.parse(s.created_at) >= monthStart.getTime());
-  const yearRevenue = sumRevenue((s) => Date.parse(s.created_at) >= yearStart.getTime());
+  const monthRevenue = sumRevenue((s) => periodMs(s) >= monthStart.getTime() && periodMs(s) < nextMonthStart.getTime());
+  const yearRevenue = sumRevenue((s) => periodMs(s) >= yearStart.getTime() && periodMs(s) < nextYearStart.getTime());
 
   // Convention alignée sur les filtres du tableau : une « résiliation » est un
   // abonnement annulé mais NON remboursé (le remboursé est sa propre catégorie).
