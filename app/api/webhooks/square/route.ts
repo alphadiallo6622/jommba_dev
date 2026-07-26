@@ -66,7 +66,19 @@ export async function POST(req: NextRequest) {
             .maybeSingle()
 
           if (row?.user_id) {
-            await admin.from('profiles').update({ is_premium: active }).eq('user_id', row.user_id)
+            // Historique multi-lignes : on ne coupe le Premium que si le membre n'a
+            // plus AUCUN abonnement actif (un événement tardif sur un ancien cycle
+            // ne doit pas désactiver un abonnement plus récent).
+            let isPremium = active
+            if (!active) {
+              const { count } = await admin
+                .from('subscriptions')
+                .select('id', { count: 'exact', head: true })
+                .eq('user_id', row.user_id)
+                .eq('status', 'active')
+              isPremium = (count ?? 0) > 0
+            }
+            await admin.from('profiles').update({ is_premium: isPremium }).eq('user_id', row.user_id)
           }
         }
         break
@@ -79,10 +91,11 @@ export async function POST(req: NextRequest) {
         if (subId) {
           const { data: row } = await admin
             .from('subscriptions')
-            .select('user_id, duration_months')
+            .select('user_id, duration_months, refunded_at')
             .eq('square_subscription_id', subId)
             .maybeSingle()
-          if (row?.user_id) {
+          // Un cycle remboursé ne doit jamais être réactivé par une facture tardive.
+          if (row?.user_id && !row.refunded_at) {
             const end = new Date()
             end.setMonth(end.getMonth() + (row.duration_months ?? 1))
             await admin

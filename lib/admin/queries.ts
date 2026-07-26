@@ -212,7 +212,7 @@ export async function getStatsData(): Promise<StatsData> {
 
   const [msgs, premiumSubs, profileCountries, statuses] = await Promise.all([
     supabase.from("messages").select("created_at").gte("created_at", since30).limit(10_000),
-    supabase.from("subscriptions").select("created_at,duration_months,price_usd").eq("plan", "premium").gte("created_at", yearStart.toISOString()).limit(10_000),
+    supabase.from("subscriptions").select("created_at,duration_months,price_usd,refunded_at").eq("plan", "premium").gte("created_at", yearStart.toISOString()).limit(10_000),
     supabase.from("profiles").select("country").limit(10_000),
     supabase.from("profiles").select("status").limit(10_000),
   ]);
@@ -231,8 +231,11 @@ export async function getStatsData(): Promise<StatsData> {
     const idx = 11 - ((now.getFullYear() - d.getFullYear()) * 12 + (now.getMonth() - d.getMonth()));
     if (idx >= 0 && idx < 12) {
       monthCounts[idx]++;
-      const price = s.price_usd ?? settings.pricing.launchPrice * (s.duration_months ?? 1);
-      monthRevenue[idx] += Number(price);
+      // Revenu : on exclut les abonnements remboursés (cohérent avec l'écran Abonnements).
+      if (!s.refunded_at) {
+        const price = s.price_usd ?? settings.pricing.launchPrice * (s.duration_months ?? 1);
+        monthRevenue[idx] += Number(price);
+      }
     }
   }
   const monthLabel = (i: number) => MONTH_LETTERS[(now.getMonth() + 1 + i) % 12];

@@ -264,27 +264,31 @@ export async function suspendMember(userId: string): Promise<ActionResult> {
 export async function offerPremium(userId: string): Promise<ActionResult> {
   return run(async () => {
     const supabase = createAdminClient();
+    const now = new Date().toISOString();
     const periodEnd = new Date();
     periodEnd.setMonth(periodEnd.getMonth() + 1);
 
-    const { error: subErr } = await supabase.from("subscriptions").upsert(
-      {
-        user_id: userId,
-        plan: "premium",
-        status: "active",
-        duration_months: 1,
-        payment_method: "Offert",
-        price_usd: 0,
-        current_period_end: periodEnd.toISOString(),
-        cancelled_at: null,
-        refunded_at: null,
-        square_subscription_id: null,
-        square_customer_id: null,
-        square_card_id: null,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "user_id" },
-    );
+    // Historique multi-lignes : on clôt l'abonnement actif éventuel (conservé en
+    // historique) puis on insère une NOUVELLE ligne pour le mois offert.
+    await supabase
+      .from("subscriptions")
+      .update({ status: "cancelled", cancelled_at: now, updated_at: now })
+      .eq("user_id", userId)
+      .eq("status", "active");
+
+    const { error: subErr } = await supabase.from("subscriptions").insert({
+      user_id: userId,
+      plan: "premium",
+      status: "active",
+      duration_months: 1,
+      payment_method: "Offert",
+      price_usd: 0,
+      current_period_end: periodEnd.toISOString(),
+      square_subscription_id: null,
+      square_customer_id: null,
+      square_card_id: null,
+      updated_at: now,
+    });
     if (subErr) throw new Error(subErr.message);
 
     const { error } = await supabase

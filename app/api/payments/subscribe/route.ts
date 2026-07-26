@@ -50,10 +50,14 @@ export async function POST(req: NextRequest) {
 
   try {
     // 2) Réutilise le Customer Square existant s'il y en a un, sinon en crée un.
+    //    Historique multi-lignes : on prend le customer du dernier abonnement en date.
     const { data: existing } = await admin
       .from('subscriptions')
       .select('square_customer_id')
       .eq('user_id', user.id)
+      .not('square_customer_id', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(1)
       .maybeSingle()
 
     let customerId = existing?.square_customer_id ?? null
@@ -92,30 +96,29 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Création de l'abonnement échouée." }, { status: 402 })
     }
 
-    // 5) Enregistre en base. Premium activé ici ; le webhook confirmera/renouvellera.
+    // 5) Enregistre en base. Historique multi-lignes : chaque souscription est une
+    //    NOUVELLE ligne (on préserve les cycles précédents, remboursements inclus).
+    //    Premium activé ici ; le webhook confirmera/renouvellera.
     const periodEnd = new Date()
     periodEnd.setMonth(periodEnd.getMonth() + plan.durationMonths)
 
     const { error: subErr } = await admin
       .from('subscriptions')
-      .upsert(
-        {
-          user_id: user.id,
-          plan: 'premium',
-          status: 'active',
-          payment_method: 'square',
-          price_usd: plan.totalPriceUsd,
-          duration_months: plan.durationMonths,
-          current_period_end: periodEnd.toISOString(),
-          square_subscription_id: subscription.id,
-          square_customer_id: customerId,
-          square_card_id: cardId,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: 'user_id' },
-      )
+      .insert({
+        user_id: user.id,
+        plan: 'premium',
+        status: 'active',
+        payment_method: 'square',
+        price_usd: plan.totalPriceUsd,
+        duration_months: plan.durationMonths,
+        current_period_end: periodEnd.toISOString(),
+        square_subscription_id: subscription.id,
+        square_customer_id: customerId,
+        square_card_id: cardId,
+        updated_at: new Date().toISOString(),
+      })
     if (subErr) {
-      console.error('[payments/subscribe] upsert subscription échoué', subscription.id, subErr)
+      console.error('[payments/subscribe] insert subscription échoué', subscription.id, subErr)
       return NextResponse.json(
         { error: 'Abonnement créé mais enregistrement échoué. Contactez le support.' },
         { status: 500 },
