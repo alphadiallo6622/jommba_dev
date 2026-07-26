@@ -10,6 +10,7 @@ import Badge from "@/components/ui/Badge";
 import { createClient } from "@/lib/supabase/server";
 import { BLOG_POSTS } from "@/data/blogPosts";
 import { Link } from "@/i18n/navigation";
+import ShareArticle from "@/components/blog/ShareArticle";
 
 export const dynamic = "force-dynamic";
 
@@ -183,6 +184,10 @@ export default async function BlogArticlePage(
                 </span>
               </div>
             </div>
+
+            <div className="pt-2">
+              <ShareArticle title={article.title} excerpt={article.excerpt} tone="onDark" />
+            </div>
           </div>
         </Container>
       </div>
@@ -213,7 +218,11 @@ export default async function BlogArticlePage(
               dangerouslySetInnerHTML={{ __html: article.html }}
             />
 
-            <div className="mt-10 pt-6 border-t border-primary-light/35 flex items-center justify-between gap-4 flex-wrap">
+            <div className="mt-10 pt-6 border-t border-primary-light/35">
+              <ShareArticle title={article.title} excerpt={article.excerpt} />
+            </div>
+
+            <div className="mt-6 pt-6 border-t border-primary-light/35 flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-full bg-primary-light text-primary font-bold text-xs flex items-center justify-center">
                   {article.authorAvatar}

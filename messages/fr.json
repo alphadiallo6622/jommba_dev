@@ -1863,5 +1863,13 @@
         ]
       }
     }
+  },
+  "share": {
+    "label": "Partager",
+    "shareOn": "Partager sur {network}",
+    "copyLink": "Copier le lien",
+    "copied": "Lien copié !",
+    "copyFallback": "Copiez le lien ci-dessous :",
+    "more": "Plus d'options de partage"
   }
 }

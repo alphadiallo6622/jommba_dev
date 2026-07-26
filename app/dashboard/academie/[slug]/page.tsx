@@ -7,6 +7,7 @@ import { getTranslations, getLocale } from 'next-intl/server'
 import { ArrowLeft, BookOpen, Calendar, Clock } from 'lucide-react'
 import DashboardNavbar from '@/components/dashboard/Navbar'
 import { createClient } from '@/lib/supabase/server'
+import ShareArticle from '@/components/blog/ShareArticle'
 
 export const dynamic = 'force-dynamic'
 
@@ -144,6 +145,10 @@ export default async function AcademieArticlePage(
                 </span>
               )}
             </div>
+
+            <div className="relative pt-1">
+              <ShareArticle title={article.title} excerpt={article.excerpt} tone="onDark" />
+            </div>
           </div>
 
           {/* Image de couverture */}
@@ -166,7 +171,11 @@ export default async function AcademieArticlePage(
               dangerouslySetInnerHTML={{ __html: article.html }}
             />
 
-            <div className="mt-10 pt-6 border-t border-gray-100 flex items-center justify-between gap-4 flex-wrap">
+            <div className="mt-10 pt-6 border-t border-gray-100">
+              <ShareArticle title={article.title} excerpt={article.excerpt} />
+            </div>
+
+            <div className="mt-6 pt-6 border-t border-gray-100 flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-full bg-emerald-50 text-emerald-600 font-bold text-xs flex items-center justify-center">
                   {article.authorAvatar}
