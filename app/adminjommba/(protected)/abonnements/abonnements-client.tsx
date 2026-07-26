@@ -181,7 +181,8 @@ export function AbonnementsClient({
       sortable: true,
       csvValue: (s) => STATUS_LABEL[displayStatus(s)],
     },
-    { key: "expires", label: "Échéance", sortable: false },
+    { key: "subscribedAt", label: "Date d'abonnement", sortable: true },
+    { key: "expires",      label: "Échéance",          sortable: false },
     {
       key: "id",
       label: "Actions",

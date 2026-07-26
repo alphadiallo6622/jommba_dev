@@ -554,6 +554,7 @@ export async function getSubscriptions(): Promise<SubscriptionsData> {
       payment: s.payment_method ?? "—",
       status: s.status,
       expires: s.current_period_end ? formatDateTime(s.current_period_end) : "—",
+      subscribedAt: s.created_at ? formatDateTime(s.created_at) : "—",
       canRefund: paid && isSquare && !s.refunded_at,
       refunded: !!s.refunded_at,
       gender: info?.gender ?? null,
@@ -570,18 +571,16 @@ export async function getSubscriptions(): Promise<SubscriptionsData> {
 
   // Revenu = somme des montants réellement encaissés (montant > 0), déduction faite
   // des abonnements remboursés. Les abonnements offerts (montant 0) ne comptent pas.
-  // La période de rattachement est celle de la facturation en cours
-  // (current_period_end = l'échéance affichée), avec repli sur created_at.
+  // Rattachement au mois/année de la DATE DE SOUSCRIPTION (created_at).
   const paidUsd = (s: (typeof allSubs)[number]) => Number(s.price_usd ?? 0);
   const isRevenue = (s: (typeof allSubs)[number]) => paidUsd(s) > 0 && !s.refunded_at;
-  const periodMs = (s: (typeof allSubs)[number]) =>
-    Date.parse(s.current_period_end ?? s.created_at);
+  const subMs = (s: (typeof allSubs)[number]) => Date.parse(s.created_at);
   const sumRevenue = (predicate: (s: (typeof allSubs)[number]) => boolean) =>
     Math.round(allSubs.filter((s) => isRevenue(s) && predicate(s)).reduce((sum, s) => sum + paidUsd(s), 0));
 
   const totalRevenue = sumRevenue(() => true);
-  const monthRevenue = sumRevenue((s) => periodMs(s) >= monthStart.getTime() && periodMs(s) < nextMonthStart.getTime());
-  const yearRevenue = sumRevenue((s) => periodMs(s) >= yearStart.getTime() && periodMs(s) < nextYearStart.getTime());
+  const monthRevenue = sumRevenue((s) => subMs(s) >= monthStart.getTime() && subMs(s) < nextMonthStart.getTime());
+  const yearRevenue = sumRevenue((s) => subMs(s) >= yearStart.getTime() && subMs(s) < nextYearStart.getTime());
 
   // Convention alignée sur les filtres du tableau : une « résiliation » est un
   // abonnement annulé mais NON remboursé (le remboursé est sa propre catégorie).

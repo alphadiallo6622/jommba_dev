@@ -125,6 +125,8 @@ export interface SubscriptionRow {
   payment: string; // « Carte », « Wave »…
   status: SubStatus;
   expires: string;
+  /** Date de souscription (created_at) au format date + heure. */
+  subscribedAt: string;
   canRefund?: boolean;
   /** true si l'abonnement a été remboursé (refunded_at présent). */
   refunded?: boolean;
