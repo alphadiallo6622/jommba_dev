@@ -331,7 +331,8 @@ function toMemberRow(
   };
 }
 
-/** Charge les détails profil enrichis + le dernier abonnement premium par membre. */
+/** Charge les détails profil enrichis + l'abonnement premium EN COURS par membre
+ *  (actif non remboursé en priorité, sinon le plus récent). */
 async function loadMemberExtras(
   supabase: ReturnType<typeof createAdminClient>,
   userIds: string[],
@@ -347,7 +348,7 @@ async function loadMemberExtras(
       .in("user_id", userIds),
     supabase
       .from("subscriptions")
-      .select("user_id,price_usd,duration_months,created_at")
+      .select("user_id,price_usd,duration_months,created_at,status,refunded_at")
       .eq("plan", "premium")
       .in("user_id", userIds)
       .order("created_at", { ascending: false }),
@@ -356,13 +357,25 @@ async function loadMemberExtras(
   for (const p of profileRows.data ?? []) {
     extra.set(p.user_id, p as unknown as MemberExtra);
   }
-  // Premier vu = le plus récent (tri desc) : on ne garde que celui-là par membre.
+  // Plan/montant EN COURS : on privilégie l'abonnement actif (non remboursé) le
+  // plus récent ; à défaut (aucun actif), on retombe sur le plus récent tout court.
+  // Les lignes étant triées par date décroissante, la première rencontrée par
+  // catégorie est la plus récente.
+  const active = new Map<string, SubInfo>();
+  const latest = new Map<string, SubInfo>();
   for (const s of subRows.data ?? []) {
-    if (subs.has(s.user_id)) continue;
-    subs.set(s.user_id, {
+    const info: SubInfo = {
       amount: s.price_usd != null ? Number(s.price_usd) : null,
       plan: s.duration_months != null ? `${s.duration_months} mois` : null,
-    });
+    };
+    if (!latest.has(s.user_id)) latest.set(s.user_id, info);
+    if (s.status === "active" && !s.refunded_at && !active.has(s.user_id)) {
+      active.set(s.user_id, info);
+    }
+  }
+  for (const uid of userIds) {
+    const info = active.get(uid) ?? latest.get(uid);
+    if (info) subs.set(uid, info);
   }
   return { extra, subs };
 }
