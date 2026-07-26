@@ -42,7 +42,9 @@ export async function POST(req: NextRequest) {
       idempotencyKey: randomUUID(),
       locationId: SQUARE_LOCATION_ID,
       amountMoney: { amount: toMinorUnits(boost.priceUsd), currency: CURRENCY },
-      referenceId: `boost:${user.id}`,
+      // referenceId limité à 40 caractères par Square : un UUID (36) tient seul,
+      // pas de préfixe. Le type d'achat est identifié par la note.
+      referenceId: user.id,
       note: `Jommba — Boost ${boost.id}`,
     })
 
@@ -73,7 +75,25 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ ok: true, expiresAt: expiresAt.toISOString() })
   } catch (err) {
-    console.error('[payments/boost] Square error', err)
-    return NextResponse.json({ error: 'Le paiement a échoué.' }, { status: 402 })
+    // Remonte le détail Square (utile en dev pour distinguer carte refusée /
+    // token invalide / mauvais environnement).
+    const detail = extractSquareError(err)
+    console.error('[payments/boost] Square error', detail ?? err)
+    return NextResponse.json(
+      { error: 'Le paiement a échoué.', detail },
+      { status: 402 },
+    )
   }
+}
+
+// Extrait le message d'erreur des exceptions du SDK Square (forme { errors: [...] }).
+function extractSquareError(err: unknown): string | undefined {
+  if (err && typeof err === 'object') {
+    const e = err as { errors?: Array<{ code?: string; detail?: string }>; body?: unknown; message?: string }
+    if (Array.isArray(e.errors) && e.errors.length) {
+      return e.errors.map((x) => x.detail ?? x.code).filter(Boolean).join(' | ')
+    }
+    if (typeof e.message === 'string') return e.message
+  }
+  return undefined
 }
