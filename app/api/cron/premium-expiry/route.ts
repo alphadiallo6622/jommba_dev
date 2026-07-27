@@ -4,6 +4,10 @@
 // webhook Square ne prévient d'un renouvellement ou d'une fin de période — cette
 // tâche est l'unique mécanisme qui fait expirer l'accès. Déclenché par Vercel Cron
 // (voir vercel.json) et protégé par CRON_SECRET.
+//
+// Cadence : une fois par jour (limite du plan Hobby de Vercel). Un membre peut
+// donc conserver son accès jusqu'à ~24 h après l'échéance ; passer le cron en
+// horaire dès le passage au plan Pro pour resserrer ce délai.
 import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 
