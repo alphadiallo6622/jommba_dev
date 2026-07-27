@@ -3,16 +3,27 @@
 // (platform_settings.pricing.monthlyPrice). Source de vérité unique partagée par
 // l'écran admin (aperçu), la page /dashboard/premium (affichage) et la route de
 // paiement (montant réellement facturé) — jamais de prix dupliqué en dur ailleurs.
+//
+// Modèle : chaque plan a une durée et une remise fixe d'engagement. Le prix payé
+// est le tarif plein de la durée (prix mensuel × nombre de mois) diminué de cette
+// remise. Le pourcentage affiché sur la carte est donc exactement PLAN_DISCOUNTS.
 
 export type PlanId = "15j" | "1m" | "3m" | "6m";
 
-/** Multiplicateurs fixes du prix mensuel, calibrés pour reproduire les tarifs
- *  actuels (15j=6, 1m=10, 3m=15, 6m=25) à monthlyPrice=10. */
-export const PLAN_MULTIPLIERS: Record<PlanId, number> = {
-  "15j": 0.6,
+/** Nombre de mois facturés par plan (base du tarif plein). */
+export const PLAN_MONTHS: Record<PlanId, number> = {
+  "15j": 0.5,
   "1m": 1,
-  "3m": 1.5,
-  "6m": 2.5,
+  "3m": 3,
+  "6m": 6,
+};
+
+/** Remise d'engagement par plan, en pourcentage du tarif plein de la durée. */
+export const PLAN_DISCOUNTS: Record<PlanId, number> = {
+  "15j": 20,
+  "1m": 40,
+  "3m": 33,
+  "6m": 49,
 };
 
 /** Durée d'accès Premium réelle par plan, en jours. */
@@ -23,44 +34,42 @@ export const PLAN_DURATION_DAYS: Record<PlanId, number> = {
   "6m": 180,
 };
 
+const PLAN_IDS: PlanId[] = ["15j", "1m", "3m", "6m"];
+
 function round2(n: number): number {
   return Math.round(n * 100) / 100;
 }
 
-/** Prix total (USD) de chaque plan, dérivé du prix mensuel courant. */
+/** Tarif plein (sans remise) de chaque plan : prix mensuel × nombre de mois. */
+export function computeFullPrices(monthlyPrice: number): Record<PlanId, number> {
+  const out = {} as Record<PlanId, number>;
+  for (const id of PLAN_IDS) out[id] = round2(monthlyPrice * PLAN_MONTHS[id]);
+  return out;
+}
+
+/** Prix total (USD) réellement payé pour chaque plan, remise appliquée. */
 export function computePlanPrices(monthlyPrice: number): Record<PlanId, number> {
-  return {
-    "15j": round2(monthlyPrice * PLAN_MULTIPLIERS["15j"]),
-    "1m": round2(monthlyPrice * PLAN_MULTIPLIERS["1m"]),
-    "3m": round2(monthlyPrice * PLAN_MULTIPLIERS["3m"]),
-    "6m": round2(monthlyPrice * PLAN_MULTIPLIERS["6m"]),
-  };
+  const out = {} as Record<PlanId, number>;
+  for (const id of PLAN_IDS) {
+    out[id] = round2(monthlyPrice * PLAN_MONTHS[id] * (1 - PLAN_DISCOUNTS[id] / 100));
+  }
+  return out;
 }
 
 /** Équivalent mensuel affiché sous chaque plan (ex. "5 $/mois" pour le 3m). */
 export function computeMonthlyEquivalents(monthlyPrice: number): Record<PlanId, number> {
   const prices = computePlanPrices(monthlyPrice);
-  const months: Record<PlanId, number> = { "15j": 0.5, "1m": 1, "3m": 3, "6m": 6 };
-  return {
-    "15j": round2(prices["15j"] / months["15j"]),
-    "1m": round2(prices["1m"] / months["1m"]),
-    "3m": round2(prices["3m"] / months["3m"]),
-    "6m": round2(prices["6m"] / months["6m"]),
-  };
+  const out = {} as Record<PlanId, number>;
+  for (const id of PLAN_IDS) out[id] = round2(prices[id] / PLAN_MONTHS[id]);
+  return out;
 }
 
-/** Badge de réduction ("-33%") comparant le total du plan à `normalPrice`
- *  appliqué sur la même durée (mois × prix normal mensuel). */
-export function computeDiscountLabels(monthlyPrice: number, normalPrice: number): Record<PlanId, string | null> {
-  const prices = computePlanPrices(monthlyPrice);
-  const months: Record<PlanId, number> = { "15j": 0.5, "1m": 1, "3m": 3, "6m": 6 };
+/** Badge de réduction affiché sur chaque carte (ex. "-40%"). */
+export function computeDiscountLabels(): Record<PlanId, string | null> {
   const out = {} as Record<PlanId, string | null>;
-  (Object.keys(prices) as PlanId[]).forEach((id) => {
-    const reference = normalPrice * months[id];
-    if (reference <= 0) { out[id] = null; return; }
-    const pct = Math.round((1 - prices[id] / reference) * 100);
-    out[id] = pct > 0 ? `-${pct}%` : null;
-  });
+  for (const id of PLAN_IDS) {
+    out[id] = PLAN_DISCOUNTS[id] > 0 ? `-${PLAN_DISCOUNTS[id]}%` : null;
+  }
   return out;
 }
 

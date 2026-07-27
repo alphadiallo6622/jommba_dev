@@ -8,7 +8,7 @@ import {
   ChevronDown, Globe, Wallet, Eye, EyeOff, Power, Wrench, Search, MapPin,
 } from "lucide-react";
 import { COUNTRIES, countryName } from "@/lib/admin/countries";
-import { computePlanPrices } from "@/lib/pricing";
+import { computePlanPrices, computeFullPrices, PLAN_DISCOUNTS } from "@/lib/pricing";
 import { Avatar } from "@/components/admin/ui/avatar";
 import { Card, CardHeader } from "@/components/admin/ui/card";
 import { useToast } from "@/components/admin/ui/toast";
@@ -966,7 +966,6 @@ export function ParametresClient({
             <div className="p-5 space-y-4">
               {([
                 { label: "Premium — prix mensuel (USD/mois)", key: "monthlyPrice" as const },
-                { label: "Premium — prix normal (USD/mois)",   key: "normalPrice"  as const },
                 { label: "Fenêtre de remboursement (jours)",   key: "refundWindow" as const },
               ] as const).map(({ label, key }) => (
                 <div key={key} className="flex items-center justify-between gap-4">
@@ -988,18 +987,25 @@ export function ParametresClient({
                 />
               </div>
 
-              {/* Aperçu live des 4 plans dérivés du prix mensuel — voir lib/pricing.ts */}
+              {/* Aperçu live des 4 plans dérivés du prix mensuel — voir lib/pricing.ts.
+                  Les remises par durée sont fixes et définies dans PLAN_DISCOUNTS. */}
               <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-faint)] p-3">
                 <p className="text-xs font-semibold text-[var(--color-ink)] mb-2">
                   Aperçu — page /dashboard/premium
                 </p>
                 <div className="grid grid-cols-4 gap-2">
-                  {(Object.entries(computePlanPrices(pricing.monthlyPrice)) as [string, number][]).map(([id, price]) => (
-                    <div key={id} className="text-center">
-                      <p className="text-[10px] text-[var(--color-muted)] uppercase">{id}</p>
-                      <p className="text-sm font-bold text-[var(--color-ink)]">{price} $</p>
-                    </div>
-                  ))}
+                  {(Object.keys(PLAN_DISCOUNTS) as (keyof typeof PLAN_DISCOUNTS)[]).map((id) => {
+                    const price = computePlanPrices(pricing.monthlyPrice)[id];
+                    const full = computeFullPrices(pricing.monthlyPrice)[id];
+                    return (
+                      <div key={id} className="text-center">
+                        <p className="text-[10px] text-[var(--color-muted)] uppercase">{id}</p>
+                        <p className="text-sm font-bold text-[var(--color-ink)]">{price} $</p>
+                        <p className="text-[10px] text-[var(--color-muted)] line-through">{full} $</p>
+                        <p className="text-[10px] font-semibold text-amber-600">−{PLAN_DISCOUNTS[id]}%</p>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 

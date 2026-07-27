@@ -14,7 +14,7 @@ import type {
 import type { AdminMember } from "@/lib/supabase/types";
 
 const DEFAULT_LIMITS: LimitsSettings = { contacts: 3, conversations: 3, coachQuestions: 3, visitors: 2 };
-const DEFAULT_PRICING: PricingSettings = { monthlyPrice: 10, normalPrice: 15, refundWindow: 7, autoValidate: false };
+const DEFAULT_PRICING: PricingSettings = { monthlyPrice: 10, refundWindow: 7, autoValidate: false };
 const DEFAULT_MAINTENANCE: MaintenanceSettings = { enabled: false, message: null };
 const DEFAULT_GEO_BLOCK: GeoBlockSettings = { enabled: false, mode: "block", countries: [] };
 

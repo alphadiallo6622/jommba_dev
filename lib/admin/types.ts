@@ -223,9 +223,9 @@ export interface LimitsSettings {
 
 export interface PricingSettings {
   /** Prix mensuel Premium (USD) : source de vérité des 4 plans (15j/1m/3m/6m),
-   *  voir lib/pricing.ts pour la formule de dérivation. */
+   *  auquel s'applique la remise d'engagement de chaque durée.
+   *  Voir lib/pricing.ts pour la formule de dérivation. */
   monthlyPrice: number;
-  normalPrice: number;
   refundWindow: number;
   autoValidate: boolean;
 }

@@ -1695,22 +1695,18 @@
         "apply": "Appliquer",
         "plans": {
           "15j": {
-            "label": "Premium 15 Jours",
-            "pricePerMonth": "12 $/mois"
+            "label": "Premium 15 Jours"
           },
           "1m": {
             "label": "Premium 1 Mois",
-            "pricePerMonth": "10 $/mois",
             "boostBadge": "x3 boost"
           },
           "3m": {
             "label": "Premium 3 Mois",
-            "pricePerMonth": "5 $/mois",
             "boostBadge": "x5 boosts"
           },
           "6m": {
             "label": "Premium 6 Mois",
-            "pricePerMonth": "4,17 $/mois",
             "boostBadge": "x8 boosts"
           }
         }

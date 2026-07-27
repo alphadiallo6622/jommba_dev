@@ -9,6 +9,8 @@ import type { AppliedPromo } from '@/app/dashboard/premium/page'
 
 export interface PremiumPricingData {
   prices: Record<string, number>
+  /** Tarif plein de la durée, avant remise d'engagement (affiché barré). */
+  fullPrices: Record<string, number>
   monthlyEquivalents: Record<string, number>
   discounts: Record<string, string | null>
 }
@@ -65,6 +67,7 @@ export default function PremiumPricing({ selectedPlan, setSelectedPlan, pricing,
         {plans.map((plan) => {
           const isActive = selectedPlan === plan.id
           const totalPrice = pricing?.prices[plan.id] ?? null
+          const fullPrice = pricing?.fullPrices[plan.id] ?? null
           const discount = pricing?.discounts[plan.id] ?? null
           return (
             <button
@@ -108,11 +111,16 @@ export default function PremiumPricing({ selectedPlan, setSelectedPlan, pricing,
                 </div>
 
                 <div className="text-right shrink-0">
-                  <div className="flex items-baseline gap-0.5 justify-end">
-                    <span className="text-xl font-bold text-gray-900">
-                      {totalPrice ?? '—'}
-                    </span>
-                    <span className="text-xs text-gray-400">$</span>
+                  <div className="flex items-baseline gap-1 justify-end">
+                    {fullPrice !== null && fullPrice > (totalPrice ?? 0) && (
+                      <span className="text-xs text-gray-400 line-through">{fullPrice} $</span>
+                    )}
+                    <div className="flex items-baseline gap-0.5">
+                      <span className="text-xl font-bold text-gray-900">
+                        {totalPrice ?? '—'}
+                      </span>
+                      <span className="text-xs text-gray-400">$</span>
+                    </div>
                   </div>
                   {discount && (
                     <span className="text-xs text-amber-600 font-medium">{discount}</span>
