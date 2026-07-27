@@ -782,37 +782,9 @@ export async function changeMyPassword(
 }
 
 // ── Paramètres : connexions API ───────────────────────────────────────────────
-
-export async function saveApiConnection(
-  id: string,
-  input: { identifier: string; secret: string; productionActive: boolean },
-): Promise<ActionResult> {
-  return run(async () => {
-    const supabase = createAdminClient();
-    const { data: service, error: readErr } = await supabase
-      .from("api_connections").select("kind").eq("id", id).single();
-    if (readErr || !service) throw new Error(readErr?.message ?? "Service inconnu");
-
-    const patch: Record<string, unknown> = {
-      identifier: input.identifier.trim() || null,
-      production_active: input.productionActive,
-      updated_at: new Date().toISOString(),
-    };
-    if (input.secret.trim()) patch.secret = input.secret.trim();
-
-    const { error } = await supabase.from("api_connections").update(patch).eq("id", id);
-    if (error) throw new Error(error.message);
-
-    // Un seul fournisseur de paiement actif à la fois.
-    if (service.kind === "payment" && input.productionActive) {
-      await supabase
-        .from("api_connections")
-        .update({ production_active: false, updated_at: new Date().toISOString() })
-        .eq("kind", "payment")
-        .neq("id", id);
-    }
-  }, "settings");
-}
+// Les clés sont lues depuis les variables d'environnement (voir
+// getApiConnections dans lib/admin/queries.ts) : l'écran est en lecture seule,
+// il n'y a donc pas d'action d'écriture ici.
 
 // ── Paramètres : limites & tarification ───────────────────────────────────────
 

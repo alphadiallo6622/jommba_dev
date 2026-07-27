@@ -829,18 +829,70 @@ export async function getAdminAccounts(): Promise<AdminAccountRow[]> {
   }));
 }
 
+/**
+ * Connexions & clés API — état dérivé des variables d'environnement.
+ *
+ * Les intégrations lisent toutes `process.env` (voir lib/square/client.ts,
+ * lib/cloudinary.ts, lib/email.ts, app/api/coach/route.ts…). Cet écran est donc
+ * en lecture seule : il rapporte la présence des variables requises, jamais
+ * leur valeur. Aucun secret ne transite vers le client.
+ */
 export async function getApiConnections(): Promise<ApiServiceRow[]> {
-  const supabase = createAdminClient();
-  const { data } = await supabase.from("api_connections").select("*").order("id");
-  return (data ?? []).map((s) => ({
-    id: s.id,
-    name: s.name,
-    desc: s.description ?? "",
-    kind: s.kind === "payment" ? "payment" : null,
-    productionActive: s.production_active,
-    identifier: s.identifier ?? "",
-    hasSecret: !!s.secret,
-  }));
+  const has = (name: string) => !!process.env[name]?.trim();
+
+  const service = (
+    id: string,
+    name: string,
+    desc: string,
+    required: string[],
+    opts: { optional?: string[]; kind?: "payment" | null; detail?: string | null } = {},
+  ): ApiServiceRow => ({
+    id,
+    name,
+    desc,
+    kind: opts.kind ?? null,
+    configured: required.every(has),
+    vars: [
+      ...required.map((n) => ({ name: n, present: has(n) })),
+      ...(opts.optional ?? []).map((n) => ({ name: n, present: has(n), optional: true })),
+    ],
+    detail: opts.detail ?? null,
+  });
+
+  const squareEnv = process.env.SQUARE_ENVIRONMENT?.trim();
+
+  return [
+    service("ai", "Anthropic — Coach IA", "Coach IA, idées de messages, génération de texte",
+      ["ANTHROPIC_API_KEY"], { detail: "Claude Sonnet 4.6 · Haiku 4.5" }),
+
+    service("auth", "Supabase Auth", "Authentification & sessions",
+      ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY"]),
+
+    service("cloud", "Cloudinary", "Stockage des photos de profil",
+      ["CLOUDINARY_CLOUD_NAME", "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET"],
+      { detail: process.env.CLOUDINARY_CLOUD_NAME?.trim() ?? null }),
+
+    service("db", "Supabase PostgreSQL", "Base de données principale",
+      ["NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"]),
+
+    service("email", "Email transactionnel", "OTP, bienvenue, resets",
+      ["EMAIL_SERVER_HOST", "EMAIL_SERVER_USER", "EMAIL_SERVER_PASSWORD", "EMAIL_FROM"],
+      { optional: ["EMAIL_SERVER_PORT"], detail: process.env.EMAIL_FROM?.trim() ?? null }),
+
+    service("square", "Square", "Paiements Premium & Boosts",
+      ["SQUARE_ACCESS_TOKEN", "SQUARE_LOCATION_ID", "NEXT_PUBLIC_SQUARE_APPLICATION_ID"],
+      {
+        kind: "payment",
+        optional: ["SQUARE_WEBHOOK_SIGNATURE_KEY", "SQUARE_PLAN_15J", "SQUARE_PLAN_1M", "SQUARE_PLAN_3M", "SQUARE_PLAN_6M"],
+        detail: squareEnv ? `Environnement : ${squareEnv}` : null,
+      }),
+
+    service("turnstile", "Cloudflare Turnstile", "Anti-bot des formulaires",
+      ["NEXT_PUBLIC_TURNSTILE_SITE_KEY", "TURNSTILE_SECRET_KEY"]),
+
+    service("google", "Google OAuth", "Connexion via compte Google",
+      ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"]),
+  ];
 }
 
 // ── Topbar : notifications dérivées des données ───────────────────────────────

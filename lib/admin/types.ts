@@ -206,9 +206,12 @@ export interface ApiServiceRow {
   name: string;
   desc: string;
   kind: "payment" | null;
-  productionActive: boolean;
-  identifier: string;
-  hasSecret: boolean;
+  /** true = toutes les variables d'environnement requises sont présentes */
+  configured: boolean;
+  /** Détail par variable d'environnement (jamais la valeur, seulement sa présence) */
+  vars: { name: string; present: boolean; optional?: boolean }[];
+  /** Info non secrète dérivée de l'env (modèle, cloud name, environnement Square…) */
+  detail: string | null;
 }
 
 export interface LimitsSettings {

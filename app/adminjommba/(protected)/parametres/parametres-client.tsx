@@ -4,7 +4,7 @@ import { useState, useTransition, type ElementType } from "react";
 import { useRouter } from "next/navigation";
 import {
   UserPlus, MoreHorizontal, Bot, Database, Lock,
-  CreditCard, Cloud, Mail, X, Pencil, Trash2,
+  ShieldCheck, Cloud, Mail, X, Pencil, Trash2,
   ChevronDown, Globe, Wallet, Eye, EyeOff, Power, Wrench, Search, MapPin,
 } from "lucide-react";
 import { COUNTRIES, countryName } from "@/lib/admin/countries";
@@ -17,7 +17,7 @@ import type {
 } from "@/lib/admin/types";
 import {
   createAdminAccount, updateAdminRole, setAdminAccountStatus, deleteAdminAccount,
-  saveApiConnection, saveLimits, savePricing, setMaintenance, setGeoBlock,
+  saveLimits, savePricing, setMaintenance, setGeoBlock,
 } from "@/app/adminjommba/actions";
 
 /* ── Types ─────────────────────────────────────────────────────────────────── */
@@ -30,7 +30,7 @@ type ModalState =
 const ROLES = ["super-admin", "modération", "support", "lecture seule"];
 
 const SERVICE_ICONS: Record<string, ElementType> = {
-  ai: Bot, stripe: CreditCard, square: Wallet, db: Database,
+  ai: Bot, turnstile: ShieldCheck, square: Wallet, db: Database,
   auth: Lock, google: Globe, cloud: Cloud, email: Mail,
 };
 
@@ -51,25 +51,14 @@ function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
   );
 }
 
-/* ── API Config Modal ───────────────────────────────────────────────────────── */
-function ConfigureApiModal({
+/* ── API Detail Modal (lecture seule) ───────────────────────────────────────── */
+function ApiDetailModal({
   service,
-  paymentConflict,
-  busy,
-  onSave,
   onClose,
 }: {
   service: ApiServiceRow;
-  paymentConflict: string | null;
-  busy: boolean;
-  onSave: (id: string, input: { identifier: string; secret: string; productionActive: boolean }) => void;
   onClose: () => void;
 }) {
-  const [apiKey,  setApiKey]  = useState("");
-  const [optUrl,  setOptUrl]  = useState(service.identifier);
-  const [showKey, setShowKey] = useState(false);
-  const [active,  setActive]  = useState(service.productionActive);
-
   const ServiceIcon = SERVICE_ICONS[service.id] ?? Database;
 
   return (
@@ -87,7 +76,7 @@ function ConfigureApiModal({
               <ServiceIcon className="w-3.5 h-3.5 text-[var(--color-muted)]" />
             </div>
             <h2 className="text-sm font-bold text-[var(--color-ink)]">
-              Configurer — {service.name}
+              {service.name}
             </h2>
           </div>
           <button
@@ -99,87 +88,59 @@ function ConfigureApiModal({
         </div>
 
         <div className="p-5 space-y-4">
-          {/* Security note */}
-          <div className="flex items-start gap-2.5 px-3.5 py-3 bg-amber-50 border border-amber-200 rounded-xl">
-            <span className="text-amber-500 shrink-0 mt-0.5 text-sm">⚠</span>
-            <p className="text-xs text-amber-800 leading-relaxed">
-              Les clés sont stockées côté serveur et ne sont jamais exposées au client.
+          <div className="flex items-start gap-2.5 px-3.5 py-3 bg-[var(--color-faint)] border border-[var(--color-line)] rounded-xl">
+            <span className="text-[var(--color-muted)] shrink-0 mt-0.5 text-sm">ⓘ</span>
+            <p className="text-xs text-[var(--color-muted)] leading-relaxed">
+              Les clés sont lues depuis les variables d&apos;environnement du serveur. Cet écran
+              indique uniquement si elles sont présentes — leurs valeurs ne sont jamais
+              transmises au navigateur et ne sont pas modifiables ici.
             </p>
           </div>
 
-          {/* API key */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-[var(--color-ink)]">
-              Clé API / Secret
-              {service.hasSecret && (
-                <span className="ml-2 font-normal text-emerald-600">· clé enregistrée</span>
-              )}
-            </label>
-            <div className="relative">
-              <input
-                type={showKey ? "text" : "password"}
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder={service.hasSecret ? "•••••••••••• (laisser vide pour conserver)" : "••••••••••••••••••••"}
-                className="w-full px-3.5 py-2.5 pr-10 text-sm border border-[var(--color-line)] rounded-xl bg-[var(--color-faint)] text-[var(--color-ink)] placeholder:text-[var(--color-line-2)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-300)] focus:bg-white transition"
-              />
-              <button
-                type="button"
-                onClick={() => setShowKey((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-ink)] transition-colors"
-              >
-                {showKey
-                  ? <EyeOff className="w-4 h-4" />
-                  : <Eye     className="w-4 h-4" />
-                }
-              </button>
-            </div>
-          </div>
-
-          {/* Optional identifier / URL */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-[var(--color-ink)]">
-              Identifiant / URL{" "}
-              <span className="font-normal text-[var(--color-muted)]">(optionnel)</span>
-            </label>
-            <input
-              type="text"
-              value={optUrl}
-              onChange={(e) => setOptUrl(e.target.value)}
-              placeholder="ex. cloud name, endpoint, client ID…"
-              className="w-full px-3.5 py-2.5 text-sm border border-[var(--color-line)] rounded-xl bg-[var(--color-faint)] text-[var(--color-ink)] placeholder:text-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-300)] focus:bg-white transition"
-            />
-          </div>
-
-          {/* Payment conflict warning */}
-          {service.kind === "payment" && paymentConflict && active && (
-            <div className="px-3.5 py-2.5 bg-amber-50 border border-amber-200 rounded-xl">
-              <p className="text-xs text-amber-800">
-                En activant <strong>{service.name}</strong>, <strong>{paymentConflict}</strong> sera automatiquement désactivé en production.
-              </p>
-            </div>
+          {service.detail && (
+            <p className="text-xs text-[var(--color-muted)]">{service.detail}</p>
           )}
 
-          {/* Production toggle */}
-          <div className="flex items-center justify-between gap-3 py-1 border-t border-[var(--color-line)] pt-4">
-            <div>
-              <p className="text-sm font-medium text-[var(--color-ink)]">Activer en production</p>
-              <p className="text-xs text-[var(--color-muted)]">
-                {service.kind === "payment"
-                  ? "Un seul fournisseur de paiement peut être actif à la fois."
-                  : "Active ce service pour les utilisateurs réels."}
-              </p>
-            </div>
-            <Toggle on={active} onToggle={() => setActive((v) => !v)} />
+          <div className="space-y-1.5">
+            <p className="text-xs font-semibold text-[var(--color-ink)]">
+              Variables d&apos;environnement
+            </p>
+            <ul className="divide-y divide-[var(--color-line)] border border-[var(--color-line)] rounded-xl overflow-hidden">
+              {service.vars.map((v) => (
+                <li key={v.name} className="flex items-center justify-between gap-3 px-3.5 py-2.5">
+                  <code className="text-xs text-[var(--color-ink)] break-all">
+                    {v.name}
+                    {v.optional && (
+                      <span className="ml-1.5 font-sans text-[var(--color-muted)]">(optionnel)</span>
+                    )}
+                  </code>
+                  <span
+                    className={`flex items-center gap-1 text-xs font-semibold shrink-0 ${
+                      v.present ? "text-emerald-600" : v.optional ? "text-gray-400" : "text-red-600"
+                    }`}
+                  >
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        v.present ? "bg-emerald-500" : v.optional ? "bg-gray-300" : "bg-red-500"
+                      }`}
+                    />
+                    {v.present ? "définie" : "absente"}
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          {/* Save button */}
+          <p className="text-xs text-[var(--color-muted)] leading-relaxed border-t border-[var(--color-line)] pt-4">
+            Pour modifier une clé : mettre à jour <code>.env.local</code> en local, ou les
+            variables d&apos;environnement du projet Vercel puis redéployer.
+          </p>
+
           <button
-            disabled={busy}
-            onClick={() => onSave(service.id, { identifier: optUrl, secret: apiKey, productionActive: active })}
-            className="w-full py-2.5 rounded-xl bg-[var(--color-brand-600)] text-white text-sm font-semibold hover:bg-[var(--color-brand-700)] transition-colors disabled:opacity-50"
+            onClick={onClose}
+            className="w-full py-2.5 rounded-xl border border-[var(--color-line)] text-sm font-semibold text-[var(--color-ink)] hover:bg-[var(--color-faint)] transition-colors"
           >
-            {busy ? "Enregistrement…" : "Enregistrer la connexion"}
+            Fermer
           </button>
         </div>
       </div>
@@ -605,17 +566,6 @@ export function ParametresClient({
     act(() => deleteAdminAccount(admin.id), `Compte supprimé · ${admin.name}`, "error", () => setModal(null));
   };
 
-  /* API action handler */
-  const handleSaveApi = (id: string, input: { identifier: string; secret: string; productionActive: boolean }) => {
-    const service = apiServices.find((s) => s.id === id);
-    act(
-      () => saveApiConnection(id, input),
-      `${service?.name ?? id} — connexion enregistrée`,
-      "success",
-      () => setConfiguring(null),
-    );
-  };
-
   /* Bascule du mode maintenance */
   const handleToggleMaintenance = () => {
     const next: MaintenanceSettings = { ...maintenance, enabled: !maintenance.enabled };
@@ -676,11 +626,6 @@ export function ParametresClient({
     if (!q) return true;
     return c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q);
   });
-
-  /* Compute payment conflict for the modal */
-  const paymentConflict = configuring?.kind === "payment"
-    ? (apiServices.find((s) => s.kind === "payment" && s.id !== configuring.id && s.productionActive)?.name ?? null)
-    : null;
 
   return (
     <>
@@ -938,7 +883,9 @@ export function ParametresClient({
         <Card>
           <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-[var(--color-line)]">
             <h3 className="font-semibold text-sm text-[var(--color-ink)]">Connexions & clés API</h3>
-            <span className="text-xs text-[var(--color-muted)]">Production</span>
+            <span className="text-xs text-[var(--color-muted)]">
+              Lecture seule · variables d&apos;environnement
+            </span>
           </div>
           <div className="grid sm:grid-cols-2 gap-px bg-[var(--color-line)] divide-y-0">
             {apiServices.map((s) => {
@@ -950,20 +897,29 @@ export function ParametresClient({
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-[var(--color-ink)]">{s.name}</p>
-                    <p className="text-xs text-[var(--color-muted)]">{s.desc}</p>
+                    <p className="text-xs text-[var(--color-muted)] truncate">
+                      {s.desc}
+                      {s.detail && <> · {s.detail}</>}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    {s.productionActive && (
-                      <span className="flex items-center gap-1 text-xs font-semibold text-emerald-600">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                        Actif
-                      </span>
-                    )}
+                    <span
+                      className={`flex items-center gap-1 text-xs font-semibold ${
+                        s.configured ? "text-emerald-600" : "text-gray-400"
+                      }`}
+                    >
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          s.configured ? "bg-emerald-500" : "bg-gray-300"
+                        }`}
+                      />
+                      {s.configured ? "Configuré" : "Non configuré"}
+                    </span>
                     <button
                       onClick={() => setConfiguring(s)}
                       className="px-3 py-1 rounded-lg border border-[var(--color-line)] text-xs font-medium text-[var(--color-ink)] hover:bg-[var(--color-faint)] transition-colors"
                     >
-                      {s.productionActive ? "Modifier" : "Configurer"}
+                      Détails
                     </button>
                   </div>
                 </div>
@@ -1064,13 +1020,10 @@ export function ParametresClient({
         />
       )}
 
-      {/* API config modal */}
+      {/* API detail modal (lecture seule) */}
       {configuring && (
-        <ConfigureApiModal
+        <ApiDetailModal
           service={configuring}
-          paymentConflict={paymentConflict}
-          busy={busy}
-          onSave={handleSaveApi}
           onClose={() => setConfiguring(null)}
         />
       )}
