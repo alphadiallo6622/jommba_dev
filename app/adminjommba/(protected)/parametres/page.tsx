@@ -21,6 +21,7 @@ export default async function ParametresPage() {
       apiServices={apiServices}
       initialLimits={settings.limits}
       initialPricing={settings.pricing}
+      initialBoostPricing={settings.boostPricing}
       initialMaintenance={settings.maintenance}
       initialGeoBlock={settings.geoBlock}
     />

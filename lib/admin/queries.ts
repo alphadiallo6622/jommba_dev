@@ -8,13 +8,14 @@ import type {
   Kpi, ChartPoint, DonutSegment, MonthBar, CountryBar, RevenuePoint, DayPoint,
   FeedItem, AdminNotification, MemberRow, PendingProfileRow, PhotoQueueItem,
   ReportRow, SubscriptionRow, BoostRow, BlogPostRow, AcademyArticleRow, TicketRow, BroadcastRow,
-  AdminAccountRow, ApiServiceRow, LimitsSettings, PricingSettings, PromoCodeRow,
+  AdminAccountRow, ApiServiceRow, LimitsSettings, PricingSettings, BoostPricingSettings, PromoCodeRow,
   BroadcastTargetCounts, MemberStatus, MaintenanceSettings, GeoBlockSettings,
 } from "@/lib/admin/types";
 import type { AdminMember } from "@/lib/supabase/types";
 
 const DEFAULT_LIMITS: LimitsSettings = { contacts: 3, conversations: 3, coachQuestions: 3, visitors: 2 };
 const DEFAULT_PRICING: PricingSettings = { monthlyPrice: 10, autoValidate: false };
+const DEFAULT_BOOST_PRICING: BoostPricingSettings = { "24h": 2.5, "3j": 5, "7j": 8 };
 const DEFAULT_MAINTENANCE: MaintenanceSettings = { enabled: false, message: null };
 const DEFAULT_GEO_BLOCK: GeoBlockSettings = { enabled: false, mode: "block", countries: [] };
 
@@ -45,14 +46,15 @@ const MONTH_LETTERS = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D
 
 // ── Paramètres plateforme ─────────────────────────────────────────────────────
 
-export const getPlatformSettings = cache(async (): Promise<{ limits: LimitsSettings; pricing: PricingSettings; maintenance: MaintenanceSettings; geoBlock: GeoBlockSettings }> => {
+export const getPlatformSettings = cache(async (): Promise<{ limits: LimitsSettings; pricing: PricingSettings; boostPricing: BoostPricingSettings; maintenance: MaintenanceSettings; geoBlock: GeoBlockSettings }> => {
   const supabase = createAdminClient();
   const { data } = await supabase.from("platform_settings").select("*").eq("id", 1).maybeSingle();
   return {
-    limits:      { ...DEFAULT_LIMITS,      ...((data?.limits      ?? {}) as Partial<LimitsSettings>)      },
-    pricing:     { ...DEFAULT_PRICING,     ...((data?.pricing     ?? {}) as Partial<PricingSettings>)     },
-    maintenance: { ...DEFAULT_MAINTENANCE, ...((data?.maintenance ?? {}) as Partial<MaintenanceSettings>) },
-    geoBlock:    { ...DEFAULT_GEO_BLOCK,   ...((data?.geo_block   ?? {}) as Partial<GeoBlockSettings>)   },
+    limits:       { ...DEFAULT_LIMITS,        ...((data?.limits        ?? {}) as Partial<LimitsSettings>)       },
+    pricing:      { ...DEFAULT_PRICING,       ...((data?.pricing       ?? {}) as Partial<PricingSettings>)      },
+    boostPricing: { ...DEFAULT_BOOST_PRICING, ...((data?.boost_pricing ?? {}) as Partial<BoostPricingSettings>) },
+    maintenance:  { ...DEFAULT_MAINTENANCE,   ...((data?.maintenance   ?? {}) as Partial<MaintenanceSettings>)  },
+    geoBlock:     { ...DEFAULT_GEO_BLOCK,     ...((data?.geo_block     ?? {}) as Partial<GeoBlockSettings>)    },
   };
 });
 

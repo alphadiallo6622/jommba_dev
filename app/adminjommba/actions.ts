@@ -13,7 +13,7 @@ import { sendEmail } from "@/lib/email";
 import { deleteCloudinaryImage, publicIdFromUrl } from "@/lib/cloudinary";
 import { PHOTO_REJECTED_MESSAGE } from "@/lib/photo-messages";
 import type { BroadcastTarget, Json } from "@/lib/supabase/types";
-import type { LimitsSettings, PricingSettings, MaintenanceSettings, GeoBlockSettings } from "@/lib/admin/types";
+import type { LimitsSettings, PricingSettings, BoostPricingSettings, MaintenanceSettings, GeoBlockSettings } from "@/lib/admin/types";
 
 export interface ActionResult {
   ok: boolean;
@@ -855,6 +855,22 @@ export async function savePricing(pricing: PricingSettings): Promise<ActionResul
     const { error } = await supabase.from("platform_settings").upsert({
       id: 1,
       pricing: pricing as unknown as Json,
+      updated_at: new Date().toISOString(),
+    });
+    if (error) throw new Error(error.message);
+  }, "settings");
+}
+
+/** Prix des boosts (USD), réglables indépendamment les uns des autres. */
+export async function saveBoostPricing(boostPricing: BoostPricingSettings): Promise<ActionResult> {
+  return run(async () => {
+    for (const [id, price] of Object.entries(boostPricing)) {
+      if (!(price > 0)) throw new Error(`Le prix du boost ${id} doit être supérieur à 0`);
+    }
+    const supabase = createAdminClient();
+    const { error } = await supabase.from("platform_settings").upsert({
+      id: 1,
+      boost_pricing: boostPricing as unknown as Json,
       updated_at: new Date().toISOString(),
     });
     if (error) throw new Error(error.message);

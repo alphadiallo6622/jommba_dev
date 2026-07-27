@@ -1,5 +1,6 @@
 // POST /api/payments/boost
-// Paiement UNIQUE (Square Payments) pour un Boost 24h à 2,5 $.
+// Paiement UNIQUE (Square Payments) pour un Boost. Le prix est réglé depuis la
+// console admin (Paramètres → Tarification des boosts).
 // Flux : le front génère un token de carte (Web Payments SDK) -> l'envoie ici ->
 // on débite via Square -> on crée le boost en base.
 //
@@ -10,6 +11,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { square, SQUARE_LOCATION_ID, CURRENCY, toMinorUnits } from '@/lib/square/client'
 import { getBoost } from '@/lib/square/plans'
+import { getPlatformSettings } from '@/lib/admin/queries'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,11 +31,14 @@ export async function POST(req: NextRequest) {
   if (!sourceId) {
     return NextResponse.json({ error: 'Token de carte manquant' }, { status: 400 })
   }
-  // Prix et durée déterminés côté serveur d'après le boostId (jamais depuis le client).
+  // Durée et prix déterminés côté serveur d'après le boostId (jamais depuis le
+  // client) ; le prix vient des paramètres admin (platform_settings.boost_pricing).
   const boost = getBoost(boostId ?? '24h')
   if (!boost) {
     return NextResponse.json({ error: 'Boost inconnu' }, { status: 400 })
   }
+  const { boostPricing } = await getPlatformSettings()
+  const priceUsd = boostPricing[boost.id]
 
   // 3) Débit via Square.
   try {
@@ -41,7 +46,7 @@ export async function POST(req: NextRequest) {
       sourceId,
       idempotencyKey: randomUUID(),
       locationId: SQUARE_LOCATION_ID,
-      amountMoney: { amount: toMinorUnits(boost.priceUsd), currency: CURRENCY },
+      amountMoney: { amount: toMinorUnits(priceUsd), currency: CURRENCY },
       // referenceId limité à 40 caractères par Square : un UUID (36) tient seul,
       // pas de préfixe. Le type d'achat est identifié par la note.
       referenceId: user.id,
@@ -62,7 +67,7 @@ export async function POST(req: NextRequest) {
       user_id: user.id,
       expires_at: expiresAt.toISOString(),
       square_payment_id: payment.id ?? null,
-      amount_usd: boost.priceUsd,
+      amount_usd: priceUsd,
     })
     if (error) {
       // Le paiement a réussi mais l'insert a échoué : à surveiller (remboursement manuel possible).

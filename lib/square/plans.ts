@@ -14,21 +14,28 @@ export function getPlanDurationDays(id: string): number | undefined {
   return isPlanId(id) ? PLAN_DURATION_DAYS[id] : undefined
 }
 
-// Boosts (paiement unique). Prix et durée fixés côté serveur — jamais depuis le client.
+// Boosts (paiement unique). La durée est fixée ici ; le prix est réglable depuis
+// la console admin (platform_settings.boost_pricing) et toujours résolu côté
+// serveur — jamais depuis le client.
 export type BoostId = '24h' | '3j' | '7j'
 
 export type BoostConfig = {
   id: BoostId
-  priceUsd: number
   durationHours: number
+  /** Libellé de durée affiché au membre. */
+  durationLabel: string
 }
 
 export const BOOSTS: Record<BoostId, BoostConfig> = {
-  '24h': { id: '24h', priceUsd: 2.5, durationHours: 24 },
-  '3j':  { id: '3j',  priceUsd: 5,   durationHours: 24 * 3 },
-  '7j':  { id: '7j',  priceUsd: 8,   durationHours: 24 * 7 },
+  '24h': { id: '24h', durationHours: 24,     durationLabel: '24h' },
+  '3j':  { id: '3j',  durationHours: 24 * 3, durationLabel: '3 jours' },
+  '7j':  { id: '7j',  durationHours: 24 * 7, durationLabel: '7 jours' },
 }
 
 export function getBoost(id: string): BoostConfig | undefined {
   return (BOOSTS as Record<string, BoostConfig>)[id]
+}
+
+export function isBoostId(id: string): id is BoostId {
+  return id === '24h' || id === '3j' || id === '7j'
 }

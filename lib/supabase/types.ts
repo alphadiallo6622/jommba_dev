@@ -262,12 +262,13 @@ export interface ApiConnection {
 }
 
 export interface PlatformSettings {
-  id:          number
-  limits:      Json
-  pricing:     Json
-  maintenance: Json
-  geo_block:   Json
-  updated_at:  string
+  id:            number
+  limits:        Json
+  pricing:       Json
+  boost_pricing: Json
+  maintenance:   Json
+  geo_block:     Json
+  updated_at:    string
 }
 
 export type PromoDiscountType = 'percent' | 'fixed_amount'
@@ -438,7 +439,7 @@ export type Database = {
       }
       platform_settings: {
         Row:           Indexed<PlatformSettings>
-        Insert:        Indexed<{ id: number; limits?: Json; pricing?: Json; maintenance?: Json; geo_block?: Json; updated_at?: string }>
+        Insert:        Indexed<{ id: number; limits?: Json; pricing?: Json; boost_pricing?: Json; maintenance?: Json; geo_block?: Json; updated_at?: string }>
         Update:        Indexed<Partial<PlatformSettings>>
         Relationships: []
       }

@@ -13,12 +13,12 @@ import { Avatar } from "@/components/admin/ui/avatar";
 import { Card, CardHeader } from "@/components/admin/ui/card";
 import { useToast } from "@/components/admin/ui/toast";
 import type {
-  AdminAccountRow, ApiServiceRow, LimitsSettings, PricingSettings, MaintenanceSettings,
-  GeoBlockSettings,
+  AdminAccountRow, ApiServiceRow, LimitsSettings, PricingSettings, BoostPricingSettings,
+  MaintenanceSettings, GeoBlockSettings,
 } from "@/lib/admin/types";
 import {
   createAdminAccount, updateAdminRole, setAdminAccountStatus, deleteAdminAccount,
-  saveLimits, savePricing, setMaintenance, setGeoBlock,
+  saveLimits, savePricing, saveBoostPricing, setMaintenance, setGeoBlock,
 } from "@/app/adminjommba/actions";
 
 /* ── Types ─────────────────────────────────────────────────────────────────── */
@@ -29,6 +29,12 @@ type ModalState =
   | { admin: AdminAccountRow; step: "confirmRemove" };
 
 const ROLES = ["super-admin", "modération", "support", "lecture seule"];
+
+const BOOST_FIELDS = [
+  { id: "24h" as const, label: "Boost 24h (USD)" },
+  { id: "3j"  as const, label: "Boost 3 jours (USD)" },
+  { id: "7j"  as const, label: "Boost 7 jours (USD)" },
+];
 
 const SERVICE_ICONS: Record<string, ElementType> = {
   ai: Bot, turnstile: ShieldCheck, square: Wallet, db: Database,
@@ -486,6 +492,7 @@ export function ParametresClient({
   apiServices,
   initialLimits,
   initialPricing,
+  initialBoostPricing,
   initialMaintenance,
   initialGeoBlock,
 }: {
@@ -493,6 +500,7 @@ export function ParametresClient({
   apiServices: ApiServiceRow[];
   initialLimits: LimitsSettings;
   initialPricing: PricingSettings;
+  initialBoostPricing: BoostPricingSettings;
   initialMaintenance: MaintenanceSettings;
   initialGeoBlock: GeoBlockSettings;
 }) {
@@ -505,6 +513,7 @@ export function ParametresClient({
   const [configuring, setConfiguring] = useState<ApiServiceRow | null>(null);
   const [limits,      setLimits]      = useState<LimitsSettings>(initialLimits);
   const [pricing,     setPricing]     = useState<PricingSettings>(initialPricing);
+  const [boostPricing, setBoostPricing] = useState<BoostPricingSettings>(initialBoostPricing);
   const [maintenance, setMaintenanceState] = useState<MaintenanceSettings>(initialMaintenance);
   const [geoBlock,    setGeoBlockState]    = useState<GeoBlockSettings>(initialGeoBlock);
   const [countryQuery, setCountryQuery]    = useState("");
@@ -1019,6 +1028,43 @@ export function ParametresClient({
               <button
                 disabled={busy}
                 onClick={() => act(() => savePricing(pricing), "Tarification enregistrée")}
+                className="mt-2 px-5 py-2 rounded-xl bg-[var(--color-brand-600)] text-white text-sm font-semibold hover:bg-[var(--color-brand-700)] transition-colors disabled:opacity-50"
+              >
+                Enregistrer
+              </button>
+            </div>
+          </Card>
+
+          <Card>
+            <CardHeader title="Tarification des boosts" />
+            <div className="p-5 space-y-4">
+              {BOOST_FIELDS.map(({ id, label }) => (
+                <div key={id} className="flex items-center justify-between gap-4">
+                  <span className="text-sm text-[var(--color-ink)]">{label}</span>
+                  <div className="flex items-center gap-1.5">
+                    <input
+                      type="number"
+                      min={0}
+                      step="0.5"
+                      value={boostPricing[id]}
+                      onChange={(e) =>
+                        setBoostPricing((p) => ({ ...p, [id]: Number(e.target.value) }))
+                      }
+                      className="w-20 text-center px-2 py-1.5 text-sm border border-[var(--color-line)] rounded-lg bg-[var(--color-surface)] text-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-300)] transition"
+                    />
+                    <span className="text-sm text-[var(--color-muted)]">$</span>
+                  </div>
+                </div>
+              ))}
+
+              <p className="text-[11px] text-[var(--color-muted)] leading-relaxed border-t border-[var(--color-line)] pt-3">
+                Chaque durée se règle indépendamment. Le montant saisi est celui
+                réellement débité lors de l&apos;achat d&apos;un boost.
+              </p>
+
+              <button
+                disabled={busy}
+                onClick={() => act(() => saveBoostPricing(boostPricing), "Tarifs des boosts enregistrés")}
                 className="mt-2 px-5 py-2 rounded-xl bg-[var(--color-brand-600)] text-white text-sm font-semibold hover:bg-[var(--color-brand-700)] transition-colors disabled:opacity-50"
               >
                 Enregistrer

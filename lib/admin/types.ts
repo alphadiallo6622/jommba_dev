@@ -222,11 +222,18 @@ export interface LimitsSettings {
 }
 
 export interface PricingSettings {
-  /** Prix mensuel Premium (USD) : source de vérité des 4 plans (15j/1m/3m/6m),
-   *  auquel s'applique la remise d'engagement de chaque durée.
-   *  Voir lib/pricing.ts pour la formule de dérivation. */
+  /** Tarif de référence Premium (USD/mois) : ne fixe pas le montant facturé
+   *  (défini par plan dans lib/pricing.ts), seulement le prix barré et le
+   *  pourcentage de remise affichés sur chaque carte. */
   monthlyPrice: number;
   autoValidate: boolean;
+}
+
+/** Prix des boosts (USD), réglables indépendamment les uns des autres. */
+export interface BoostPricingSettings {
+  "24h": number;
+  "3j": number;
+  "7j": number;
 }
 
 export interface PromoCodeRow {

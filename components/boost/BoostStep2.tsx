@@ -1,16 +1,39 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { Clock, ChevronLeft } from 'lucide-react'
 import { useBoostStore, BoostOption } from '@/store/boost.store'
 
-const BOOST_OPTIONS: BoostOption[] = [
-  { id: '24h', label: 'Boost 24h',     duration: '24h',     price: '2,5 $' },
-  { id: '3j',  label: 'Boost 3 jours', duration: '3 jours', price: '5 $'   },
-  { id: '7j',  label: 'Boost 7 jours', duration: '7 jours', price: '8 $'   },
-]
+/** Prix formaté à la française (2.5 -> "2,5 $"). */
+function formatPrice(usd: number): string {
+  return `${usd.toLocaleString('fr-FR')} $`
+}
+
+type BoostPricingResponse = {
+  boosts: { id: string; durationLabel: string; priceUsd: number }[]
+}
 
 export default function BoostStep2() {
   const { selectOption, goToStep } = useBoostStore()
+  const [options, setOptions] = useState<BoostOption[] | null>(null)
+
+  // Les prix viennent des paramètres admin : jamais codés en dur ici, pour
+  // rester alignés avec le montant réellement débité par /api/payments/boost.
+  useEffect(() => {
+    fetch('/api/boost/pricing')
+      .then((r) => r.json())
+      .then((data: BoostPricingResponse) =>
+        setOptions(
+          data.boosts.map((b) => ({
+            id: b.id,
+            label: `Boost ${b.durationLabel}`,
+            duration: b.durationLabel,
+            price: formatPrice(b.priceUsd),
+          })),
+        ),
+      )
+      .catch(() => setOptions([]))
+  }, [])
 
   return (
     <div className="p-6">
@@ -19,7 +42,17 @@ export default function BoostStep2() {
       </h2>
 
       <div className="space-y-3 mb-6">
-        {BOOST_OPTIONS.map((option) => (
+        {options === null ? (
+          <div className="space-y-3">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="h-[68px] rounded-xl border border-gray-200 bg-gray-50 animate-pulse" />
+            ))}
+          </div>
+        ) : options.length === 0 ? (
+          <p className="text-center text-sm text-gray-400 py-6">
+            Tarifs indisponibles pour le moment. Réessayez.
+          </p>
+        ) : options.map((option) => (
           <button
             key={option.id}
             onClick={() => selectOption(option)}
