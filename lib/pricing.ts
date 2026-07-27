@@ -20,10 +20,10 @@ export const PLAN_MONTHS: Record<PlanId, number> = {
 
 /** Remise d'engagement par plan, en pourcentage du tarif plein de la durée. */
 export const PLAN_DISCOUNTS: Record<PlanId, number> = {
-  "15j": 20,
-  "1m": 40,
-  "3m": 33,
-  "6m": 49,
+  "15j": 15,
+  "1m": 20,
+  "3m": 30,
+  "6m": 40,
 };
 
 /** Durée d'accès Premium réelle par plan, en jours. */
