@@ -2,11 +2,11 @@
 // app/adminjommba/(protected)/promos/promos-client.tsx
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Tag, Plus, X } from "lucide-react";
+import { Tag, Plus, X, Trash2 } from "lucide-react";
 import { Card, CardHeader } from "@/components/admin/ui/card";
 import { useToast } from "@/components/admin/ui/toast";
 import type { PromoCodeRow } from "@/lib/admin/types";
-import { createPromoCode, togglePromoCodeActive } from "@/app/adminjommba/actions";
+import { createPromoCode, togglePromoCodeActive, deletePromoCode } from "@/app/adminjommba/actions";
 
 const PLAN_OPTIONS = [
   { id: "15j", label: "15 jours" },
@@ -188,18 +188,75 @@ function CreatePromoModal({
   );
 }
 
+function DeletePromoModal({
+  promo,
+  busy,
+  onConfirm,
+  onClose,
+}: {
+  promo: PromoCodeRow;
+  busy: boolean;
+  onConfirm: () => void;
+  onClose: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]" onClick={onClose} />
+      <div className="relative bg-white rounded-2xl w-full max-w-sm shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-line)]">
+          <h2 className="text-sm font-bold text-[var(--color-ink)]">Supprimer le code</h2>
+          <button onClick={onClose} className="p-1 rounded-lg hover:bg-[var(--color-faint)] text-[var(--color-muted)] transition-colors">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        <div className="p-5 space-y-3">
+          <p className="text-sm text-[var(--color-ink)]">
+            Supprimer définitivement le code <strong className="font-mono">{promo.code}</strong> ?
+          </p>
+          <p className="text-xs text-[var(--color-muted)]">
+            {promo.timesUsed > 0
+              ? `Ce code a déjà été utilisé ${promo.timesUsed} fois — son historique d'utilisation sera perdu. Pour simplement empêcher de nouvelles utilisations, désactivez-le plutôt.`
+              : "Pour le rendre inutilisable sans le supprimer, désactivez-le plutôt."}
+          </p>
+          <div className="flex gap-2 pt-1">
+            <button
+              onClick={onClose}
+              className="flex-1 py-2.5 rounded-xl border border-[var(--color-line)] text-sm text-[var(--color-ink)] hover:bg-[var(--color-faint)] transition-colors"
+            >
+              Annuler
+            </button>
+            <button
+              disabled={busy}
+              onClick={onConfirm}
+              className="flex-1 py-2.5 rounded-xl bg-red-600 text-white text-sm font-semibold hover:bg-red-700 transition-colors disabled:opacity-50"
+            >
+              {busy ? "…" : "Supprimer"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function PromosClient({ promoCodes }: { promoCodes: PromoCodeRow[] }) {
   const { show } = useToast();
   const router = useRouter();
   const [busy, startTransition] = useTransition();
   const [creating, setCreating] = useState(false);
+  const [deleting, setDeleting] = useState<PromoCodeRow | null>(null);
   const [now] = useState(() => Date.now());
 
-  const act = (fn: () => Promise<{ ok: boolean; error?: string }>, msg: string, onDone?: () => void) => {
+  const act = (
+    fn: () => Promise<{ ok: boolean; error?: string }>,
+    msg: string,
+    type: "success" | "warning" | "error" = "success",
+    onDone?: () => void,
+  ) => {
     startTransition(async () => {
       const res = await fn();
       if (res.ok) {
-        show(msg, "success");
+        show(msg, type);
         onDone?.();
         router.refresh();
       } else {
@@ -209,13 +266,17 @@ export function PromosClient({ promoCodes }: { promoCodes: PromoCodeRow[] }) {
   };
 
   const handleCreate = (input: Parameters<typeof createPromoCode>[0]) =>
-    act(() => createPromoCode(input), `Code créé · ${input.code.toUpperCase()}`, () => setCreating(false));
+    act(() => createPromoCode(input), `Code créé · ${input.code.toUpperCase()}`, "success", () => setCreating(false));
 
   const handleToggle = (p: PromoCodeRow) =>
     act(
       () => togglePromoCodeActive(p.id, !p.active),
       `${p.code} ${p.active ? "désactivé" : "activé"}`,
+      p.active ? "warning" : "success",
     );
+
+  const handleDelete = (p: PromoCodeRow) =>
+    act(() => deletePromoCode(p.id), `Code supprimé · ${p.code}`, "error", () => setDeleting(null));
 
   return (
     <div className="space-y-4">
@@ -266,6 +327,13 @@ export function PromosClient({ promoCodes }: { promoCodes: PromoCodeRow[] }) {
                     {p.timesUsed}{p.usageLimit !== null ? ` / ${p.usageLimit}` : ""} utilisations
                   </span>
                   <Toggle on={p.active} onToggle={() => handleToggle(p)} />
+                  <button
+                    onClick={() => setDeleting(p)}
+                    className="p-1.5 rounded-lg text-[var(--color-muted)] hover:bg-red-50 hover:text-red-600 transition-colors shrink-0"
+                    aria-label={`Supprimer ${p.code}`}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
               );
             })}
@@ -275,6 +343,15 @@ export function PromosClient({ promoCodes }: { promoCodes: PromoCodeRow[] }) {
 
       {creating && (
         <CreatePromoModal busy={busy} onCreate={handleCreate} onClose={() => setCreating(false)} />
+      )}
+
+      {deleting && (
+        <DeletePromoModal
+          promo={deleting}
+          busy={busy}
+          onConfirm={() => handleDelete(deleting)}
+          onClose={() => setDeleting(null)}
+        />
       )}
     </div>
   );

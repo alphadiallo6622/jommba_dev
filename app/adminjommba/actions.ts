@@ -902,3 +902,11 @@ export async function togglePromoCodeActive(id: string, active: boolean): Promis
     if (error) throw new Error(error.message);
   }, "settings");
 }
+
+export async function deletePromoCode(id: string): Promise<ActionResult> {
+  return run(async () => {
+    const supabase = createAdminClient();
+    const { error } = await supabase.from("promo_codes").delete().eq("id", id);
+    if (error) throw new Error(error.message);
+  }, "settings");
+}
