@@ -36,6 +36,106 @@ export async function areContacts(myId: string, otherId: string): Promise<boolea
   return (data ?? []).length > 0
 }
 
+/** Valeur de repli si platform_settings est indisponible. */
+export const FREE_MAX_CONVERSATIONS = 3
+
+/** Nombre de conversations simultanées autorisées aux membres Free
+ *  (console admin → Paramètres → Limites). */
+async function getFreeConversationLimit(): Promise<number> {
+  const supabase = createClient()
+  const { data } = await supabase
+    .from('platform_settings')
+    .select('limits')
+    .eq('id', 1)
+    .maybeSingle()
+  return Number((data?.limits as { conversations?: number } | null)?.conversations) || FREE_MAX_CONVERSATIONS
+}
+
+export type ConversationResult =
+  | { ok: true; conversation: DbConversation }
+  | { ok: false; reason: 'limit' | 'error'; message: string }
+
+/** Vérifie qu'une nouvelle conversation avec `otherId` peut être ouverte, sans
+ *  rien créer. À appeler avant d'accepter une demande de contact : accepter puis
+ *  buter sur la limite laisserait la demande acceptée sans messagerie possible.
+ *  Une conversation déjà existante passe toujours. */
+export async function canOpenNewConversation(
+  myId: string,
+  otherId: string,
+  isPremium: boolean,
+): Promise<{ ok: true } | { ok: false; message: string }> {
+  if (isPremium) return { ok: true }
+
+  const supabase = createClient()
+  const [p1, p2] = orderPair(myId, otherId)
+
+  const { data: existing } = await supabase
+    .from('conversations')
+    .select('id')
+    .eq('participant_1', p1)
+    .eq('participant_2', p2)
+    .maybeSingle()
+  if (existing) return { ok: true }
+
+  const [{ count }, limit] = await Promise.all([
+    supabase
+      .from('conversations')
+      .select('id', { count: 'exact', head: true })
+      .or(`participant_1.eq.${myId},participant_2.eq.${myId}`),
+    getFreeConversationLimit(),
+  ])
+
+  if ((count ?? 0) >= limit) {
+    return {
+      ok: false,
+      message: `Limite de ${limit} conversations simultanées atteinte. Passe Premium pour discuter sans limite !`,
+    }
+  }
+  return { ok: true }
+}
+
+/** Ouvre (ou retrouve) la conversation avec `otherId`. Les membres Free sont
+ *  plafonnés à N conversations simultanées ; retrouver une conversation déjà
+ *  ouverte n'est jamais bloqué, seule la création d'une nouvelle l'est. */
+export async function getOrCreateConversationChecked(
+  myId: string,
+  otherId: string,
+  isPremium: boolean,
+): Promise<ConversationResult> {
+  const supabase = createClient()
+  const [p1, p2] = orderPair(myId, otherId)
+
+  const { data: existing } = await supabase
+    .from('conversations')
+    .select('*')
+    .eq('participant_1', p1)
+    .eq('participant_2', p2)
+    .maybeSingle()
+  if (existing) return { ok: true, conversation: existing as DbConversation }
+
+  if (!isPremium) {
+    const [{ count }, limit] = await Promise.all([
+      supabase
+        .from('conversations')
+        .select('id', { count: 'exact', head: true })
+        .or(`participant_1.eq.${myId},participant_2.eq.${myId}`),
+      getFreeConversationLimit(),
+    ])
+    if ((count ?? 0) >= limit) {
+      return {
+        ok: false,
+        reason: 'limit',
+        message: `Limite de ${limit} conversations simultanées atteinte. Passe Premium pour discuter sans limite !`,
+      }
+    }
+  }
+
+  const conversation = await getOrCreateConversation(myId, otherId)
+  return conversation
+    ? { ok: true, conversation }
+    : { ok: false, reason: 'error', message: "La conversation n'a pas pu être ouverte." }
+}
+
 export async function getOrCreateConversation(myId: string, otherId: string): Promise<DbConversation | null> {
   const supabase = createClient()
   const [p1, p2] = orderPair(myId, otherId)

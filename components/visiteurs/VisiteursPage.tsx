@@ -23,6 +23,10 @@ export default function VisiteursPage() {
   const { isPremium } = useCurrentUser()
   const [visitors, setVisitors] = useState<Visitor[]>([])
   const [loading, setLoading]   = useState(true)
+  // Nombre de visiteurs visibles en clair pour un membre Free (Paramètres →
+  // Limites). null tant que la valeur n'est pas chargée : on floute alors tout,
+  // pour ne jamais dévoiler plus que la limite en cas de lenteur réseau.
+  const [visibleLimit, setVisibleLimit] = useState<number | null>(null)
 
   const fetchVisitors = useCallback(async () => {
     if (!user) return
@@ -39,7 +43,7 @@ export default function VisiteursPage() {
       const visitorIds = [...new Set((visits ?? []).map((v: { visitor_id: string }) => v.visitor_id))]
 
       type ProfileRow = { user_id: string; first_name: string; last_name: string | null; age: number | null; avatar_url: string | null; city: string | null; country: string | null }
-      let profileMap = new Map<string, ProfileRow>()
+      const profileMap = new Map<string, ProfileRow>()
 
       if (visitorIds.length > 0) {
         const { data: profiles } = await supabase
@@ -80,6 +84,23 @@ export default function VisiteursPage() {
 
   useEffect(() => { fetchVisitors() }, [fetchVisitors])
 
+  // Limite de visiteurs visibles, pilotée par la console admin.
+  useEffect(() => {
+    if (isPremium) return
+    const supabase = createClient()
+    supabase
+      .from('platform_settings')
+      .select('limits')
+      .eq('id', 1)
+      .maybeSingle()
+      .then(({ data }) => {
+        const value = Number((data?.limits as { visitors?: number } | null)?.visitors)
+        setVisibleLimit(Number.isFinite(value) && value >= 0 ? value : 0)
+      })
+  }, [isPremium])
+
+  const hiddenCount = isPremium ? 0 : Math.max(0, visitors.length - (visibleLimit ?? 0))
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
 
@@ -99,17 +120,21 @@ export default function VisiteursPage() {
         </div>
       )}
 
-      {!loading && !isPremium && visitors.length > 0 && (
+      {/* Le bandeau ne compte que les visiteurs encore masqués : inutile de
+          proposer de « voir qui » si tout est déjà visible. */}
+      {!loading && !isPremium && hiddenCount > 0 && (
         <PremiumBanner
-          visitorsCount={visitors.length}
+          visitorsCount={hiddenCount}
           onCTA={() => router.push('/dashboard/premium')}
         />
       )}
 
       {!loading && visitors.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {visitors.map((visitor) =>
-            isPremium ? (
+          {visitors.map((visitor, index) =>
+            // Premium : tout est visible. Free : seuls les `visibleLimit`
+            // visiteurs les plus récents le sont, les autres restent floutés.
+            isPremium || index < (visibleLimit ?? 0) ? (
               <VisitorCardUnlocked key={visitor.id} visitor={visitor} />
             ) : (
               <VisitorCardLocked

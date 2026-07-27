@@ -61,7 +61,9 @@ export default function CoachModal() {
         let errorMsg = 'Désolé, une erreur est survenue. Réessaie dans un moment.'
         try {
           const errBody = await res.json()
-          if (errBody?.error) errorMsg = `Erreur : ${errBody.error}`
+          // Quota quotidien atteint : message d'information, pas une panne.
+          if (errBody?.reason === 'limit' && errBody?.error) errorMsg = errBody.error
+          else if (errBody?.error) errorMsg = `Erreur : ${errBody.error}`
         } catch { /* ignore json parse error */ }
         updateLastMessage(errorMsg)
         return

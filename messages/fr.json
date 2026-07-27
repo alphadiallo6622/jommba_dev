@@ -869,7 +869,7 @@
       "viewProfile": "Voir le profil →",
       "profileSoon": "Profil bientôt accessible",
       "bannerTitle": "Découvre qui s'intéresse à toi",
-      "bannerDesc": "{count, plural, one {# personne a visité ton profil.} other {# personnes ont visité ton profil.}} Passe Premium pour voir qui !",
+      "bannerDesc": "{count, plural, one {# autre personne a visité ton profil.} other {# autres personnes ont visité ton profil.}} Passe Premium pour voir qui !",
       "bannerCta": "Voir mes visiteurs →"
     },
     "demandes": {

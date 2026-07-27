@@ -12,7 +12,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { useCurrentUser } from '@/lib/use-current-user'
 import { notifyByEmail } from '@/lib/notify-email'
-import { getOrCreateConversation, sendMessage } from '@/lib/supabase/messages-service'
+import { getOrCreateConversation, sendMessage, canOpenNewConversation } from '@/lib/supabase/messages-service'
 
 type PendingRequest = {
   id: string          // sender_id
@@ -35,7 +35,7 @@ export default function PendingRequestModal() {
   const router = useRouter()
   const t = useTranslations('dashboard.pendingModal')
   const { user } = useAuth()
-  const { firstName: myFirstName } = useCurrentUser()
+  const { firstName: myFirstName, isPremium: amIPremium } = useCurrentUser()
 
   // Libellé « il y a … » localisé (dépend de t, donc défini dans le composant).
   const formatTimeAgo = useCallback((dateStr: string): string => {
@@ -128,6 +128,16 @@ export default function PendingRequestModal() {
   const handleAccept = async () => {
     if (!request || !user) return
     setAccepting(true)
+
+    // Vérifié AVANT d'accepter : accepter puis se voir refuser la conversation
+    // laisserait la demande acceptée sans messagerie possible.
+    const quota = await canOpenNewConversation(user.id, request.id, amIPremium)
+    if (!quota.ok) {
+      toast.error(quota.message)
+      setAccepting(false)
+      return
+    }
+
     const supabase = createClient()
     const { error } = await supabase
       .from('likes')

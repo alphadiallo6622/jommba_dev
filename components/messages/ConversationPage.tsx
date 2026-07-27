@@ -11,7 +11,7 @@ import { useAuth } from '@/components/providers/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import {
   areContacts,
-  getOrCreateConversation,
+  getOrCreateConversationChecked,
   fetchMessages,
   sendMessage,
   markConversationRead,
@@ -49,6 +49,9 @@ export default function ConversationPage({ id }: Props) {
   const [messages, setMessages]           = useState<Message[]>([])
   const [loading, setLoading]             = useState(true)
   const [blocked, setBlocked]             = useState(false)
+  // Renseigné quand le blocage vient du plafond de conversations Free (et non
+  // d'une absence de contact mutuel) : le message et le CTA diffèrent alors.
+  const [limitMessage, setLimitMessage]   = useState<string | null>(null)
   const [rulesAccepted, setRulesAccepted] = useState(false)
   const [rulesChecked, setRulesChecked]   = useState(false)
   const [sentCount, setSentCount]         = useState(0)
@@ -97,11 +100,18 @@ export default function ConversationPage({ id }: Props) {
           .eq('user_id', id)
           .single()
 
-        const conversation = await getOrCreateConversation(user.id, id)
-        if (!conversation) {
-          if (!cancelled) setLoading(false)
+        // Plafond de conversations simultanées pour les membres Free : une
+        // conversation déjà ouverte passe toujours, seule une nouvelle est
+        // refusée (l'écran affiche alors le même état « bloqué »).
+        const result = await getOrCreateConversationChecked(user.id, id, isPremium)
+        if (!result.ok) {
+          if (!cancelled) {
+            if (result.reason === 'limit') { setLimitMessage(result.message); setBlocked(true) }
+            setLoading(false)
+          }
           return
         }
+        const conversation = result.conversation
 
         const dbMessages = await fetchMessages(conversation.id)
         await markConversationRead(conversation.id, user.id)
@@ -131,7 +141,7 @@ export default function ConversationPage({ id }: Props) {
 
     init()
     return () => { cancelled = true }
-  }, [user, id, locale])
+  }, [user, id, locale, isPremium])
 
   // Temps réel : réception des messages de l'autre participant
   useEffect(() => {
@@ -192,16 +202,16 @@ export default function ConversationPage({ id }: Props) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-3 px-6 text-center">
         <p className="text-gray-500 text-sm font-medium">
-          {t('blockedTitle')}
+          {limitMessage ? 'Limite atteinte' : t('blockedTitle')}
         </p>
         <p className="text-gray-400 text-xs">
-          {t('blockedDesc')}
+          {limitMessage ?? t('blockedDesc')}
         </p>
         <button
-          onClick={() => router.push(`/dashboard/profil/${id}`)}
+          onClick={() => router.push(limitMessage ? '/dashboard/premium' : `/dashboard/profil/${id}`)}
           className="mt-2 bg-[#10B981] text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-[#059669] transition-colors"
         >
-          {t('viewProfile')}
+          {limitMessage ? 'Passer Premium' : t('viewProfile')}
         </button>
       </div>
     )

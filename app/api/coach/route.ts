@@ -3,6 +3,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { COACH_SYSTEM_PROMPT } from '@/lib/coach-prompt'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getPlatformSettings } from '@/lib/admin/queries'
 
 // bypass SSL cert verification (corporate proxy / dev environment)
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -45,14 +46,45 @@ export async function POST(req: NextRequest) {
 
   const systemPrompt = COACH_SYSTEM_PROMPT.replace('[prénom]', userName)
 
-  // Identifie le membre (best-effort) pour les statistiques admin.
-  let coachUserId: string | null = null
-  try {
-    const supabase = await createClient()
-    const { data } = await supabase.auth.getUser()
-    coachUserId = data.user?.id ?? null
-  } catch {
-    coachUserId = null
+  // Authentification : chaque question consomme des tokens facturés, on ne
+  // répond donc jamais à un appel anonyme.
+  const supabase = await createClient()
+  const { data: authData } = await supabase.auth.getUser()
+  const coachUserId = authData.user?.id ?? null
+  if (!coachUserId) {
+    return new Response(
+      JSON.stringify({ error: 'Non authentifié' }),
+      { status: 401, headers: { 'Content-Type': 'application/json' } }
+    )
+  }
+
+  // Quota quotidien pour les membres Free (Paramètres → Limites).
+  const admin = createAdminClient()
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('is_premium')
+    .eq('user_id', coachUserId)
+    .maybeSingle()
+
+  if (!profile?.is_premium) {
+    const { limits } = await getPlatformSettings()
+    const since = new Date()
+    since.setHours(0, 0, 0, 0)
+    const { count } = await admin
+      .from('coach_usage')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', coachUserId)
+      .gte('created_at', since.toISOString())
+
+    if ((count ?? 0) >= limits.coachQuestions) {
+      return new Response(
+        JSON.stringify({
+          error: `Tu as atteint ta limite de ${limits.coachQuestions} question${limits.coachQuestions > 1 ? 's' : ''} par jour avec le Coach. Passe Premium pour des échanges illimités !`,
+          reason: 'limit',
+        }),
+        { status: 429, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
   }
 
   try {
@@ -86,7 +118,7 @@ export async function POST(req: NextRequest) {
           controller.close()
           // Journalise la question pour les stats du dashboard admin (non bloquant).
           try {
-            await createAdminClient()
+            await admin
               .from('coach_usage')
               .insert({ user_id: coachUserId, tokens: outputTokens })
           } catch {
