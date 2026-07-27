@@ -1,7 +1,7 @@
 // POST /api/payments/subscribe
 // Achat Premium — paiement UNIQUE (Square Payments API), prix dynamique.
-// Flux : le front génère un token de carte -> on calcule le prix côté serveur
-// depuis platform_settings.pricing (jamais depuis le client), on applique/re-valide
+// Flux : le front génère un token de carte -> on détermine le prix côté serveur
+// d'après le plan (lib/pricing.ts, jamais depuis le client), on applique/re-valide
 // un éventuel code promo, on débite via Square, puis on enregistre la période
 // Premium en base. Le renouvellement n'est plus automatique : le membre repaie à
 // l'échéance ; app/api/cron/premium-expiry coupe l'accès une fois la période finie.
@@ -14,7 +14,6 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { square, SQUARE_LOCATION_ID, CURRENCY, toMinorUnits } from '@/lib/square/client'
 import { getPlanDurationDays } from '@/lib/square/plans'
 import { computePlanPrices, isPlanId } from '@/lib/pricing'
-import { getPlatformSettings } from '@/lib/admin/queries'
 import { validatePromoCode, redeemPromoCode } from '@/lib/promo'
 
 export const dynamic = 'force-dynamic'
@@ -42,9 +41,8 @@ export async function POST(req: NextRequest) {
 
   const admin = createAdminClient()
 
-  // 2) Prix calculé côté serveur depuis le prix mensuel admin (jamais depuis le client).
-  const { pricing } = await getPlatformSettings()
-  const basePrice = computePlanPrices(pricing.monthlyPrice)[planId]
+  // 2) Prix déterminé côté serveur d'après le plan (jamais depuis le client).
+  const basePrice = computePlanPrices()[planId]
 
   // 3) Code promo optionnel : re-validation complète côté serveur.
   let finalPrice = basePrice

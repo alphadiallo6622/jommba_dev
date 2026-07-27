@@ -8,7 +8,7 @@ import {
   ChevronDown, Globe, Wallet, Eye, EyeOff, Power, Wrench, Search, MapPin,
 } from "lucide-react";
 import { COUNTRIES, countryName } from "@/lib/admin/countries";
-import { computePlanPrices, computeFullPrices, PLAN_DISCOUNTS } from "@/lib/pricing";
+import { computePlanPrices, computeFullPrices, computeDiscountLabels, PLAN_PRICES } from "@/lib/pricing";
 import { Avatar } from "@/components/admin/ui/avatar";
 import { Card, CardHeader } from "@/components/admin/ui/card";
 import { useToast } from "@/components/admin/ui/toast";
@@ -965,8 +965,8 @@ export function ParametresClient({
             <CardHeader title="Tarification & politique" />
             <div className="p-5 space-y-4">
               {([
-                { label: "Premium — prix mensuel (USD/mois)", key: "monthlyPrice" as const },
-                { label: "Fenêtre de remboursement (jours)",   key: "refundWindow" as const },
+                { label: "Premium — tarif de référence (USD/mois)", key: "monthlyPrice" as const },
+                { label: "Fenêtre de remboursement (jours)",         key: "refundWindow" as const },
               ] as const).map(({ label, key }) => (
                 <div key={key} className="flex items-center justify-between gap-4">
                   <span className="text-sm text-[var(--color-ink)]">{label}</span>
@@ -987,26 +987,36 @@ export function ParametresClient({
                 />
               </div>
 
-              {/* Aperçu live des 4 plans dérivés du prix mensuel — voir lib/pricing.ts.
-                  Les remises par durée sont fixes et définies dans PLAN_DISCOUNTS. */}
+              {/* Aperçu live — voir lib/pricing.ts. Les prix payés sont fixes
+                  (PLAN_PRICES) ; le tarif de référence ci-dessus ne pilote que le
+                  prix barré et le pourcentage de remise affichés. */}
               <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-faint)] p-3">
                 <p className="text-xs font-semibold text-[var(--color-ink)] mb-2">
                   Aperçu — page /dashboard/premium
                 </p>
                 <div className="grid grid-cols-4 gap-2">
-                  {(Object.keys(PLAN_DISCOUNTS) as (keyof typeof PLAN_DISCOUNTS)[]).map((id) => {
-                    const price = computePlanPrices(pricing.monthlyPrice)[id];
+                  {(Object.keys(PLAN_PRICES) as (keyof typeof PLAN_PRICES)[]).map((id) => {
+                    const price = computePlanPrices()[id];
                     const full = computeFullPrices(pricing.monthlyPrice)[id];
+                    const discount = computeDiscountLabels(pricing.monthlyPrice)[id];
                     return (
                       <div key={id} className="text-center">
                         <p className="text-[10px] text-[var(--color-muted)] uppercase">{id}</p>
                         <p className="text-sm font-bold text-[var(--color-ink)]">{price} $</p>
-                        <p className="text-[10px] text-[var(--color-muted)] line-through">{full} $</p>
-                        <p className="text-[10px] font-semibold text-amber-600">−{PLAN_DISCOUNTS[id]}%</p>
+                        {full > price && (
+                          <p className="text-[10px] text-[var(--color-muted)] line-through">{full} $</p>
+                        )}
+                        {discount && (
+                          <p className="text-[10px] font-semibold text-amber-600">{discount}</p>
+                        )}
                       </div>
                     );
                   })}
                 </div>
+                <p className="mt-2 text-[10px] text-[var(--color-muted)] leading-relaxed">
+                  Les montants payés sont fixes. Le tarif de référence ne change que le
+                  prix barré et le pourcentage affichés.
+                </p>
               </div>
 
               <button
