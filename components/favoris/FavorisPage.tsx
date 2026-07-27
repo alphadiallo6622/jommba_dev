@@ -10,6 +10,7 @@ import { useAuth } from '@/components/providers/AuthProvider'
 import { useCurrentUser } from '@/lib/use-current-user'
 import { supabaseProfileToExplorer } from '@/lib/supabase/profile-service'
 import type { FavoriteEntry } from '@/store/favoris.store'
+import { formatHoursAgo } from '@/lib/format-time-ago'
 import FavorisCard from './FavorisCard'
 
 type QuiMAimeEntry = {
@@ -76,7 +77,7 @@ export default function FavorisPage() {
       const receivedIds = (received ?? []).map((l: { sender_id: string }) => l.sender_id)
       const allIds = [...new Set([...sentIds, ...receivedIds])]
 
-      let profileMap = new Map<string, ProfileRow>()
+      const profileMap = new Map<string, ProfileRow>()
       if (allIds.length > 0) {
         const { data: profiles } = await supabase
           .from('profiles')
@@ -266,7 +267,7 @@ export default function FavorisPage() {
                     )}
                     <span className="absolute top-2 right-2 bg-emerald-900 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
                       <Clock className="w-3 h-3" />
-                      {t('hoursAgo', { n: person.hoursAgo })}
+                      {formatHoursAgo(person.hoursAgo, t)}
                     </span>
                   </div>
 

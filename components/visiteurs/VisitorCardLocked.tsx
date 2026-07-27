@@ -3,6 +3,7 @@
 import { Lock, Clock, Crown } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { Visitor } from '@/lib/mock-visitors'
+import { formatHoursAgo } from '@/lib/format-time-ago'
 
 interface Props {
   visitor: Visitor
@@ -27,7 +28,7 @@ export default function VisitorCardLocked({ visitor, onUnlock }: Props) {
         {/* Time badge */}
         <span className="absolute top-2 right-2 bg-emerald-900 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
           <Clock className="w-3 h-3" />
-          {t('hoursAgo', { n: visitor.hoursAgo })}
+          {formatHoursAgo(visitor.hoursAgo, t)}
         </span>
         {/* New badge */}
         {visitor.isNew && (
