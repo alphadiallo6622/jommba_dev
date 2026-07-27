@@ -2,6 +2,12 @@
 // Reçoit les notifications d'événements Square et met à jour la base.
 // URL configurée dans le dashboard Square : https://jommba.com/api/webhooks/square
 //
+// LÉGATAIRE : Premium est désormais facturé en paiement unique (voir
+// app/api/payments/subscribe), plus de nouvelles souscriptions Square ne sont
+// créées. Ce webhook reste actif uniquement pour les abonnements Square créés
+// avant la bascule, qui continuent de se renouveler normalement jusqu'à leur
+// annulation — ne pas supprimer tant que ces abonnements existent encore.
+//
 // Sécurité : on vérifie la signature HMAC (WebhooksHelper.verifySignature) sur le
 // body BRUT avant de traiter quoi que ce soit. Un événement dont la signature est
 // invalide est rejeté (401).

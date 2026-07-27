@@ -270,6 +270,22 @@ export interface PlatformSettings {
   updated_at:  string
 }
 
+export type PromoDiscountType = 'percent' | 'fixed_amount'
+
+export interface PromoCode {
+  id:                string
+  code:               string
+  discount_type:      PromoDiscountType
+  value:              number
+  applicable_plans:   string[] | null
+  expires_at:         string | null
+  usage_limit:        number | null
+  times_used:         number
+  active:             boolean
+  created_at:         string
+  updated_at:         string
+}
+
 export interface AdminMember {
   id:                 string
   user_id:            string
@@ -424,6 +440,12 @@ export type Database = {
         Row:           Indexed<PlatformSettings>
         Insert:        Indexed<{ id: number; limits?: Json; pricing?: Json; maintenance?: Json; geo_block?: Json; updated_at?: string }>
         Update:        Indexed<Partial<PlatformSettings>>
+        Relationships: []
+      }
+      promo_codes: {
+        Row:           Indexed<PromoCode>
+        Insert:        Indexed<Omit<PromoCode, 'id' | 'created_at' | 'updated_at' | 'times_used' | 'active' | 'applicable_plans' | 'expires_at' | 'usage_limit'> & { id?: string; created_at?: string; updated_at?: string; times_used?: number; active?: boolean; applicable_plans?: string[] | null; expires_at?: string | null; usage_limit?: number | null }>
+        Update:        Indexed<Partial<PromoCode>>
         Relationships: []
       }
     }

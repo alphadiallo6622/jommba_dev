@@ -1,3 +1,8 @@
+// DÉPRÉCIÉ : Premium est désormais facturé en paiement unique (Square Payments
+// API) avec un prix dynamique (voir lib/pricing.ts), plus via des abonnements
+// Square catalogués. Ce script ne sert plus à rien pour les nouveaux achats —
+// conservé pour référence tant que des abonnements Square légataires existent.
+//
 // Crée les plans d'abonnement Premium dans le Catalog Square (une fois par environnement).
 // Usage : node scripts/square-setup-plans.mjs
 // Lit SQUARE_ACCESS_TOKEN / SQUARE_ENVIRONMENT depuis .env.local.

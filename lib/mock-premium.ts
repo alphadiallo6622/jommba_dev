@@ -11,8 +11,6 @@ import {
 
 export type PlanMeta = {
   id: string
-  discount: string
-  totalPrice: number
   isPopular: boolean
   isRecommended: boolean
 }
@@ -24,11 +22,14 @@ export type FeatureMeta = {
   isNew?: boolean
 }
 
+// Structure uniquement — les prix (totalPrice, discount) sont calculés depuis
+// platform_settings.pricing via /api/premium/pricing (voir lib/pricing.ts),
+// pilotés par l'admin, jamais dupliqués en dur ici.
 export const plans: PlanMeta[] = [
-  { id: '15j', discount: '-60%', totalPrice: 6,  isPopular: false, isRecommended: false },
-  { id: '1m',  discount: '-33%', totalPrice: 10, isPopular: true,  isRecommended: true  },
-  { id: '3m',  discount: '-50%', totalPrice: 15, isPopular: false, isRecommended: false },
-  { id: '6m',  discount: '-58%', totalPrice: 25, isPopular: false, isRecommended: false },
+  { id: '15j', isPopular: false, isRecommended: false },
+  { id: '1m',  isPopular: true,  isRecommended: true  },
+  { id: '3m',  isPopular: false, isRecommended: false },
+  { id: '6m',  isPopular: false, isRecommended: false },
 ]
 
 export const features: FeatureMeta[] = [

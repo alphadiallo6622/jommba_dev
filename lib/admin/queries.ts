@@ -8,13 +8,13 @@ import type {
   Kpi, ChartPoint, DonutSegment, MonthBar, CountryBar, RevenuePoint, DayPoint,
   FeedItem, AdminNotification, MemberRow, PendingProfileRow, PhotoQueueItem,
   ReportRow, SubscriptionRow, BoostRow, BlogPostRow, AcademyArticleRow, TicketRow, BroadcastRow,
-  AdminAccountRow, ApiServiceRow, LimitsSettings, PricingSettings,
+  AdminAccountRow, ApiServiceRow, LimitsSettings, PricingSettings, PromoCodeRow,
   BroadcastTargetCounts, MemberStatus, MaintenanceSettings, GeoBlockSettings,
 } from "@/lib/admin/types";
 import type { AdminMember } from "@/lib/supabase/types";
 
 const DEFAULT_LIMITS: LimitsSettings = { contacts: 3, conversations: 3, coachQuestions: 3, visitors: 2 };
-const DEFAULT_PRICING: PricingSettings = { launchPrice: 10, normalPrice: 15, refundWindow: 7, autoValidate: false };
+const DEFAULT_PRICING: PricingSettings = { monthlyPrice: 10, normalPrice: 15, refundWindow: 7, autoValidate: false };
 const DEFAULT_MAINTENANCE: MaintenanceSettings = { enabled: false, message: null };
 const DEFAULT_GEO_BLOCK: GeoBlockSettings = { enabled: false, mode: "block", countries: [] };
 
@@ -48,13 +48,38 @@ const MONTH_LETTERS = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D
 export const getPlatformSettings = cache(async (): Promise<{ limits: LimitsSettings; pricing: PricingSettings; maintenance: MaintenanceSettings; geoBlock: GeoBlockSettings }> => {
   const supabase = createAdminClient();
   const { data } = await supabase.from("platform_settings").select("*").eq("id", 1).maybeSingle();
+  // `launchPrice` est l'ancien nom du champ (avant le passage au prix mensuel
+  // dérivant les 4 plans) : lu en repli pour les lignes historiques non migrées.
+  const rawPricing = (data?.pricing ?? {}) as Partial<PricingSettings> & { launchPrice?: number };
   return {
     limits:      { ...DEFAULT_LIMITS,      ...((data?.limits      ?? {}) as Partial<LimitsSettings>)      },
-    pricing:     { ...DEFAULT_PRICING,     ...((data?.pricing     ?? {}) as Partial<PricingSettings>)     },
+    pricing:     { ...DEFAULT_PRICING, ...rawPricing, monthlyPrice: rawPricing.monthlyPrice ?? rawPricing.launchPrice ?? DEFAULT_PRICING.monthlyPrice },
     maintenance: { ...DEFAULT_MAINTENANCE, ...((data?.maintenance ?? {}) as Partial<MaintenanceSettings>) },
     geoBlock:    { ...DEFAULT_GEO_BLOCK,   ...((data?.geo_block   ?? {}) as Partial<GeoBlockSettings>)   },
   };
 });
+
+// ── Codes promo ────────────────────────────────────────────────────────────────
+
+export async function getPromoCodes(): Promise<PromoCodeRow[]> {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("promo_codes")
+    .select("*")
+    .order("created_at", { ascending: false });
+  return (data ?? []).map((p) => ({
+    id: p.id,
+    code: p.code,
+    discountType: p.discount_type,
+    value: p.value,
+    applicablePlans: p.applicable_plans,
+    expiresAt: p.expires_at,
+    usageLimit: p.usage_limit,
+    timesUsed: p.times_used,
+    active: p.active,
+    createdAt: p.created_at,
+  }));
+}
 
 // ── Compteurs globaux (sidebar / topbar / vue d'ensemble) ─────────────────────
 
@@ -233,7 +258,7 @@ export async function getStatsData(): Promise<StatsData> {
       monthCounts[idx]++;
       // Revenu : on exclut les abonnements remboursés (cohérent avec l'écran Abonnements).
       if (!s.refunded_at) {
-        const price = s.price_usd ?? settings.pricing.launchPrice * (s.duration_months ?? 1);
+        const price = s.price_usd ?? settings.pricing.monthlyPrice * (s.duration_months ?? 1);
         monthRevenue[idx] += Number(price);
       }
     }
@@ -258,7 +283,7 @@ export async function getStatsData(): Promise<StatsData> {
   const decided = (byStatus["validated"] ?? 0) + (byStatus["refused"] ?? 0);
   const valRate = decided > 0 ? (((byStatus["validated"] ?? 0) / decided) * 100).toFixed(1).replace(".", ",") : "—";
 
-  const mrr = counts.premiumMembers * settings.pricing.launchPrice;
+  const mrr = counts.premiumMembers * settings.pricing.monthlyPrice;
 
   const kpis: Kpi[] = [
     { label: "MRR (USD)", value: `${mrr.toLocaleString("fr-FR")} $`, delta: `${counts.premiumMembers} abonnés actifs`, up: true, icon: "dollar-sign", accent: "#10b981", accentBg: "#ecfdf5", spark: monthRevenue.slice(-12).map((v) => Math.round(v)) },

@@ -860,3 +860,45 @@ export async function savePricing(pricing: PricingSettings): Promise<ActionResul
     if (error) throw new Error(error.message);
   }, "settings");
 }
+
+// ── Codes promo ───────────────────────────────────────────────────────────────
+
+export async function createPromoCode(input: {
+  code: string;
+  discountType: "percent" | "fixed_amount";
+  value: number;
+  applicablePlans: string[] | null;
+  expiresAt: string | null;
+  usageLimit: number | null;
+}): Promise<ActionResult> {
+  return run(async () => {
+    const code = input.code.trim().toUpperCase();
+    if (!code) throw new Error("Le code ne peut pas être vide");
+    if (!(input.value > 0)) throw new Error("La valeur doit être positive");
+
+    const supabase = createAdminClient();
+    const { error } = await supabase.from("promo_codes").insert({
+      code,
+      discount_type: input.discountType,
+      value: input.value,
+      applicable_plans: input.applicablePlans && input.applicablePlans.length > 0 ? input.applicablePlans : null,
+      expires_at: input.expiresAt,
+      usage_limit: input.usageLimit,
+    });
+    if (error) {
+      if (error.code === "23505") throw new Error("Ce code existe déjà");
+      throw new Error(error.message);
+    }
+  }, "settings");
+}
+
+export async function togglePromoCodeActive(id: string, active: boolean): Promise<ActionResult> {
+  return run(async () => {
+    const supabase = createAdminClient();
+    const { error } = await supabase
+      .from("promo_codes")
+      .update({ active, updated_at: new Date().toISOString() })
+      .eq("id", id);
+    if (error) throw new Error(error.message);
+  }, "settings");
+}

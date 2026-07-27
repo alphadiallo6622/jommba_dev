@@ -5,16 +5,52 @@ import { useTranslations } from 'next-intl'
 import { Tag } from 'lucide-react'
 import { plans } from '@/lib/mock-premium'
 import { cn } from '@/lib/utils'
+import type { AppliedPromo } from '@/app/dashboard/premium/page'
+
+export interface PremiumPricingData {
+  prices: Record<string, number>
+  monthlyEquivalents: Record<string, number>
+  discounts: Record<string, string | null>
+}
 
 interface Props {
   selectedPlan: string
   setSelectedPlan: (id: string) => void
+  pricing: PremiumPricingData | null
+  appliedPromo: AppliedPromo | null
+  onPromoApplied: (promo: AppliedPromo | null) => void
 }
 
-export default function PremiumPricing({ selectedPlan, setSelectedPlan }: Props) {
+export default function PremiumPricing({ selectedPlan, setSelectedPlan, pricing, appliedPromo, onPromoApplied }: Props) {
   const t = useTranslations('dashboard.premium.pricing')
   const [showPromo, setShowPromo] = useState(false)
   const [promoCode, setPromoCode] = useState('')
+  const [promoError, setPromoError] = useState<string | null>(null)
+  const [applying, setApplying] = useState(false)
+
+  const handleApplyPromo = async () => {
+    if (!promoCode.trim() || applying) return
+    setApplying(true)
+    setPromoError(null)
+    try {
+      const res = await fetch('/api/promo/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: promoCode, planId: selectedPlan }),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok || !json.valid) {
+        setPromoError(json.error ?? 'Code promo invalide.')
+        onPromoApplied(null)
+        return
+      }
+      onPromoApplied({ code: json.code, discountedPrice: json.discountedPrice })
+    } catch {
+      setPromoError('Une erreur est survenue. Réessayez.')
+    } finally {
+      setApplying(false)
+    }
+  }
 
   return (
     <section className="py-6">
@@ -28,6 +64,8 @@ export default function PremiumPricing({ selectedPlan, setSelectedPlan }: Props)
       <div className="flex flex-col gap-3">
         {plans.map((plan) => {
           const isActive = selectedPlan === plan.id
+          const totalPrice = pricing?.prices[plan.id] ?? null
+          const discount = pricing?.discounts[plan.id] ?? null
           return (
             <button
               key={plan.id}
@@ -63,19 +101,21 @@ export default function PremiumPricing({ selectedPlan, setSelectedPlan }: Props)
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-400 mt-0.5">{t(`plans.${plan.id}.pricePerMonth`)}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {pricing ? `${pricing.monthlyEquivalents[plan.id]} $/mois` : '—'}
+                    </p>
                   </div>
                 </div>
 
                 <div className="text-right shrink-0">
                   <div className="flex items-baseline gap-0.5 justify-end">
                     <span className="text-xl font-bold text-gray-900">
-                      {plan.totalPrice}
+                      {totalPrice ?? '—'}
                     </span>
                     <span className="text-xs text-gray-400">$</span>
                   </div>
-                  {plan.discount && (
-                    <span className="text-xs text-amber-600 font-medium">{plan.discount}</span>
+                  {discount && (
+                    <span className="text-xs text-amber-600 font-medium">{discount}</span>
                   )}
                 </div>
               </div>
@@ -86,7 +126,18 @@ export default function PremiumPricing({ selectedPlan, setSelectedPlan }: Props)
 
       {/* Promo code */}
       <div className="mt-5 text-center">
-        {!showPromo ? (
+        {appliedPromo ? (
+          <div className="flex items-center justify-center gap-2 text-sm text-emerald-600 font-medium">
+            <Tag className="w-3.5 h-3.5" />
+            Code {appliedPromo.code} appliqué — {appliedPromo.discountedPrice} $
+            <button
+              onClick={() => { onPromoApplied(null); setPromoCode(''); setShowPromo(false) }}
+              className="text-gray-400 underline hover:text-gray-600"
+            >
+              Retirer
+            </button>
+          </div>
+        ) : !showPromo ? (
           <button
             onClick={() => setShowPromo(true)}
             className="text-sm text-gray-400 underline inline-flex items-center gap-1 hover:text-gray-600 transition-colors"
@@ -95,17 +146,26 @@ export default function PremiumPricing({ selectedPlan, setSelectedPlan }: Props)
             {t('havePromo')}
           </button>
         ) : (
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={promoCode}
-              onChange={(e) => setPromoCode(e.target.value)}
-              placeholder={t('promoPlaceholder')}
-              className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-400 bg-white"
-            />
-            <button className="bg-amber-500 text-white text-sm px-4 py-2 rounded-lg font-medium hover:bg-amber-600 transition-colors shrink-0">
-              {t('apply')}
-            </button>
+          <div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={promoCode}
+                onChange={(e) => { setPromoCode(e.target.value); setPromoError(null) }}
+                placeholder={t('promoPlaceholder')}
+                className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-400 bg-white"
+              />
+              <button
+                onClick={handleApplyPromo}
+                disabled={applying || !promoCode.trim()}
+                className="bg-amber-500 text-white text-sm px-4 py-2 rounded-lg font-medium hover:bg-amber-600 transition-colors shrink-0 disabled:opacity-50"
+              >
+                {applying ? '…' : t('apply')}
+              </button>
+            </div>
+            {promoError && (
+              <p className="mt-2 text-xs text-red-600">{promoError}</p>
+            )}
           </div>
         )}
       </div>

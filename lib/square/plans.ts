@@ -1,47 +1,17 @@
 // Source de vérité des plans Premium côté paiement.
-// Aligné sur lib/mock-premium.ts (ids + prix affichés). Partagé entre la route
-// d'abonnement et le script de création du Catalog Square.
 //
-// Square facture par cadence (DAILY, WEEKLY, MONTHLY, ANNUAL...). Le plan « 15 jours »
-// n'a pas de cadence native : on le modélise par un abonnement DAILY dont la phase
-// dure 15 jours n'existe pas non plus proprement — on le traite donc comme un
-// abonnement MONTHLY facturé une fois (voir note ci-dessous) OU comme paiement unique.
-// Pour rester simple et correct, tous les plans ci-dessous utilisent une cadence
-// mensuelle et un nombre de périodes ; le 15j est le seul cas particulier.
+// Le prix est calculé dynamiquement depuis platform_settings.pricing.monthlyPrice
+// (voir lib/pricing.ts) — Premium est facturé en paiement UNIQUE (Square Payments
+// API, comme les boosts), pas en abonnement Square catalogué : un prix piloté par
+// l'admin (et des codes promo) n'est pas compatible avec des variations de Catalog
+// figées par variable d'environnement. Le renouvellement se fait par un nouveau
+// paiement à l'échéance (voir app/api/cron/premium-expiry pour la coupure d'accès).
 
-export type PlanId = '15j' | '1m' | '3m' | '6m'
+export type { PlanId } from '@/lib/pricing'
+import { PLAN_DURATION_DAYS, isPlanId } from '@/lib/pricing'
 
-// Cadences Square les plus proches des périodes commerciales. Le client est
-// re-prélevé à chaque échéance jusqu'à annulation (vrai abonnement récurrent).
-export type Cadence = 'EVERY_TWO_WEEKS' | 'MONTHLY' | 'QUARTERLY' | 'EVERY_SIX_MONTHS'
-
-export type SquarePlanConfig = {
-  id: PlanId
-  /** Prix facturé à CHAQUE échéance, en dollars. */
-  totalPriceUsd: number
-  /** Cadence de prélèvement Square. */
-  cadence: Cadence
-  /** Durée d'accès Premium par cycle, en mois (pour current_period_end). */
-  durationMonths: number
-  /** Nom du plan dans le Catalog Square. */
-  name: string
-  /** Variable d'environnement contenant l'ID de variation du plan Catalog. */
-  envKey:
-    | 'SQUARE_PLAN_15J'
-    | 'SQUARE_PLAN_1M'
-    | 'SQUARE_PLAN_3M'
-    | 'SQUARE_PLAN_6M'
-}
-
-export const SQUARE_PLANS: Record<PlanId, SquarePlanConfig> = {
-  '15j': { id: '15j', totalPriceUsd: 6,  cadence: 'EVERY_TWO_WEEKS',  durationMonths: 1, name: 'Premium 15 jours', envKey: 'SQUARE_PLAN_15J' },
-  '1m':  { id: '1m',  totalPriceUsd: 10, cadence: 'MONTHLY',          durationMonths: 1, name: 'Premium 1 mois',   envKey: 'SQUARE_PLAN_1M'  },
-  '3m':  { id: '3m',  totalPriceUsd: 15, cadence: 'QUARTERLY',        durationMonths: 3, name: 'Premium 3 mois',   envKey: 'SQUARE_PLAN_3M'  },
-  '6m':  { id: '6m',  totalPriceUsd: 25, cadence: 'EVERY_SIX_MONTHS', durationMonths: 6, name: 'Premium 6 mois',   envKey: 'SQUARE_PLAN_6M'  },
-}
-
-export function getPlan(id: string): SquarePlanConfig | undefined {
-  return (SQUARE_PLANS as Record<string, SquarePlanConfig>)[id]
+export function getPlanDurationDays(id: string): number | undefined {
+  return isPlanId(id) ? PLAN_DURATION_DAYS[id] : undefined
 }
 
 // Boosts (paiement unique). Prix et durée fixés côté serveur — jamais depuis le client.

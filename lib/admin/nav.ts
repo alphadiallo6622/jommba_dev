@@ -2,7 +2,7 @@
 import type { LucideIcon } from "lucide-react";
 import {
   LayoutDashboard, TrendingUp, ShieldCheck, Users, Flag, Image,
-  Crown, Zap, Newspaper, GraduationCap, MessageSquareHeart, Megaphone, LifeBuoy, Settings,
+  Crown, Zap, Newspaper, GraduationCap, MessageSquareHeart, Megaphone, LifeBuoy, Settings, Tag,
 } from "lucide-react";
 
 export interface NavItem {
@@ -36,6 +36,7 @@ export const NAV: NavSection[] = [
     items: [
       { label: "Abonnements", desc: "Monétisation",      href: "/adminjommba/abonnements", icon: Crown },
       { label: "Boosts",      desc: "Visibilité payante", href: "/adminjommba/boosts",      icon: Zap },
+      { label: "Codes promo", desc: "Réductions Premium", href: "/adminjommba/promos",      icon: Tag },
     ],
   },
   {

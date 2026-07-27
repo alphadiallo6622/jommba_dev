@@ -5,21 +5,24 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Smartphone, CreditCard } from 'lucide-react'
 import { toast } from 'sonner'
-import { plans } from '@/lib/mock-premium'
 import { cn } from '@/lib/utils'
 import SquareCardForm from '@/components/payments/SquareCardForm'
+import type { PremiumPricingData } from '@/components/premium/PremiumPricing'
+import type { AppliedPromo } from '@/app/dashboard/premium/page'
 
 interface Props {
   selectedPlan: string
+  pricing: PremiumPricingData | null
+  appliedPromo: AppliedPromo | null
 }
 
-export default function PremiumPayment({ selectedPlan }: Props) {
+export default function PremiumPayment({ selectedPlan, pricing, appliedPromo }: Props) {
   const t = useTranslations('dashboard.premium.payment')
   const router = useRouter()
   const [paymentMethod, setPaymentMethod] = useState<'mobile' | 'card'>('card')
 
-  const currentPlan = plans.find((p) => p.id === selectedPlan)
-  const total = currentPlan?.totalPrice ?? 10
+  const basePrice = pricing?.prices[selectedPlan] ?? 10
+  const total = appliedPromo?.discountedPrice ?? basePrice
 
   return (
     <section className="py-4">
@@ -72,11 +75,16 @@ export default function PremiumPayment({ selectedPlan }: Props) {
       {/* Total */}
       <div className="mt-1 flex items-center justify-between rounded-2xl bg-emerald-50/60 px-4 py-3">
         <span className="text-sm font-medium text-gray-600">{t('total')}</span>
-        <div className="flex items-baseline gap-1">
-          <span className="text-3xl font-extrabold tracking-tight text-emerald-600">
-            {total}
-          </span>
-          <span className="text-base font-semibold text-emerald-500">$</span>
+        <div className="flex items-baseline gap-2">
+          {appliedPromo && (
+            <span className="text-sm text-gray-400 line-through">{basePrice} $</span>
+          )}
+          <div className="flex items-baseline gap-1">
+            <span className="text-3xl font-extrabold tracking-tight text-emerald-600">
+              {total}
+            </span>
+            <span className="text-base font-semibold text-emerald-500">$</span>
+          </div>
         </div>
       </div>
 
@@ -86,6 +94,7 @@ export default function PremiumPayment({ selectedPlan }: Props) {
           <SquareCardForm
             mode="subscribe"
             planId={selectedPlan}
+            promoCode={appliedPromo?.code}
             accent="green"
             submitLabel={`${t('subscribe')} · ${total} $`}
             onSuccess={() => {

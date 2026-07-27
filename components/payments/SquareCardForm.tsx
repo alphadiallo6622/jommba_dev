@@ -30,6 +30,8 @@ interface Props {
   mode: 'boost' | 'subscribe'
   /** Requis pour mode 'subscribe' : identifiant du plan (15j / 1m / 3m / 6m). */
   planId?: string
+  /** Optionnel pour mode 'subscribe' : code promo appliqué (revalidé côté serveur). */
+  promoCode?: string
   /** Requis pour mode 'boost' : identifiant du boost (24h / 3j / 7j). */
   boostId?: string
   /** Libellé du bouton (ex. « Payer 2,5 $ »). */
@@ -46,7 +48,7 @@ const ACCENT = {
   orange: 'bg-gradient-to-b from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-orange-500/30',
 } as const
 
-export default function SquareCardForm({ mode, planId, boostId, submitLabel, accent = 'green', onSuccess }: Props) {
+export default function SquareCardForm({ mode, planId, promoCode, boostId, submitLabel, accent = 'green', onSuccess }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const cardRef = useRef<(SquareCard & { attach: (el: HTMLElement) => Promise<void> }) | null>(null)
   const [ready, setReady] = useState(false)
@@ -95,7 +97,7 @@ export default function SquareCardForm({ mode, planId, boostId, submitLabel, acc
       const body =
         mode === 'boost'
           ? { sourceId: result.token, boostId }
-          : { sourceId: result.token, planId }
+          : { sourceId: result.token, planId, promoCode: promoCode?.trim() || undefined }
 
       const res = await fetch(endpoint, {
         method: 'POST',
