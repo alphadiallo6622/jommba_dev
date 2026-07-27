@@ -964,21 +964,18 @@ export function ParametresClient({
           <Card>
             <CardHeader title="Tarification & politique" />
             <div className="p-5 space-y-4">
-              {([
-                { label: "Premium — tarif de référence (USD/mois)", key: "monthlyPrice" as const },
-                { label: "Fenêtre de remboursement (jours)",         key: "refundWindow" as const },
-              ] as const).map(({ label, key }) => (
-                <div key={key} className="flex items-center justify-between gap-4">
-                  <span className="text-sm text-[var(--color-ink)]">{label}</span>
-                  <input
-                    type="number"
-                    min={0}
-                    value={pricing[key]}
-                    onChange={(e) => setPricing((p) => ({ ...p, [key]: Number(e.target.value) }))}
-                    className="w-16 text-center px-2 py-1.5 text-sm border border-[var(--color-line)] rounded-lg bg-[var(--color-surface)] text-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-300)] transition"
-                  />
-                </div>
-              ))}
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-sm text-[var(--color-ink)]">
+                  Premium — tarif de référence (USD/mois)
+                </span>
+                <input
+                  type="number"
+                  min={0}
+                  value={pricing.monthlyPrice}
+                  onChange={(e) => setPricing((p) => ({ ...p, monthlyPrice: Number(e.target.value) }))}
+                  className="w-16 text-center px-2 py-1.5 text-sm border border-[var(--color-line)] rounded-lg bg-[var(--color-surface)] text-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-300)] transition"
+                />
+              </div>
               <div className="flex items-center justify-between gap-4">
                 <span className="text-sm text-[var(--color-ink)]">Validation auto. des profils</span>
                 <Toggle

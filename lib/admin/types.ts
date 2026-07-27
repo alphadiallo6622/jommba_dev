@@ -226,7 +226,6 @@ export interface PricingSettings {
    *  auquel s'applique la remise d'engagement de chaque durée.
    *  Voir lib/pricing.ts pour la formule de dérivation. */
   monthlyPrice: number;
-  refundWindow: number;
   autoValidate: boolean;
 }
 

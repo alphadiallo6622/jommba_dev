@@ -14,7 +14,7 @@ import type {
 import type { AdminMember } from "@/lib/supabase/types";
 
 const DEFAULT_LIMITS: LimitsSettings = { contacts: 3, conversations: 3, coachQuestions: 3, visitors: 2 };
-const DEFAULT_PRICING: PricingSettings = { monthlyPrice: 10, refundWindow: 7, autoValidate: false };
+const DEFAULT_PRICING: PricingSettings = { monthlyPrice: 10, autoValidate: false };
 const DEFAULT_MAINTENANCE: MaintenanceSettings = { enabled: false, message: null };
 const DEFAULT_GEO_BLOCK: GeoBlockSettings = { enabled: false, mode: "block", countries: [] };
 
@@ -48,12 +48,9 @@ const MONTH_LETTERS = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D
 export const getPlatformSettings = cache(async (): Promise<{ limits: LimitsSettings; pricing: PricingSettings; maintenance: MaintenanceSettings; geoBlock: GeoBlockSettings }> => {
   const supabase = createAdminClient();
   const { data } = await supabase.from("platform_settings").select("*").eq("id", 1).maybeSingle();
-  // `launchPrice` est l'ancien nom du champ (avant le passage au prix mensuel
-  // dérivant les 4 plans) : lu en repli pour les lignes historiques non migrées.
-  const rawPricing = (data?.pricing ?? {}) as Partial<PricingSettings> & { launchPrice?: number };
   return {
     limits:      { ...DEFAULT_LIMITS,      ...((data?.limits      ?? {}) as Partial<LimitsSettings>)      },
-    pricing:     { ...DEFAULT_PRICING, ...rawPricing, monthlyPrice: rawPricing.monthlyPrice ?? rawPricing.launchPrice ?? DEFAULT_PRICING.monthlyPrice },
+    pricing:     { ...DEFAULT_PRICING,     ...((data?.pricing     ?? {}) as Partial<PricingSettings>)     },
     maintenance: { ...DEFAULT_MAINTENANCE, ...((data?.maintenance ?? {}) as Partial<MaintenanceSettings>) },
     geoBlock:    { ...DEFAULT_GEO_BLOCK,   ...((data?.geo_block   ?? {}) as Partial<GeoBlockSettings>)   },
   };
