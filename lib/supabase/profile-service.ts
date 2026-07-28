@@ -54,7 +54,7 @@ export function supabaseProfileToExplorer(p: Profile): ExplorerProfile {
     lastInitial: (p.last_name ?? '').charAt(0),
     age: p.age ?? 0,
     location: [p.city, p.country].filter(Boolean).join(', ') || 'Inconnu',
-    countryCode: p.country ?? '',
+    country: p.country ?? '',
     maritalStatus: p.marital_status ?? '',
     job: p.job ?? '',
     photos: [p.avatar_url ?? '/avatar-placeholder.svg'],

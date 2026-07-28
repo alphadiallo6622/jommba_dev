@@ -103,7 +103,7 @@ export default function FavorisPage() {
             : {
                 id,
                 firstName: '…', lastInitial: '?', age: 0,
-                location: t('unknown'), countryCode: '', maritalStatus: '', job: '',
+                location: t('unknown'), country: '', maritalStatus: '', job: '',
                 photos: ['/avatar-placeholder.svg'],
                 isEnAvant: false, photosBlurred: false,
                 marriageVision: '', ceQueJeRecherche: '',

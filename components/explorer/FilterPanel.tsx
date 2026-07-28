@@ -32,15 +32,19 @@ const FILTER_TABS = [
 function CountrySelect({
   selected,
   onToggle,
+  onClear,
   label,
   searchPlaceholder,
   allLabel,
+  clearLabel,
 }: {
   selected: string[]
   onToggle: (country: string) => void
+  onClear: () => void
   label: string
   searchPlaceholder: string
   allLabel: string
+  clearLabel: string
 }) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -67,18 +71,48 @@ function CountrySelect({
   if (allSelected) buttonText = allLabel
   else if (selectedCountries.length > 0) buttonText = selectedCountries.join(', ')
 
+  const hasSelection = allSelected || selectedCountries.length > 0
+
   return (
     <div ref={ref} className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-gray-200 text-sm text-left hover:border-emerald-300 transition-colors"
-      >
-        <span className={cn('truncate', (allSelected || selectedCountries.length > 0) ? 'text-gray-900' : 'text-gray-400')}>
-          {buttonText}
-        </span>
-        <ChevronDown className={cn('w-4 h-4 shrink-0 text-gray-400 transition-transform', open && 'rotate-180')} />
-      </button>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setOpen(o => !o)}
+          className="flex-1 min-w-0 flex items-center justify-between px-4 py-3 rounded-xl border border-gray-200 text-sm text-left hover:border-emerald-300 transition-colors"
+        >
+          <span className={cn('truncate', hasSelection ? 'text-gray-900' : 'text-gray-400')}>
+            {buttonText}
+          </span>
+          <ChevronDown className={cn('w-4 h-4 shrink-0 text-gray-400 transition-transform', open && 'rotate-180')} />
+        </button>
+        {hasSelection && (
+          <button
+            type="button"
+            onClick={onClear}
+            title={clearLabel}
+            className="shrink-0 w-10 h-10 flex items-center justify-center rounded-xl border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-300 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+
+      {selectedCountries.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mt-2">
+          {selectedCountries.map(name => (
+            <button
+              key={name}
+              type="button"
+              onClick={() => onToggle(name)}
+              className="inline-flex items-center gap-1 pl-2.5 pr-1.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium hover:bg-emerald-100 transition-colors"
+            >
+              {name}
+              <X className="w-3 h-3" />
+            </button>
+          ))}
+        </div>
+      )}
 
       <AnimatePresence>
         {open && (
@@ -163,6 +197,12 @@ export default function FilterPanel() {
     const withoutAll = activeFilters.filter(f => f !== ALL_COUNTRIES_VALUE)
     useExplorerStore.setState({ activeFilters: withoutAll })
     toggleFilter(value)
+  }
+
+  const handleClearCountries = () => {
+    useExplorerStore.setState({
+      activeFilters: activeFilters.filter(f => f !== ALL_COUNTRIES_VALUE && !COUNTRIES.some(c => c.name === f)),
+    })
   }
 
   const handleApply = () => {
@@ -259,9 +299,11 @@ export default function FilterPanel() {
                   <CountrySelect
                     selected={activeFilters}
                     onToggle={handleToggleCountry}
+                    onClear={handleClearCountries}
                     label={t('countryPlaceholder')}
                     searchPlaceholder={t('countrySearchPlaceholder')}
                     allLabel={t('allCountries')}
+                    clearLabel={t('clearCountries')}
                   />
                 </div>
               )}

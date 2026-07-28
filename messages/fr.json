@@ -1430,6 +1430,7 @@
         "countryPlaceholder": "Sélectionner un ou plusieurs pays",
         "countrySearchPlaceholder": "Rechercher un pays…",
         "allCountries": "Tous les pays",
+        "clearCountries": "Effacer les pays sélectionnés",
         "advancedFilters": "Filtres avancés",
         "advancedPremiumHint": "Réservé aux membres Premium",
         "apply": "Appliquer les filtres",
