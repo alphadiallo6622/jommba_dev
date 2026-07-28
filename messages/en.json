@@ -1153,7 +1153,9 @@
         "security": "Security",
         "securitySub": "Password, verification",
         "account": "My account",
-        "accountSub": "Suspend, delete"
+        "accountSub": "Suspend, delete",
+        "subscription": "My subscription",
+        "subscriptionSub": "Manage your Premium plan"
       },
       "themeSection": {
         "themes": "✦ Themes:",
@@ -1336,6 +1338,31 @@
         "deleteModal1Desc": "This action will permanently delete your profile, photos and all your messages. It is irreversible.",
         "deleteModal2Title": "Final confirmation",
         "deleteModal2Desc": "Tap \"Delete\" to confirm the permanent deletion of your Jommba account."
+      },
+      "subscription": {
+        "title": "My subscription",
+        "close": "Close",
+        "tabSubscription": "Subscription",
+        "tabHistory": "History",
+        "activeTitle": "Premium subscription active",
+        "activeSub": "{duration} plan",
+        "daysLeft": "{n, plural, =0 {Last day} one {# day left} other {# days left}}",
+        "expiresOn": "Expires on {date}",
+        "fieldStart": "Start",
+        "fieldDuration": "Duration",
+        "fieldAmount": "Amount paid",
+        "renewNotice": "Your Premium access does not renew automatically. Pay again before it expires to keep your benefits.",
+        "renewAction": "Renew my Premium",
+        "emptyTitle": "No active subscription",
+        "emptyDesc": "Go Premium to unlock every feature and maximise your chances of finding your other half.",
+        "emptyCta": "See Premium plans",
+        "historyEmpty": "No transactions yet",
+        "txPremium": "Premium — {duration}",
+        "txBoost": "Profile boost",
+        "statusPaid": "Paid",
+        "statusRefunded": "Refunded",
+        "durationMonths": "{n, plural, one {# month} other {# months}}",
+        "durationDays": "{n, plural, one {# day} other {# days}}"
       }
     },
     "academie": {

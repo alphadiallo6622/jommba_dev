@@ -1153,7 +1153,9 @@
         "security": "Sécurité",
         "securitySub": "Mot de passe, vérification",
         "account": "Mon compte",
-        "accountSub": "Suspendre, supprimer"
+        "accountSub": "Suspendre, supprimer",
+        "subscription": "Mon abonnement",
+        "subscriptionSub": "Gérer ton abonnement Premium"
       },
       "themeSection": {
         "themes": "✦ Thèmes :",
@@ -1336,6 +1338,31 @@
         "deleteModal1Desc": "Cette action supprimera définitivement ton profil, tes photos et tous tes messages. Elle est irréversible.",
         "deleteModal2Title": "Confirmation finale",
         "deleteModal2Desc": "Clique sur \"Supprimer\" pour confirmer la suppression définitive de ton compte Jommba."
+      },
+      "subscription": {
+        "title": "Mon abonnement",
+        "close": "Fermer",
+        "tabSubscription": "Abonnement",
+        "tabHistory": "Historique",
+        "activeTitle": "Abonnement Premium actif",
+        "activeSub": "Formule {duration}",
+        "daysLeft": "{n, plural, =0 {Dernier jour} one {# jour restant} other {# jours restants}}",
+        "expiresOn": "Expire le {date}",
+        "fieldStart": "Début",
+        "fieldDuration": "Durée",
+        "fieldAmount": "Montant payé",
+        "renewNotice": "Ton accès Premium n'est pas renouvelé automatiquement. Repaie avant l'échéance pour ne pas perdre tes avantages.",
+        "renewAction": "Renouveler mon Premium",
+        "emptyTitle": "Pas d'abonnement actif",
+        "emptyDesc": "Passe à Premium pour débloquer toutes les fonctionnalités et maximiser tes chances de trouver ta moitié.",
+        "emptyCta": "Découvrir les offres Premium",
+        "historyEmpty": "Aucune transaction pour le moment",
+        "txPremium": "Premium — {duration}",
+        "txBoost": "Boost de profil",
+        "statusPaid": "Payé",
+        "statusRefunded": "Remboursé",
+        "durationMonths": "{n, plural, one {# mois} other {# mois}}",
+        "durationDays": "{n, plural, one {# jour} other {# jours}}"
       }
     },
     "academie": {
