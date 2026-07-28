@@ -13,6 +13,12 @@ export type MockUser = {
   height: number
   city: string
   country: string
+  // Exposés explicitement (et non plus seulement via `tags`, dont les positions
+  // glissent quand un champ est vide) : les indicateurs de complétude des
+  // Paramètres ont besoin de savoir si chacun est renseigné.
+  maritalStatus: string
+  job: string
+  education: string
   avatar: string
   profileCompletion: number
   isPremium: boolean
@@ -43,6 +49,9 @@ export const EMPTY_USER: MockUser = {
   height: 0,
   city: '',
   country: '',
+  maritalStatus: '',
+  job: '',
+  education: '',
   email: '',
   avatar: '/avatar-placeholder.svg',
   profileCompletion: 0,

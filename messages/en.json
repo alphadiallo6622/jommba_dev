@@ -1363,7 +1363,9 @@
         "statusRefunded": "Refunded",
         "durationMonths": "{n, plural, one {# month} other {# months}}",
         "durationDays": "{n, plural, one {# day} other {# days}}"
-      }
+      },
+      "sectionComplete": "Section complete",
+      "sectionIncomplete": "Missing information"
     },
     "academie": {
       "badge": "Marriage Academy",

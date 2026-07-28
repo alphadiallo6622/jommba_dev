@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { ChevronRight, Camera, User, MapPin, Heart, Smile, Crown, EyeOff, Bell, Shield, Settings } from 'lucide-react'
+import { ChevronRight, Camera, User, MapPin, Heart, Smile, Crown, EyeOff, Bell, Shield, Settings, Check, AlertCircle } from 'lucide-react'
 import { useCurrentUser } from '@/lib/use-current-user'
+import { isSectionComplete, isTrackedSection } from '@/lib/profile-sections'
 import PhotoPanel        from './panels/PhotoPanel'
 import InfosPanel        from './panels/InfosPanel'
 import LocationPanel     from './panels/LocationPanel'
@@ -34,7 +35,8 @@ const SECTIONS = [
 export default function ParametresPage() {
   const t = useTranslations('dashboard.parametres')
   const [activePanel, setActivePanel] = useState<PanelId>(null)
-  const { profileCompletion: completion } = useCurrentUser()
+  const currentUser = useCurrentUser()
+  const completion = currentUser.profileCompletion
 
   const close = () => setActivePanel(null)
 
@@ -69,6 +71,11 @@ export default function ParametresPage() {
         {SECTIONS.map((section) => {
           const { id, icon: Icon, key } = section
           const accent = 'accent' in section && section.accent
+          // Indicateur de complétude : uniquement sur les sections qui entrent
+          // dans le score (voir lib/profile-sections.ts).
+          const complete = isTrackedSection(key)
+            ? isSectionComplete(key, currentUser)
+            : null
           return (
           <button
             key={id}
@@ -86,6 +93,18 @@ export default function ParametresPage() {
               <p className="text-sm font-medium text-gray-800">{t(`sections.${key}`)}</p>
               <p className="text-xs text-gray-400">{t(`sections.${key}Sub`)}</p>
             </div>
+            {complete !== null && (
+              <span
+                title={complete ? t('sectionComplete') : t('sectionIncomplete')}
+                className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
+                  complete ? 'bg-[#E1F5EE]' : 'bg-amber-100'
+                }`}
+              >
+                {complete
+                  ? <Check className="w-3.5 h-3.5 text-[#10B981]" />
+                  : <AlertCircle className="w-3.5 h-3.5 text-amber-500" />}
+              </span>
+            )}
             <ChevronRight className="w-4 h-4 text-gray-400" />
           </button>
           )

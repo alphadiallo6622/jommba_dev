@@ -1363,7 +1363,9 @@
         "statusRefunded": "Remboursé",
         "durationMonths": "{n, plural, one {# mois} other {# mois}}",
         "durationDays": "{n, plural, one {# jour} other {# jours}}"
-      }
+      },
+      "sectionComplete": "Section complétée",
+      "sectionIncomplete": "Informations manquantes"
     },
     "academie": {
       "badge": "Académie du Mariage",
