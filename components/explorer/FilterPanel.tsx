@@ -1,11 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { X } from 'lucide-react'
+import { ChevronDown, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useExplorerStore } from '@/store/explorer.store'
 import { cn } from '@/lib/utils'
+
+const COUNTRIES = ['Sénégal', 'France', 'Guinée', 'Canada', 'Belgique', 'Maroc']
 
 // Valeur canonique (utilisée pour le filtrage) + clé de libellé traduit.
 const QUICK_FILTERS = [
@@ -19,6 +21,74 @@ const FILTER_TABS = [
   { id: 'filters', labelKey: 'tabFilters' },
   { id: 'country', labelKey: 'tabCountry' },
 ] as const
+
+function CountrySelect({
+  selected,
+  onToggle,
+  label,
+}: {
+  selected: string[]
+  onToggle: (country: string) => void
+  label: string
+}) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const selectedCountries = selected.filter(f => COUNTRIES.includes(f))
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-gray-200 text-sm text-left hover:border-emerald-300 transition-colors"
+      >
+        <span className={cn(selectedCountries.length > 0 ? 'text-gray-900' : 'text-gray-400')}>
+          {selectedCountries.length > 0 ? selectedCountries.join(', ') : label}
+        </span>
+        <ChevronDown className={cn('w-4 h-4 text-gray-400 transition-transform', open && 'rotate-180')} />
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.15 }}
+            className="absolute z-10 mt-2 w-full max-h-56 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg py-1"
+          >
+            {COUNTRIES.map(country => {
+              const active = selected.includes(country)
+              return (
+                <button
+                  key={country}
+                  type="button"
+                  onClick={() => onToggle(country)}
+                  className={cn(
+                    'w-full flex items-center justify-between px-4 py-2 text-sm text-left hover:bg-gray-50 transition-colors',
+                    active ? 'text-emerald-600 font-medium' : 'text-gray-700',
+                  )}
+                >
+                  {country}
+                  {active && <span className="text-emerald-500">✓</span>}
+                </button>
+              )
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
 
 export default function FilterPanel() {
   const t = useTranslations('dashboard.explorer.filters')
@@ -111,25 +181,7 @@ export default function FilterPanel() {
               {activeTab === 'country' && (
                 <div>
                   <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">{t('country')}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {['Sénégal', 'France', 'Guinée', 'Canada', 'Belgique', 'Maroc'].map(c => {
-                      const active = activeFilters.includes(c)
-                      return (
-                        <button
-                          key={c}
-                          onClick={() => toggleFilter(c)}
-                          className={cn(
-                            'px-4 py-2 rounded-full text-sm font-medium border transition-all',
-                            active
-                              ? 'bg-emerald-50 border-emerald-500 text-emerald-600'
-                              : 'bg-white border-gray-200 text-gray-600 hover:border-emerald-300',
-                          )}
-                        >
-                          {c}
-                        </button>
-                      )
-                    })}
-                  </div>
+                  <CountrySelect selected={activeFilters} onToggle={toggleFilter} label={t('countryPlaceholder')} />
                 </div>
               )}
 

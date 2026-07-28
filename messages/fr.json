@@ -1426,6 +1426,7 @@
         "tabCountry": "🌍 Pays",
         "quickFilters": "Filtres rapides",
         "country": "Pays",
+        "countryPlaceholder": "Sélectionner un ou plusieurs pays",
         "apply": "Appliquer les filtres",
         "quick": {
           "photo": "Photo",
