@@ -1,11 +1,17 @@
 ﻿export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://jommba.com";
 
 // Seuil de complétude à partir duquel un profil devient visible par les
-// autres membres (accueil, explorateur, accès direct). Abaissé temporairement
-// de 100 à 90 : le champ ville n'était pas collectable pour certains pays
-// avant le fix de l'onboarding — remonter à 100 une fois les profils existants
-// mis à jour.
-export const MIN_VISIBLE_PROFILE_COMPLETION = 90;
+// autres membres (accueil, explorateur, accès direct).
+//
+// Recalibré de 90 à 56 lors du passage de computeProfileCompletion de 10 à 16
+// champs clés : le seuil est exprimé en pourcentage, donc élargir le score
+// aurait mécaniquement durci l'exigence et fait disparaître de l'explorateur des
+// profils jusque-là visibles. 56 % ≈ 9 champs sur 16, soit le même niveau réel
+// d'exigence qu'avant (9 champs sur 10).
+//
+// À remonter progressivement une fois les profils existants complétés — la
+// barre correspond désormais à un profil bien plus riche à exigence égale.
+export const MIN_VISIBLE_PROFILE_COMPLETION = 56;
 
 export const SITE_METADATA = {
   title: "Jommba - Rencontre Halal & Mariage Musulman",
