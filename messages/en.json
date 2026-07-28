@@ -1763,38 +1763,38 @@
         "items": [
           {
             "daysLabel": "2 days",
-            "statusLabel": "In discussion",
-            "quote": "Before Premium, my profile was invisible. By the 2nd day, I saw 12 brothers had visited my profile. I contacted the one who kept coming back.",
-            "author": "Fatou N.",
-            "city": "Dakar"
+            "statusLabel": "In conversation",
+            "quote": "Before Premium, my profile was invisible. By day 2, I saw that 12 brothers had visited my profile. I reached out to the one who kept coming back.",
+            "author": "Fatoumata B.",
+            "city": "New York, USA"
           },
           {
             "daysLabel": "1 day",
             "statusLabel": "Engaged",
-            "quote": "I'd almost lost hope, but Jommba surprised me. In under 24h after going Premium, I had 3 serious contacts.",
-            "author": "Aminata K.",
-            "city": "Thiès"
+            "quote": "I had almost given up, but Jommba surprised me. Within 24h of going Premium, I had 3 serious contacts.",
+            "author": "Aïcha C.",
+            "city": "Paris, FR"
           },
           {
             "daysLabel": "3 days",
             "statusLabel": "Married",
-            "quote": "Instant approval let me get started quickly. The coach helped me a lot to write my profile.",
-            "author": "Ibrahim S.",
-            "city": "Paris, FR"
+            "quote": "Instant validation let me get started right away. The coach helped me a lot with writing my profile.",
+            "author": "Ibrahima D.",
+            "city": "Brussels, BE"
           },
           {
             "daysLabel": "5 days",
-            "statusLabel": "In discussion",
-            "quote": "The seriousness badge changes everything. The people who message me are truly here to marry.",
-            "author": "Mariama D.",
-            "city": "Abidjan"
+            "statusLabel": "In conversation",
+            "quote": "The trust badge changes everything. The people who message me are genuinely here to get married.",
+            "author": "Mariam S.",
+            "city": "Atlanta, USA"
           },
           {
             "daysLabel": "7 days",
             "statusLabel": "Engaged",
-            "quote": "Thanks to the included boosts, my profile appeared at the top. I got 20 visits on the first day.",
-            "author": "Moussa B.",
-            "city": "Dakar"
+            "quote": "Thanks to the included boosts, my profile showed up first. I got 20 visits on the very first day.",
+            "author": "Mamadou B.",
+            "city": "London, UK"
           }
         ]
       },

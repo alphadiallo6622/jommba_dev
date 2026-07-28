@@ -120,9 +120,16 @@ export async function generateMetadata(
   const { slug } = await params;
   const article = await loadArticle(decodeURIComponent(slug));
   if (!article) return { title: "Article introuvable | Jommba" };
+  const title = `${article.title} | Blog Jommba`;
+  const description = article.excerpt || undefined;
+  // L'image de couverture de l'article remplace le logo par défaut sur les
+  // aperçus de partage (Facebook, WhatsApp, LinkedIn…) quand elle existe.
+  const images = article.coverImage ? [{ url: article.coverImage }] : undefined;
   return {
-    title: `${article.title} | Blog Jommba`,
-    description: article.excerpt || undefined,
+    title,
+    description,
+    openGraph: { title, description, images, type: "article" },
+    twitter: { card: "summary_large_image", title, description, images: article.coverImage ? [article.coverImage] : undefined },
   };
 }
 

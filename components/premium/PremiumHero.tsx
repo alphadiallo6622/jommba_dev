@@ -32,7 +32,7 @@ export default function PremiumHero() {
       <div className="bg-yellow-50 border border-amber-200 rounded-xl grid grid-cols-3 divide-x divide-amber-200">
         {[
           { value: '3x',        label: t('stat1Label') },
-          { value: '200 000+',  label: t('stat2Label') },
+          { value: '500+',      label: t('stat2Label') },
           { value: '100%',      label: t('stat3Label') },
         ].map(({ value, label }) => (
           <div key={label} className="py-5 flex flex-col items-center gap-1">
