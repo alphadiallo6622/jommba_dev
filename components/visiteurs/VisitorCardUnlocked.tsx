@@ -1,8 +1,8 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { Clock, MapPin } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { toast } from 'sonner'
 import type { Visitor } from '@/lib/mock-visitors'
 import { formatHoursAgo } from '@/lib/format-time-ago'
 
@@ -11,6 +11,7 @@ interface Props {
 }
 
 export default function VisitorCardUnlocked({ visitor }: Props) {
+  const router = useRouter()
   const t = useTranslations('dashboard.visiteurs')
   return (
     <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
@@ -46,7 +47,7 @@ export default function VisitorCardUnlocked({ visitor }: Props) {
 
         {/* View profile button */}
         <button
-          onClick={() => toast.success(t('profileSoon'))}
+          onClick={() => router.push(`/dashboard/profil/${visitor.id}`)}
           className="w-full mt-3 bg-emerald-500 text-white text-sm font-medium py-2 rounded-lg flex items-center justify-center gap-1 hover:bg-emerald-600 transition-colors"
         >
           {t('viewProfile')}
