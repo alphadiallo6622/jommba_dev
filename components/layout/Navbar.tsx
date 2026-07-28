@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Menu, LayoutDashboard } from "lucide-react";
 import { Link, usePathname } from "@/i18n/navigation";
+// /dashboard n'est pas localisé : le Link de @/i18n/navigation le préfixerait
+// (/fr/dashboard → 404). On utilise donc le Link natif de Next pour ces liens.
+import NextLink from "next/link";
 import { NAV_LINKS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/providers/AuthProvider";
@@ -78,13 +81,13 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-4">
             <LocaleSwitcher />
             {user ? (
-              <a
+              <NextLink
                 href="/dashboard"
                 className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white font-semibold text-sm shadow-green-btn hover:bg-primary-dark hover:-translate-y-0.5 transition-all duration-200"
               >
                 <LayoutDashboard className="w-4 h-4" />
                 {t("dashboard")}
-              </a>
+              </NextLink>
             ) : (
               <>
                 <Link
@@ -106,13 +109,13 @@ export default function Navbar() {
           {/* Mobile: Dashboard (si connecté) + bouton menu */}
           <div className="md:hidden flex items-center gap-2">
             {user && (
-              <a
+              <NextLink
                 href="/dashboard"
                 className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full bg-primary text-white font-semibold text-sm shadow-green-btn hover:bg-primary-dark transition-all duration-200"
               >
                 <LayoutDashboard className="w-4 h-4" />
                 {t("dashboard")}
-              </a>
+              </NextLink>
             )}
             <button
               onClick={() => setIsMobileMenuOpen(true)}

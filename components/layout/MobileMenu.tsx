@@ -16,6 +16,9 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "@/i18n/navigation";
+// /dashboard n'est pas localisé : le Link de @/i18n/navigation le préfixerait
+// (/fr/dashboard → 404). On utilise donc le Link natif de Next pour ce lien.
+import NextLink from "next/link";
 import { NAV_LINKS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/providers/AuthProvider";
@@ -128,14 +131,14 @@ export default function MobileMenu({ isOpen, onClose, pathname }: MobileMenuProp
               </div>
 
               {user ? (
-                <a
+                <NextLink
                   href="/dashboard"
                   onClick={onClose}
                   className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl bg-white text-primary font-bold text-sm shadow-lg hover:bg-jommba-bg transition-all duration-200"
                 >
                   <LayoutDashboard className="w-4 h-4" />
                   {t("dashboard")}
-                </a>
+                </NextLink>
               ) : (
                 <>
                   <Link
