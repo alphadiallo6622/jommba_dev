@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#00A676" />
+    <title>Hors ligne — Jommba.com</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #fffdf9;
+        --fg: #1a202c;
+        --muted: #64748b;
+        --primary: #00a676;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0a0f1c;
+          --fg: #f8fafc;
+          --muted: #94a3b8;
+        }
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        text-align: center;
+      }
+      .card { max-width: 380px; }
+      img { width: 72px; height: 72px; border-radius: 18px; }
+      h1 { font-size: 1.35rem; margin: 20px 0 8px; }
+      p { color: var(--muted); line-height: 1.6; margin: 0 0 24px; font-size: 0.95rem; }
+      button {
+        background: var(--primary);
+        color: #fff;
+        border: 0;
+        border-radius: 14px;
+        padding: 12px 28px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button:hover { background: #008f64; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <img src="/icons/icon-192.png" alt="Jommba.com" />
+      <h1>Vous êtes hors ligne</h1>
+      <p>
+        Impossible de joindre Jommba.com pour le moment. Vérifiez votre
+        connexion internet, puis réessayez.<br /><br />
+        <em>You are offline. Please check your internet connection and try again.</em>
+      </p>
+      <button onclick="location.reload()">Réessayer / Retry</button>
+    </div>
+  </body>
+</html>

@@ -1934,5 +1934,16 @@
     "copied": "Lien copié !",
     "copyFallback": "Copiez le lien ci-dessous :",
     "more": "Plus d'options de partage"
+  },
+  "pwa": {
+    "installTitle": "Installer Jommba.com",
+    "installDescription": "Installez Jommba sur votre téléphone pour un accès plus rapide.",
+    "install": "Installer",
+    "later": "Plus tard",
+    "close": "Fermer",
+    "iosTitle": "Installer Jommba.com",
+    "iosDescription": "Pour installer Jommba, touchez le bouton Partager puis « Sur l'écran d'accueil ».",
+    "iosStepShare": "Touchez Partager",
+    "iosStepAdd": "Sur l'écran d'accueil"
   }
 }

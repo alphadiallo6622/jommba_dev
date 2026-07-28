@@ -228,7 +228,12 @@ export async function proxy(req: NextRequest) {
 
 export const config = {
   // Couvre tout le site (maintenance + i18n) en excluant les assets statiques.
+  //
+  // `manifest.webmanifest` et `offline.html` doivent impérativement rester hors
+  // du middleware : sans cela next-intl les redirigerait vers /fr/…, le
+  // navigateur ne trouverait plus le manifest et l'app cesserait d'être
+  // installable. (/sw.js est déjà couvert par l'exclusion des fichiers .js.)
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|svg|gif|webp|ico|txt|xml|woff2?|ttf|css|js|map)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|offline.html|.*\\.(?:png|jpg|jpeg|svg|gif|webp|ico|txt|xml|woff2?|ttf|css|js|map)$).*)",
   ],
 }

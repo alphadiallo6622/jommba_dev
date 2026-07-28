@@ -1934,5 +1934,16 @@
     "copied": "Link copied!",
     "copyFallback": "Copy the link below:",
     "more": "More sharing options"
+  },
+  "pwa": {
+    "installTitle": "Install Jommba.com",
+    "installDescription": "Install Jommba on your phone for faster access.",
+    "install": "Install",
+    "later": "Later",
+    "close": "Close",
+    "iosTitle": "Install Jommba.com",
+    "iosDescription": "To install Jommba, tap the Share button then \"Add to Home Screen\".",
+    "iosStepShare": "Tap Share",
+    "iosStepAdd": "Add to Home Screen"
   }
 }
