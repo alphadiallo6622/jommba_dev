@@ -13,7 +13,7 @@ const CRITERIA = [
 export default function AdvancedFiltersModal() {
   const router = useRouter()
   const t = useTranslations('dashboard.explorer.advancedFiltersModal')
-  const { showAdvancedFiltersModal, setShowAdvancedFiltersModal, setAdvancedFilterTouched } = useExplorerStore()
+  const { showAdvancedFiltersModal, setShowAdvancedFiltersModal } = useExplorerStore()
 
   if (!showAdvancedFiltersModal) return null
 
@@ -21,7 +21,6 @@ export default function AdvancedFiltersModal() {
 
   const handlePremium = () => {
     close()
-    setAdvancedFilterTouched(false)
     router.push('/dashboard/premium')
   }
 

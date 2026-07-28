@@ -147,7 +147,7 @@ export default function FilterPanel() {
   const t = useTranslations('dashboard.explorer.filters')
   const {
     filtersOpen, activeFilters, setFiltersOpen, toggleFilter,
-    setAdvancedFilterTouched, applyFilters, setShowAdvancedFiltersModal,
+    applyFilters, setShowAdvancedFiltersModal,
   } = useExplorerStore()
   const { isPremium } = useCurrentUser()
   const [activeTab, setActiveTab] = useState('filters')
@@ -166,7 +166,7 @@ export default function FilterPanel() {
   }
 
   const handleApply = () => {
-    if (!isPremium && useExplorerStore.getState().advancedFilterTouched) {
+    if (!isPremium && activeTab === 'advanced') {
       setShowAdvancedFiltersModal(true)
       return
     }
@@ -277,10 +277,7 @@ export default function FilterPanel() {
                       <button
                         key={field}
                         type="button"
-                        onClick={() => {
-                          if (!isPremium) { setAdvancedFilterTouched(true); return }
-                        }}
-                        disabled={isPremium}
+                        disabled={!isPremium}
                         className={cn(
                           'w-full flex items-center justify-between px-4 py-3 rounded-xl border text-sm text-left transition-colors',
                           isPremium

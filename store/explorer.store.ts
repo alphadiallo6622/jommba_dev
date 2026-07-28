@@ -13,8 +13,6 @@ type ExplorerStore = {
   activeFilters: string[]
   /** Snapshot de activeFilters appliqué au clic sur "Appliquer les filtres" — pilote le filtrage réel des profils. */
   appliedFilters: string[]
-  /** L'utilisateur a interagi avec au moins un champ de "Filtres avancés" (réservé Premium). */
-  advancedFilterTouched: boolean
   showPremiumModal: boolean
   showAdvancedFiltersModal: boolean
   tourHighlight: TourHighlight
@@ -24,7 +22,6 @@ type ExplorerStore = {
   decrementGrillUses: () => void
   nextProfile: (total: number) => void
   toggleFilter: (filter: string) => void
-  setAdvancedFilterTouched: (touched: boolean) => void
   applyFilters: () => void
   setFiltersOpen: (open: boolean) => void
   setShowPremiumModal: (show: boolean) => void
@@ -40,7 +37,6 @@ export const useExplorerStore = create<ExplorerStore>()((set) => ({
   filtersOpen: false,
   activeFilters: [],
   appliedFilters: [],
-  advancedFilterTouched: false,
   showPremiumModal: false,
   showAdvancedFiltersModal: false,
   tourHighlight: 'none',
@@ -54,7 +50,6 @@ export const useExplorerStore = create<ExplorerStore>()((set) => ({
       ? s.activeFilters.filter(f => f !== filter)
       : [...s.activeFilters, filter],
   })),
-  setAdvancedFilterTouched: (touched) => set({ advancedFilterTouched: touched }),
   applyFilters: () => set((s) => ({ appliedFilters: s.activeFilters, currentProfileIndex: 0 })),
   setFiltersOpen: (open) => set({ filtersOpen: open }),
   setShowPremiumModal: (show) => set({ showPremiumModal: show }),
