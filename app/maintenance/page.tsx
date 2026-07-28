@@ -23,7 +23,7 @@ export default async function MaintenancePage() {
         <div className="flex justify-center mb-8">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/logo_jommba.jpeg"
+            src="/logo_jommba_fond_transparent.png"
             alt="Jommba"
             className="h-16 w-auto"
           />

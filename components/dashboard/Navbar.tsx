@@ -71,7 +71,7 @@ export default function DashboardNavbar() {
             aria-label={t('homeAria')}
           >
             <img
-              src="/logo_jommba.jpeg"
+              src="/logo_jommba_fond_transparent.png"
               alt="Jommba"
               className="max-w-none w-[135px] h-auto md:w-auto md:h-14"
             />

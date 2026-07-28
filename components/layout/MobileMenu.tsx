@@ -65,7 +65,7 @@ export default function MobileMenu({ isOpen, onClose, pathname }: MobileMenuProp
             <div className="flex items-center justify-between">
               <Link href="/" onClick={onClose} className="flex items-center">
                 <img
-                  src="/logo_jommba.jpeg"
+                  src="/logo_jommba_fond_transparent.png"
                   alt="Jommba"
                   className="max-w-none w-[120px] h-auto rounded-lg"
                 />

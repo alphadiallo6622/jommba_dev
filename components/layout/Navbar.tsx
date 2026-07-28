@@ -44,7 +44,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center group">
             <img
-              src="/logo_jommba.jpeg"
+              src="/logo_jommba_fond_transparent.png"
               alt="Jommba"
               className="max-w-none w-[140px] h-auto md:w-auto md:h-14 group-hover:scale-105 transition-transform duration-300"
             />

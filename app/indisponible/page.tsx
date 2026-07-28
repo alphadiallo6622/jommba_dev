@@ -17,7 +17,7 @@ export default function GeoBlockedPage() {
         {/* Logo / marque */}
         <div className="flex justify-center mb-8">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo_jommba.jpeg" alt="Jommba" className="h-16 w-auto" />
+          <img src="/logo_jommba_fond_transparent.png" alt="Jommba" className="h-16 w-auto" />
         </div>
 
         {/* Icône globe */}
