@@ -1424,9 +1424,14 @@
         "title": "Filtres",
         "tabFilters": "⚡ Filtres",
         "tabCountry": "🌍 Pays",
+        "tabAdvanced": "Filtres avancés",
         "quickFilters": "Filtres rapides",
         "country": "Pays",
         "countryPlaceholder": "Sélectionner un ou plusieurs pays",
+        "countrySearchPlaceholder": "Rechercher un pays…",
+        "allCountries": "Tous les pays",
+        "advancedFilters": "Filtres avancés",
+        "advancedPremiumHint": "Réservé aux membres Premium",
         "apply": "Appliquer les filtres",
         "quick": {
           "photo": "Photo",
@@ -1434,6 +1439,17 @@
           "age1825": "18-25",
           "age2635": "26-35",
           "age36": "36+"
+        },
+        "advanced": {
+          "madhhab": "Madhhab",
+          "education": "Niveau d'études",
+          "polygamie": "Accepte polygamie",
+          "region": "Région précise",
+          "projetHijra": "Projet hijra",
+          "peutDemenager": "Prêt à déménager",
+          "situation": "Situation",
+          "enfants": "Enfants existants",
+          "souhaitEnfants": "Veut des enfants"
         }
       },
       "details": {
@@ -1458,6 +1474,24 @@
         "benefit2": "Voir qui visite ton profil",
         "benefit3": "Demandes illimitées",
         "cta": "⭐ Passer Premium ›"
+      },
+      "advancedFiltersModal": {
+        "title": "Affine ta recherche",
+        "desc": "9 critères précis pour trouver la sœur ou le frère qui te correspond vraiment.",
+        "criteria": {
+          "madhhab": "Madhhab",
+          "education": "Niveau d'études",
+          "region": "Région précise",
+          "projetHijra": "Projet hijra",
+          "polygamie": "Polygamie",
+          "souhaitEnfants": "Veut des enfants",
+          "situation": "Situation",
+          "enfants": "Enfants existants",
+          "peutDemenager": "Prêt à déménager"
+        },
+        "tagline": "Filtres précis, matches précis.",
+        "cta": "Découvrir Premium →",
+        "later": "Plus tard"
       },
       "report": {
         "title": "Signaler {name}",

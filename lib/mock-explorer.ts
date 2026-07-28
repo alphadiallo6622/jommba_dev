@@ -9,6 +9,8 @@ export type ExplorerProfile = {
   lastInitial: string
   age: number
   location: string
+  /** Code ISO 3166-1 alpha-2 du pays (ex. "SN"), pour le filtrage par pays. */
+  countryCode: string
   maritalStatus: string
   job: string
   photos: string[]

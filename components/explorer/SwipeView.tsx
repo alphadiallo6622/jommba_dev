@@ -10,6 +10,7 @@ import { useAuth } from '@/components/providers/AuthProvider'
 import { useCurrentUser } from '@/lib/use-current-user'
 import { sendContactRequest, addFavorite as dbAddFavorite, removeFavorite as dbRemoveFavorite } from '@/lib/supabase/likes-service'
 import { notifyByEmail } from '@/lib/notify-email'
+import { applyExplorerFilters } from '@/lib/explorer-filters'
 import { cn } from '@/lib/utils'
 import ProfileSwipeCard from './ProfileSwipeCard'
 import ProfileDetails from './ProfileDetails'
@@ -17,7 +18,8 @@ import ProfileDetails from './ProfileDetails'
 export default function SwipeView() {
   const t = useTranslations('dashboard.explorer')
   const ts = useTranslations('dashboard.explorer.swipe')
-  const { currentProfileIndex, nextProfile, tourHighlight, profiles, setShowPremiumModal } = useExplorerStore()
+  const { currentProfileIndex, nextProfile, tourHighlight, profiles: allProfiles, appliedFilters, setShowPremiumModal } = useExplorerStore()
+  const profiles = applyExplorerFilters(allProfiles, appliedFilters)
   const { isFavorite, addFavorite, removeFavorite } = useFavorisStore()
   const { user } = useAuth()
   const { isPremium, firstName: myFirstName } = useCurrentUser()

@@ -1424,9 +1424,14 @@
         "title": "Filters",
         "tabFilters": "⚡ Filters",
         "tabCountry": "🌍 Country",
+        "tabAdvanced": "Advanced filters",
         "quickFilters": "Quick filters",
         "country": "Country",
         "countryPlaceholder": "Select one or more countries",
+        "countrySearchPlaceholder": "Search a country…",
+        "allCountries": "All countries",
+        "advancedFilters": "Advanced filters",
+        "advancedPremiumHint": "Premium members only",
         "apply": "Apply filters",
         "quick": {
           "photo": "Photo",
@@ -1434,6 +1439,17 @@
           "age1825": "18-25",
           "age2635": "26-35",
           "age36": "36+"
+        },
+        "advanced": {
+          "madhhab": "Madhhab",
+          "education": "Education level",
+          "polygamie": "Accepts polygamy",
+          "region": "Specific region",
+          "projetHijra": "Hijra plan",
+          "peutDemenager": "Willing to relocate",
+          "situation": "Marital status",
+          "enfants": "Existing children",
+          "souhaitEnfants": "Wants children"
         }
       },
       "details": {
@@ -1458,6 +1474,24 @@
         "benefit2": "See who visits your profile",
         "benefit3": "Unlimited requests",
         "cta": "⭐ Go Premium ›"
+      },
+      "advancedFiltersModal": {
+        "title": "Refine your search",
+        "desc": "9 precise criteria to find the sister or brother who truly matches you.",
+        "criteria": {
+          "madhhab": "Madhhab",
+          "education": "Education level",
+          "region": "Specific region",
+          "projetHijra": "Hijra plan",
+          "polygamie": "Polygamy",
+          "souhaitEnfants": "Wants children",
+          "situation": "Marital status",
+          "enfants": "Existing children",
+          "peutDemenager": "Willing to relocate"
+        },
+        "tagline": "Precise filters, precise matches.",
+        "cta": "Discover Premium →",
+        "later": "Later"
       },
       "report": {
         "title": "Report {name}",

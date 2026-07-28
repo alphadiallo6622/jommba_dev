@@ -4,6 +4,7 @@ import { Compass } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useCurrentUser } from '@/lib/use-current-user'
 import { useExplorerStore } from '@/store/explorer.store'
+import { applyExplorerFilters } from '@/lib/explorer-filters'
 import ProfileGridCard from './ProfileGridCard'
 
 const FREE_CARD_COUNT = 8
@@ -11,7 +12,9 @@ const FREE_CARD_COUNT = 8
 export default function GridView() {
   const t = useTranslations('dashboard.explorer')
   const { isPremium } = useCurrentUser()
-  const profiles = useExplorerStore(s => s.profiles)
+  const allProfiles = useExplorerStore(s => s.profiles)
+  const appliedFilters = useExplorerStore(s => s.appliedFilters)
+  const profiles = applyExplorerFilters(allProfiles, appliedFilters)
 
   if (profiles.length === 0) {
     return (

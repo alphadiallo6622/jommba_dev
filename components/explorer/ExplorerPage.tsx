@@ -8,6 +8,7 @@ import SwipeView        from './SwipeView'
 import GridView         from './GridView'
 import FilterPanel      from './FilterPanel'
 import PremiumGridModal from './PremiumGridModal'
+import AdvancedFiltersModal from './AdvancedFiltersModal'
 import OnboardingGuide  from './onboarding/OnboardingGuide'
 import { useExplorerStore } from '@/store/explorer.store'
 import { useFavorisStore } from '@/store/favoris.store'
@@ -91,6 +92,7 @@ export default function ExplorerPage() {
 
       <FilterPanel />
       <PremiumGridModal />
+      <AdvancedFiltersModal />
       <OnboardingGuide />
     </div>
   )
