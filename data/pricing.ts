@@ -1,3 +1,18 @@
+import { PLAN_PRICES, computeFullPrices } from "@/lib/pricing";
+
+/** Photos autorisées sur un profil Free. Non réglable en admin — contrairement
+ *  aux autres limites de la carte Gratuit, qui viennent de platform_settings. */
+export const FREE_PHOTOS = 3;
+
+/** Prix mensuel affiché sur l'accueil : le montant réellement facturé pour le
+ *  plan "1 mois", pas un chiffre saisi à part. */
+export const HOME_MONTHLY_PRICE = PLAN_PRICES["1m"];
+
+/** Prix barré du plan mensuel, déduit du tarif de référence réglé en admin. */
+export function homeOriginalPrice(referenceMonthlyPrice: number): number {
+  return computeFullPrices(referenceMonthlyPrice)["1m"];
+}
+
 export interface PricingFeature {
   /** Index de la fonctionnalité, résolu via home.pricing.<plan>.features.<n> */
   key: string;
@@ -9,8 +24,6 @@ export interface PricingFeature {
 export interface PricingPlan {
   /** Clé de traduction sous home.pricing.<planKey> */
   planKey: "free" | "premium";
-  price: string;
-  originalPrice?: string;
   hasBadge: boolean;
   hasNote: boolean;
   features: PricingFeature[];
@@ -21,7 +34,6 @@ export interface PricingPlan {
 export const PRICING_PLANS: PricingPlan[] = [
   {
     planKey: "free",
-    price: "0",
     hasBadge: false,
     hasNote: false,
     features: Array.from({ length: 9 }, (_, i) => ({ key: String(i + 1), included: true })).concat(
@@ -32,8 +44,6 @@ export const PRICING_PLANS: PricingPlan[] = [
   },
   {
     planKey: "premium",
-    price: "10",
-    originalPrice: "15",
     hasBadge: true,
     hasNote: true,
     features: Array.from({ length: 17 }, (_, i) => ({

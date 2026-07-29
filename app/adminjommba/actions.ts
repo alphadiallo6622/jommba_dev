@@ -797,6 +797,9 @@ export async function saveLimits(limits: LimitsSettings): Promise<ActionResult> 
       updated_at: new Date().toISOString(),
     });
     if (error) throw new Error(error.message);
+    // La section Tarifs de l'accueil affiche ces limites : sans cela, la page
+    // publique resterait sur les valeurs mises en cache au build.
+    revalidatePath("/", "layout");
   }, "settings");
 }
 
@@ -858,6 +861,8 @@ export async function savePricing(pricing: PricingSettings): Promise<ActionResul
       updated_at: new Date().toISOString(),
     });
     if (error) throw new Error(error.message);
+    // Le tarif de référence fixe le prix barré affiché sur l'accueil.
+    revalidatePath("/", "layout");
   }, "settings");
 }
 

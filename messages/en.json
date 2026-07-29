@@ -161,10 +161,10 @@
         "buttonText": "Get started",
         "features": {
           "1": "Full profile creation",
-          "2": "3 profile photos",
-          "3": "3 contact requests per day",
-          "4": "3 active conversations at once",
-          "5": "3 questions per day to Sheikh Abdallah (AI Coach)",
+          "2": "{photos} profile photos",
+          "3": "{contacts} contact requests per day",
+          "4": "{conversations} active conversations at once",
+          "5": "{coachQuestions} questions per day to Sheikh Abdallah (AI Coach)",
           "6": "Reply to messages you receive",
           "7": "Ice Breaker: conversation starters",
           "8": "Access to the Marriage Academy",
@@ -187,7 +187,7 @@
         "period": "/ month",
         "description": "Maximize your chances of finding your other half",
         "badge": "✨ LAUNCH OFFER",
-        "note": "* Limited launch price. Regular price: $15 / month",
+        "note": "* Limited launch price. Regular price: ${originalPrice} / month",
         "buttonText": "Get started",
         "features": {
           "1": "Unlimited contact requests",

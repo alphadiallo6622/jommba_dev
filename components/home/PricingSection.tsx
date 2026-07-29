@@ -6,10 +6,33 @@ import Container from "@/components/ui/Container";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Button from "@/components/ui/Button";
 import AnimatedSection from "@/components/ui/AnimatedSection";
-import { PRICING_PLANS, PricingPlan } from "@/data/pricing";
+import { PRICING_PLANS, PricingPlan, FREE_PHOTOS } from "@/data/pricing";
 
-export default function PricingSection() {
+export interface PricingSectionProps {
+  /** Limites du plan Free, telles que réglées dans le Dashboard Admin. */
+  limits: { contacts: number; conversations: number; coachQuestions: number };
+  /** Montant facturé pour un mois de Premium. */
+  monthlyPrice: number;
+  /** Prix barré du plan mensuel (tarif de référence admin). */
+  originalPrice: number;
+}
+
+export default function PricingSection({ limits, monthlyPrice, originalPrice }: PricingSectionProps) {
   const t = useTranslations("home.pricing");
+
+  // Valeurs injectées dans les libellés paramétrés (features 2-5 du plan Free,
+  // note du plan Premium). Les autres libellés n'attendent aucune variable.
+  const featureValues = {
+    photos: FREE_PHOTOS,
+    contacts: limits.contacts,
+    conversations: limits.conversations,
+    coachQuestions: limits.coachQuestions,
+  };
+
+  const prices: Record<PricingPlan["planKey"], { price: number; originalPrice?: number }> = {
+    free: { price: 0 },
+    premium: { price: monthlyPrice, originalPrice },
+  };
 
   return (
     <section id="pricing" className="py-12 sm:py-16 scroll-mt-[76px] bg-jommba-bg/50 border-t border-primary-light/10">
@@ -53,13 +76,13 @@ export default function PricingSection() {
 
                   {/* Price */}
                   <div className="mb-1">
-                    {plan.originalPrice && (
+                    {prices[plan.planKey].originalPrice != null && (
                       <span className="text-sm text-text-subtle line-through mr-2">
-                        {plan.originalPrice} $
+                        {prices[plan.planKey].originalPrice} $
                       </span>
                     )}
                     <span className="text-4xl font-extrabold text-primary font-serif">
-                      {plan.price}
+                      {prices[plan.planKey].price}
                     </span>
                     <span className="text-lg font-bold text-text-primary ml-1">$</span>
                   </div>
@@ -88,7 +111,7 @@ export default function PricingSection() {
                               : "text-text-subtle/60 line-through"
                           }`}
                         >
-                          {t(`${plan.planKey}.features.${feature.key}`)}
+                          {t(`${plan.planKey}.features.${feature.key}`, featureValues)}
                           {feature.tagged && (
                             <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-primary text-white uppercase tracking-wide">
                               {t(`${plan.planKey}.newTag`)}
@@ -106,7 +129,7 @@ export default function PricingSection() {
                     </Button>
                     {plan.hasNote && (
                       <p className="text-[11px] text-text-subtle text-center leading-relaxed">
-                        {t(`${plan.planKey}.note`)}
+                        {t(`${plan.planKey}.note`, { originalPrice })}
                       </p>
                     )}
                   </div>

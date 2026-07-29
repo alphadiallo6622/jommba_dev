@@ -161,10 +161,10 @@
         "buttonText": "Commencer",
         "features": {
           "1": "Création de profil complète",
-          "2": "3 photos de profil",
-          "3": "3 demandes de contact par jour",
-          "4": "3 conversations actives en parallèle",
-          "5": "3 questions par jour à Cheikh Abdallah (Coach IA)",
+          "2": "{photos} photos de profil",
+          "3": "{contacts} demandes de contact par jour",
+          "4": "{conversations} conversations actives en parallèle",
+          "5": "{coachQuestions} questions par jour à Cheikh Abdallah (Coach IA)",
           "6": "Répondre aux messages reçus",
           "7": "Ice Breaker : idées de messages",
           "8": "Accès à l'Académie du Mariage",
@@ -187,7 +187,7 @@
         "period": "/ mois",
         "description": "Maximise tes chances de trouver ta moitié",
         "badge": "✨ OFFRE DE LANCEMENT",
-        "note": "* Tarif de lancement limité. Prix normal : 15 $ / mois",
+        "note": "* Tarif de lancement limité. Prix normal : {originalPrice} $ / mois",
         "buttonText": "Commencer",
         "features": {
           "1": "Demandes de contact illimitées",
