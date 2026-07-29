@@ -85,20 +85,60 @@ export default function PWAInstallBanner() {
                 </p>
 
                 {isIOS ? (
-                  // ── iOS : guide visuel, aucune API d'installation ──────────
-                  <div className="mt-3 flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 rounded-lg bg-primary-light/60 px-2.5 py-1.5 text-xs font-medium text-primary dark:bg-primary/15">
-                      <Share className="h-3.5 w-3.5" aria-hidden="true" />
-                      {t('iosStepShare')}
-                    </span>
-                    <span aria-hidden="true" className="text-text-subtle">
-                      →
-                    </span>
-                    <span className="inline-flex items-center gap-1.5 rounded-lg bg-primary-light/60 px-2.5 py-1.5 text-xs font-medium text-primary dark:bg-primary/15">
-                      <SquarePlus className="h-3.5 w-3.5" aria-hidden="true" />
-                      {t('iosStepAdd')}
-                    </span>
-                  </div>
+                  // ── iOS : guide manuel ────────────────────────────────────
+                  // Safari n'expose aucune API pour ouvrir la feuille de partage
+                  // ni pour déclencher « Sur l'écran d'accueil » (navigator.share
+                  // n'offre que les cibles de partage). Ces étapes sont donc
+                  // volontairement non cliquables : elles sont numérotées et
+                  // décrivent l'emplacement réel des boutons dans Safari.
+                  <>
+                    <ol className="mt-3 space-y-2">
+                      <li className="flex items-start gap-2.5 text-sm text-text-primary dark:text-white">
+                        <span
+                          aria-hidden="true"
+                          className="mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-[0.6875rem] font-bold text-white"
+                        >
+                          1
+                        </span>
+                        <span className="leading-snug">
+                          {t.rich('iosStepShare', {
+                            icon: () => (
+                              <Share
+                                className="inline h-4 w-4 -translate-y-px text-primary"
+                                aria-hidden="true"
+                              />
+                            ),
+                          })}
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2.5 text-sm text-text-primary dark:text-white">
+                        <span
+                          aria-hidden="true"
+                          className="mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-[0.6875rem] font-bold text-white"
+                        >
+                          2
+                        </span>
+                        <span className="leading-snug">
+                          {t.rich('iosStepAdd', {
+                            icon: () => (
+                              <SquarePlus
+                                className="inline h-4 w-4 -translate-y-px text-primary"
+                                aria-hidden="true"
+                              />
+                            ),
+                          })}
+                        </span>
+                      </li>
+                    </ol>
+
+                    <button
+                      type="button"
+                      onClick={dismiss}
+                      className="mt-3.5 inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white shadow-green-btn transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary-dark active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    >
+                      {t('iosGotIt')}
+                    </button>
+                  </>
                 ) : (
                   // ── Android / Chrome / Edge : invite native ────────────────
                   <div className="mt-3.5 flex items-center gap-2">

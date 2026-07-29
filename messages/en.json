@@ -1942,8 +1942,9 @@
     "later": "Later",
     "close": "Close",
     "iosTitle": "Install Jommba.com",
-    "iosDescription": "To install Jommba, tap the Share button then \"Add to Home Screen\".",
-    "iosStepShare": "Tap Share",
-    "iosStepAdd": "Add to Home Screen"
+    "iosDescription": "Safari can't install automatically. Just follow these 2 steps:",
+    "iosStepShare": "Tap <icon></icon> Share, in the Safari toolbar",
+    "iosStepAdd": "Choose <icon></icon> \"Add to Home Screen\"",
+    "iosGotIt": "Got it"
   }
 }

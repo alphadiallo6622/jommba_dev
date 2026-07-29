@@ -1942,8 +1942,9 @@
     "later": "Plus tard",
     "close": "Fermer",
     "iosTitle": "Installer Jommba.com",
-    "iosDescription": "Pour installer Jommba, touchez le bouton Partager puis « Sur l'écran d'accueil ».",
-    "iosStepShare": "Touchez Partager",
-    "iosStepAdd": "Sur l'écran d'accueil"
+    "iosDescription": "Safari ne permet pas l'installation automatique. Suivez ces 2 étapes :",
+    "iosStepShare": "Touchez <icon></icon> Partager, dans la barre de Safari",
+    "iosStepAdd": "Choisissez <icon></icon> « Sur l'écran d'accueil »",
+    "iosGotIt": "J'ai compris"
   }
 }
