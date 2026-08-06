@@ -290,7 +290,9 @@
       "errorEmailUnreachable": "Cette adresse email n'existe pas ou n'accepte pas les messages",
       "errorPasswordMin": "Minimum 8 caractères",
       "errorConfirmRequired": "Confirmation requise",
-      "errorPasswordMismatch": "Les mots de passe ne correspondent pas"
+      "errorPasswordMismatch": "Les mots de passe ne correspondent pas",
+      "errorGeneric": "La création du compte a échoué. Réessaie dans un instant.",
+      "errorNetwork": "Impossible de joindre le serveur. Vérifie ta connexion internet."
     },
     "forgotPassword": {
       "sideTitle": "Pas de panique, ça arrive à tout le monde",

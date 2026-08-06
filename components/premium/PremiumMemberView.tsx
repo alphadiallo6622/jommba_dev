@@ -35,7 +35,11 @@ export default function PremiumMemberView() {
       day: 'numeric', month: 'long', year: 'numeric',
     })
 
-  // Abonnement réel du membre (subscriptions — RLS : propriétaire uniquement)
+  // Abonnement réel du membre (subscriptions — RLS : propriétaire uniquement).
+  // `subscriptions` est un historique : une ligne par achat, plus la ligne
+  // 'free' posée à l'inscription. On isole donc le cycle EN COURS avec les
+  // mêmes critères que GET /api/subscription/me (Premium actif, non remboursé,
+  // période non échue, le plus récent d'abord).
   useEffect(() => {
     if (!user) return
     const supabase = createClient()
@@ -43,9 +47,19 @@ export default function PremiumMemberView() {
       .from('subscriptions')
       .select('plan, status, duration_months, current_period_end')
       .eq('user_id', user.id)
+      .eq('plan', 'premium')
+      .eq('status', 'active')
+      .is('refunded_at', null)
+      .gt('current_period_end', new Date().toISOString())
+      .order('created_at', { ascending: false })
+      .limit(1)
       .maybeSingle()
-      .then(({ data }) => {
-        if (!data || data.plan !== 'premium' || !data.current_period_end) return
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('[PremiumMemberView] lecture subscriptions échouée:', error)
+          return
+        }
+        if (!data?.current_period_end) return
         const end = new Date(data.current_period_end)
         const daysLeft = Math.max(0, Math.ceil((end.getTime() - Date.now()) / 86_400_000))
         setSub({

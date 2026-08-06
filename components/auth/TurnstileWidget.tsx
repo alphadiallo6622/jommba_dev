@@ -20,7 +20,17 @@ declare global {
   }
 }
 
-export function TurnstileWidget({ onVerify, onExpire }: { onVerify: (token: string) => void; onExpire: () => void }) {
+export function TurnstileWidget({
+  onVerify,
+  onExpire,
+  resetKey = 0,
+}: {
+  onVerify: (token: string) => void
+  onExpire: () => void
+  /** Incrémenter cette valeur redemande un challenge : un token Turnstile est
+   *  à usage unique, sans reset l'utilisateur ne peut plus resoumettre. */
+  resetKey?: number
+}) {
   const containerRef = useRef<HTMLDivElement>(null)
   const widgetIdRef   = useRef<string | null>(null)
 
@@ -37,6 +47,12 @@ export function TurnstileWidget({ onVerify, onExpire }: { onVerify: (token: stri
   useEffect(() => {
     if (window.turnstile) render()
   }, [])
+
+  useEffect(() => {
+    if (resetKey > 0 && widgetIdRef.current && window.turnstile) {
+      window.turnstile.reset(widgetIdRef.current)
+    }
+  }, [resetKey])
 
   return (
     <>

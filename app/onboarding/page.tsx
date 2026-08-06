@@ -37,8 +37,18 @@ export default function OnboardingPage() {
   const { user }            = useAuth()
   const { currentStep, setStep, reset } = useOnboardingStore()
 
-  // Display name from Supabase auth metadata (set during inscription)
-  const firstName = (user?.user_metadata?.first_name as string | undefined) ?? ''
+  // Display name from Supabase auth metadata. Le formulaire d'inscription pose
+  // first_name ; Google (OIDC) renvoie given_name / name — d'où les fallbacks.
+  const meta = user?.user_metadata as Record<string, unknown> | undefined
+  const metaName = (key: string) => {
+    const v = meta?.[key]
+    return typeof v === 'string' ? v.trim() : ''
+  }
+  const firstName =
+    metaName('first_name') ||
+    metaName('given_name') ||
+    (metaName('name') || metaName('full_name')).split(' ')[0] ||
+    ''
 
   /* Step 0 = welcome screen */
   const isWelcome  = currentStep === 0

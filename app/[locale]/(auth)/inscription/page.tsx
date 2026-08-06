@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
+import { authErrorMessage } from '@/lib/auth/error-message'
 import { cn } from '@/lib/utils'
 import { Link } from '@/i18n/navigation'
 import { TurnstileWidget } from '@/components/auth/TurnstileWidget'
@@ -117,6 +118,14 @@ export default function InscriptionPage() {
   const [showPwd, setShowPwd]     = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
+  const [turnstileReset, setTurnstileReset] = useState(0)
+
+  // Le token consommé (échec de vérif ou de signUp) doit être redemandé,
+  // sinon le bouton reste désactivé sans moyen de repasser le contrôle.
+  const resetTurnstile = () => {
+    setTurnstileToken(null)
+    setTurnstileReset(n => n + 1)
+  }
 
   const step1Schema = z.object({
     firstName: z.string().min(2, t('errorFirstNameMin')),
@@ -166,7 +175,9 @@ export default function InscriptionPage() {
         provider: 'google',
         options: { redirectTo: `${window.location.origin}/api/auth/callback?next=/onboarding` },
       })
-      if (error) toast.error(error.message)
+      if (error) toast.error(authErrorMessage(error, t('errorGeneric')))
+    } catch {
+      toast.error(t('errorNetwork'))
     } finally {
       setLoading(false)
     }
@@ -209,10 +220,10 @@ export default function InscriptionPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: turnstileToken }),
       })
-      const verifyResult = await verifyRes.json()
+      const verifyResult = await verifyRes.json().catch(() => ({ success: false }))
       if (!verifyResult.success) {
         toast.error(t('turnstileFailed'))
-        setTurnstileToken(null)
+        resetTurnstile()
         return
       }
 
@@ -228,11 +239,15 @@ export default function InscriptionPage() {
         },
       })
       if (error) {
-        toast.error(error.message)
+        toast.error(authErrorMessage(error, t('errorGeneric')))
+        resetTurnstile()
       } else {
         toast.success(t('accountCreated'))
         router.push(`/verify-email?email=${encodeURIComponent(step1Data.email)}`)
       }
+    } catch {
+      toast.error(t('errorNetwork'))
+      resetTurnstile()
     } finally {
       setLoading(false)
     }
@@ -466,6 +481,7 @@ export default function InscriptionPage() {
               <TurnstileWidget
                 onVerify={token => setTurnstileToken(token)}
                 onExpire={() => setTurnstileToken(null)}
+                resetKey={turnstileReset}
               />
 
               {/* Actions */}

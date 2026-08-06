@@ -290,7 +290,9 @@
       "errorEmailUnreachable": "This email address doesn't exist or can't receive messages",
       "errorPasswordMin": "Minimum 8 characters",
       "errorConfirmRequired": "Confirmation required",
-      "errorPasswordMismatch": "Passwords don't match"
+      "errorPasswordMismatch": "Passwords don't match",
+      "errorGeneric": "Account creation failed. Please try again in a moment.",
+      "errorNetwork": "Can't reach the server. Check your internet connection."
     },
     "forgotPassword": {
       "sideTitle": "Don't worry, it happens to everyone",
