@@ -12,13 +12,16 @@ import ThemeTextSection from '../ThemeTextSection'
 
 type Props = { open: boolean; onClose: () => void }
 
-const INTEREST_THEMES = ['Football','Lecture','Voyages','Cuisine','Informatique','Natation','Randonnée','Musique','Art','Jardinage']
-const QUALITY_THEMES  = ['Responsable','Sincère','Patient','Généreux','Fiable','Attentionné','Organisé','Empathique']
-const FLAW_THEMES     = ['Perfectionniste','Timide','Têtu','Impatient','Désorganisé','Maladroit']
+// Clés de thèmes envoyées à l'IA ; le libellé affiché est traduit.
+const INTEREST_THEMES = ['football','reading','travel','cooking','tech','swimming','hiking','music','art','gardening']
+const QUALITY_THEMES  = ['responsible','sincere','patient','generous','reliable','caring','organized','empathetic']
+const FLAW_THEMES     = ['perfectionist','shy','stubborn','impatient','disorganized','clumsy']
 
 export default function PersonalityPanel({ open, onClose }: Props) {
   const t = useTranslations('dashboard.parametres.personality')
   const tp = useTranslations('dashboard.parametres')
+  const tt = useTranslations('dashboard.parametres.themes')
+  const themes = (keys: string[]) => keys.map(value => ({ value, label: tt(value) }))
   const mockUser = useCurrentUser()
   const { user } = useAuth()
   const [interests, setInterests] = useState(mockUser.interests)
@@ -67,7 +70,7 @@ export default function PersonalityPanel({ open, onClose }: Props) {
           onChange={setInterests}
           maxLength={300}
           placeholder={t('interestsPlaceholder')}
-          themes={INTEREST_THEMES}
+          themes={themes(INTEREST_THEMES)}
         />
         <ThemeTextSection
           label={t('qualitiesLabel')}
@@ -75,7 +78,7 @@ export default function PersonalityPanel({ open, onClose }: Props) {
           onChange={setQualities}
           maxLength={300}
           placeholder={t('qualitiesPlaceholder')}
-          themes={QUALITY_THEMES}
+          themes={themes(QUALITY_THEMES)}
         />
         <ThemeTextSection
           label={t('flawsLabel')}
@@ -83,7 +86,7 @@ export default function PersonalityPanel({ open, onClose }: Props) {
           onChange={setFlaws}
           maxLength={300}
           placeholder={t('flawsPlaceholder')}
-          themes={FLAW_THEMES}
+          themes={themes(FLAW_THEMES)}
           hint={t('flawsHint')}
         />
       </div>

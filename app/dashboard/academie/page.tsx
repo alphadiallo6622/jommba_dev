@@ -2,11 +2,16 @@
 // Académie du Mariage — liste des articles publiés depuis la console admin
 // (table academy_articles), présentés sous forme de blog pédagogique.
 import type { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 import DashboardNavbar from '@/components/dashboard/Navbar'
 import { createClient } from '@/lib/supabase/server'
 import AcademieListClient, { type AcademyArticleCard } from './academie-list-client'
 
-export const metadata: Metadata = { title: 'Académie du Mariage | Jommba' }
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('dashboard.academie')
+  return { title: t('metaTitle') }
+}
+
 export const dynamic = 'force-dynamic'
 
 function stripHtml(html: string): string {

@@ -1,12 +1,12 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { ChevronDown, Lock, Search, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useExplorerStore } from '@/store/explorer.store'
 import { useCurrentUser } from '@/lib/use-current-user'
-import { COUNTRIES } from '@/lib/countries'
+import { COUNTRIES, countryLabel, countriesForLocale, localizeStoredCountry } from '@/lib/countries'
 import { ALL_COUNTRIES_VALUE } from '@/lib/explorer-filters'
 import { cn } from '@/lib/utils'
 
@@ -46,6 +46,7 @@ function CountrySelect({
   allLabel: string
   clearLabel: string
 }) {
+  const locale = useLocale()
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const ref = useRef<HTMLDivElement>(null)
@@ -58,18 +59,25 @@ function CountrySelect({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  // La valeur du filtre reste le nom français : seul l'affichage est traduit.
   const selectedCountries = selected.filter(f => COUNTRIES.some(c => c.name === f))
   const allSelected = selected.includes(ALL_COUNTRIES_VALUE)
 
   const filteredCountries = useMemo(() => {
+    const sorted = countriesForLocale(COUNTRIES, locale)
     const q = query.trim().toLowerCase()
-    if (!q) return COUNTRIES
-    return COUNTRIES.filter(c => c.name.toLowerCase().includes(q))
-  }, [query])
+    if (!q) return sorted
+    // On cherche dans les deux langues : le membre peut taper l'un ou l'autre.
+    return sorted.filter(c =>
+      c.name.toLowerCase().includes(q) || c.nameEn.toLowerCase().includes(q),
+    )
+  }, [query, locale])
 
   let buttonText = label
   if (allSelected) buttonText = allLabel
-  else if (selectedCountries.length > 0) buttonText = selectedCountries.join(', ')
+  else if (selectedCountries.length > 0) {
+    buttonText = selectedCountries.map(n => localizeStoredCountry(n, locale)).join(', ')
+  }
 
   const hasSelection = allSelected || selectedCountries.length > 0
 
@@ -107,7 +115,7 @@ function CountrySelect({
               onClick={() => onToggle(name)}
               className="inline-flex items-center gap-1 pl-2.5 pr-1.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium hover:bg-emerald-100 transition-colors"
             >
-              {name}
+              {localizeStoredCountry(name, locale)}
               <X className="w-3 h-3" />
             </button>
           ))}
@@ -161,7 +169,7 @@ function CountrySelect({
                       active ? 'text-emerald-600 font-medium' : 'text-gray-700',
                     )}
                   >
-                    {country.name}
+                    {countryLabel(country, locale)}
                     {active && <span className="text-emerald-500">✓</span>}
                   </button>
                 )

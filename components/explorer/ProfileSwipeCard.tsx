@@ -3,6 +3,7 @@
 import { Star, BadgeCheck } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { ExplorerProfile } from '@/lib/mock-explorer'
+import { translateProfileValue, translateProfileValueList } from '@/lib/profile-values'
 import { cn } from '@/lib/utils'
 import { useIsOnline } from '@/components/providers/PresenceProvider'
 
@@ -16,6 +17,7 @@ type Props = {
 
 export default function ProfileSwipeCard({ profile, highlightPhoto, isFavorite, onToggleFavorite, viewerIsPremium }: Props) {
   const t = useTranslations('dashboard.explorer')
+  const tv = useTranslations('dashboard.profileValues')
   const photoUrl   = profile.photos[0] ?? '/avatar-placeholder.svg'
   const photoCount = profile.photos.length
   const isOnline   = useIsOnline(profile.id)
@@ -90,7 +92,7 @@ export default function ProfileSwipeCard({ profile, highlightPhoto, isFavorite, 
           </p>
           <div className="flex gap-2 flex-wrap">
             <span className="bg-white/25 text-white text-xs px-2.5 py-1 rounded-full backdrop-blur-sm">
-              {profile.maritalStatus}
+              {translateProfileValue(profile.maritalStatus, tv)}
             </span>
             <span className="bg-white/25 text-white text-xs px-2.5 py-1 rounded-full backdrop-blur-sm">
               {profile.job}
@@ -105,7 +107,7 @@ export default function ProfileSwipeCard({ profile, highlightPhoto, isFavorite, 
           {t('marriageVisionLabel')}
         </p>
         <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
-          {profile.marriageVision}
+          {translateProfileValueList(profile.marriageVision, tv)}
         </p>
       </div>
     </div>

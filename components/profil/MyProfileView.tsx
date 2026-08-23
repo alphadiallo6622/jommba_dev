@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import {
   MapPin, Zap, Camera,
   Heart, Users, BookOpen, Home, Globe,
@@ -10,6 +10,8 @@ import {
 } from 'lucide-react'
 import { useCurrentUser } from '@/lib/use-current-user'
 import { useBoostStore } from '@/store/boost.store'
+import { translateProfileValue, translateProfileValueList } from '@/lib/profile-values'
+import { localizeStoredCountry } from '@/lib/countries'
 import ProfileSection from './ProfileSection'
 import ProfileGridSection from './ProfileGridSection'
 import PhotoGallery from './PhotoGallery'
@@ -20,6 +22,8 @@ import PhotoLightbox from './PhotoLightbox'
 export default function MyProfileView() {
   const router    = useRouter()
   const t = useTranslations('dashboard.profil')
+  const tv = useTranslations('dashboard.profileValues')
+  const locale = useLocale()
   const mockUser  = useCurrentUser()
   const openBoost = useBoostStore(s => s.openBoost)
 
@@ -67,12 +71,14 @@ export default function MyProfileView() {
           {t('my.nameLine', { name: mockUser.firstName, age: mockUser.age, height: mockUser.height })}
         </h2>
         <p className="text-gray-500 text-sm flex items-center gap-1 mb-3">
-          <MapPin className="w-3.5 h-3.5" /> {mockUser.country} {mockUser.city}, Sénégal
+          <MapPin className="w-3.5 h-3.5" />
+          {[mockUser.city, localizeStoredCountry(mockUser.country, locale)].filter(Boolean).join(', ')}
         </p>
         <div className="flex gap-2 flex-wrap">
+          {/* tags = [situation, métier, études] — situation et études sont des valeurs canoniques. */}
           {mockUser.tags.map(tag => (
             <span key={tag} className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">
-              {tag}
+              {translateProfileValue(tag, tv)}
             </span>
           ))}
         </div>
@@ -99,30 +105,30 @@ export default function MyProfileView() {
         <ProfileSection
           icon={Heart} iconColor="text-pink-500" iconBg="bg-pink-50"
           title={t('sections.marriageVision')}
-          text={mockUser.marriageVision}
+          text={translateProfileValueList(mockUser.marriageVision, tv)}
         />
         <ProfileSection
           icon={Users} iconColor="text-green-600" iconBg="bg-green-50"
           title={t('sections.seeking')}
-          text={mockUser.seeking}
+          text={translateProfileValueList(mockUser.seeking, tv)}
         />
         <ProfileGridSection
           icon={BookOpen} iconColor="text-blue-500" iconBg="bg-blue-50"
           title={t('sections.religion')}
           fields={[
-            { label: t('fields.madhhab'), value: mockUser.religion.madhhab },
-            { label: t('fields.mosque'),  value: mockUser.religion.mosque  },
-            { label: t('fields.arabic'),  value: mockUser.religion.arabic  },
+            { label: t('fields.madhhab'), value: translateProfileValue(mockUser.religion.madhhab, tv) },
+            { label: t('fields.mosque'),  value: translateProfileValue(mockUser.religion.mosque, tv)  },
+            { label: t('fields.arabic'),  value: translateProfileValue(mockUser.religion.arabic, tv)  },
           ]}
         />
         <ProfileGridSection
           icon={Home} iconColor="text-amber-500" iconBg="bg-amber-50"
           title={t('sections.lifeProject')}
           fields={[
-            { label: t('fields.hasChildren'),   value: mockUser.lifeProject.hasChildren   },
-            { label: t('fields.wantsChildren'), value: mockUser.lifeProject.wantsChildren },
-            { label: t('fields.canRelocate'),   value: mockUser.lifeProject.canRelocate   },
-            { label: t('fields.polygamy'),      value: mockUser.lifeProject.polygamy      },
+            { label: t('fields.hasChildren'),   value: translateProfileValue(mockUser.lifeProject.hasChildren, tv)   },
+            { label: t('fields.wantsChildren'), value: translateProfileValue(mockUser.lifeProject.wantsChildren, tv) },
+            { label: t('fields.canRelocate'),   value: translateProfileValue(mockUser.lifeProject.canRelocate, tv)   },
+            { label: t('fields.polygamy'),      value: translateProfileValue(mockUser.lifeProject.polygamy, tv)      },
           ]}
         />
         <ProfileSection

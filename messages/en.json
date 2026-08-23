@@ -587,9 +587,7 @@
       },
       "childrenOptions": {
         "have": "Yes, I have some",
-        "none": "No, no children",
-        "want": "I would like some",
-        "dontWant": "I don't want any"
+        "none": "No, no children"
       }
     },
     "photos": {
@@ -626,6 +624,41 @@
     }
   },
   "dashboard": {
+    "profileValues": {
+      "single": "Single",
+      "divorced": "Divorced",
+      "widowed": "Widowed",
+      "married": "Married",
+      "marriedPolygamy": "Married - polygamy",
+      "noDegree": "No degree",
+      "brevet": "Middle school certificate",
+      "bac": "High school diploma",
+      "bac2": "2-year degree",
+      "licence": "Bachelor's degree",
+      "master": "Master's degree",
+      "doctorate": "Doctorate",
+      "other": "Other",
+      "asap": "Marriage as soon as possible",
+      "sixMonths": "Within 6 months",
+      "thisYear": "Within the year",
+      "noRush": "No rush",
+      "afterKnowing": "After getting to know each other",
+      "istikhara": "Need istikhara",
+      "practicing": "Practicing",
+      "serious": "Serious",
+      "goodCharacter": "Good character",
+      "unitedFamily": "United family",
+      "hardworking": "Hardworking",
+      "discreet": "Discreet",
+      "patient": "Patient",
+      "generous": "Generous",
+      "yes": "Yes",
+      "no": "No",
+      "conditional": "Depending on conditions",
+      "noneChildren": "None",
+      "wantsChildren": "Would like some",
+      "dontWantChildren": "Doesn't want any"
+    },
     "nav": {
       "home": "Home",
       "discover": "Discover",
@@ -662,7 +695,51 @@
     "coach": {
       "label": "Coach",
       "aria": "Coach",
-      "avatarAlt": "Coach Abdallah"
+      "avatarAlt": "Coach Abdallah",
+      "name": "Coach Abdallah",
+      "subtitle": "Your personal marriage coach",
+      "senderName": "Sheikh Abdallah",
+      "welcome": "As-salamu alaykum! I'm Sheikh Abdallah, your personal marriage coach on Jommba. I'm here to support you. How can I help?",
+      "inputPlaceholder": "Type your message...",
+      "minimize": "Minimize",
+      "close": "Close",
+      "send": "Send",
+      "errorGeneric": "Sorry, something went wrong. Please try again in a moment.",
+      "errorEmpty": "Sorry, the server returned an empty response.",
+      "errorPrefix": "Error: {msg}"
+    },
+    "payment": {
+      "invalidCard": "Invalid card. Please check your details.",
+      "failed": "The payment failed.",
+      "genericError": "Something went wrong. Please try again.",
+      "processing": "Processing…",
+      "secure": "100% secure payment"
+    },
+    "addPhotoReminder": {
+      "close": "Close",
+      "title": "Add a profile photo",
+      "body": "Your profile has no photo yet, so it is <b>not visible</b> to other members. Add a photo to make your profile visible and boost your chances of meeting someone.",
+      "cta": "Add my photo",
+      "later": "Later"
+    },
+    "boost": {
+      "close": "Close",
+      "title": "Boost your visibility",
+      "subtitle": "Appear first in searches and get up to 10x more views on your profile",
+      "visibilityBadge": "10x visibility",
+      "premiumBadge": "Premium",
+      "buy": "Buy a Boost",
+      "later": "Later",
+      "chooseTitle": "Choose your boost",
+      "pricingUnavailable": "Pricing is unavailable right now. Please try again.",
+      "optionLabel": "{duration} boost",
+      "back": "Back",
+      "choosePayment": "Choose your payment method",
+      "pay": "Pay {price}",
+      "activated": "Boost activated! 🚀",
+      "mobileMoney": "Mobile Money",
+      "mobileMoneySoon": "Mobile Money payment is coming soon.",
+      "card": "Bank card"
     },
     "dailyReminder": {
       "badge": "REMINDER OF THE DAY",
@@ -840,6 +917,64 @@
       "title": "Notifications",
       "markAllRead": "Mark all as read",
       "unread": "{count, plural, one {# unread} other {# unread}}",
+      "items": {
+        "newMessage": {
+          "title": "New message",
+          "body": "{name} sent you a message"
+        },
+        "newRequest": {
+          "title": "New contact request",
+          "body": "{name} would like to get in touch with you"
+        },
+        "requestAccepted": {
+          "title": "Request accepted 🎉",
+          "body": "{name} accepted your request. You can start chatting!"
+        },
+        "requestDeclined": {
+          "title": "Request declined",
+          "body": "Your request wasn't accepted this time. Keep exploring!"
+        },
+        "newVisit": {
+          "title": "New visit",
+          "body": "Someone viewed your profile"
+        },
+        "profileValidated": {
+          "title": "Profile approved 🎉",
+          "body": "Congratulations! Your profile has been approved by our team. It is now visible to other members."
+        },
+        "profileRefused": {
+          "title": "Profile rejected",
+          "body": "Your profile could not be approved. Reason: {reason}. You can edit it and submit it again."
+        },
+        "photoRejected": {
+          "title": "Profile photo not compliant",
+          "body": "Your profile photo was not approved by our team. Please upload a new one that follows our guidelines."
+        },
+        "warning": {
+          "title": "Warning",
+          "body": "Following a report, we'd like to remind you of the Jommba community rules. Any further breach may lead to your account being suspended."
+        },
+        "accountSuspendedReport": {
+          "title": "Account suspended",
+          "body": "Your account has been suspended following a report. Contact support for more information."
+        },
+        "accountSuspendedAdmin": {
+          "title": "Account suspended",
+          "body": "Your account has been suspended by an administrator. Contact support for more information."
+        },
+        "premiumGifted": {
+          "title": "Premium gifted 🎁",
+          "body": "The Jommba team is giving you 1 month of Premium access. Enjoy!"
+        },
+        "subscriptionCancelled": {
+          "title": "Subscription cancelled",
+          "body": "Your Premium subscription has been cancelled. You can resubscribe at any time."
+        },
+        "refundConfirmed": {
+          "title": "Refund confirmed",
+          "body": "Your Premium subscription has been refunded for {amount, number, ::currency/USD} (70% of the amount paid; the remaining 30% covers service fees). The amount will be credited within 5 to 10 business days."
+        }
+      },
       "tabs": {
         "all": "All",
         "visits": "Visits",
@@ -1166,6 +1301,51 @@
         "selectThemes": "Select themes",
         "counter": "{count} · {max} max"
       },
+      "themes": {
+        "serenity": "Serenity",
+        "trust": "Trust",
+        "mutualSupport": "Mutual support",
+        "loyalty": "Loyalty",
+        "respect": "Respect",
+        "piety": "Piety",
+        "family": "Family",
+        "communication": "Communication",
+        "gentleness": "Gentleness",
+        "seriousness": "Seriousness",
+        "maturity": "Maturity",
+        "sincerity": "Sincerity",
+        "responsibility": "Responsibility",
+        "humility": "Humility",
+        "dishonesty": "Dishonesty",
+        "disrespect": "Disrespect",
+        "lackOfPiety": "Lack of piety",
+        "infidelity": "Infidelity",
+        "violence": "Violence",
+        "football": "Football",
+        "reading": "Reading",
+        "travel": "Travel",
+        "cooking": "Cooking",
+        "tech": "Tech",
+        "swimming": "Swimming",
+        "hiking": "Hiking",
+        "music": "Music",
+        "art": "Art",
+        "gardening": "Gardening",
+        "responsible": "Responsible",
+        "sincere": "Sincere",
+        "patient": "Patient",
+        "generous": "Generous",
+        "reliable": "Reliable",
+        "caring": "Caring",
+        "organized": "Organized",
+        "empathetic": "Empathetic",
+        "perfectionist": "Perfectionist",
+        "shy": "Shy",
+        "stubborn": "Stubborn",
+        "impatient": "Impatient",
+        "disorganized": "Disorganized",
+        "clumsy": "Clumsy"
+      },
       "infos": {
         "title": "My information",
         "firstNameRequired": "First name is required",
@@ -1370,6 +1550,7 @@
       "sectionIncomplete": "Missing information"
     },
     "academie": {
+      "metaTitle": "Marriage Academy | Jommba",
       "badge": "Marriage Academy",
       "heading": "Learn and prepare",
       "intro": "Practical advice, prophetic wisdom and concrete guides to build a fulfilling marriage.",
@@ -1670,8 +1851,8 @@
       "hero": {
         "badge": "Halal, serious, hand-verified",
         "titleName": "{name},",
-        "titleLine": "your future wife is waiting.",
-        "titleHighlight": "Don't miss her.",
+        "titleLine": "{gender, select, femme {your future husband is waiting.} other {your future wife is waiting.}}",
+        "titleHighlight": "{gender, select, femme {Don't miss him.} other {Don't miss her.}}",
         "subtitle": "Without Premium, your profile stays buried. With Premium, you appear first, you see who's interested in you, and you reply without limits.",
         "stat1Label": "more replies",
         "stat2Label": "verified profiles",
@@ -1762,6 +1943,8 @@
         "havePromo": "I have a promo code",
         "promoPlaceholder": "Enter promo code",
         "apply": "Apply",
+        "promoInvalid": "Invalid promo code.",
+        "promoError": "Something went wrong. Please try again.",
         "plans": {
           "15j": {
             "label": "Premium 15 Days"

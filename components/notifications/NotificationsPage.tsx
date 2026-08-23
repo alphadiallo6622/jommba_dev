@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { type Notification, type NotifType } from '@/lib/mock-notifications'
+import { localizeNotification, type NotificationData } from '@/lib/notification-i18n'
 import NotificationCard from './NotificationCard'
 
 type TabId = 'tout' | 'visites' | 'demandes' | 'messages' | 'profil' | 'premium'
@@ -42,6 +43,7 @@ const DB_TYPE_MAP: Record<string, NotifType> = {
 export default function NotificationsPage() {
   const router = useRouter()
   const t = useTranslations('dashboard.notifications')
+  const tItems = useTranslations('dashboard.notifications.items')
   const { user } = useAuth()
   const [notifs, setNotifs]       = useState<Notification[]>([])
   const [loading, setLoading]     = useState(true)
@@ -70,22 +72,32 @@ export default function NotificationsPage() {
         .limit(50)
 
       setNotifs(
-        (data ?? []).map((n) => ({
-          id:          n.id,
-          type:        (DB_TYPE_MAP[n.type] ?? 'profil') as NotifType,
-          title:       n.title,
-          description: n.body,
-          date:        formatDate(n.created_at),
-          isRead:      n.is_read,
-          targetId:    (n.data as Record<string, string> | null)?.target_id,
-        }))
+        (data ?? []).map((n) => {
+          const payload = n.data as NotificationData
+          // Texte traduit si la notification porte une clé i18n, sinon le
+          // français stocké (annonces et messages admin écrits à la main).
+          const { title, description } = localizeNotification(
+            payload,
+            { title: n.title, description: n.body },
+            tItems,
+          )
+          return {
+            id:          n.id,
+            type:        (DB_TYPE_MAP[n.type] ?? 'profil') as NotifType,
+            title,
+            description,
+            date:        formatDate(n.created_at),
+            isRead:      n.is_read,
+            targetId:    payload?.target_id,
+          }
+        })
       )
     } catch (err) {
       console.error('[NotificationsPage] fetch error:', err)
     } finally {
       setLoading(false)
     }
-  }, [user, formatDate])
+  }, [user, formatDate, tItems])
 
   useEffect(() => { fetchNotifs() }, [fetchNotifs])
 

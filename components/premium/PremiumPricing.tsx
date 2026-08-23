@@ -42,13 +42,13 @@ export default function PremiumPricing({ selectedPlan, setSelectedPlan, pricing,
       })
       const json = await res.json().catch(() => ({}))
       if (!res.ok || !json.valid) {
-        setPromoError(json.error ?? 'Code promo invalide.')
+        setPromoError(json.error ?? t('promoInvalid'))
         onPromoApplied(null)
         return
       }
       onPromoApplied({ code: json.code, discountedPrice: json.discountedPrice })
     } catch {
-      setPromoError('Une erreur est survenue. Réessayez.')
+      setPromoError(t('promoError'))
     } finally {
       setApplying(false)
     }

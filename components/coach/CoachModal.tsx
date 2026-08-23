@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useLocale, useTranslations } from 'next-intl'
 import { X, Minus, Send } from 'lucide-react'
 import { useCoachStore } from '@/store/coach.store'
 import { useCurrentUser } from '@/lib/use-current-user'
@@ -13,6 +14,8 @@ export default function CoachModal() {
     isOpen, isMinimized, messages, isLoading,
     closeCoach, toggleMinimize, addMessage, setLoading, updateLastMessage,
   } = useCoachStore()
+  const t = useTranslations('dashboard.coach')
+  const locale = useLocale()
   const mockUser = useCurrentUser()
 
   const [input, setInput]         = useState('')
@@ -23,7 +26,7 @@ export default function CoachModal() {
   }, [messages])
 
   const getTime = () =>
-    new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+    new Date().toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return
@@ -54,23 +57,23 @@ export default function CoachModal() {
       const res = await fetch('/api/coach', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: apiMessages, userName: mockUser.firstName }),
+        body: JSON.stringify({ messages: apiMessages, userName: mockUser.firstName, locale }),
       })
 
       if (!res.ok) {
-        let errorMsg = 'Désolé, une erreur est survenue. Réessaie dans un moment.'
+        let errorMsg = t('errorGeneric')
         try {
           const errBody = await res.json()
           // Quota quotidien atteint : message d'information, pas une panne.
           if (errBody?.reason === 'limit' && errBody?.error) errorMsg = errBody.error
-          else if (errBody?.error) errorMsg = `Erreur : ${errBody.error}`
+          else if (errBody?.error) errorMsg = t('errorPrefix', { msg: errBody.error })
         } catch { /* ignore json parse error */ }
         updateLastMessage(errorMsg)
         return
       }
 
       if (!res.body) {
-        updateLastMessage('Désolé, réponse vide du serveur.')
+        updateLastMessage(t('errorEmpty'))
         return
       }
 
@@ -85,7 +88,7 @@ export default function CoachModal() {
         updateLastMessage(fullText)
       }
     } catch {
-      updateLastMessage('Désolé, une erreur est survenue. Réessaie dans un moment.')
+      updateLastMessage(t('errorGeneric'))
     } finally {
       setLoading(false)
     }
@@ -107,21 +110,23 @@ export default function CoachModal() {
           <div className="bg-[#10B981] px-4 py-3 flex items-center gap-3 shrink-0">
             <img
               src={COACH_AVATAR}
-              alt="Coach Abdallah"
+              alt={t('avatarAlt')}
               className="w-10 h-10 rounded-full object-cover border-2 border-white/40 shrink-0"
             />
             <div className="flex-1 min-w-0">
-              <p className="text-white font-semibold text-sm">Coach Abdallah</p>
-              <p className="text-white/80 text-xs">Ton coach personnel mariage</p>
+              <p className="text-white font-semibold text-sm">{t('name')}</p>
+              <p className="text-white/80 text-xs">{t('subtitle')}</p>
             </div>
             <button
               onClick={toggleMinimize}
+              aria-label={t('minimize')}
               className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors shrink-0"
             >
               <Minus className="w-4 h-4 text-white" />
             </button>
             <button
               onClick={closeCoach}
+              aria-label={t('close')}
               className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors shrink-0"
             >
               <X className="w-4 h-4 text-white" />
@@ -139,14 +144,15 @@ export default function CoachModal() {
                       <div className="flex gap-2">
                         <img
                           src={COACH_AVATAR}
-                          alt="Coach"
+                          alt={t('avatarAlt')}
                           className="w-8 h-8 rounded-full object-cover shrink-0 mt-1"
                         />
                         <div className="flex-1 min-w-0">
-                          <p className="text-[#10B981] text-xs font-semibold mb-1">Cheikh Abdallah</p>
+                          <p className="text-[#10B981] text-xs font-semibold mb-1">{t('senderName')}</p>
                           <div className="bg-white rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
                             <p className="text-gray-800 text-sm leading-relaxed whitespace-pre-wrap">
-                              {msg.content}
+                              {/* Le message d'accueil n'est pas stocké : il vient des traductions. */}
+                              {msg.id === 'welcome' ? t('welcome') : msg.content}
                               {isLoading &&
                                 idx === messages.length - 1 &&
                                 msg.content === '' && (
@@ -181,11 +187,12 @@ export default function CoachModal() {
                   value={input}
                   onChange={e => setInput(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
-                  placeholder="Écrivez votre message..."
+                  placeholder={t('inputPlaceholder')}
                   className="flex-1 px-4 py-2.5 bg-gray-100 rounded-full text-sm focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#10B981]/30 transition-all"
                 />
                 <button
                   onClick={handleSend}
+                  aria-label={t('send')}
                   disabled={!input.trim() || isLoading}
                   className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-colors ${
                     input.trim() && !isLoading

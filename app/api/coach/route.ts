@@ -32,11 +32,13 @@ export async function POST(req: NextRequest) {
 
   let messages: { role: string; content: string }[]
   let userName: string
+  let locale: string
 
   try {
     const body = await req.json()
     messages = body.messages
     userName = body.userName ?? 'cher membre'
+    locale = typeof body.locale === 'string' ? body.locale : 'fr'
   } catch {
     return new Response(
       JSON.stringify({ error: 'Corps de requête invalide' }),
@@ -44,7 +46,11 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const systemPrompt = COACH_SYSTEM_PROMPT.replace('[prénom]', userName)
+  // Le coach répond dans la langue affichée par le membre.
+  const isEnglish = locale.startsWith('en')
+  const systemPrompt = COACH_SYSTEM_PROMPT
+    .replace('[prénom]', userName)
+    .replace('[langue]', isEnglish ? 'anglais' : 'français')
 
   // Authentification : chaque question consomme des tokens facturés, on ne
   // répond donc jamais à un appel anonyme.
@@ -77,11 +83,12 @@ export async function POST(req: NextRequest) {
       .gte('created_at', since.toISOString())
 
     if ((count ?? 0) >= limits.coachQuestions) {
+      const n = limits.coachQuestions
+      const error = isEnglish
+        ? `You've reached your limit of ${n} question${n > 1 ? 's' : ''} per day with the Coach. Go Premium for unlimited conversations!`
+        : `Tu as atteint ta limite de ${n} question${n > 1 ? 's' : ''} par jour avec le Coach. Passe Premium pour des échanges illimités !`
       return new Response(
-        JSON.stringify({
-          error: `Tu as atteint ta limite de ${limits.coachQuestions} question${limits.coachQuestions > 1 ? 's' : ''} par jour avec le Coach. Passe Premium pour des échanges illimités !`,
-          reason: 'limit',
-        }),
+        JSON.stringify({ error, reason: 'limit' }),
         { status: 429, headers: { 'Content-Type': 'application/json' } }
       )
     }

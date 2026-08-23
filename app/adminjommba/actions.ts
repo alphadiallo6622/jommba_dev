@@ -64,9 +64,31 @@ async function run(
   }
 }
 
-async function notifyUser(userId: string, type: string, title: string, body: string) {
+/**
+ * Insère une notification in-app.
+ *
+ * `title` / `body` restent en français : ils servent de repli et alimentent les
+ * lectures hors application (emails, exports). Quand le message est un texte
+ * figé, on joint aussi sa clé de traduction dans `data` pour que le dashboard
+ * l'affiche dans la langue du membre — voir
+ * supabase/2026-08-23-notifications-i18n.sql.
+ */
+async function notifyUser(
+  userId: string,
+  type: string,
+  title: string,
+  body: string,
+  i18n?: { key: string; params?: Record<string, string> },
+) {
   const supabase = createAdminClient();
-  await supabase.from("notifications").insert({ user_id: userId, type, title, body, is_read: false });
+  await supabase.from("notifications").insert({
+    user_id: userId,
+    type,
+    title,
+    body,
+    is_read: false,
+    data: i18n ? { i18n: i18n.key, params: i18n.params ?? {} } : null,
+  });
 }
 
 async function getMemberContact(userId: string): Promise<{ email: string; name: string }> {
@@ -128,7 +150,8 @@ export async function validateProfile(userId: string): Promise<ActionResult> {
       .eq("user_id", userId);
     if (error) throw new Error(error.message);
     await notifyUser(userId, "moderation", "Profil validé 🎉",
-      "Félicitations ! Votre profil a été validé par notre équipe. Il est maintenant visible par les autres membres.");
+      "Félicitations ! Votre profil a été validé par notre équipe. Il est maintenant visible par les autres membres.",
+      { key: "profileValidated" });
   }, "moderation");
 }
 
@@ -141,7 +164,8 @@ export async function refuseProfile(userId: string, reason: string): Promise<Act
       .eq("user_id", userId);
     if (error) throw new Error(error.message);
     await notifyUser(userId, "moderation", "Profil refusé",
-      `Votre profil n'a pas pu être validé. Motif : ${reason}. Vous pouvez le modifier puis le soumettre à nouveau.`);
+      `Votre profil n'a pas pu être validé. Motif : ${reason}. Vous pouvez le modifier puis le soumettre à nouveau.`,
+      { key: "profileRefused", params: { reason } });
   }, "moderation");
 }
 
@@ -186,6 +210,7 @@ export async function rejectPhoto(photoId: string): Promise<ActionResult> {
       "moderation",
       "Photo de profil non conforme",
       PHOTO_REJECTED_MESSAGE,
+      { key: "photoRejected" },
     );
 
     try {
@@ -224,7 +249,8 @@ export async function warnReportedMember(reportId: string): Promise<ActionResult
     if (readErr || !report) throw new Error(readErr?.message ?? "Signalement introuvable");
 
     await notifyUser(report.reported_id, "moderation", "Avertissement",
-      "Suite à un signalement, nous vous rappelons les règles de la communauté Jommba. Tout nouveau manquement pourra entraîner la suspension de votre compte.");
+      "Suite à un signalement, nous vous rappelons les règles de la communauté Jommba. Tout nouveau manquement pourra entraîner la suspension de votre compte.",
+      { key: "warning" });
     const { error } = await supabase
       .from("reports").update({ status: "reviewed" }).eq("id", reportId);
     if (error) throw new Error(error.message);
@@ -244,7 +270,8 @@ export async function suspendReportedMember(reportId: string): Promise<ActionRes
 
     await supabase.from("reports").update({ status: "resolved" }).eq("id", reportId);
     await notifyUser(report.reported_id, "moderation", "Compte suspendu",
-      "Votre compte a été suspendu suite à un signalement. Contactez le support pour plus d'informations.");
+      "Votre compte a été suspendu suite à un signalement. Contactez le support pour plus d'informations.",
+      { key: "accountSuspendedReport" });
   }, "moderation");
 }
 
@@ -257,7 +284,8 @@ export async function suspendMember(userId: string): Promise<ActionResult> {
       .from("profiles").update({ status: "suspended" }).eq("user_id", userId);
     if (error) throw new Error(error.message);
     await notifyUser(userId, "moderation", "Compte suspendu",
-      "Votre compte a été suspendu par un administrateur. Contactez le support pour plus d'informations.");
+      "Votre compte a été suspendu par un administrateur. Contactez le support pour plus d'informations.",
+      { key: "accountSuspendedAdmin" });
   }, "moderation");
 }
 
@@ -296,7 +324,8 @@ export async function offerPremium(userId: string): Promise<ActionResult> {
     if (error) throw new Error(error.message);
 
     await notifyUser(userId, "premium", "Premium offert 🎁",
-      "L'équipe Jommba vous offre 1 mois d'accès Premium. Profitez-en !");
+      "L'équipe Jommba vous offre 1 mois d'accès Premium. Profitez-en !",
+      { key: "premiumGifted" });
   }, "monetization");
 }
 
@@ -322,7 +351,8 @@ export async function cancelSubscription(subscriptionId: string): Promise<Action
 
     await supabase.from("profiles").update({ is_premium: false }).eq("user_id", sub.user_id);
     await notifyUser(sub.user_id, "premium", "Abonnement résilié",
-      "Votre abonnement Premium a été résilié. Vous pouvez vous réabonner à tout moment.");
+      "Votre abonnement Premium a été résilié. Vous pouvez vous réabonner à tout moment.",
+      { key: "subscriptionCancelled" });
   }, "monetization");
 }
 
@@ -389,7 +419,9 @@ export async function refundSubscription(subscriptionId: string): Promise<Action
     // 5) Notification in-app + email au membre.
     const amountLabel = `${refundedUsd.toLocaleString("fr-FR")} $`;
     await notifyUser(sub.user_id, "premium", "Remboursement confirmé",
-      `Votre abonnement Premium a été remboursé à hauteur de ${amountLabel} (70 % du montant payé ; les 30 % restants correspondent aux frais de service). Le montant sera crédité sous 5 à 10 jours ouvrés.`);
+      `Votre abonnement Premium a été remboursé à hauteur de ${amountLabel} (70 % du montant payé ; les 30 % restants correspondent aux frais de service). Le montant sera crédité sous 5 à 10 jours ouvrés.`,
+      // Montant brut : le dashboard le formate dans la devise/locale du membre.
+      { key: "refundConfirmed", params: { amount: String(refundedUsd) } });
 
     const contact = await getMemberContact(sub.user_id).catch(() => null);
     if (contact) {

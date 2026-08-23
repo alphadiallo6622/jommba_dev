@@ -1,6 +1,7 @@
 'use client'
 
 import { AnimatePresence, motion } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 import { X } from 'lucide-react'
 import { useBoostStore } from '@/store/boost.store'
 import BoostStep1 from './BoostStep1'
@@ -8,6 +9,7 @@ import BoostStep2 from './BoostStep2'
 import BoostStep3 from './BoostStep3'
 
 export default function BoostModal() {
+  const t = useTranslations('dashboard.boost')
   const { step, closeBoost } = useBoostStore()
 
   return (
@@ -34,6 +36,7 @@ export default function BoostModal() {
             {/* Close button */}
             <button
               onClick={closeBoost}
+              aria-label={t('close')}
               className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors z-10"
             >
               <X className="w-4 h-4 text-gray-500" />

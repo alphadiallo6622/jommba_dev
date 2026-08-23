@@ -1,10 +1,14 @@
 'use client'
 
-import { useTranslations } from 'next-intl'
+import { useMemo } from 'react'
+import { useLocale, useTranslations } from 'next-intl'
 import { useOnboardingStore } from '@/store/onboarding.store'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { COUNTRIES, AFRICAN_COUNTRIES, NON_AFRICAN_COUNTRIES } from '@/lib/countries'
+import {
+  COUNTRIES, AFRICAN_COUNTRIES, NON_AFRICAN_COUNTRIES,
+  countryLabel, countriesForLocale,
+} from '@/lib/countries'
 
 type Props = { onNext: () => void; onBack: () => void }
 
@@ -15,8 +19,15 @@ const SENEGAL_REGIONS = [
 
 export default function StepLocation({ onNext, onBack }: Props) {
   const t = useTranslations('onboarding')
+  const locale = useLocale()
   const { location, setField } = useOnboardingStore()
   const type = location?.type ?? null
+
+  // Les <option value> restent le nom français (valeur canonique stockée) ;
+  // seul le libellé et l'ordre alphabétique suivent la langue affichée.
+  const allCountries     = useMemo(() => countriesForLocale(COUNTRIES, locale), [locale])
+  const africanCountries = useMemo(() => countriesForLocale(AFRICAN_COUNTRIES, locale), [locale])
+  const otherCountries   = useMemo(() => countriesForLocale(NON_AFRICAN_COUNTRIES, locale), [locale])
 
   const setType = (t: 'afrique' | 'diaspora') => {
     setField('location', { type: t, country: '', region: '', residenceCountry: '' })
@@ -86,8 +97,8 @@ export default function StepLocation({ onNext, onBack }: Props) {
               className="w-full py-2.5 px-3 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 bg-white"
             >
               <option value="">{t('location.selectCountry')}</option>
-              {AFRICAN_COUNTRIES.map(c => (
-                <option key={c.code} value={c.name}>{c.name}</option>
+              {africanCountries.map(c => (
+                <option key={c.code} value={c.name}>{countryLabel(c, locale)}</option>
               ))}
             </select>
           </div>
@@ -133,7 +144,9 @@ export default function StepLocation({ onNext, onBack }: Props) {
               className="w-full py-2.5 px-3 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 bg-white"
             >
               <option value="">{t('location.select')}</option>
-              {NON_AFRICAN_COUNTRIES.map(c => <option key={c.code} value={c.name}>{c.name}</option>)}
+              {otherCountries.map(c => (
+                <option key={c.code} value={c.name}>{countryLabel(c, locale)}</option>
+              ))}
             </select>
           </div>
 
@@ -162,7 +175,9 @@ export default function StepLocation({ onNext, onBack }: Props) {
               className="w-full py-2.5 px-3 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 bg-white"
             >
               <option value="">{t('location.selectCountry')}</option>
-              {COUNTRIES.map(c => <option key={c.code} value={c.name}>{c.name}</option>)}
+              {allCountries.map(c => (
+                <option key={c.code} value={c.name}>{countryLabel(c, locale)}</option>
+              ))}
             </select>
           </div>
         </>

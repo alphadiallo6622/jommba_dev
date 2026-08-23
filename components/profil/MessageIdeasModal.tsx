@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { Sparkles, X, Copy, Check, Loader2, RefreshCw, Lightbulb } from 'lucide-react'
 import { toast } from 'sonner'
 import type { FullProfile } from '@/lib/mock-demandes'
@@ -13,21 +13,29 @@ type Props = {
   onClose: () => void
 }
 
-// Couleur du badge selon le ton, façon capture Farata.
+// Couleur et emoji du badge selon le ton. Le ton est rédigé par le modèle dans
+// la langue du membre : on indexe donc sur les libellés FR et EN.
 const TONE_STYLE: Record<string, string> = {
   Curieux: 'bg-purple-50 text-purple-600',
+  Curious: 'bg-purple-50 text-purple-600',
   Sincère: 'bg-blue-50 text-blue-600',
+  Sincere: 'bg-blue-50 text-blue-600',
   Taquin: 'bg-amber-50 text-amber-600',
+  Playful: 'bg-amber-50 text-amber-600',
 }
 
 const TONE_EMOJI: Record<string, string> = {
   Curieux: '🤔',
+  Curious: '🤔',
   Sincère: '💚',
+  Sincere: '💚',
   Taquin: '😄',
+  Playful: '😄',
 }
 
 export default function MessageIdeasModal({ profile, onClose }: Props) {
   const t = useTranslations('dashboard.profil.ideas')
+  const locale = useLocale()
   const [ideas, setIdeas] = useState<Idea[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -51,6 +59,7 @@ export default function MessageIdeasModal({ profile, onClose }: Props) {
             interests: profile.interests,
             qualities: profile.qualities,
           },
+          locale,
         }),
       })
       const data = await res.json()
@@ -63,7 +72,7 @@ export default function MessageIdeasModal({ profile, onClose }: Props) {
     } finally {
       setLoading(false)
     }
-  }, [profile, t])
+  }, [profile, t, locale])
 
   useEffect(() => { generate() }, [generate])
 

@@ -32,10 +32,8 @@ const POLYGAMY_OPTIONS = [
   { value: 'selon', key: 'conditional' },
 ] as const
 const CHILDREN_OPTIONS = [
-  { value: 'oui',             key: 'have' },
-  { value: 'non',             key: 'none' },
-  { value: 'souhaite',        key: 'want' },
-  { value: 'ne_souhaite_pas', key: 'dontWant' },
+  { value: 'oui', key: 'have' },
+  { value: 'non', key: 'none' },
 ] as const
 
 const MAX_PILLS = 3

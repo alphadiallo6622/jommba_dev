@@ -1,8 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { Sparkles, Loader2 } from 'lucide-react'
+
+/** Un thème : `value` est la clé canonique envoyée à l'IA, `label` l'affichage. */
+export type Theme = { value: string; label: string }
 
 type Props = {
   label: string
@@ -10,12 +13,13 @@ type Props = {
   onChange: (v: string) => void
   maxLength: number
   placeholder?: string
-  themes?: string[]
+  themes?: Theme[]
   hint?: string
 }
 
 export default function ThemeTextSection({ label, value, onChange, maxLength, placeholder, themes, hint }: Props) {
   const t = useTranslations('dashboard.parametres.themeSection')
+  const locale = useLocale()
   const [focused, setFocused] = useState(false)
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [generating, setGenerating] = useState(false)
@@ -32,11 +36,17 @@ export default function ThemeTextSection({ label, value, onChange, maxLength, pl
   const generate = async () => {
     if (!selected.size || generating) return
     setGenerating(true)
+    // On envoie les libellés traduits, pas les clés internes : ils sont plus
+    // lisibles pour le modèle et déjà dans la langue attendue en sortie.
+    const selectedLabels = (themes ?? [])
+      .filter(th => selected.has(th.value))
+      .map(th => th.label)
     try {
       const res = await fetch('/api/generate-text', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ themes: Array.from(selected), context: label }),
+        // Le texte est rédigé dans la langue affichée, pas systématiquement en français.
+        body: JSON.stringify({ themes: selectedLabels, context: label, locale }),
       })
       const data = await res.json()
       if (data.text) {
@@ -75,18 +85,18 @@ export default function ThemeTextSection({ label, value, onChange, maxLength, pl
         <div className="mt-2 space-y-2">
           <p className="text-xs text-gray-500 font-medium">{t('themes')}</p>
           <div className="flex flex-wrap gap-1.5">
-            {themes.map(theme => (
+            {themes.map(({ value: themeValue, label: themeLabel }) => (
               <button
-                key={theme}
+                key={themeValue}
                 type="button"
-                onClick={() => toggleTheme(theme)}
+                onClick={() => toggleTheme(themeValue)}
                 className={`text-xs px-3 py-1 rounded-full border transition-colors ${
-                  selected.has(theme)
+                  selected.has(themeValue)
                     ? 'bg-[#10B981] border-[#10B981] text-white'
                     : 'bg-white border-gray-200 text-gray-600 hover:border-[#10B981] hover:text-[#10B981]'
                 }`}
               >
-                {theme}
+                {themeLabel}
               </button>
             ))}
           </div>

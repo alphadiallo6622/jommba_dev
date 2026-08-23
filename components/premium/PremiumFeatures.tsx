@@ -2,12 +2,14 @@
 
 import { useTranslations } from 'next-intl'
 import { features } from '@/lib/mock-premium'
+import { useCurrentUser } from '@/lib/use-current-user'
 
 type FeatureItem = { title: string; description: string; free: string; premium: string }
 
 export default function PremiumFeatures() {
   const t = useTranslations('dashboard.premium.features')
   const items = t.raw('items') as FeatureItem[]
+  const { gender } = useCurrentUser()
 
   return (
     <section className="py-6">
@@ -15,7 +17,7 @@ export default function PremiumFeatures() {
         {t('title')}
       </h2>
       <p className="text-center text-gray-400 text-sm mb-6">
-        {t('subtitle')}
+        {t('subtitle', { gender: gender ?? 'homme' })}
       </p>
 
       <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
