@@ -72,6 +72,16 @@ export default function InfosPanel({ open, onClose }: Props) {
   }
 
   const input  = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-[#10B981]'
+  // Champ obligatoire encore vide : bordure rouge pour le repérer d'un coup
+  // d'œil (les champs concernés sont ceux de lib/profile-sections.ts, plus le
+  // prénom qui bloque l'enregistrement).
+  const missingInput = 'w-full border border-red-400 bg-red-50/40 rounded-xl px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-[#10B981]'
+  const cls = (missing: boolean) => (missing ? missingInput : input)
+  const toFill = <span className="ml-2 text-[10px] font-normal normal-case text-red-500">{tp('toFill')}</span>
+
+  const firstNameMissing = !firstName.trim()
+  const lastNameMissing  = !lastName.trim()
+  const heightMissing    = !height.trim() || !heightValid
 
   return (
     <SettingsDrawer open={open} title={t('title')} onClose={onClose}
@@ -89,12 +99,26 @@ export default function InfosPanel({ open, onClose }: Props) {
       <div className="px-4 py-5 space-y-4">
         {/* Name */}
         <div>
-          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">{t('firstName')}</label>
-          <input value={firstName} onChange={e => setFirstName(e.target.value)} className={input} />
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+            {t('firstName')}{firstNameMissing && toFill}
+          </label>
+          <input
+            value={firstName}
+            onChange={e => setFirstName(e.target.value)}
+            aria-invalid={firstNameMissing}
+            className={cls(firstNameMissing)}
+          />
         </div>
         <div>
-          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">{t('lastName')}</label>
-          <input value={lastName} onChange={e => setLastName(e.target.value)} className={input} />
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+            {t('lastName')}{lastNameMissing && toFill}
+          </label>
+          <input
+            value={lastName}
+            onChange={e => setLastName(e.target.value)}
+            aria-invalid={lastNameMissing}
+            className={cls(lastNameMissing)}
+          />
         </div>
 
         {/* Âge — fixé à l'onboarding, non modifiable */}
@@ -111,8 +135,17 @@ export default function InfosPanel({ open, onClose }: Props) {
 
         {/* Height */}
         <div>
-          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">{t('height')}</label>
-          <input type="text" inputMode="decimal" value={height} onChange={e => setHeight(e.target.value)} className={input} />
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+            {t('height')}{heightMissing && toFill}
+          </label>
+          <input
+            type="text"
+            inputMode="decimal"
+            value={height}
+            onChange={e => setHeight(e.target.value)}
+            aria-invalid={heightMissing}
+            className={cls(heightMissing)}
+          />
           {!heightValid && (
             <p className="text-xs text-red-500 mt-1.5">{t('heightInvalid')}</p>
           )}

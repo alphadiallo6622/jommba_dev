@@ -63,8 +63,10 @@ export default function VisionPanel({ open, onClose }: Props) {
         </button>
       }
     >
+      {/* Les trois champs comptent dans la complétude (lib/profile-sections.ts). */}
       <div className="px-4 py-5">
         <ThemeTextSection
+          required
           label={t('visionLabel')}
           value={vision}
           onChange={setVision}
@@ -73,6 +75,7 @@ export default function VisionPanel({ open, onClose }: Props) {
           themes={themes(VISION_THEMES)}
         />
         <ThemeTextSection
+          required
           label={t('seekingLabel')}
           value={seeking}
           onChange={setSeeking}
@@ -81,6 +84,7 @@ export default function VisionPanel({ open, onClose }: Props) {
           themes={themes(SEEKING_THEMES)}
         />
         <ThemeTextSection
+          required
           label={t('dealbreakersLabel')}
           value={dealbreakers}
           onChange={setDealbreakers}

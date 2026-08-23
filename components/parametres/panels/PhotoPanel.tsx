@@ -197,10 +197,14 @@ export default function PhotoPanel({ open, onClose }: Props) {
           {/* Add slot */}
           {hasRoom && (
             <div className="flex flex-col gap-1.5">
+              {/* Aucune photo : le profil est invisible pour les autres membres,
+                  on signale l'emplacement en rouge comme les champs obligatoires. */}
               <button
                 onClick={addPhoto}
                 disabled={uploading}
-                className="aspect-square rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center gap-1.5 hover:border-[#10B981] hover:bg-[#E1F5EE] transition-colors group disabled:opacity-50"
+                className={`aspect-square rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-1.5 hover:border-[#10B981] hover:bg-[#E1F5EE] transition-colors group disabled:opacity-50 ${
+                  photos.length === 0 ? 'border-red-400 bg-red-50/40' : 'border-gray-300'
+                }`}
               >
                 <div className="w-8 h-8 rounded-full bg-gray-100 group-hover:bg-[#10B981]/15 flex items-center justify-center transition-colors">
                   {uploading

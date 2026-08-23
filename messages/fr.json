@@ -1272,6 +1272,7 @@
       "save": "Sauvegarder",
       "saveAndClose": "Enregistrer et fermer",
       "close": "Fermer",
+      "toFill": "À remplir",
       "sections": {
         "photo": "Mes photos",
         "photoSub": "1 photo ajoutée",

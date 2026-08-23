@@ -65,6 +65,7 @@ export default function PersonalityPanel({ open, onClose }: Props) {
     >
       <div className="px-4 py-5">
         <ThemeTextSection
+          required
           label={t('interestsLabel')}
           value={interests}
           onChange={setInterests}
@@ -73,6 +74,7 @@ export default function PersonalityPanel({ open, onClose }: Props) {
           themes={themes(INTEREST_THEMES)}
         />
         <ThemeTextSection
+          required
           label={t('qualitiesLabel')}
           value={qualities}
           onChange={setQualities}
@@ -80,6 +82,8 @@ export default function PersonalityPanel({ open, onClose }: Props) {
           placeholder={t('qualitiesPlaceholder')}
           themes={themes(QUALITY_THEMES)}
         />
+        {/* « Mes défauts » n'est volontairement pas obligatoire : trop intime
+            pour être exigé, il est exclu du score (lib/profile-sections.ts). */}
         <ThemeTextSection
           label={t('flawsLabel')}
           value={flaws}
