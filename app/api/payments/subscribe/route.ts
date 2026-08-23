@@ -15,24 +15,28 @@ import { square, SQUARE_LOCATION_ID, CURRENCY, toMinorUnits } from '@/lib/square
 import { getPlanDurationDays } from '@/lib/square/plans'
 import { computePlanPrices, isPlanId } from '@/lib/pricing'
 import { validatePromoCode, redeemPromoCode } from '@/lib/promo'
+import { paymentError } from '@/lib/payment-errors'
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(req: NextRequest) {
+  // Lu avant tout le reste : `locale` sert à répondre dans la langue affichée.
+  const { sourceId, planId, promoCode, locale } = (await req.json().catch(() => ({}))) as {
+    sourceId?: string
+    planId?: string
+    promoCode?: string
+    locale?: string
+  }
+
   // 1) Authentification.
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
-    return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
+    return NextResponse.json({ error: paymentError('notAuthenticated', locale) }, { status: 401 })
   }
 
-  const { sourceId, planId, promoCode } = (await req.json().catch(() => ({}))) as {
-    sourceId?: string
-    planId?: string
-    promoCode?: string
-  }
   if (!sourceId) {
-    return NextResponse.json({ error: 'Token de carte manquant' }, { status: 400 })
+    return NextResponse.json({ error: paymentError('missingCardToken', locale) }, { status: 400 })
   }
   if (!planId || !isPlanId(planId)) {
     return NextResponse.json({ error: 'Plan inconnu' }, { status: 400 })
@@ -70,7 +74,7 @@ export async function POST(req: NextRequest) {
 
     if (payment?.status !== 'COMPLETED') {
       return NextResponse.json(
-        { error: 'Paiement non finalisé', status: payment?.status },
+        { error: paymentError('notCompleted', locale), status: payment?.status },
         { status: 402 },
       )
     }
@@ -103,7 +107,7 @@ export async function POST(req: NextRequest) {
       // Le paiement a réussi mais l'insert a échoué : à surveiller (remboursement manuel possible).
       console.error('[payments/subscribe] insert subscription échoué après paiement', payment.id, subErr)
       return NextResponse.json(
-        { error: 'Paiement encaissé mais activation échouée. Contactez le support.', paymentId: payment.id },
+        { error: paymentError('chargedButNotActivated', locale), paymentId: payment.id },
         { status: 500 },
       )
     }
@@ -115,7 +119,7 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     const detail = extractSquareError(err)
     console.error('[payments/subscribe] Square error', detail ?? err)
-    return NextResponse.json({ error: "L'abonnement a échoué.", detail }, { status: 402 })
+    return NextResponse.json({ error: paymentError('subscriptionFailed', locale), detail }, { status: 402 })
   }
 }
 

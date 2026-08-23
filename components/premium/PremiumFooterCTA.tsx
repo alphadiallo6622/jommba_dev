@@ -8,7 +8,7 @@ import { useCurrentUser } from '@/lib/use-current-user'
 export default function PremiumFooterCTA() {
   const t = useTranslations('dashboard.premium.footerCta')
   const tCta = useTranslations('dashboard.premium.cta')
-  const { firstName } = useCurrentUser()
+  const { firstName, gender } = useCurrentUser()
 
   const securityBadges = [
     { icon: Shield,    title: t('badge1Title'), sub: t('badge1Sub') },
@@ -35,7 +35,7 @@ export default function PremiumFooterCTA() {
           {t('title', { name: firstName })}
         </p>
         <p className="text-emerald-200 text-sm mb-2">
-          {t('body1')}
+          {t('body1', { gender: gender ?? 'homme' })}
         </p>
         <p className="text-emerald-200 text-sm mb-8">
           {t('body2')}

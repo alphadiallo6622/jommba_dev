@@ -27,9 +27,11 @@ export async function POST(req: NextRequest) {
   }
 
   let profile: Record<string, unknown>
+  let locale: string
   try {
     const body = await req.json()
     profile = body.profile
+    locale = typeof body.locale === 'string' ? body.locale : 'fr'
   } catch {
     return Response.json({ error: 'Corps de requête invalide' }, { status: 400 })
   }
@@ -54,12 +56,19 @@ export async function POST(req: NextRequest) {
     p.qualities && `Qualités : ${p.qualities}`,
   ].filter(Boolean).join('\n')
 
+  // Les messages proposés sont rédigés dans la langue affichée par le membre.
+  const isEnglish = locale.startsWith('en')
+  const language = isEnglish ? 'anglais' : 'français'
+  const tones = isEnglish
+    ? '"Curious", "Sincere", "Playful"'
+    : '"Curieux", "Sincère", "Taquin"'
+
   const prompt = `Tu es un assistant d'écriture pour Jommba, une application de rencontre sérieuse orientée mariage halal (musulman).
 
 Voici le profil de la personne à qui écrire un premier message :
 ${profileSummary}
 
-Génère exactement 3 idées de premiers messages personnalisés, en français, adressés à ${p.firstName || 'cette personne'}.
+Génère exactement 3 idées de premiers messages personnalisés, en ${language}, adressés à ${p.firstName || 'cette personne'}.
 Chaque message doit :
 - s'appuyer sur un élément CONCRET du profil ci-dessus (le citer ou y faire référence)
 - rester respectueux, pudique et sérieux (contexte mariage halal)
@@ -67,10 +76,12 @@ Chaque message doit :
 - éviter les clichés et les formules creuses
 - se terminer idéalement par une question ouverte pour engager la discussion
 
-Utilise 3 tons différents : "Curieux", "Sincère", "Taquin" (léger et bienveillant).
+Utilise 3 tons différents, libellés en ${language} : ${tones} (le troisième reste léger et bienveillant).
+
+Les champs "tone" et "reason" doivent eux aussi être rédigés en ${language}.
 
 Réponds UNIQUEMENT avec un tableau JSON valide, sans texte autour, au format :
-[{"tone":"Curieux","text":"...","reason":"élément du profil utilisé (3-5 mots)"}, ...]`
+[{"tone":"...","text":"...","reason":"élément du profil utilisé (3-5 mots)"}, ...]`
 
   try {
     const message = await anthropic.messages.create({

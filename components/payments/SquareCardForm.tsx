@@ -6,6 +6,7 @@
 // qu'on envoie à nos routes API (/api/payments/boost ou /subscribe).
 import { useEffect, useRef, useState } from 'react'
 import Script from 'next/script'
+import { useLocale, useTranslations } from 'next-intl'
 import { Lock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -49,6 +50,8 @@ const ACCENT = {
 } as const
 
 export default function SquareCardForm({ mode, planId, promoCode, boostId, submitLabel, accent = 'green', onSuccess }: Props) {
+  const t = useTranslations('dashboard.payment')
+  const locale = useLocale()
   const containerRef = useRef<HTMLDivElement>(null)
   const cardRef = useRef<(SquareCard & { attach: (el: HTMLElement) => Promise<void> }) | null>(null)
   const [ready, setReady] = useState(false)
@@ -88,16 +91,17 @@ export default function SquareCardForm({ mode, planId, promoCode, boostId, submi
     try {
       const result = await cardRef.current.tokenize()
       if (result.status !== 'OK' || !result.token) {
-        setError('Carte invalide. Vérifiez vos informations.')
+        setError(t('invalidCard'))
         setLoading(false)
         return
       }
 
       const endpoint = mode === 'boost' ? '/api/payments/boost' : '/api/payments/subscribe'
+      // `locale` : les erreurs renvoyées par la route sont affichées telles quelles.
       const body =
         mode === 'boost'
-          ? { sourceId: result.token, boostId }
-          : { sourceId: result.token, planId, promoCode: promoCode?.trim() || undefined }
+          ? { sourceId: result.token, boostId, locale }
+          : { sourceId: result.token, planId, promoCode: promoCode?.trim() || undefined, locale }
 
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -107,7 +111,7 @@ export default function SquareCardForm({ mode, planId, promoCode, boostId, submi
       const json = await res.json().catch(() => ({}))
 
       if (!res.ok) {
-        setError(json.error ?? 'Le paiement a échoué.')
+        setError(json.error ?? t('failed'))
         setLoading(false)
         return
       }
@@ -115,7 +119,7 @@ export default function SquareCardForm({ mode, planId, promoCode, boostId, submi
       onSuccess()
     } catch (e) {
       console.error('[SquareCardForm] pay', e)
-      setError('Une erreur est survenue. Réessayez.')
+      setError(t('genericError'))
       setLoading(false)
     }
   }
@@ -148,7 +152,7 @@ export default function SquareCardForm({ mode, planId, promoCode, boostId, submi
         {loading ? (
           <span className="flex items-center justify-center gap-2">
             <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
-            Traitement…
+            {t('processing')}
           </span>
         ) : (
           submitLabel
@@ -158,7 +162,7 @@ export default function SquareCardForm({ mode, planId, promoCode, boostId, submi
       {/* Réassurance : paiement sécurisé. */}
       <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-gray-400">
         <Lock className="h-3 w-3" />
-        Paiement 100 % sécurisé
+        {t('secure')}
       </p>
     </div>
   )

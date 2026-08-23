@@ -21,12 +21,15 @@ type CoachStore = {
 }
 
 const getTime = () =>
-  new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+  new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
 
+// Le contenu du message d'accueil est rendu depuis les traductions dans
+// CoachModal (repéré par son id) : le store est créé hors de React et n'a donc
+// pas accès à la locale.
 const welcomeMessage: ChatMessage = {
   id: 'welcome',
   role: 'assistant',
-  content: "As-salamu alaykum ! Je suis Cheikh Abdallah, ton coach personnel mariage sur Jommba. Je suis là pour t'accompagner. Comment puis-je t'aider ?",
+  content: '',
   timestamp: getTime(),
 }
 

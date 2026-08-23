@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { ExplorerProfile } from '@/lib/mock-explorer'
+import { translateProfileValue } from '@/lib/profile-values'
 import { cn } from '@/lib/utils'
 import { useIsOnline } from '@/components/providers/PresenceProvider'
 
@@ -17,6 +18,7 @@ type Props = {
 export default function ProfileGridCard({ profile, blurred, viewerIsPremium }: Props) {
   const router  = useRouter()
   const t = useTranslations('dashboard.explorer')
+  const tv = useTranslations('dashboard.profileValues')
   const photoUrl = profile.photos[0] ?? '/avatar-placeholder.svg'
   const isOnline = useIsOnline(profile.id)
 
@@ -92,7 +94,7 @@ export default function ProfileGridCard({ profile, blurred, viewerIsPremium }: P
         </p>
         <div className="flex gap-1 flex-wrap">
           <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full truncate max-w-[80px]">
-            {profile.maritalStatus}
+            {translateProfileValue(profile.maritalStatus, tv)}
           </span>
           <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full truncate max-w-[80px]">
             {profile.job}

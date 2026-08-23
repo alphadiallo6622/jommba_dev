@@ -12,24 +12,28 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { square, SQUARE_LOCATION_ID, CURRENCY, toMinorUnits } from '@/lib/square/client'
 import { getBoost } from '@/lib/square/plans'
 import { getPlatformSettings } from '@/lib/admin/queries'
+import { paymentError } from '@/lib/payment-errors'
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(req: NextRequest) {
+  // 2) Token de carte + type de boost fournis par le front. Lu avant tout le
+  //    reste : `locale` sert à répondre dans la langue affichée par le membre.
+  const { sourceId, boostId, locale } = (await req.json().catch(() => ({}))) as {
+    sourceId?: string
+    boostId?: string
+    locale?: string
+  }
+
   // 1) Authentification de l'utilisateur.
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
-    return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
+    return NextResponse.json({ error: paymentError('notAuthenticated', locale) }, { status: 401 })
   }
 
-  // 2) Token de carte + type de boost fournis par le front.
-  const { sourceId, boostId } = (await req.json().catch(() => ({}))) as {
-    sourceId?: string
-    boostId?: string
-  }
   if (!sourceId) {
-    return NextResponse.json({ error: 'Token de carte manquant' }, { status: 400 })
+    return NextResponse.json({ error: paymentError('missingCardToken', locale) }, { status: 400 })
   }
   // Durée et prix déterminés côté serveur d'après le boostId (jamais depuis le
   // client) ; le prix vient des paramètres admin (platform_settings.boost_pricing).
@@ -55,7 +59,7 @@ export async function POST(req: NextRequest) {
 
     if (payment?.status !== 'COMPLETED') {
       return NextResponse.json(
-        { error: 'Paiement non finalisé', status: payment?.status },
+        { error: paymentError('notCompleted', locale), status: payment?.status },
         { status: 402 },
       )
     }
@@ -73,7 +77,7 @@ export async function POST(req: NextRequest) {
       // Le paiement a réussi mais l'insert a échoué : à surveiller (remboursement manuel possible).
       console.error('[payments/boost] insert boost échoué après paiement', payment.id, error)
       return NextResponse.json(
-        { error: 'Paiement encaissé mais activation échouée. Contactez le support.', paymentId: payment.id },
+        { error: paymentError('chargedButNotActivated', locale), paymentId: payment.id },
         { status: 500 },
       )
     }
@@ -85,7 +89,7 @@ export async function POST(req: NextRequest) {
     const detail = extractSquareError(err)
     console.error('[payments/boost] Square error', detail ?? err)
     return NextResponse.json(
-      { error: 'Le paiement a échoué.', detail },
+      { error: paymentError('paymentFailed', locale), detail },
       { status: 402 },
     )
   }

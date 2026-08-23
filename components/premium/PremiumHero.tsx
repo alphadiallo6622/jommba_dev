@@ -5,7 +5,9 @@ import { useCurrentUser } from '@/lib/use-current-user'
 
 export default function PremiumHero() {
   const t = useTranslations('dashboard.premium.hero')
-  const { firstName } = useCurrentUser()
+  const { firstName, gender } = useCurrentUser()
+  // Une femme cherche un époux, un homme une épouse ; profil non renseigné → masculin.
+  const audience = gender ?? 'homme'
 
   return (
     <section className="text-center py-6">
@@ -18,8 +20,8 @@ export default function PremiumHero() {
       <h1 className="font-serif text-4xl leading-tight text-gray-900 mb-4">
         <span className="block">{t('titleName', { name: firstName })}</span>
         <span className="block">
-          {t('titleLine')}{' '}
-          <span className="text-emerald-500">{t('titleHighlight')}</span>
+          {t('titleLine', { gender: audience })}{' '}
+          <span className="text-emerald-500">{t('titleHighlight', { gender: audience })}</span>
         </span>
       </h1>
 

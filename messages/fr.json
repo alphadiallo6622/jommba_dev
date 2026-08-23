@@ -587,9 +587,7 @@
       },
       "childrenOptions": {
         "have": "Oui, j'en ai",
-        "none": "Non, pas d'enfants",
-        "want": "Je souhaite en avoir",
-        "dontWant": "Je ne souhaite pas en avoir"
+        "none": "Non, pas d'enfants"
       }
     },
     "photos": {
@@ -626,6 +624,41 @@
     }
   },
   "dashboard": {
+    "profileValues": {
+      "single": "Célibataire",
+      "divorced": "Divorcé(e)",
+      "widowed": "Veuf/Veuve",
+      "married": "Marié(e)",
+      "marriedPolygamy": "Marié(e) - polygamie",
+      "noDegree": "Aucun diplôme",
+      "brevet": "Brevet",
+      "bac": "Baccalauréat",
+      "bac2": "Bac +2 / BTS",
+      "licence": "Licence / Bac +3",
+      "master": "Master / Bac +5",
+      "doctorate": "Doctorat",
+      "other": "Autre",
+      "asap": "Mariage dès que possible",
+      "sixMonths": "Dans les 6 mois",
+      "thisYear": "Dans l'année",
+      "noRush": "Pas pressé(e)",
+      "afterKnowing": "Après connaissance sérieuse",
+      "istikhara": "Besoin d'istikhara",
+      "practicing": "Pratiquant(e)",
+      "serious": "Sérieux(se)",
+      "goodCharacter": "Bon caractère",
+      "unitedFamily": "Famille unie",
+      "hardworking": "Travailleur(se)",
+      "discreet": "Discret(e)",
+      "patient": "Patient(e)",
+      "generous": "Généreux(se)",
+      "yes": "Oui",
+      "no": "Non",
+      "conditional": "Selon les conditions",
+      "noneChildren": "Aucun",
+      "wantsChildren": "Souhaite en avoir",
+      "dontWantChildren": "Ne souhaite pas en avoir"
+    },
     "nav": {
       "home": "Accueil",
       "discover": "Découvrir",
@@ -662,7 +695,51 @@
     "coach": {
       "label": "Coach",
       "aria": "Coach",
-      "avatarAlt": "Coach Abdallah"
+      "avatarAlt": "Coach Abdallah",
+      "name": "Coach Abdallah",
+      "subtitle": "Ton coach personnel mariage",
+      "senderName": "Cheikh Abdallah",
+      "welcome": "As-salamu alaykum ! Je suis Cheikh Abdallah, ton coach personnel mariage sur Jommba. Je suis là pour t'accompagner. Comment puis-je t'aider ?",
+      "inputPlaceholder": "Écrivez votre message...",
+      "minimize": "Réduire",
+      "close": "Fermer",
+      "send": "Envoyer",
+      "errorGeneric": "Désolé, une erreur est survenue. Réessaie dans un moment.",
+      "errorEmpty": "Désolé, réponse vide du serveur.",
+      "errorPrefix": "Erreur : {msg}"
+    },
+    "payment": {
+      "invalidCard": "Carte invalide. Vérifiez vos informations.",
+      "failed": "Le paiement a échoué.",
+      "genericError": "Une erreur est survenue. Réessayez.",
+      "processing": "Traitement…",
+      "secure": "Paiement 100 % sécurisé"
+    },
+    "addPhotoReminder": {
+      "close": "Fermer",
+      "title": "Ajoutez une photo de profil",
+      "body": "Votre profil n'a pas encore de photo : il n'est donc <b>pas visible</b> par les autres membres. Ajoutez une photo pour rendre votre profil visible et augmenter vos chances de rencontre.",
+      "cta": "Ajouter ma photo",
+      "later": "Plus tard"
+    },
+    "boost": {
+      "close": "Fermer",
+      "title": "Boostez votre visibilité",
+      "subtitle": "Apparaissez en priorité dans les recherches et recevez jusqu'à 10x plus de vues sur votre profil",
+      "visibilityBadge": "10x visibilité",
+      "premiumBadge": "Premium",
+      "buy": "Acheter un Boost",
+      "later": "Plus tard",
+      "chooseTitle": "Choisissez votre boost",
+      "pricingUnavailable": "Tarifs indisponibles pour le moment. Réessayez.",
+      "optionLabel": "Boost {duration}",
+      "back": "Retour",
+      "choosePayment": "Choisissez votre mode de paiement",
+      "pay": "Payer {price}",
+      "activated": "Boost activé ! 🚀",
+      "mobileMoney": "Mobile Money",
+      "mobileMoneySoon": "Le paiement Mobile Money arrive bientôt.",
+      "card": "Carte bancaire"
     },
     "dailyReminder": {
       "badge": "RAPPEL DU JOUR",
@@ -840,6 +917,64 @@
       "title": "Notifications",
       "markAllRead": "Tout marquer comme lu",
       "unread": "{count, plural, one {# non lue} other {# non lues}}",
+      "items": {
+        "newMessage": {
+          "title": "Nouveau message",
+          "body": "{name} t'a envoyé un message"
+        },
+        "newRequest": {
+          "title": "Nouvelle demande de contact",
+          "body": "{name} souhaite entrer en contact avec toi"
+        },
+        "requestAccepted": {
+          "title": "Demande acceptée 🎉",
+          "body": "{name} a accepté ta demande. Vous pouvez discuter !"
+        },
+        "requestDeclined": {
+          "title": "Demande déclinée",
+          "body": "Ta demande n'a pas été acceptée cette fois-ci. Continue d'explorer !"
+        },
+        "newVisit": {
+          "title": "Nouvelle visite",
+          "body": "Quelqu'un a consulté ton profil"
+        },
+        "profileValidated": {
+          "title": "Profil validé 🎉",
+          "body": "Félicitations ! Votre profil a été validé par notre équipe. Il est maintenant visible par les autres membres."
+        },
+        "profileRefused": {
+          "title": "Profil refusé",
+          "body": "Votre profil n'a pas pu être validé. Motif : {reason}. Vous pouvez le modifier puis le soumettre à nouveau."
+        },
+        "photoRejected": {
+          "title": "Photo de profil non conforme",
+          "body": "Votre photo de profil n'a pas été validée par notre équipe. Merci d'en ajouter une nouvelle, conforme à nos règles."
+        },
+        "warning": {
+          "title": "Avertissement",
+          "body": "Suite à un signalement, nous vous rappelons les règles de la communauté Jommba. Tout nouveau manquement pourra entraîner la suspension de votre compte."
+        },
+        "accountSuspendedReport": {
+          "title": "Compte suspendu",
+          "body": "Votre compte a été suspendu suite à un signalement. Contactez le support pour plus d'informations."
+        },
+        "accountSuspendedAdmin": {
+          "title": "Compte suspendu",
+          "body": "Votre compte a été suspendu par un administrateur. Contactez le support pour plus d'informations."
+        },
+        "premiumGifted": {
+          "title": "Premium offert 🎁",
+          "body": "L'équipe Jommba vous offre 1 mois d'accès Premium. Profitez-en !"
+        },
+        "subscriptionCancelled": {
+          "title": "Abonnement résilié",
+          "body": "Votre abonnement Premium a été résilié. Vous pouvez vous réabonner à tout moment."
+        },
+        "refundConfirmed": {
+          "title": "Remboursement confirmé",
+          "body": "Votre abonnement Premium a été remboursé à hauteur de {amount, number, ::currency/USD} (70 % du montant payé ; les 30 % restants correspondent aux frais de service). Le montant sera crédité sous 5 à 10 jours ouvrés."
+        }
+      },
       "tabs": {
         "all": "Tout",
         "visits": "Visites",
@@ -1166,6 +1301,51 @@
         "selectThemes": "Sélectionne des thèmes",
         "counter": "{count} · {max} max"
       },
+      "themes": {
+        "serenity": "Sérénité",
+        "trust": "Confiance",
+        "mutualSupport": "Entraide",
+        "loyalty": "Fidélité",
+        "respect": "Respect",
+        "piety": "Piété",
+        "family": "Famille",
+        "communication": "Communication",
+        "gentleness": "Douceur",
+        "seriousness": "Sérieux",
+        "maturity": "Maturité",
+        "sincerity": "Sincérité",
+        "responsibility": "Responsabilité",
+        "humility": "Humilité",
+        "dishonesty": "Malhonnêteté",
+        "disrespect": "Manque de respect",
+        "lackOfPiety": "Absence de piété",
+        "infidelity": "Infidélité",
+        "violence": "Violence",
+        "football": "Football",
+        "reading": "Lecture",
+        "travel": "Voyages",
+        "cooking": "Cuisine",
+        "tech": "Informatique",
+        "swimming": "Natation",
+        "hiking": "Randonnée",
+        "music": "Musique",
+        "art": "Art",
+        "gardening": "Jardinage",
+        "responsible": "Responsable",
+        "sincere": "Sincère",
+        "patient": "Patient",
+        "generous": "Généreux",
+        "reliable": "Fiable",
+        "caring": "Attentionné",
+        "organized": "Organisé",
+        "empathetic": "Empathique",
+        "perfectionist": "Perfectionniste",
+        "shy": "Timide",
+        "stubborn": "Têtu",
+        "impatient": "Impatient",
+        "disorganized": "Désorganisé",
+        "clumsy": "Maladroit"
+      },
       "infos": {
         "title": "Mes informations",
         "firstNameRequired": "Le prénom est obligatoire",
@@ -1370,6 +1550,7 @@
       "sectionIncomplete": "Informations manquantes"
     },
     "academie": {
+      "metaTitle": "Académie du Mariage | Jommba",
       "badge": "Académie du Mariage",
       "heading": "Apprends et prépare-toi",
       "intro": "Conseils pratiques, sagesse prophétique et guides concrets pour construire un mariage épanoui.",
@@ -1670,8 +1851,8 @@
       "hero": {
         "badge": "Halal, sérieux, vérifié à la main",
         "titleName": "{name},",
-        "titleLine": "ta future épouse t'attend.",
-        "titleHighlight": "Ne la rate pas.",
+        "titleLine": "{gender, select, femme {ton futur époux t'attend.} other {ta future épouse t'attend.}}",
+        "titleHighlight": "{gender, select, femme {Ne le rate pas.} other {Ne la rate pas.}}",
         "subtitle": "Sans Premium, ton profil reste noyé. Avec Premium, tu apparais en premier, tu vois qui s'intéresse à toi, et tu réponds sans limite.",
         "stat1Label": "plus de réponses",
         "stat2Label": "profils vérifiés",
@@ -1679,7 +1860,7 @@
       },
       "features": {
         "title": "Ce que Premium débloque pour toi",
-        "subtitle": "Tout ce qui change pour trouver ta future épouse plus vite",
+        "subtitle": "{gender, select, femme {Tout ce qui change pour trouver ton futur époux plus vite} other {Tout ce qui change pour trouver ta future épouse plus vite}}",
         "new": "NOUVEAU",
         "items": [
           {
@@ -1762,6 +1943,8 @@
         "havePromo": "J'ai un code promo",
         "promoPlaceholder": "Entrer le code promo",
         "apply": "Appliquer",
+        "promoInvalid": "Code promo invalide.",
+        "promoError": "Une erreur est survenue. Réessayez.",
         "plans": {
           "15j": {
             "label": "Premium 15 Jours"
@@ -1877,7 +2060,7 @@
         "badge3Title": "Sans engagement",
         "badge3Sub": "Pas de renouvellement surprise",
         "title": "{name}, le bon moment c'est maintenant",
-        "body1": "Chaque jour tu l'attends, c'est peut-être la future épouse que tu ne découvres pas.",
+        "body1": "{gender, select, femme {Chaque jour tu l'attends, c'est peut-être le futur époux que tu ne découvres pas.} other {Chaque jour tu l'attends, c'est peut-être la future épouse que tu ne découvres pas.}}",
         "body2": "Fais le premier pas vers ton avenir.",
         "button": "Passer Premium",
         "quote": "« Et parmi Ses signes, il a créé pour vous des épouses. » — Sourate Al-Rum, 30:21"

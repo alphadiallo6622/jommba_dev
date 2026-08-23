@@ -17,6 +17,7 @@ import { useCurrentUser } from '@/lib/use-current-user'
 import { sendContactRequest } from '@/lib/supabase/likes-service'
 import { notifyByEmail } from '@/lib/notify-email'
 import { oppositeGender } from '@/lib/gender'
+import { translateProfileValue, translateProfileValueList } from '@/lib/profile-values'
 import { MIN_VISIBLE_PROFILE_COMPLETION } from '@/lib/constants'
 import type { FullProfile } from '@/lib/mock-demandes'
 import type { Profile } from '@/lib/supabase/types'
@@ -65,6 +66,7 @@ function profileToFull(p: Profile, requestStatus: FullProfile['requestStatus'], 
 export default function ProfilePage({ id }: Props) {
   const router  = useRouter()
   const t = useTranslations('dashboard.profil')
+  const tv = useTranslations('dashboard.profileValues')
   const { user } = useAuth()
   const { isPremium, gender, firstName: myFirstName } = useCurrentUser()
   const isOnline = useIsOnline(id)
@@ -293,8 +295,11 @@ export default function ProfilePage({ id }: Props) {
           <MapPin className="w-3.5 h-3.5" /> {profile.location}
         </p>
         <div className="flex gap-2 flex-wrap">
+          {/* tags = [situation, métier, études] — situation et études sont des valeurs canoniques. */}
           {profile.tags.map(tag => (
-            <span key={tag} className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">{tag}</span>
+            <span key={tag} className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">
+              {translateProfileValue(tag, tv)}
+            </span>
           ))}
         </div>
       </div>
@@ -323,23 +328,23 @@ export default function ProfilePage({ id }: Props) {
       </div>
 
       <div className="space-y-3">
-        <ProfileSection icon={Heart}      iconColor="text-pink-500"   iconBg="bg-pink-50"   title={t('sections.marriageVision')} text={profile.marriageVision} />
-        <ProfileSection icon={Users}      iconColor="text-green-600"  iconBg="bg-green-50"  title={t('sections.seeking')}        text={profile.seeking} />
+        <ProfileSection icon={Heart}      iconColor="text-pink-500"   iconBg="bg-pink-50"   title={t('sections.marriageVision')} text={translateProfileValueList(profile.marriageVision, tv)} />
+        <ProfileSection icon={Users}      iconColor="text-green-600"  iconBg="bg-green-50"  title={t('sections.seeking')}        text={translateProfileValueList(profile.seeking, tv)} />
         <ProfileGridSection
           icon={BookOpen} iconColor="text-blue-500" iconBg="bg-blue-50" title={t('sections.religion')}
           fields={[
-            { label: t('fields.madhhab'), value: profile.religion.madhhab },
-            { label: t('fields.mosque'),  value: profile.religion.mosque  },
-            { label: t('fields.arabic'),  value: profile.religion.arabic  },
+            { label: t('fields.madhhab'), value: translateProfileValue(profile.religion.madhhab, tv) },
+            { label: t('fields.mosque'),  value: translateProfileValue(profile.religion.mosque, tv)  },
+            { label: t('fields.arabic'),  value: translateProfileValue(profile.religion.arabic, tv)  },
           ]}
         />
         <ProfileGridSection
           icon={Home} iconColor="text-amber-500" iconBg="bg-amber-50" title={t('sections.lifeProject')}
           fields={[
-            { label: t('fields.hasChildren'),   value: profile.lifeProject.hasChildren   },
-            { label: t('fields.wantsChildren'), value: profile.lifeProject.wantsChildren },
-            { label: t('fields.canRelocate'),   value: profile.lifeProject.canRelocate   },
-            { label: t('fields.polygamy'),      value: profile.lifeProject.polygamy      },
+            { label: t('fields.hasChildren'),   value: translateProfileValue(profile.lifeProject.hasChildren, tv)   },
+            { label: t('fields.wantsChildren'), value: translateProfileValue(profile.lifeProject.wantsChildren, tv) },
+            { label: t('fields.canRelocate'),   value: translateProfileValue(profile.lifeProject.canRelocate, tv)   },
+            { label: t('fields.polygamy'),      value: translateProfileValue(profile.lifeProject.polygamy, tv)      },
           ]}
         />
         <ProfileSection icon={Globe}     iconColor="text-teal-500"   iconBg="bg-teal-50"   title={t('sections.interests')}    text={profile.interests} />

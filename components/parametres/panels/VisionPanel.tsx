@@ -12,13 +12,16 @@ import ThemeTextSection from '../ThemeTextSection'
 
 type Props = { open: boolean; onClose: () => void }
 
-const VISION_THEMES = ['Sérénité','Confiance','Entraide','Fidélité','Respect','Piété','Famille','Communication']
-const SEEKING_THEMES = ['Piété','Douceur','Sérieux','Maturité','Sincérité','Responsabilité','Humilité']
-const DEALBREAKER_THEMES = ['Malhonnêteté','Manque de respect','Absence de piété','Infidélité','Violence']
+// Clés de thèmes envoyées à l'IA ; le libellé affiché est traduit.
+const VISION_THEMES = ['serenity','trust','mutualSupport','loyalty','respect','piety','family','communication']
+const SEEKING_THEMES = ['piety','gentleness','seriousness','maturity','sincerity','responsibility','humility']
+const DEALBREAKER_THEMES = ['dishonesty','disrespect','lackOfPiety','infidelity','violence']
 
 export default function VisionPanel({ open, onClose }: Props) {
   const t = useTranslations('dashboard.parametres.vision')
   const tp = useTranslations('dashboard.parametres')
+  const tt = useTranslations('dashboard.parametres.themes')
+  const themes = (keys: string[]) => keys.map(value => ({ value, label: tt(value) }))
   const mockUser = useCurrentUser()
   const { user } = useAuth()
   const [vision, setVision]             = useState(mockUser.marriageVision)
@@ -67,7 +70,7 @@ export default function VisionPanel({ open, onClose }: Props) {
           onChange={setVision}
           maxLength={500}
           placeholder={t('visionPlaceholder')}
-          themes={VISION_THEMES}
+          themes={themes(VISION_THEMES)}
         />
         <ThemeTextSection
           label={t('seekingLabel')}
@@ -75,7 +78,7 @@ export default function VisionPanel({ open, onClose }: Props) {
           onChange={setSeeking}
           maxLength={500}
           placeholder={t('seekingPlaceholder')}
-          themes={SEEKING_THEMES}
+          themes={themes(SEEKING_THEMES)}
         />
         <ThemeTextSection
           label={t('dealbreakersLabel')}
@@ -83,7 +86,7 @@ export default function VisionPanel({ open, onClose }: Props) {
           onChange={setDealbreakers}
           maxLength={300}
           placeholder={t('dealbreakersPlaceholder')}
-          themes={DEALBREAKER_THEMES}
+          themes={themes(DEALBREAKER_THEMES)}
         />
       </div>
     </SettingsDrawer>

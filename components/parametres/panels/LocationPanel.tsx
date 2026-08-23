@@ -1,25 +1,28 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useTranslations } from 'next-intl'
+import { useState, useEffect, useMemo } from 'react'
+import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 import { useCurrentUser } from '@/lib/use-current-user'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { updateMyProfile } from '@/lib/supabase/profile-actions'
-import { AFRICAN_COUNTRIES, NON_AFRICAN_COUNTRIES } from '@/lib/countries'
+import { AFRICAN_COUNTRIES, NON_AFRICAN_COUNTRIES, countriesForLocale, countryLabel } from '@/lib/countries'
+import { translateProfileValue } from '@/lib/profile-values'
 import SettingsDrawer from '../SettingsDrawer'
 
 type Props = { open: boolean; onClose: () => void }
 
 const AFRICA_COUNTRIES  = AFRICAN_COUNTRIES.map(c => c.name)
-const DIASPORA_COUNTRIES = NON_AFRICAN_COUNTRIES.map(c => c.name)
 const DAKAR_CITIES = ['Dakar','Thiès','Kaolack','Saint-Louis','Ziguinchor','Diourbel','Louga','Fatick','Kolda','Tambacounda']
+// Valeur canonique (FR) stockée en base ; le libellé est traduit à l'affichage.
 const ETUDES = ['Bac','Bac+2','Bac+3','Bac+5','Doctorat','Autre']
 
 export default function LocationPanel({ open, onClose }: Props) {
   const t = useTranslations('dashboard.parametres.location')
   const tp = useTranslations('dashboard.parametres')
+  const tv = useTranslations('dashboard.profileValues')
+  const locale = useLocale()
   const mockUser = useCurrentUser()
   const { user } = useAuth()
   const [inAfrica, setInAfrica] = useState(true)
@@ -57,7 +60,11 @@ export default function LocationPanel({ open, onClose }: Props) {
     onClose()
   }
 
-  const countries = inAfrica ? AFRICA_COUNTRIES : DIASPORA_COUNTRIES
+  // La <option value> reste le nom français ; libellé et tri suivent la langue.
+  const countries = useMemo(
+    () => countriesForLocale(inAfrica ? AFRICAN_COUNTRIES : NON_AFRICAN_COUNTRIES, locale),
+    [inAfrica, locale],
+  )
 
   const select = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 bg-white focus:outline-none focus:border-[#10B981]'
   const inputCls = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-[#10B981]'
@@ -103,7 +110,9 @@ export default function LocationPanel({ open, onClose }: Props) {
         <div>
           <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">{t('country')}</label>
           <select value={country} onChange={e => setCountry(e.target.value)} className={select}>
-            {countries.map(c => <option key={c}>{c}</option>)}
+            {countries.map(c => (
+              <option key={c.code} value={c.name}>{countryLabel(c, locale)}</option>
+            ))}
           </select>
         </div>
 
@@ -142,7 +151,7 @@ export default function LocationPanel({ open, onClose }: Props) {
                     : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
                 }`}
               >
-                {e}
+                {translateProfileValue(e, tv)}
               </button>
             ))}
           </div>

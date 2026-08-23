@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
-import { CheckCircle2, Clock, Heart, Shield, Star } from 'lucide-react'
+import { CheckCircle2, Clock, Shield, Star } from 'lucide-react'
 
 export default async function OnboardingSuccessPage() {
   const t = await getTranslations('onboarding.success')
@@ -9,11 +9,13 @@ export default async function OnboardingSuccessPage() {
       <div className="w-full max-w-sm space-y-8 text-center">
 
         {/* Logo */}
-        <div className="flex items-center gap-2 justify-center">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: '#10B981' }}>
-            <Heart className="w-5 h-5 text-white fill-white" />
-          </div>
-          <span className="text-xl font-serif font-bold" style={{ color: '#064E3B' }}>Jommba</span>
+        <div className="flex justify-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo_jommba_fond_transparent.png"
+            alt="Jommba"
+            className="h-14 w-auto"
+          />
         </div>
 
         {/* Success circle */}

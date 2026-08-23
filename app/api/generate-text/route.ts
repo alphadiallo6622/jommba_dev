@@ -24,11 +24,13 @@ export async function POST(req: NextRequest) {
 
   let themes: string[]
   let context: string
+  let locale: string
 
   try {
     const body = await req.json()
     themes = body.themes
     context = body.context
+    locale = typeof body.locale === 'string' ? body.locale : 'fr'
   } catch {
     return Response.json({ error: 'Corps de requête invalide' }, { status: 400 })
   }
@@ -37,19 +39,22 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: 'Paramètres manquants' }, { status: 400 })
   }
 
+  // Le texte doit être rédigé dans la langue affichée par le membre.
+  const language = locale.startsWith('en') ? 'anglais' : 'français'
+
   const prompt = `Tu es un assistant d'écriture pour Jommba, une application de rencontre sérieuse orientée mariage halal.
 
 Section du profil : "${context}"
 Thèmes sélectionnés : ${themes.join(', ')}
 
-Génère un texte naturel et sincère en français à la première personne (je/mon/ma) pour cette section de profil.
+Génère un texte naturel et sincère en ${language} à la première personne pour cette section de profil.
 Contraintes :
 - Intègre naturellement les thèmes, sans les citer mot pour mot de façon mécanique
 - 2 à 4 phrases, moins de 400 caractères au total
 - Direct, authentique, sans formules banales ni clichés
 - Ton sérieux, adapté à un profil de mariage
 
-Réponds UNIQUEMENT avec le texte, sans guillemets ni introduction.`
+Réponds UNIQUEMENT avec le texte en ${language}, sans guillemets ni introduction.`
 
   try {
     const message = await anthropic.messages.create({
