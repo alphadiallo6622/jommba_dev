@@ -97,12 +97,12 @@ export default function ParametresPage() {
               <span
                 title={complete ? t('sectionComplete') : t('sectionIncomplete')}
                 className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
-                  complete ? 'bg-[#E1F5EE]' : 'bg-amber-100'
+                  complete ? 'bg-[#E1F5EE]' : 'bg-red-100'
                 }`}
               >
                 {complete
                   ? <Check className="w-3.5 h-3.5 text-[#10B981]" />
-                  : <AlertCircle className="w-3.5 h-3.5 text-amber-500" />}
+                  : <AlertCircle className="w-3.5 h-3.5 text-red-500" />}
               </span>
             )}
             <ChevronRight className="w-4 h-4 text-gray-400" />
