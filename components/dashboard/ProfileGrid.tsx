@@ -183,6 +183,9 @@ export default function ProfileGrid() {
   const handlePass = () => advance('pass')
   const handleLikeCarousel = async () => {
     if (!profile) return
+    // Profil déjà liké : la demande n'est pas renvoyée, mais on passe quand
+    // même au suivant sinon le bouton reste sans effet.
+    if (liked.has(profile.id)) { advance('like'); return }
     const ok = await handleLike(profile.id, profile.name)
     if (ok) advance('like')
   }
@@ -286,6 +289,11 @@ export default function ProfileGrid() {
             </div>
 
             <div
+              // La clé force React à remonter la carte entière à chaque
+              // profil au lieu de remplacer les textes en place : le nom et
+              // l'âge ne peuvent plus rester figés si une extension ou un
+              // traducteur a modifié le DOM.
+              key={profile.id}
               className={cn(
                 'relative rounded-2xl overflow-hidden cursor-pointer select-none transition-all duration-200',
                 leaving === 'pass' && '-translate-x-4 opacity-0',

@@ -853,8 +853,8 @@
       "allSeen": "Tu as vu tous les profils !",
       "restart": "Recommencer",
       "pass": "Passer",
-      "alreadyLiked": "Déjà liké",
-      "like": "J'aime",
+      "alreadyLiked": "Déjà aimé",
+      "like": "Aimer",
       "requestSent": "Demande envoyée à {name} ✓",
       "unknownCity": "Inconnu"
     },

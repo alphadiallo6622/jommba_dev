@@ -30,6 +30,13 @@ export const metadata: Metadata = {
     icon: "/icons/icon-192.png",
     apple: "/icons/apple-touch-icon.png",
   },
+  other: {
+    // Le site gère lui-même ses langues (LocaleSwitcher + next-intl). La
+    // traduction automatique de Chrome/Google réécrit les nœuds de texte du
+    // DOM, ce qui casse la réconciliation React : les cartes profil gardaient
+    // l'ancien nom et empilaient les âges après un "Passer". On la désactive.
+    google: "notranslate",
+  },
 };
 
 export const viewport: Viewport = {
@@ -63,7 +70,8 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
-      className={`${inter.variable} ${playfair.variable} ${arefRuqaa.variable} h-full antialiased`}
+      translate="no"
+      className={`notranslate ${inter.variable} ${playfair.variable} ${arefRuqaa.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-jommba-bg text-text-secondary font-sans">
         <AuthProvider initialUser={user}>
