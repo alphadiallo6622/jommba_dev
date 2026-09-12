@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations, useLocale } from 'next-intl'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Lock, MessageCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Message, Conversation } from '@/lib/mock-messages'
 import { useCurrentUser } from '@/lib/use-current-user'
@@ -193,23 +193,28 @@ export default function ConversationPage({ id }: Props) {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <Loader2 className="w-6 h-6 animate-spin text-[#10B981]" />
+        <div className="w-12 h-12 rounded-full bg-[#E1F5EE] flex items-center justify-center">
+          <Loader2 className="w-5 h-5 animate-spin text-[#10B981]" />
+        </div>
       </div>
     )
   }
 
   if (blocked) {
     return (
-      <div className="flex flex-col items-center justify-center h-full gap-3 px-6 text-center">
-        <p className="text-gray-500 text-sm font-medium">
+      <div className="flex flex-col items-center justify-center h-full gap-2 px-6 text-center max-w-sm mx-auto">
+        <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mb-2">
+          <Lock className="w-6 h-6 text-gray-400" />
+        </div>
+        <p className="text-gray-800 text-[15px] font-semibold leading-snug">
           {limitMessage ? 'Limite atteinte' : t('blockedTitle')}
         </p>
-        <p className="text-gray-400 text-xs">
+        <p className="text-gray-400 text-xs leading-relaxed">
           {limitMessage ?? t('blockedDesc')}
         </p>
         <button
           onClick={() => router.push(limitMessage ? '/dashboard/premium' : `/dashboard/profil/${id}`)}
-          className="mt-2 bg-[#10B981] text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-[#059669] transition-colors"
+          className="mt-4 bg-gradient-to-br from-[#10B981] to-[#059669] text-white text-sm font-semibold px-5 py-2.5 rounded-xl shadow-[0_4px_14px_-4px_rgba(16,185,129,0.8)] hover:brightness-105 active:scale-95 transition-all"
         >
           {limitMessage ? 'Passer Premium' : t('viewProfile')}
         </button>
@@ -219,7 +224,10 @@ export default function ConversationPage({ id }: Props) {
 
   if (!conv) {
     return (
-      <div className="flex items-center justify-center h-full">
+      <div className="flex flex-col items-center justify-center h-full gap-3">
+        <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center">
+          <MessageCircle className="w-6 h-6 text-gray-300" />
+        </div>
         <p className="text-gray-400 text-sm">{t('notFound')}</p>
       </div>
     )
@@ -241,12 +249,14 @@ export default function ConversationPage({ id }: Props) {
       <ConversationHeader
         conv={conv}
         msgsRemaining={msgsRemaining}
+        msgsTotal={MSGS_REQUIRED}
       />
 
       <MessageArea
         messages={messages}
         firstName={conv.firstName}
         lastInitial={conv.lastInitial}
+        photo={conv.photo}
       />
 
       <MessageInput onSend={handleSend} isPremium={isPremium} />
