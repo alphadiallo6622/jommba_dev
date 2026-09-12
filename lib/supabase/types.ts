@@ -178,6 +178,13 @@ export interface Report {
   created_at:  string
 }
 
+export interface BlockedUser {
+  id:         string
+  blocker_id: string
+  blocked_id: string
+  created_at: string
+}
+
 export interface Notification {
   id:         string
   user_id:    string
@@ -387,6 +394,12 @@ export type Database = {
         Row:           Indexed<Report>
         Insert:        Indexed<Omit<Report, 'id' | 'created_at' | 'severity' | 'description'> & { id?: string; created_at?: string; severity?: ReportSeverity; description?: string | null }>
         Update:        Indexed<Partial<Report>>
+        Relationships: []
+      }
+      blocked_users: {
+        Row:           Indexed<BlockedUser>
+        Insert:        Indexed<Omit<BlockedUser, 'id' | 'created_at'> & { id?: string; created_at?: string }>
+        Update:        Indexed<Partial<BlockedUser>>
         Relationships: []
       }
       notifications: {

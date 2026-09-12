@@ -3,20 +3,41 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { ArrowLeft, Heart, Clock, MoreVertical, ChevronRight, Lock, LockOpen, User } from 'lucide-react'
+import { ArrowLeft, Heart, Clock, MoreVertical, ChevronRight, Lock, LockOpen, User, Ban, Flag } from 'lucide-react'
 import { Conversation } from '@/lib/mock-messages'
+import ConfirmActionModal from './ConfirmActionModal'
 
 type Props = {
   conv: Conversation
   msgsRemaining: number
   msgsTotal?: number
+  /** Blocage du membre — la discussion se ferme ensuite (géré par le parent). */
+  onBlock: () => Promise<void>
+  /** Signalement du membre à la modération. */
+  onReport: () => Promise<void>
 }
 
-export default function ConversationHeader({ conv, msgsRemaining, msgsTotal = 30 }: Props) {
+export default function ConversationHeader({ conv, msgsRemaining, msgsTotal = 30, onBlock, onReport }: Props) {
   const router    = useRouter()
   const t         = useTranslations('dashboard.messages.conv')
   const [menuOpen,    setMenuOpen]    = useState(false)
   const [showTooltip, setShowTooltip] = useState(false)
+  // Action de modération en attente de confirmation dans la feuille.
+  const [confirming,  setConfirming]  = useState<null | 'block' | 'report'>(null)
+  const [pending,     setPending]     = useState(false)
+
+  const fullName = `${conv.firstName} ${conv.lastInitial}.`
+
+  const runConfirmed = async () => {
+    if (!confirming) return
+    setPending(true)
+    try {
+      await (confirming === 'block' ? onBlock() : onReport())
+      setConfirming(null)
+    } finally {
+      setPending(false)
+    }
+  }
 
   const contactsUnlocked = msgsRemaining === 0
 
@@ -101,13 +122,31 @@ export default function ConversationHeader({ conv, msgsRemaining, msgsTotal = 30
           {menuOpen && (
             <>
               <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
-              <div className="absolute right-0 top-11 bg-white rounded-2xl shadow-xl shadow-gray-900/10 border border-gray-100 p-1 min-w-[190px] z-20 origin-top-right animate-fade-in-up">
+              <div className="absolute right-0 top-11 bg-white rounded-2xl shadow-xl shadow-gray-900/10 border border-gray-100 p-1 min-w-[210px] z-20 origin-top-right animate-fade-in-up">
                 <button
                   onClick={handleViewProfile}
                   className="w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 flex items-center gap-2.5 hover:bg-gray-50 transition-colors"
                 >
                   <User className="w-4 h-4 text-gray-400 shrink-0" />
                   {t('viewProfile')}
+                </button>
+
+                <div className="my-1 h-px bg-gray-100" />
+
+                <button
+                  onClick={() => { setMenuOpen(false); setConfirming('block') }}
+                  className="w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 flex items-center gap-2.5 hover:bg-gray-50 transition-colors"
+                >
+                  <Ban className="w-4 h-4 text-gray-400 shrink-0" />
+                  {t('block')}
+                </button>
+
+                <button
+                  onClick={() => { setMenuOpen(false); setConfirming('report') }}
+                  className="w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-red-600 flex items-center gap-2.5 hover:bg-red-50 transition-colors"
+                >
+                  <Flag className="w-4 h-4 text-red-400 shrink-0" />
+                  {t('report')}
                 </button>
               </div>
             </>
@@ -122,6 +161,35 @@ export default function ConversationHeader({ conv, msgsRemaining, msgsTotal = 30
           style={{ width: `${progress}%` }}
         />
       </div>
+
+      {/* Confirmation de blocage / signalement */}
+      {confirming === 'block' && (
+        <ConfirmActionModal
+          icon={<Ban className="w-6 h-6" />}
+          tone="danger"
+          title={t('blockTitle', { name: fullName })}
+          description={t('blockDesc')}
+          confirmLabel={t('block')}
+          cancelLabel={t('cancel')}
+          pending={pending}
+          onConfirm={runConfirmed}
+          onCancel={() => setConfirming(null)}
+        />
+      )}
+
+      {confirming === 'report' && (
+        <ConfirmActionModal
+          icon={<Flag className="w-6 h-6" />}
+          tone="warning"
+          title={t('reportTitle', { name: fullName })}
+          description={t('reportDesc')}
+          confirmLabel={t('report')}
+          cancelLabel={t('cancel')}
+          pending={pending}
+          onConfirm={runConfirmed}
+          onCancel={() => setConfirming(null)}
+        />
+      )}
 
       {/* Tooltip banner — appears below header, covers conversation top */}
       {showTooltip && (

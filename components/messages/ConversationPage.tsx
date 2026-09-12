@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations, useLocale } from 'next-intl'
-import { Loader2, Lock, MessageCircle } from 'lucide-react'
+import { Loader2, Lock, MessageCircle, Ban } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Message, Conversation } from '@/lib/mock-messages'
 import { useCurrentUser } from '@/lib/use-current-user'
@@ -18,6 +18,7 @@ import {
   formatTimeAgo,
 } from '@/lib/supabase/messages-service'
 import type { Message as DbMessage } from '@/lib/supabase/types'
+import { fetchBlockState, blockUser, unblockUser, reportUser } from '@/lib/supabase/moderation-service'
 import { notifyByEmail } from '@/lib/notify-email'
 import ConversationHeader from './ConversationHeader'
 import MessageArea from './MessageArea'
@@ -55,6 +56,12 @@ export default function ConversationPage({ id }: Props) {
   const [rulesAccepted, setRulesAccepted] = useState(false)
   const [rulesChecked, setRulesChecked]   = useState(false)
   const [sentCount, setSentCount]         = useState(0)
+  // Vrai quand c'est moi qui ai bloqué l'autre : l'écran propose alors de
+  // débloquer. Un blocage subi affiche le même écran neutre qu'une absence de
+  // contact, pour ne pas révéler la décision de l'autre membre.
+  const [blockedByMe, setBlockedByMe]     = useState(false)
+  // Incrémenté après un déblocage pour relancer le chargement de la discussion.
+  const [reloadKey, setReloadKey]         = useState(0)
   const convIdRef = useRef<string | null>(null)
 
   // Clé de persistance de l'acceptation des règles, propre à la paire (moi ↔ autre).
@@ -91,6 +98,19 @@ export default function ConversationPage({ id }: Props) {
         const allowed = await areContacts(user.id, id)
         if (!allowed) {
           if (!cancelled) { setBlocked(true); setLoading(false) }
+          return
+        }
+
+        // Un blocage, dans un sens ou dans l'autre, ferme la discussion. La
+        // base l'impose aussi via are_contacts() : les policies RLS d'insertion
+        // de messages refusent l'envoi même si l'écran restait ouvert.
+        const blockState = await fetchBlockState(user.id, id)
+        if (blockState.blockedByMe || blockState.blockedByOther) {
+          if (!cancelled) {
+            setBlockedByMe(blockState.blockedByMe)
+            setBlocked(true)
+            setLoading(false)
+          }
           return
         }
 
@@ -141,7 +161,7 @@ export default function ConversationPage({ id }: Props) {
 
     init()
     return () => { cancelled = true }
-  }, [user, id, locale, isPremium])
+  }, [user, id, locale, isPremium, reloadKey])
 
   // Temps réel : réception des messages de l'autre participant
   useEffect(() => {
@@ -167,6 +187,31 @@ export default function ConversationPage({ id }: Props) {
   }, [user, conversationId, locale])
 
   const msgsRemaining = Math.max(0, MSGS_REQUIRED - sentCount)
+
+  const handleBlock = async () => {
+    if (!user) return
+    if (!await blockUser(user.id, id)) { toast.error(t('conv.blockError')); return }
+    toast.success(t('conv.blockDone'))
+    router.push('/dashboard/messages')
+  }
+
+  const handleUnblock = async () => {
+    if (!user) return
+    if (!await unblockUser(user.id, id)) { toast.error(t('conv.unblockError')); return }
+    toast.success(t('conv.unblockDone'))
+    setBlockedByMe(false)
+    setBlocked(false)
+    setReloadKey(k => k + 1)   // relance le chargement de la discussion
+  }
+
+  const handleReport = async () => {
+    if (!user) return
+    if (!await reportUser(user.id, id, t('conv.reportReason'))) {
+      toast.error(t('conv.reportError'))
+      return
+    }
+    toast.success(t('conv.reportDone'))
+  }
 
   const handleSend = async (text: string) => {
     if (!user || !convIdRef.current) return
@@ -195,6 +240,36 @@ export default function ConversationPage({ id }: Props) {
       <div className="flex items-center justify-center h-full">
         <div className="w-12 h-12 rounded-full bg-[#E1F5EE] flex items-center justify-center">
           <Loader2 className="w-5 h-5 animate-spin text-[#10B981]" />
+        </div>
+      </div>
+    )
+  }
+
+  if (blocked && blockedByMe) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-2 px-6 text-center max-w-sm mx-auto">
+        <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mb-2">
+          <Ban className="w-6 h-6 text-red-400" />
+        </div>
+        <p className="text-gray-800 text-[15px] font-semibold leading-snug">
+          {t('conv.blockedByMeTitle')}
+        </p>
+        <p className="text-gray-400 text-xs leading-relaxed">
+          {t('conv.blockedByMeDesc')}
+        </p>
+        <div className="flex gap-2 mt-4">
+          <button
+            onClick={() => router.push('/dashboard/messages')}
+            className="bg-gray-100 text-gray-700 text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-gray-200 active:scale-95 transition-all"
+          >
+            {t('conv.backToList')}
+          </button>
+          <button
+            onClick={handleUnblock}
+            className="bg-gradient-to-br from-[#10B981] to-[#059669] text-white text-sm font-semibold px-5 py-2.5 rounded-xl shadow-[0_4px_14px_-4px_rgba(16,185,129,0.8)] hover:brightness-105 active:scale-95 transition-all"
+          >
+            {t('conv.unblock')}
+          </button>
         </div>
       </div>
     )
@@ -250,6 +325,8 @@ export default function ConversationPage({ id }: Props) {
         conv={conv}
         msgsRemaining={msgsRemaining}
         msgsTotal={MSGS_REQUIRED}
+        onBlock={handleBlock}
+        onReport={handleReport}
       />
 
       <MessageArea
