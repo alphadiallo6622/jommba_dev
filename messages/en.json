@@ -1092,8 +1092,7 @@
         "reportError": "Could not send the report"
       },
       "input": {
-        "placeholder": "Write your message...",
-        "voiceSoon": "Voice messages — coming in the next version 🎤"
+        "placeholder": "Write your message..."
       },
       "sendError": "Message not sent. Please try again.",
       "blockedTitle": "You must be a contact to chat.",
@@ -1123,6 +1122,22 @@
         "accept": "I accept these rules before Allah 🤲",
         "confirmEnabled": "I accept and I begin",
         "confirmDisabled": "Tick to continue"
+      },
+      "voice": {
+        "label": "Voice message",
+        "record": "Record a voice message",
+        "recording": "Recording…",
+        "cancel": "Cancel recording",
+        "send": "Send voice message",
+        "play": "Play",
+        "pause": "Pause",
+        "sending": "Sending…",
+        "tooShort": "Hold longer to record",
+        "denied": "Microphone denied. Allow microphone access in your browser.",
+        "unsupported": "Your browser cannot record voice messages.",
+        "failed": "Microphone unavailable. Check no other app is using it.",
+        "sendError": "Voice message not sent. Please try again.",
+        "playError": "Cannot play"
       }
     },
     "aide": {

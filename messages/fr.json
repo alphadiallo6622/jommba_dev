@@ -1092,8 +1092,7 @@
         "reportError": "Erreur lors du signalement"
       },
       "input": {
-        "placeholder": "Écrivez votre message...",
-        "voiceSoon": "Messages vocaux — disponible dans la prochaine version 🎤"
+        "placeholder": "Écrivez votre message..."
       },
       "sendError": "Message non envoyé. Réessaie.",
       "blockedTitle": "Vous devez être en contact pour discuter.",
@@ -1123,6 +1122,22 @@
         "accept": "J'accepte ces règles devant Allah 🤲",
         "confirmEnabled": "J'accepte et je commence",
         "confirmDisabled": "Cochez pour continuer"
+      },
+      "voice": {
+        "label": "Message vocal",
+        "record": "Enregistrer un message vocal",
+        "recording": "Enregistrement…",
+        "cancel": "Annuler l’enregistrement",
+        "send": "Envoyer le vocal",
+        "play": "Écouter",
+        "pause": "Pause",
+        "sending": "Envoi…",
+        "tooShort": "Maintenez plus longtemps pour enregistrer",
+        "denied": "Micro refusé. Autorise l’accès au micro dans ton navigateur.",
+        "unsupported": "Ton navigateur ne permet pas d’enregistrer un vocal.",
+        "failed": "Micro indisponible. Vérifie qu’aucune autre application ne l’utilise.",
+        "sendError": "Vocal non envoyé. Réessaie.",
+        "playError": "Lecture impossible"
       }
     },
     "aide": {

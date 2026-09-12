@@ -134,6 +134,7 @@ export default function MessagesPage() {
                   lastInitial: conv.lastInitial,
                   photo:       conv.photo,
                   lastMessage: conv.lastMessage,
+                  lastIsVoice: conv.lastIsVoice,
                   timeAgo:     formatTimeAgo(conv.lastMessageAt, locale),
                   isRead:      conv.isRead,
                   unreadCount: conv.unreadCount,

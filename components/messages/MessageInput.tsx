@@ -1,18 +1,23 @@
 'use client'
 
 import { useState } from 'react'
-import { Send, Mic } from 'lucide-react'
+import { Send, Mic, Trash2, Loader2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
+import { useVoiceRecorder, type RecorderError } from '@/lib/use-voice-recorder'
+import { VOICE_MIN_MS, VOICE_MAX_MS, formatDuration } from '@/lib/supabase/voice-service'
 
 type Props = {
   onSend: (text: string) => void
+  /** Envoi d'un vocal — réservé aux Premium (la policy RLS le vérifie aussi). */
+  onSendVoice: (blob: Blob, durationMs: number) => Promise<void>
   isPremium: boolean
 }
 
-export default function MessageInput({ onSend, isPremium }: Props) {
+export default function MessageInput({ onSend, onSendVoice, isPremium }: Props) {
   const t = useTranslations('dashboard.messages')
-  const [text, setText] = useState('')
+  const [text, setText]       = useState('')
+  const [sending, setSending] = useState(false)
 
   const handleSend = () => {
     if (!text.trim()) return
@@ -20,10 +25,71 @@ export default function MessageInput({ onSend, isPremium }: Props) {
     setText('')
   }
 
-  const handleVoice = () => {
-    toast.info(t('input.voiceSoon'))
+  const handleRecorded = async (blob: Blob, durationMs: number) => {
+    // Un appui trop court est un faux départ, pas un message.
+    if (durationMs < VOICE_MIN_MS) {
+      toast.info(t('voice.tooShort'))
+      return
+    }
+    setSending(true)
+    try {
+      await onSendVoice(blob, durationMs)
+    } finally {
+      setSending(false)
+    }
   }
 
+  const handleRecorderError = (error: RecorderError) => {
+    toast.error(t(error === 'denied' ? 'voice.denied' : error === 'unsupported' ? 'voice.unsupported' : 'voice.failed'))
+  }
+
+  const recorder = useVoiceRecorder({
+    onComplete: handleRecorded,
+    onError:    handleRecorderError,
+  })
+
+  const isRecording = recorder.status === 'recording'
+  const remaining   = Math.max(0, VOICE_MAX_MS - recorder.elapsed)
+
+  // ── Barre d'enregistrement ──────────────────────────────────────────────────
+  if (isRecording) {
+    return (
+      <div className="px-3 sm:px-4 py-3 bg-white border-t border-gray-100 shrink-0">
+        <div className="w-full flex items-center gap-2">
+          <button
+            onClick={recorder.cancel}
+            aria-label={t('voice.cancel')}
+            className="w-10 h-10 rounded-full bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-500 flex items-center justify-center shrink-0 active:scale-95 transition-all"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+
+          <div className="flex-1 min-w-0 flex items-center gap-2.5 px-4 py-2.5 bg-red-50 border border-red-100 rounded-full">
+            <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shrink-0" />
+            <span className="text-sm font-medium text-red-600 tabular-nums shrink-0">
+              {formatDuration(recorder.elapsed)}
+            </span>
+            <span className="text-xs text-red-400 truncate">
+              {t('voice.recording')}
+            </span>
+            <span className="ml-auto text-[10px] text-red-400 tabular-nums shrink-0">
+              −{formatDuration(remaining)}
+            </span>
+          </div>
+
+          <button
+            onClick={recorder.stop}
+            aria-label={t('voice.send')}
+            className="w-11 h-11 rounded-full bg-gradient-to-br from-[#10B981] to-[#059669] text-white flex items-center justify-center shrink-0 shadow-[0_4px_14px_-4px_rgba(16,185,129,0.8)] hover:brightness-105 active:scale-95 transition-all"
+          >
+            <Send className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Barre normale ───────────────────────────────────────────────────────────
   return (
     <div className="px-3 sm:px-4 py-3 bg-white border-t border-gray-100 shrink-0">
       <div className="w-full flex items-center gap-2">
@@ -31,10 +97,15 @@ export default function MessageInput({ onSend, isPremium }: Props) {
         {/* Voice button — premium only */}
         {isPremium && (
           <button
-            onClick={handleVoice}
-            className="w-10 h-10 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700 flex items-center justify-center shrink-0 active:scale-95 transition-all"
+            onClick={recorder.start}
+            disabled={sending || recorder.status === 'requesting'}
+            aria-label={t('voice.record')}
+            title={t('voice.record')}
+            className="w-10 h-10 rounded-full bg-gray-100 text-gray-500 hover:bg-[#E1F5EE] hover:text-[#047857] flex items-center justify-center shrink-0 active:scale-95 transition-all disabled:opacity-60"
           >
-            <Mic className="w-4 h-4" />
+            {sending || recorder.status === 'requesting'
+              ? <Loader2 className="w-4 h-4 animate-spin" />
+              : <Mic className="w-4 h-4" />}
           </button>
         )}
 

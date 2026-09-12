@@ -110,9 +110,15 @@ export interface Message {
   conversation_id: string
   sender_id:       string
   receiver_id:     string
+  /** Vide pour un message vocal (contrainte messages_text_or_audio). */
   content:         string
   is_read:         boolean
   created_at:      string
+  /** Chemin dans le bucket privé voice-messages, null pour un message texte. */
+  audio_path:         string | null
+  /** Type MIME complet renvoyé par MediaRecorder (codec compris). */
+  audio_mime:         string | null
+  audio_duration_ms:  number | null
 }
 
 export interface Like {
@@ -356,7 +362,7 @@ export type Database = {
       }
       messages: {
         Row:           Indexed<Message>
-        Insert:        Indexed<Omit<Message, 'id' | 'created_at'> & { id?: string; created_at?: string }>
+        Insert:        Indexed<Omit<Message, 'id' | 'created_at' | 'audio_path' | 'audio_mime' | 'audio_duration_ms'> & { id?: string; created_at?: string; audio_path?: string | null; audio_mime?: string | null; audio_duration_ms?: number | null }>
         Update:        Indexed<Partial<Message>>
         Relationships: []
       }

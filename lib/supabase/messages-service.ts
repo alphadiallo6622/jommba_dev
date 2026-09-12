@@ -12,6 +12,8 @@ export type ConversationListEntry = {
   lastInitial:    string
   photo:          string
   lastMessage:    string
+  /** Le dernier message est un vocal : l'aperçu affiche un libellé dédié. */
+  lastIsVoice:    boolean
   lastMessageAt:  string | null
   isRead:         boolean
   unreadCount:    number
@@ -248,7 +250,7 @@ export async function fetchConversationList(myId: string): Promise<ConversationL
       .select('user_id, first_name, last_name, avatar_url')
       .in('user_id', otherIds),
     supabase.from('messages')
-      .select('conversation_id, content, created_at')
+      .select('conversation_id, content, created_at, audio_path')
       .in('conversation_id', convIds)
       .order('created_at', { ascending: false })
       .limit(300),
@@ -262,8 +264,8 @@ export async function fetchConversationList(myId: string): Promise<ConversationL
   const profileMap = new Map<string, ProfileRow>()
   for (const p of (profiles ?? []) as ProfileRow[]) profileMap.set(p.user_id, p)
 
-  const lastMsgMap = new Map<string, { content: string; created_at: string }>()
-  for (const m of (lastMsgs ?? []) as { conversation_id: string; content: string; created_at: string }[]) {
+  const lastMsgMap = new Map<string, { content: string; created_at: string; audio_path: string | null }>()
+  for (const m of (lastMsgs ?? []) as { conversation_id: string; content: string; created_at: string; audio_path: string | null }[]) {
     if (!lastMsgMap.has(m.conversation_id)) lastMsgMap.set(m.conversation_id, m)
   }
 
@@ -286,6 +288,7 @@ export async function fetchConversationList(myId: string): Promise<ConversationL
       // Chaîne vide = « pas encore de message » ; le composant affiche un
       // placeholder localisé et le style italique dans ce cas.
       lastMessage:    last?.content ?? '',
+      lastIsVoice:    Boolean(last?.audio_path),
       lastMessageAt:  last?.created_at ?? c.last_message_at,
       isRead:         nUnread === 0,
       unreadCount:    nUnread,

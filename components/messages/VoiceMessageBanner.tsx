@@ -3,21 +3,16 @@
 import { Mic, ChevronRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { toast } from 'sonner'
 import { useCurrentUser } from '@/lib/use-current-user'
 
 export default function VoiceMessageBanner() {
   const router = useRouter()
-  const t = useTranslations('dashboard.messages')
   const tb = useTranslations('dashboard.messages.voiceBanner')
   const { isPremium } = useCurrentUser()
 
   if (isPremium) {
     return (
-      <div
-        className="flex items-center gap-3 bg-[#064E3B] rounded-xl p-4 mb-4 cursor-pointer hover:opacity-95 transition-opacity"
-        onClick={() => toast.info(t('input.voiceSoon'))}
-      >
+      <div className="flex items-center gap-3 bg-[#064E3B] rounded-xl p-4 mb-4">
         <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0">
           <Mic className="w-5 h-5 text-[#10B981]" />
         </div>
@@ -34,7 +29,6 @@ export default function VoiceMessageBanner() {
           </p>
         </div>
 
-        <ChevronRight className="w-5 h-5 text-white/40 shrink-0" />
       </div>
     )
   }

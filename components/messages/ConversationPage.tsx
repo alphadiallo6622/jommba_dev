@@ -19,6 +19,7 @@ import {
 } from '@/lib/supabase/messages-service'
 import type { Message as DbMessage } from '@/lib/supabase/types'
 import { fetchBlockState, blockUser, unblockUser, reportUser } from '@/lib/supabase/moderation-service'
+import { sendVoiceMessage } from '@/lib/supabase/voice-service'
 import { notifyByEmail } from '@/lib/notify-email'
 import ConversationHeader from './ConversationHeader'
 import MessageArea from './MessageArea'
@@ -35,6 +36,8 @@ function toUiMessage(m: DbMessage, myId: string, locale: string): Message {
     text:   m.content,
     sender: m.sender_id === myId ? 'me' : 'other',
     time:   new Date(m.created_at).toLocaleTimeString(locale === 'en' ? 'en-GB' : 'fr-FR', { hour: '2-digit', minute: '2-digit' }),
+    audioPath:       m.audio_path,
+    audioDurationMs: m.audio_duration_ms,
   }
 }
 
@@ -147,6 +150,7 @@ export default function ConversationPage({ id }: Props) {
           lastInitial: (p?.last_name ?? '').charAt(0),
           photo:       p?.avatar_url ?? '/avatar-placeholder.svg',
           lastMessage: dbMessages.at(-1)?.content ?? '',
+          lastIsVoice: Boolean(dbMessages.at(-1)?.audio_path),
           timeAgo:     formatTimeAgo(dbMessages.at(-1)?.created_at ?? null, locale),
           isRead:      true,
           unreadCount: 0,
@@ -211,6 +215,33 @@ export default function ConversationPage({ id }: Props) {
       return
     }
     toast.success(t('conv.reportDone'))
+  }
+
+  const handleSendVoice = async (blob: Blob, durationMs: number) => {
+    if (!user || !convIdRef.current) return
+
+    // Bulle optimiste sans chemin : le lecteur affiche « envoi en cours »
+    // jusqu'à ce que l'upload et l'insertion aboutissent.
+    const optimistic: Message = {
+      id:     `tmp-${Date.now()}`,
+      text:   '',
+      sender: 'me',
+      time:   new Date().toLocaleTimeString(locale === 'en' ? 'en-GB' : 'fr-FR', { hour: '2-digit', minute: '2-digit' }),
+      audioDurationMs: durationMs,
+      audioPending:    true,
+    }
+    setMessages(prev => [...prev, optimistic])
+
+    const result = await sendVoiceMessage(convIdRef.current, user.id, id, blob, durationMs)
+    if (!result.ok) {
+      setMessages(prev => prev.filter(m => m.id !== optimistic.id))
+      toast.error(t('voice.sendError'))
+      return
+    }
+
+    setSentCount(c => c + 1)
+    setMessages(prev => prev.map(m => m.id === optimistic.id ? toUiMessage(result.message, user.id, locale) : m))
+    notifyByEmail(id, 'message', myFirstName || t('unknownMember'))
   }
 
   const handleSend = async (text: string) => {
@@ -336,7 +367,7 @@ export default function ConversationPage({ id }: Props) {
         photo={conv.photo}
       />
 
-      <MessageInput onSend={handleSend} isPremium={isPremium} />
+      <MessageInput onSend={handleSend} onSendVoice={handleSendVoice} isPremium={isPremium} />
 
       {/* Spacer for mobile bottom nav */}
       <div className="md:hidden shrink-0 h-16" />

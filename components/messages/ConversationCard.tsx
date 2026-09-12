@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import { Mic } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Conversation } from '@/lib/mock-messages'
 
@@ -10,7 +11,9 @@ type Props = { conv: Conversation }
 export default function ConversationCard({ conv }: Props) {
   const router = useRouter()
   const t = useTranslations('dashboard.messages')
-  const isEmpty = conv.lastMessage === ''
+  // Un vocal n'a pas de texte : l'aperçu ne doit pas passer pour « vide ».
+  const isVoice = conv.lastIsVoice === true
+  const isEmpty = conv.lastMessage === '' && !isVoice
 
   return (
     <div
@@ -28,10 +31,15 @@ export default function ConversationCard({ conv }: Props) {
           {conv.firstName} {conv.lastInitial}.
         </p>
         <p className={cn(
-          'text-xs truncate mt-0.5',
+          'text-xs truncate mt-0.5 flex items-center gap-1',
           isEmpty ? 'text-gray-300 italic' : 'text-gray-400',
         )}>
-          {isEmpty ? t('startConversation') : conv.lastMessage}
+          {isVoice && <Mic className="w-3 h-3 shrink-0" />}
+          {isVoice
+            ? t('voice.label')
+            : isEmpty
+              ? t('startConversation')
+              : conv.lastMessage}
         </p>
       </div>
 
