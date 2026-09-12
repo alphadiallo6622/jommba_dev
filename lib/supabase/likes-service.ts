@@ -1,6 +1,7 @@
 'use client'
 
 import { createClient } from './client'
+import { isBlockedPair } from './moderation-service'
 
 // Valeur de repli si platform_settings est indisponible.
 export const FREE_DAILY_REQUESTS = 3
@@ -18,7 +19,7 @@ async function getFreeDailyLimit(): Promise<number> {
 
 export type SendRequestResult =
   | { ok: true }
-  | { ok: false; reason: 'limit' | 'duplicate' | 'error'; message: string }
+  | { ok: false; reason: 'limit' | 'duplicate' | 'blocked' | 'error'; message: string }
 
 // Envoie une demande de contact en respectant les règles Jommba :
 // - limite quotidienne (3/jour en gratuit, illimité en premium)
@@ -31,6 +32,17 @@ export async function sendContactRequest(
   flashMessage?: string,
 ): Promise<SendRequestResult> {
   const supabase = createClient()
+
+  // Un blocage, dans un sens ou dans l'autre, ferme aussi les demandes : la
+  // policy RLS de likes les refuse, autant le dire clairement avant l'insert.
+  // On ne precise pas qui a bloque qui, pour ne rien reveler.
+  if (await isBlockedPair(senderId, receiverId)) {
+    return {
+      ok: false,
+      reason: 'blocked',
+      message: "Vous ne pouvez pas envoyer de demande à ce membre.",
+    }
+  }
 
   // Demande existante ?
   const { data: existing } = await supabase
@@ -90,6 +102,11 @@ export async function sendContactRequest(
 // ignoreDuplicates → ON CONFLICT DO NOTHING (pas besoin du droit UPDATE).
 export async function addFavorite(senderId: string, receiverId: string): Promise<string | null> {
   const supabase = createClient()
+  // Meme porte que les demandes : la policy d'insertion de likes refuse une
+  // paire bloquee. On rend un message lisible plutot qu'une erreur Postgres.
+  if (await isBlockedPair(senderId, receiverId)) {
+    return 'Action impossible avec ce membre.'
+  }
   const { error } = await supabase.from('likes').upsert({
     sender_id:   senderId,
     receiver_id: receiverId,

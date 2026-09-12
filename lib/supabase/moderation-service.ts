@@ -33,6 +33,12 @@ export async function fetchBlockState(myId: string, otherId: string): Promise<Bl
   }
 }
 
+/** Raccourci : y a-t-il un blocage dans un sens ou dans l'autre ? */
+export async function isBlockedPair(myId: string, otherId: string): Promise<boolean> {
+  const state = await fetchBlockState(myId, otherId)
+  return state.blockedByMe || state.blockedByOther
+}
+
 /** Bloque `otherId`. La demande de contact reste intacte : le déblocage rouvre
  *  la discussion sans repasser par une nouvelle demande. Idempotent. */
 export async function blockUser(myId: string, otherId: string): Promise<boolean> {
