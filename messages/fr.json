@@ -1311,7 +1311,9 @@
         "account": "Mon compte",
         "accountSub": "Suspendre, supprimer",
         "subscription": "Mon abonnement",
-        "subscriptionSub": "Gérer ton abonnement Premium"
+        "subscriptionSub": "Gérer ton abonnement Premium",
+        "blocked": "Membres bloqués",
+        "blockedSub": "Voir et débloquer"
       },
       "themeSection": {
         "themes": "✦ Thèmes :",
@@ -1566,7 +1568,19 @@
         "durationDays": "{n, plural, one {# jour} other {# jours}}"
       },
       "sectionComplete": "Section complétée",
-      "sectionIncomplete": "Informations manquantes"
+      "sectionIncomplete": "Informations manquantes",
+      "blocked": {
+        "title": "Membres bloqués",
+        "close": "Fermer",
+        "explainTitle": "Ce que le blocage implique",
+        "explainDesc": "Un membre bloqué ne peut plus vous écrire et disparaît de vos messages, de l’exploration, de vos favoris, de vos demandes et de vos visiteurs. Il n’est pas informé du blocage.",
+        "empty": "Aucun membre bloqué",
+        "emptyHint": "Vous pouvez bloquer un membre depuis le menu de sa discussion.",
+        "since": "Bloqué le {date}",
+        "unblock": "Débloquer",
+        "unblockDone": "{name} a été débloqué",
+        "unblockError": "Déblocage impossible. Réessaie."
+      }
     },
     "academie": {
       "metaTitle": "Académie du Mariage | Jommba",

@@ -7,6 +7,7 @@ import { Eye, Loader2 } from 'lucide-react'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { useCurrentUser } from '@/lib/use-current-user'
 import { createClient } from '@/lib/supabase/client'
+import { fetchBlockedIds } from '@/lib/supabase/moderation-service'
 import type { Visitor } from '@/lib/mock-visitors'
 import PremiumBanner from './PremiumBanner'
 import VisitorCardLocked from './VisitorCardLocked'
@@ -34,13 +35,18 @@ export default function VisiteursPage() {
     try {
       const supabase = createClient()
 
-      const { data: visits } = await supabase
-        .from('profile_visitors')
-        .select('visitor_id, visited_at')
-        .eq('profile_id', user.id)
-        .order('visited_at', { ascending: false })
+      const [{ data: visits }, blockedIds] = await Promise.all([
+        supabase
+          .from('profile_visitors')
+          .select('visitor_id, visited_at')
+          .eq('profile_id', user.id)
+          .order('visited_at', { ascending: false }),
+        fetchBlockedIds(user.id),
+      ])
 
+      // Les visites d'un membre bloqué ne sont plus listées.
       const visitorIds = [...new Set((visits ?? []).map((v: { visitor_id: string }) => v.visitor_id))]
+        .filter(id => !blockedIds.has(id))
 
       type ProfileRow = { user_id: string; first_name: string; last_name: string | null; age: number | null; avatar_url: string | null; city: string | null; country: string | null }
       const profileMap = new Map<string, ProfileRow>()

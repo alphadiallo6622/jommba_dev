@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import type { ReceivedRequest, SentRequest, ContactEntry } from '@/lib/mock-demandes'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
+import { fetchBlockedIds } from '@/lib/supabase/moderation-service'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { useCurrentUser } from '@/lib/use-current-user'
 import { notifyByEmail } from '@/lib/notify-email'
@@ -62,7 +63,7 @@ export default function DemandesPage() {
     try {
       const supabase = createClient()
 
-      const [{ data: likesRecues }, { data: likesEnvoyees }] = await Promise.all([
+      const [{ data: likesRecuesRaw }, { data: likesEnvoyeesRaw }, blockedIds] = await Promise.all([
         supabase.from('likes')
           .select('*')
           .eq('receiver_id', user.id)
@@ -73,10 +74,15 @@ export default function DemandesPage() {
           .eq('sender_id', user.id)
           .eq('type', 'request')
           .order('created_at', { ascending: false }),
+        fetchBlockedIds(user.id),
       ])
 
-      const senderIds   = (likesRecues   ?? []).map((l: { sender_id: string }) => l.sender_id)
-      const receiverIds = (likesEnvoyees ?? []).map((l: { receiver_id: string }) => l.receiver_id)
+      // Les demandes échangées avec un membre bloqué sortent des trois onglets.
+      const likesRecues   = (likesRecuesRaw   ?? []).filter((l: { sender_id: string })   => !blockedIds.has(l.sender_id))
+      const likesEnvoyees = (likesEnvoyeesRaw ?? []).filter((l: { receiver_id: string }) => !blockedIds.has(l.receiver_id))
+
+      const senderIds   = likesRecues.map((l: { sender_id: string }) => l.sender_id)
+      const receiverIds = likesEnvoyees.map((l: { receiver_id: string }) => l.receiver_id)
       const allIds = [...new Set([...senderIds, ...receiverIds])]
 
       type ProfileRow = { user_id: string; first_name: string; last_name: string | null; age: number | null; avatar_url: string | null; city: string | null }

@@ -1,6 +1,7 @@
 'use client'
 
 import { createClient } from './client'
+import { fetchBlockedIds } from './moderation-service'
 import type { Conversation as DbConversation, Message as DbMessage } from './types'
 
 // Entrée enrichie pour la liste des conversations (côté UI)
@@ -223,11 +224,19 @@ export { formatTimeAgo }
 export async function fetchConversationList(myId: string): Promise<ConversationListEntry[]> {
   const supabase = createClient()
 
-  const { data: convs } = await supabase
-    .from('conversations')
-    .select('*')
-    .order('last_message_at', { ascending: false, nullsFirst: false })
-  const conversations = (convs ?? []) as DbConversation[]
+  const [{ data: convs }, blockedIds] = await Promise.all([
+    supabase
+      .from('conversations')
+      .select('*')
+      .order('last_message_at', { ascending: false, nullsFirst: false }),
+    fetchBlockedIds(myId),
+  ])
+  // Une discussion bloquée (dans un sens ou dans l'autre) sort de la liste ;
+  // le déblocage se fait depuis Paramètres → Membres bloqués.
+  const conversations = ((convs ?? []) as DbConversation[]).filter(c => {
+    const otherId = c.participant_1 === myId ? c.participant_2 : c.participant_1
+    return !blockedIds.has(otherId)
+  })
   if (conversations.length === 0) return []
 
   const convIds  = conversations.map(c => c.id)

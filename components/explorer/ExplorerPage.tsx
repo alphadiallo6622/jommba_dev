@@ -16,6 +16,7 @@ import { useAuth } from '@/components/providers/AuthProvider'
 import { useCurrentUser } from '@/lib/use-current-user'
 import { createClient } from '@/lib/supabase/client'
 import { supabaseProfileToExplorer } from '@/lib/supabase/profile-service'
+import { fetchBlockedIds } from '@/lib/supabase/moderation-service'
 import { oppositeGender, type Gender } from '@/lib/gender'
 import { MIN_VISIBLE_PROFILE_COMPLETION } from '@/lib/constants'
 import type { Profile } from '@/lib/supabase/types'
@@ -37,7 +38,7 @@ export default function ExplorerPage() {
 
     async function load(targetGender: Gender) {
       if (!user) return
-      const [{ data: profilesData }, { data: myFavorites }] = await Promise.all([
+      const [{ data: profilesData }, { data: myFavorites }, blockedIds] = await Promise.all([
         supabase
           .from('profiles')
           .select('*')
@@ -55,9 +56,13 @@ export default function ExplorerPage() {
           .select('receiver_id, created_at')
           .eq('sender_id', user.id)
           .eq('type', 'favorite'),
+        fetchBlockedIds(user.id),
       ])
 
-      const explorerProfiles = (profilesData ?? []).map(p => supabaseProfileToExplorer(p as unknown as Profile))
+      // Les membres bloqués (des deux côtés) disparaissent de l'exploration.
+      const explorerProfiles = (profilesData ?? [])
+        .filter(p => !blockedIds.has((p as unknown as Profile).user_id))
+        .map(p => supabaseProfileToExplorer(p as unknown as Profile))
       setProfiles(explorerProfiles)
 
       // Hydrate le store favoris depuis la BDD pour que l'état ⭐ soit correct

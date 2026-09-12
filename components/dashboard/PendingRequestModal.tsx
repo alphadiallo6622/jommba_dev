@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
+import { fetchBlockedIds } from '@/lib/supabase/moderation-service'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { useCurrentUser } from '@/lib/use-current-user'
 import { notifyByEmail } from '@/lib/notify-email'
@@ -65,15 +66,19 @@ export default function PendingRequestModal() {
     } catch { /* ignore */ }
 
     const supabase = createClient()
-    const { data: likes } = await supabase
-      .from('likes')
-      .select('sender_id, created_at, status, type, flash_message')
-      .eq('receiver_id', user.id)
-      .eq('type', 'request')
-      .eq('status', 'pending')
-      .order('created_at', { ascending: false })
+    const [{ data: likes }, blockedIds] = await Promise.all([
+      supabase
+        .from('likes')
+        .select('sender_id, created_at, status, type, flash_message')
+        .eq('receiver_id', user.id)
+        .eq('type', 'request')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false }),
+      fetchBlockedIds(user.id),
+    ])
 
-    const pending = likes ?? []
+    // On ne relance pas l'utilisateur sur la demande d'un membre bloqué.
+    const pending = (likes ?? []).filter((l: { sender_id: string }) => !blockedIds.has(l.sender_id))
     if (pending.length === 0) return
 
     setPendingCount(pending.length)

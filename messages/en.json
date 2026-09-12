@@ -1311,7 +1311,9 @@
         "account": "My account",
         "accountSub": "Suspend, delete",
         "subscription": "My subscription",
-        "subscriptionSub": "Manage your Premium plan"
+        "subscriptionSub": "Manage your Premium plan",
+        "blocked": "Blocked members",
+        "blockedSub": "View and unblock"
       },
       "themeSection": {
         "themes": "✦ Themes:",
@@ -1566,7 +1568,19 @@
         "durationDays": "{n, plural, one {# day} other {# days}}"
       },
       "sectionComplete": "Section complete",
-      "sectionIncomplete": "Missing information"
+      "sectionIncomplete": "Missing information",
+      "blocked": {
+        "title": "Blocked members",
+        "close": "Close",
+        "explainTitle": "What blocking does",
+        "explainDesc": "A blocked member can no longer write to you and disappears from your messages, from browsing, from your favourites, your requests and your visitors. They are not told about the block.",
+        "empty": "No blocked member",
+        "emptyHint": "You can block a member from the menu in their chat.",
+        "since": "Blocked on {date}",
+        "unblock": "Unblock",
+        "unblockDone": "{name} has been unblocked",
+        "unblockError": "Could not unblock. Please try again."
+      }
     },
     "academie": {
       "metaTitle": "Marriage Academy | Jommba",

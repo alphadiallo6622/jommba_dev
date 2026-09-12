@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { ChevronRight, Camera, User, MapPin, Heart, Smile, Crown, EyeOff, Bell, Shield, Settings, Check, AlertCircle } from 'lucide-react'
+import { ChevronRight, Camera, User, MapPin, Heart, Smile, Crown, EyeOff, Bell, Shield, Settings, Check, AlertCircle, Ban } from 'lucide-react'
 import { useCurrentUser } from '@/lib/use-current-user'
 import { isSectionComplete, isTrackedSection } from '@/lib/profile-sections'
 import PhotoPanel        from './panels/PhotoPanel'
@@ -14,9 +14,10 @@ import SubscriptionPanel   from './panels/SubscriptionPanel'
 import ConfidentialityPanel from './panels/ConfidentialityPanel'
 import NotificationsPanel from './panels/NotificationsPanel'
 import SecurityPanel     from './panels/SecurityPanel'
+import BlockedPanel      from './panels/BlockedPanel'
 import AccountPanel      from './panels/AccountPanel'
 
-type PanelId = 'photo' | 'infos' | 'location' | 'vision' | 'personality' | 'religion' | 'lifeproject' | 'subscription' | 'confidentiality' | 'notifications' | 'security' | 'account' | null
+type PanelId = 'photo' | 'infos' | 'location' | 'vision' | 'personality' | 'religion' | 'lifeproject' | 'subscription' | 'confidentiality' | 'notifications' | 'security' | 'blocked' | 'account' | null
 
 const SECTIONS = [
   { id: 'photo'           as PanelId, icon: Camera,   key: 'photo' },
@@ -29,6 +30,8 @@ const SECTIONS = [
   { id: 'confidentiality' as PanelId, icon: EyeOff,   key: 'confidentiality' },
   { id: 'notifications'   as PanelId, icon: Bell,     key: 'notifications' },
   { id: 'security'        as PanelId, icon: Shield,   key: 'security' },
+  // Seul chemin de déblocage : un membre bloqué n'apparaît plus dans les listes.
+  { id: 'blocked'         as PanelId, icon: Ban,      key: 'blocked' },
   { id: 'account'         as PanelId, icon: Settings, key: 'account' },
 ] as const
 
@@ -121,6 +124,7 @@ export default function ParametresPage() {
       <ConfidentialityPanel open={activePanel === 'confidentiality'} onClose={close} />
       <NotificationsPanel  open={activePanel === 'notifications'} onClose={close} />
       <SecurityPanel     open={activePanel === 'security'}        onClose={close} />
+      <BlockedPanel      open={activePanel === 'blocked'}         onClose={close} />
       <AccountPanel      open={activePanel === 'account'}         onClose={close} />
     </div>
   )

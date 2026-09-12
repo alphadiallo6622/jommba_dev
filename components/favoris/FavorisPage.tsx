@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl'
 import { Heart, Users, HeartOff, Lock, Clock, Crown, MapPin, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
+import { fetchBlockedIds } from '@/lib/supabase/moderation-service'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { useCurrentUser } from '@/lib/use-current-user'
 import { supabaseProfileToExplorer } from '@/lib/supabase/profile-service'
@@ -68,13 +69,15 @@ export default function FavorisPage() {
     try {
       const supabase = createClient()
 
-      const [{ data: sent }, { data: received }] = await Promise.all([
+      const [{ data: sent }, { data: received }, blockedIds] = await Promise.all([
         supabase.from('likes').select('receiver_id, created_at').eq('sender_id', user.id).eq('type', 'favorite').order('created_at', { ascending: false }),
         supabase.from('likes').select('sender_id, created_at').eq('receiver_id', user.id).eq('type', 'favorite').order('created_at', { ascending: false }),
+        fetchBlockedIds(user.id),
       ])
 
-      const sentIds     = (sent     ?? []).map((l: { receiver_id: string }) => l.receiver_id)
-      const receivedIds = (received ?? []).map((l: { sender_id: string }) => l.sender_id)
+      // Un membre bloqué disparaît des deux onglets (mes favoris / qui m'aime).
+      const sentIds     = (sent     ?? []).map((l: { receiver_id: string }) => l.receiver_id).filter(id => !blockedIds.has(id))
+      const receivedIds = (received ?? []).map((l: { sender_id: string })   => l.sender_id).filter(id => !blockedIds.has(id))
       const allIds = [...new Set([...sentIds, ...receivedIds])]
 
       const profileMap = new Map<string, ProfileRow>()

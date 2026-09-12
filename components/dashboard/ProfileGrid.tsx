@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import { fetchBlockedIds } from '@/lib/supabase/moderation-service'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { useCurrentUser } from '@/lib/use-current-user'
@@ -124,6 +125,9 @@ export default function ProfileGrid() {
     const targetGender = oppositeGender(gender)
     if (!targetGender) return
     const supabase = createClient()
+    let cancelled = false
+    fetchBlockedIds(user.id).then(blockedIds => {
+    if (cancelled) return
     supabase
       .from('profiles')
       .select('user_id, first_name, last_name, age, city, job, avatar_url, is_premium, profile_completion, photos_blurred')
@@ -137,9 +141,12 @@ export default function ProfileGrid() {
       .order('profile_completion', { ascending: false })
       .limit(12)
       .then(({ data }) => {
+        if (cancelled) return
         if (data && data.length > 0) {
           setProfiles(
             (data as { user_id: string; first_name: string; last_name: string | null; age: number | null; city: string | null; job: string | null; avatar_url: string | null; is_premium: boolean; profile_completion: number; photos_blurred: boolean | null }[])
+              // Les membres bloqués sortent du carrousel.
+              .filter(p => !blockedIds.has(p.user_id))
               .map(p => ({
                 id:           p.user_id,
                 name:         `${p.first_name} ${(p.last_name ?? '').charAt(0)}.`,
@@ -154,6 +161,8 @@ export default function ProfileGrid() {
           )
         }
       })
+    })
+    return () => { cancelled = true }
   }, [user, gender])
 
   const total   = profiles.length

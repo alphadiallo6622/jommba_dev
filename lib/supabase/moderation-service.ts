@@ -74,3 +74,74 @@ export async function reportUser(myId: string, otherId: string, reason: string):
   }
   return true
 }
+
+/** Membre bloqué par moi, avec son profil — pour l'écran Paramètres. */
+export type BlockedMember = {
+  userId:      string
+  firstName:   string
+  lastInitial: string
+  photo:       string
+  blockedAt:   string
+}
+
+/** Identifiants à masquer dans toutes les listes : les membres que j'ai bloqués
+ *  et ceux qui m'ont bloqué. En cas d'erreur on renvoie un ensemble vide : une
+ *  panne de lecture ne doit pas amputer les listes de l'utilisateur. */
+export async function fetchBlockedIds(myId: string): Promise<Set<string>> {
+  const supabase = createClient()
+  try {
+    const { data, error } = await supabase
+      .from('blocked_users')
+      .select('blocker_id, blocked_id')
+      .or(`blocker_id.eq.${myId},blocked_id.eq.${myId}`)
+    if (error) throw error
+    const ids = new Set<string>()
+    for (const r of data ?? []) {
+      ids.add(r.blocker_id === myId ? r.blocked_id : r.blocker_id)
+    }
+    return ids
+  } catch (err) {
+    console.error('[moderation] fetchBlockedIds error:', err)
+    return new Set()
+  }
+}
+
+/** Membres que j'ai bloqués, du plus récent au plus ancien. Seuls mes propres
+ *  blocages sont listés : on ne montre pas qui m'a bloqué. */
+export async function fetchBlockedMembers(myId: string): Promise<BlockedMember[]> {
+  const supabase = createClient()
+  try {
+    const { data, error } = await supabase
+      .from('blocked_users')
+      .select('blocked_id, created_at')
+      .eq('blocker_id', myId)
+      .order('created_at', { ascending: false })
+    if (error) throw error
+
+    const rows = data ?? []
+    if (rows.length === 0) return []
+
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('user_id, first_name, last_name, avatar_url')
+      .in('user_id', rows.map(r => r.blocked_id))
+
+    type ProfileRow = { user_id: string; first_name: string; last_name: string | null; avatar_url: string | null }
+    const profileMap = new Map<string, ProfileRow>()
+    for (const p of (profiles ?? []) as ProfileRow[]) profileMap.set(p.user_id, p)
+
+    return rows.map(r => {
+      const p = profileMap.get(r.blocked_id)
+      return {
+        userId:      r.blocked_id,
+        firstName:   p?.first_name ?? '…',
+        lastInitial: (p?.last_name ?? '').charAt(0),
+        photo:       p?.avatar_url ?? '/avatar-placeholder.svg',
+        blockedAt:   r.created_at,
+      }
+    })
+  } catch (err) {
+    console.error('[moderation] fetchBlockedMembers error:', err)
+    return []
+  }
+}
