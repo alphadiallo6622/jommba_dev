@@ -58,7 +58,7 @@ export default function HeroSection() {
 
           <AnimatedSection delay={0.35} className="relative w-full pt-2 space-y-3">
             <div className="relative overflow-hidden rounded-[1.5rem] shadow-xl">
-              <HeroVideo title={t("videoTitle")} playLabel={t("videoPlay")} />
+              <HeroVideo variant="mobile" title={t("videoTitle")} soundLabel={t("videoSound")} />
             </div>
             <div className="flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-white border border-primary-light shadow-sm w-fit mx-auto">
               <Heart className="w-4 h-4 text-primary fill-primary shrink-0" />
@@ -175,7 +175,7 @@ export default function HeroSection() {
 
               {/* Lecteur video */}
               <div className="relative rounded-[2rem] overflow-hidden shadow-2xl">
-                <HeroVideo title={t("videoTitle")} playLabel={t("videoPlay")} />
+                <HeroVideo variant="desktop" title={t("videoTitle")} soundLabel={t("videoSound")} />
               </div>
 
               {/* Badges sous la video, pour ne pas masquer le lecteur */}
