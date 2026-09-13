@@ -14,7 +14,10 @@ import type {
 import type { AdminMember } from "@/lib/supabase/types";
 
 const DEFAULT_LIMITS: LimitsSettings = { contacts: 3, conversations: 3, coachQuestions: 3, visitors: 2 };
-const DEFAULT_PRICING: PricingSettings = { monthlyPrice: 10, autoValidate: false };
+// Le tarif de référence est le prix payé pour un mois : ce repli doit rester
+// aligné sur la grille en vigueur, pour ne pas brader Premium si la ligne de
+// réglages venait à manquer.
+const DEFAULT_PRICING: PricingSettings = { monthlyPrice: 15, autoValidate: false };
 const DEFAULT_BOOST_PRICING: BoostPricingSettings = { "24h": 2.5, "3j": 5, "7j": 8 };
 const DEFAULT_MAINTENANCE: MaintenanceSettings = { enabled: false, message: null };
 const DEFAULT_GEO_BLOCK: GeoBlockSettings = { enabled: false, mode: "block", countries: [] };

@@ -886,6 +886,11 @@ export async function setGeoBlock(geoBlock: GeoBlockSettings): Promise<ActionRes
 
 export async function savePricing(pricing: PricingSettings): Promise<ActionResult> {
   return run(async () => {
+    // Le tarif de référence est le prix réellement facturé pour un mois : un
+    // champ vide ou négatif ne doit jamais atteindre la base.
+    if (!Number.isFinite(pricing.monthlyPrice) || pricing.monthlyPrice <= 0) {
+      throw new Error("Le tarif de référence doit être supérieur à 0");
+    }
     const supabase = createAdminClient();
     const { error } = await supabase.from("platform_settings").upsert({
       id: 1,
@@ -893,7 +898,8 @@ export async function savePricing(pricing: PricingSettings): Promise<ActionResul
       updated_at: new Date().toISOString(),
     });
     if (error) throw new Error(error.message);
-    // Le tarif de référence fixe le prix barré affiché sur l'accueil.
+    // Le tarif pilote les prix affichés (accueil, /dashboard/premium) et les
+    // montants facturés : on invalide tout le cache pour qu'il prenne effet.
     revalidatePath("/", "layout");
   }, "settings");
 }

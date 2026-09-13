@@ -8,7 +8,7 @@ import {
   ChevronDown, Globe, Wallet, Eye, EyeOff, Power, Wrench, Search, MapPin,
 } from "lucide-react";
 import { COUNTRIES, countryName } from "@/lib/admin/countries";
-import { computePlanPrices, computeFullPrices, computeDiscountLabels, PLAN_PRICES } from "@/lib/pricing";
+import { computePlanPrices, computeFullPrices, computeDiscountLabels, PLAN_IDS } from "@/lib/pricing";
 import { Avatar } from "@/components/admin/ui/avatar";
 import { Card, CardHeader } from "@/components/admin/ui/card";
 import { useToast } from "@/components/admin/ui/toast";
@@ -993,16 +993,16 @@ export function ParametresClient({
                 />
               </div>
 
-              {/* Aperçu live — voir lib/pricing.ts. Les prix payés sont fixes
-                  (PLAN_PRICES) ; le tarif de référence ci-dessus ne pilote que le
-                  prix barré et le pourcentage de remise affichés. */}
+              {/* Aperçu live — voir lib/pricing.ts. Le tarif de référence est le
+                  prix payé pour un mois ; les autres durées en découlent via un
+                  multiplicateur fixe qui porte la remise d'engagement. */}
               <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-faint)] p-3">
                 <p className="text-xs font-semibold text-[var(--color-ink)] mb-2">
                   Aperçu — page /dashboard/premium
                 </p>
                 <div className="grid grid-cols-4 gap-2">
-                  {(Object.keys(PLAN_PRICES) as (keyof typeof PLAN_PRICES)[]).map((id) => {
-                    const price = computePlanPrices()[id];
+                  {PLAN_IDS.map((id) => {
+                    const price = computePlanPrices(pricing.monthlyPrice)[id];
                     const full = computeFullPrices(pricing.monthlyPrice)[id];
                     const discount = computeDiscountLabels(pricing.monthlyPrice)[id];
                     return (
@@ -1020,8 +1020,8 @@ export function ParametresClient({
                   })}
                 </div>
                 <p className="mt-2 text-[10px] text-[var(--color-muted)] leading-relaxed">
-                  Les montants payés sont fixes. Le tarif de référence ne change que le
-                  prix barré et le pourcentage affichés.
+                  Ces montants sont ceux réellement facturés, ici comme sur la page
+                  d'accueil. Ils prennent effet dès l'enregistrement.
                 </p>
               </div>
 

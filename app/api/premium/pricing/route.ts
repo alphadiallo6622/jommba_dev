@@ -14,9 +14,9 @@ export const dynamic = 'force-dynamic'
 export async function GET() {
   const { pricing } = await getPlatformSettings()
   return NextResponse.json({
-    prices: computePlanPrices(),
+    prices: computePlanPrices(pricing.monthlyPrice),
     fullPrices: computeFullPrices(pricing.monthlyPrice),
-    monthlyEquivalents: computeMonthlyEquivalents(),
+    monthlyEquivalents: computeMonthlyEquivalents(pricing.monthlyPrice),
     discounts: computeDiscountLabels(pricing.monthlyPrice),
   })
 }

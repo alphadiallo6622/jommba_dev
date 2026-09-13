@@ -7,7 +7,7 @@ import PricingSection from "@/components/home/PricingSection";
 import IslamicQuoteSection from "@/components/home/IslamicQuoteSection";
 import CTASection from "@/components/home/CTASection";
 import { getPlatformSettings } from "@/lib/admin/queries";
-import { HOME_MONTHLY_PRICE, homeOriginalPrice } from "@/data/pricing";
+import { homeMonthlyPrice } from "@/data/pricing";
 
 export default async function Home() {
   // Les limites du plan Free et le tarif de référence Premium affichés dans la
@@ -23,8 +23,7 @@ export default async function Home() {
       <TestimonialsSection />
       <PricingSection
         limits={limits}
-        monthlyPrice={HOME_MONTHLY_PRICE}
-        originalPrice={homeOriginalPrice(pricing.monthlyPrice)}
+        monthlyPrice={homeMonthlyPrice(pricing.monthlyPrice)}
       />
       <IslamicQuoteSection />
       <CTASection />

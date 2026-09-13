@@ -14,6 +14,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { square, SQUARE_LOCATION_ID, CURRENCY, toMinorUnits } from '@/lib/square/client'
 import { getPlanDurationDays } from '@/lib/square/plans'
 import { computePlanPrices, isPlanId } from '@/lib/pricing'
+import { getPlatformSettings } from '@/lib/admin/queries'
 import { validatePromoCode, redeemPromoCode } from '@/lib/promo'
 import { paymentError } from '@/lib/payment-errors'
 
@@ -45,8 +46,10 @@ export async function POST(req: NextRequest) {
 
   const admin = createAdminClient()
 
-  // 2) Prix déterminé côté serveur d'après le plan (jamais depuis le client).
-  const basePrice = computePlanPrices()[planId]
+  // 2) Prix déterminé côté serveur d'après le plan et le tarif de référence
+  //    réglé en admin (jamais depuis le client).
+  const { pricing } = await getPlatformSettings()
+  const basePrice = computePlanPrices(pricing.monthlyPrice)[planId]
 
   // 3) Code promo optionnel : re-validation complète côté serveur.
   let finalPrice = basePrice

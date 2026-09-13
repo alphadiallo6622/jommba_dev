@@ -13,11 +13,9 @@ export interface PricingSectionProps {
   limits: { contacts: number; conversations: number; coachQuestions: number };
   /** Montant facturé pour un mois de Premium. */
   monthlyPrice: number;
-  /** Prix barré du plan mensuel (tarif de référence admin). */
-  originalPrice: number;
 }
 
-export default function PricingSection({ limits, monthlyPrice, originalPrice }: PricingSectionProps) {
+export default function PricingSection({ limits, monthlyPrice }: PricingSectionProps) {
   const t = useTranslations("home.pricing");
 
   // Valeurs injectées dans les libellés paramétrés (features 2-5 du plan Free,
@@ -29,9 +27,12 @@ export default function PricingSection({ limits, monthlyPrice, originalPrice }: 
     coachQuestions: limits.coachQuestions,
   };
 
-  const prices: Record<PricingPlan["planKey"], { price: number; originalPrice?: number }> = {
+  // Le tarif mensuel réglé en admin est le prix réellement payé : il n'y a pas
+  // de remise à barrer ici. Les remises d'engagement portent sur les durées 3 et
+  // 6 mois, affichées sur /dashboard/premium.
+  const prices: Record<PricingPlan["planKey"], { price: number }> = {
     free: { price: 0 },
-    premium: { price: monthlyPrice, originalPrice },
+    premium: { price: monthlyPrice },
   };
 
   return (
@@ -76,11 +77,6 @@ export default function PricingSection({ limits, monthlyPrice, originalPrice }: 
 
                   {/* Price */}
                   <div className="mb-1">
-                    {prices[plan.planKey].originalPrice != null && (
-                      <span className="text-sm text-text-subtle line-through mr-2">
-                        {prices[plan.planKey].originalPrice} $
-                      </span>
-                    )}
                     <span className="text-4xl font-extrabold text-primary font-serif">
                       {prices[plan.planKey].price}
                     </span>
@@ -127,11 +123,6 @@ export default function PricingSection({ limits, monthlyPrice, originalPrice }: 
                     <Button href="/inscription" variant={plan.variant} className="w-full">
                       {t(`${plan.planKey}.buttonText`)} →
                     </Button>
-                    {plan.hasNote && (
-                      <p className="text-[11px] text-text-subtle text-center leading-relaxed">
-                        {t(`${plan.planKey}.note`, { originalPrice })}
-                      </p>
-                    )}
                   </div>
                 </div>
               </div>
