@@ -9,6 +9,7 @@
     "login": "Connexion",
     "signup": "S'inscrire",
     "loginCta": "Se connecter",
+    "logout": "Se déconnecter",
     "dashboard": "Dashboard",
     "openMenu": "Ouvrir le menu",
     "closeMenu": "Fermer le menu",

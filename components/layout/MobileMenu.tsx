@@ -11,6 +11,7 @@ import {
   Mail,
   ChevronRight,
   LogIn,
+  LogOut,
   LayoutDashboard,
   Sparkles,
 } from "lucide-react";
@@ -41,7 +42,7 @@ interface MobileMenuProps {
 
 export default function MobileMenu({ isOpen, onClose, pathname }: MobileMenuProps) {
   const t = useTranslations("nav");
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
 
   return (
     <AnimatePresence>
@@ -129,6 +130,20 @@ export default function MobileMenu({ isOpen, onClose, pathname }: MobileMenuProp
               <div className="flex justify-center">
                 <LocaleSwitcher />
               </div>
+
+              {user && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    signOut();
+                  }}
+                  className="inline-flex items-center justify-center gap-2 w-full py-3 rounded-2xl border border-white/25 bg-white/5 text-white font-semibold text-sm hover:bg-white/15 transition-all duration-200"
+                >
+                  <LogOut className="w-4 h-4" />
+                  {t("logout")}
+                </button>
+              )}
 
               {user ? (
                 <NextLink
