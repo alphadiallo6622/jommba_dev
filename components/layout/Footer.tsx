@@ -42,12 +42,13 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 lg:gap-12">
           {/* Brand Info */}
           <div className="space-y-6">
-            <Link href="/" className="flex items-center gap-2 group w-fit">
-              <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center shadow-green-btn">
-                <Heart className="w-5 h-5 text-white fill-white" />
-              </div>
-              <span className="text-xl font-serif font-bold text-white tracking-tight">
-                Jommba
+            <Link href="/" className="flex items-center group w-fit">
+              <span className="inline-flex items-center rounded-2xl bg-white px-4 py-2.5 shadow-green-btn group-hover:scale-105 transition-transform duration-300">
+                <img
+                  src="/logo_jommba_fond_transparent.png"
+                  alt="Jommba"
+                  className="max-w-none w-[150px] h-auto"
+                />
               </span>
             </Link>
             <p className="text-sm text-text-subtle leading-relaxed">

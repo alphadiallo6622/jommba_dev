@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {
-  Mail, Lock, Eye, EyeOff, Heart, Shield, Users, CheckCircle2,
+  Mail, Lock, Eye, EyeOff, Shield, Users, CheckCircle2,
   Loader2, User, ArrowLeft, ArrowRight, Check,
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -46,11 +46,14 @@ function SidePanel() {
       className="hidden lg:flex flex-col justify-between p-10 text-white"
       style={{ background: 'linear-gradient(160deg, #10B981 0%, #064E3B 100%)' }}
     >
-      <div className="flex items-center gap-2">
-        <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center">
-          <Heart className="w-5 h-5 text-white fill-white" />
-        </div>
-        <span className="text-xl font-serif font-bold">Jommba</span>
+      <div className="flex items-center">
+        <span className="inline-flex items-center rounded-2xl bg-white px-4 py-2.5 shadow-lg">
+          <img
+            src="/logo_jommba_fond_transparent.png"
+            alt="Jommba"
+            className="max-w-none w-[150px] h-auto"
+          />
+        </span>
       </div>
 
       <div className="space-y-6">
@@ -262,11 +265,12 @@ export default function InscriptionPage() {
         <div className="w-full max-w-sm space-y-6">
 
           {/* Logo mobile */}
-          <div className="lg:hidden flex items-center gap-2 justify-center">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: '#10B981' }}>
-              <Heart className="w-4 h-4 text-white fill-white" />
-            </div>
-            <span className="text-xl font-serif font-bold" style={{ color: '#064E3B' }}>Jommba</span>
+          <div className="lg:hidden flex items-center justify-center">
+            <img
+              src="/logo_jommba_fond_transparent.png"
+              alt="Jommba"
+              className="max-w-none w-[190px] h-auto"
+            />
           </div>
 
           <div className="text-center">
