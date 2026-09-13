@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { Menu, LayoutDashboard } from "lucide-react";
+import { Menu, LayoutDashboard, LogIn } from "lucide-react";
 import { Link, usePathname } from "@/i18n/navigation";
 // /dashboard n'est pas localisé : le Link de @/i18n/navigation le préfixerait
 // (/fr/dashboard → 404). On utilise donc le Link natif de Next pour ces liens.
@@ -119,8 +119,9 @@ export default function Navbar() {
             ) : (
               <Link
                 href="/connexion"
-                className="inline-flex items-center justify-center whitespace-nowrap px-4 py-2 rounded-full bg-primary text-white font-semibold text-sm shadow-green-btn hover:bg-primary-dark transition-all duration-200"
+                className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap px-4 py-2 rounded-full bg-primary text-white font-semibold text-sm shadow-green-btn hover:bg-primary-dark transition-all duration-200"
               >
+                <LogIn className="w-4 h-4 shrink-0" />
                 {t("loginCta")}
               </Link>
             )}
