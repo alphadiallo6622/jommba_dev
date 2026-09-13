@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { Menu, LayoutDashboard } from "lucide-react";
+import { Menu, LayoutDashboard, LogIn } from "lucide-react";
 import { Link, usePathname } from "@/i18n/navigation";
 // /dashboard n'est pas localisé : le Link de @/i18n/navigation le préfixerait
 // (/fr/dashboard → 404). On utilise donc le Link natif de Next pour ces liens.
@@ -106,9 +106,9 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile: Dashboard (si connecté) + bouton menu */}
+          {/* Mobile: Dashboard (connecté) ou Se connecter (visiteur) + bouton menu */}
           <div className="md:hidden flex items-center gap-2">
-            {user && (
+            {user ? (
               <NextLink
                 href="/dashboard"
                 className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full bg-primary text-white font-semibold text-sm shadow-green-btn hover:bg-primary-dark transition-all duration-200"
@@ -116,6 +116,14 @@ export default function Navbar() {
                 <LayoutDashboard className="w-4 h-4" />
                 {t("dashboard")}
               </NextLink>
+            ) : (
+              <Link
+                href="/connexion"
+                className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full bg-primary text-white font-semibold text-sm shadow-green-btn hover:bg-primary-dark transition-all duration-200"
+              >
+                <LogIn className="w-4 h-4" />
+                {t("loginCta")}
+              </Link>
             )}
             <button
               onClick={() => setIsMobileMenuOpen(true)}
