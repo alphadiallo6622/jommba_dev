@@ -1,13 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Mail, Heart, KeyRound, ArrowLeft, Loader2, AlertCircle } from 'lucide-react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import { Link } from '@/i18n/navigation'
 
@@ -57,6 +56,7 @@ function SidePanel() {
 export default function MotDePasseOubliePage() {
   const t = useTranslations('auth.forgotPassword')
   const tShared = useTranslations('auth.shared')
+  const locale = useLocale()
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
   const [sentEmail, setSentEmail] = useState('')
@@ -73,13 +73,15 @@ export default function MotDePasseOubliePage() {
   const onSubmit = async (data: FormData) => {
     setLoading(true)
     try {
-      const supabase = createClient()
-      const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
-        redirectTo: `${window.location.origin}/api/auth/callback?next=/reinitialiser-mot-de-passe`,
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: data.email, locale }),
       })
-      if (error) {
-        console.error('[MotDePasseOublie] Supabase error:', JSON.stringify(error))
-        toast.error(error.message || t('errorSendFailed'))
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        console.error('[MotDePasseOublie] Envoi échoué:', res.status, body)
+        toast.error(body.error === 'rate_limited' ? t('errorRateLimited') : t('errorSendFailed'))
         return
       }
       setSentEmail(data.email)

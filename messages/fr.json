@@ -311,7 +311,8 @@
       "backToLogin": "Retour à la connexion",
       "errorSendFailed": "Impossible d'envoyer le lien pour le moment.",
       "errorNetwork": "Impossible d'envoyer le lien. Vérifie ta connexion internet.",
-      "errorEmailInvalid": "Adresse email invalide"
+      "errorEmailInvalid": "Adresse email invalide",
+      "errorRateLimited": "Un lien vient déjà d'être envoyé. Réessaie dans une minute."
     },
     "resetPassword": {
       "checkingLink": "Vérification du lien…",

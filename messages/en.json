@@ -311,7 +311,8 @@
       "backToLogin": "Back to sign in",
       "errorSendFailed": "Couldn't send the link right now.",
       "errorNetwork": "Couldn't send the link. Check your internet connection.",
-      "errorEmailInvalid": "Invalid email address"
+      "errorEmailInvalid": "Invalid email address",
+      "errorRateLimited": "A link was just sent. Please try again in a minute."
     },
     "resetPassword": {
       "checkingLink": "Verifying link…",

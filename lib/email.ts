@@ -56,6 +56,8 @@ export interface SendEmailInput {
   /** Signature affichée sous le message (nom + fonction). */
   signatureName?: string;
   signatureRole?: string;
+  /** Bouton d'action affiché sous le message (lien absolu). */
+  cta?: { label: string; url: string };
 }
 
 /**
@@ -75,6 +77,11 @@ export async function sendEmail(input: SendEmailInput): Promise<void> {
       <div style="border:1px solid #e5e7eb;border-top:none;border-radius:0 0 16px 16px;padding:28px;">
         ${input.toName ? `<p style="margin:0 0 14px;">Bonjour ${escapeHtml(input.toName.split(" ")[0])},</p>` : ""}
         ${textToHtml(input.text)}
+        ${input.cta ? `
+        <p style="margin:22px 0;text-align:center;">
+          <a href="${escapeHtml(input.cta.url).replace(/"/g, "&quot;")}" style="display:inline-block;background:#10b981;color:#fff;text-decoration:none;font-weight:600;padding:12px 24px;border-radius:12px;">${escapeHtml(input.cta.label)}</a>
+        </p>
+        <p style="margin:0 0 14px;font-size:12px;color:#6b7280;word-break:break-all;">${escapeHtml(input.cta.url)}</p>` : ""}
         <div style="margin-top:24px;padding-top:16px;border-top:1px dashed #e5e7eb;font-size:13px;color:#6b7280;">
           <p style="margin:0;font-weight:600;color:#1f2937;">${escapeHtml(input.signatureName ?? "Équipe Jommba")}</p>
           ${input.signatureRole ? `<p style="margin:2px 0 0;">${escapeHtml(input.signatureRole)}</p>` : ""}
@@ -88,7 +95,7 @@ export async function sendEmail(input: SendEmailInput): Promise<void> {
     from: `"Jommba" <${from}>`,
     to: input.toName ? `"${input.toName}" <${input.to}>` : input.to,
     subject: input.subject,
-    text: input.text,
+    text: input.cta ? `${input.text}\n\n${input.cta.label} : ${input.cta.url}` : input.text,
     html,
   });
 }
