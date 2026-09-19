@@ -584,10 +584,10 @@ export async function getSubscriptions(): Promise<SubscriptionsData> {
     const info = nameMap.get(s.user_id);
     // Remboursable via le bouton : paiement Square uniquement (les autres moyens
     // de paiement se remboursent manuellement). Doit être réellement payé
-    // (montant > 0), rattaché à un customer Square, et pas déjà remboursé.
+    // (montant > 0) et pas déjà remboursé.
     // La résiliation seule ne donne pas de remboursement.
     const paid = s.price_usd != null && Number(s.price_usd) > 0;
-    const isSquare = s.payment_method === "square" && !!s.square_customer_id;
+    const isSquare = s.payment_method === "square";
     return {
       id: s.id,
       userId: s.user_id,

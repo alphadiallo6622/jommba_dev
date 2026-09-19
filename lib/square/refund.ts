@@ -1,10 +1,11 @@
 // lib/square/refund.ts
 // Remboursement d'un abonnement Premium payé via Square (serveur uniquement).
 //
-// Square ne stocke pas de payment_id sur notre ligne `subscriptions` : on remonte
-// donc la chaîne à partir du customer Square rattaché à l'abonnement :
-//   customer → factures (invoices.search) → commande (orders.get) → tender → payment_id
-// puis on rembourse le paiement le plus récent (refunds.refundPayment).
+// Notre ligne `subscriptions` ne stocke pas de payment_id. Le paiement est retrouvé :
+//  1) achats actuels (paiement unique) : payments.list dans une fenêtre autour de la
+//     date d'achat, en filtrant sur referenceId (= id du membre) et le montant ;
+//  2) anciens abonnements Square : customer → factures → commande → tender.
+// Puis on rembourse ce paiement (refunds.refundPayment).
 import { randomUUID } from 'crypto'
 import { square, SQUARE_LOCATION_ID, CURRENCY, toMinorUnits } from './client'
 
@@ -24,13 +25,19 @@ export interface RefundResult {
  * Square (l'appelant décide alors s'il annule la mutation en base).
  */
 export async function refundSquareSubscription(input: {
-  squareCustomerId: string
+  userId: string
   paidUsd: number
+  /** Date d'achat (created_at de la ligne subscriptions). */
+  subscribedAt: string
+  /** Présent uniquement sur les anciens abonnements récurrents Square. */
+  squareCustomerId?: string | null
 }): Promise<RefundResult> {
-  const { squareCustomerId, paidUsd } = input
+  const { userId, paidUsd, subscribedAt, squareCustomerId } = input
 
-  // 1) Retrouve la commande payée la plus récente de ce customer via ses factures.
-  const paymentId = await findLatestPaymentId(squareCustomerId)
+  // 1) Retrouve le paiement Square à rembourser.
+  const paymentId =
+    (await findPaymentByReference(userId, paidUsd, subscribedAt)) ??
+    (squareCustomerId ? await findLatestPaymentId(squareCustomerId) : null)
   if (!paymentId) {
     throw new Error('Paiement Square introuvable pour ce client.')
   }
@@ -45,6 +52,31 @@ export async function refundSquareSubscription(input: {
   })
 
   return { refundedUsd, squareRefundId: refund?.id ?? null }
+}
+
+/** Paiement unique : cherche autour de la date d'achat un paiement COMPLETED du membre au bon montant. */
+async function findPaymentByReference(
+  userId: string,
+  paidUsd: number,
+  subscribedAt: string,
+): Promise<string | null> {
+  const center = Date.parse(subscribedAt)
+  if (Number.isNaN(center)) return null
+  const page = await square.payments.list({
+    beginTime: new Date(center - 15 * 60 * 1000).toISOString(),
+    endTime: new Date(center + 15 * 60 * 1000).toISOString(),
+    locationId: SQUARE_LOCATION_ID,
+    limit: 100,
+  })
+  const expected = toMinorUnits(paidUsd)
+  let best: { id: string; gap: number } | null = null
+  for await (const p of page) {
+    if (p.referenceId !== userId || p.status !== 'COMPLETED' || !p.id) continue
+    if (p.amountMoney?.amount !== expected) continue
+    const gap = Math.abs(Date.parse(p.createdAt ?? '') - center)
+    if (!best || gap < best.gap) best = { id: p.id, gap }
+  }
+  return best?.id ?? null
 }
 
 /** Remonte customer → facture payée → commande → tender pour obtenir un payment_id. */

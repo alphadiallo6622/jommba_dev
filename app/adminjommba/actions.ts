@@ -374,7 +374,7 @@ export async function refundSubscription(subscriptionId: string): Promise<Action
 
     // Seuls les paiements Square se remboursent depuis ce bouton ; les autres
     // moyens de paiement (carte hors Square, etc.) se remboursent manuellement.
-    if (sub.payment_method !== "square" || !sub.square_customer_id) {
+    if (sub.payment_method !== "square") {
       throw new Error(
         "Seuls les paiements Square sont remboursables ici. Ce paiement doit être remboursé manuellement.",
       );
@@ -384,8 +384,10 @@ export async function refundSubscription(subscriptionId: string): Promise<Action
     //    Si le paiement Square est introuvable, on stoppe : rien n'est marqué en base.
     const { refundSquareSubscription } = await import("@/lib/square/refund");
     const { refundedUsd } = await refundSquareSubscription({
-      squareCustomerId: sub.square_customer_id,
+      userId: sub.user_id,
       paidUsd,
+      subscribedAt: sub.created_at,
+      squareCustomerId: sub.square_customer_id,
     });
 
     // 3) Annule l'abonnement récurrent côté Square : sans cela, le renouvellement
