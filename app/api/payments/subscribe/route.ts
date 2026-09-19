@@ -13,6 +13,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { square, SQUARE_LOCATION_ID, CURRENCY, toMinorUnits } from '@/lib/square/client'
 import { getOrCreateSquareCustomerId } from '@/lib/square/customer'
+import { sendPaymentEmails } from '@/lib/payment-emails'
 import { getPlanDurationDays } from '@/lib/square/plans'
 import { computePlanPrices, isPlanId } from '@/lib/pricing'
 import { getPlatformSettings } from '@/lib/admin/queries'
@@ -133,6 +134,20 @@ export async function POST(req: NextRequest) {
 
     // Marque le profil comme Premium (source lue par l'app pour débloquer les fonctionnalités).
     await admin.from('profiles').update({ is_premium: true }).eq('user_id', user.id)
+
+    // Emails : confirmation au membre + notification à l'administration.
+    await sendPaymentEmails({
+      kind: 'premium',
+      itemId: planId,
+      amountUsd: finalPrice,
+      locale,
+      memberEmail: user.email,
+      firstName: profile?.first_name,
+      lastName: profile?.last_name,
+      paymentId: payment.id,
+      expiresAt: periodEnd,
+      promoCode: promoCode?.trim() || null,
+    })
 
     return NextResponse.json({ ok: true, expiresAt: periodEnd.toISOString() })
   } catch (err) {

@@ -11,6 +11,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { square, SQUARE_LOCATION_ID, CURRENCY, toMinorUnits } from '@/lib/square/client'
 import { getOrCreateSquareCustomerId } from '@/lib/square/customer'
+import { sendPaymentEmails } from '@/lib/payment-emails'
 import { getBoost } from '@/lib/square/plans'
 import { getPlatformSettings } from '@/lib/admin/queries'
 import { paymentError } from '@/lib/payment-errors'
@@ -97,6 +98,19 @@ export async function POST(req: NextRequest) {
         { status: 500 },
       )
     }
+
+    // Emails : confirmation au membre + notification à l'administration.
+    await sendPaymentEmails({
+      kind: 'boost',
+      itemId: boost.id,
+      amountUsd: priceUsd,
+      locale,
+      memberEmail: user.email,
+      firstName: profile?.first_name,
+      lastName: profile?.last_name,
+      paymentId: payment.id,
+      expiresAt,
+    })
 
     return NextResponse.json({ ok: true, expiresAt: expiresAt.toISOString() })
   } catch (err) {
