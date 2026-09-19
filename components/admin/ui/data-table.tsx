@@ -10,6 +10,8 @@ export interface Column<T> {
   render?: (row: T) => React.ReactNode;
   sortable?: boolean;
   csvValue?: (row: T) => string | number;
+  /** Fixe la colonne à droite : reste visible pendant le défilement horizontal. */
+  sticky?: boolean;
 }
 
 interface Props<T> {
@@ -172,7 +174,7 @@ export function DataTable<T>({
                 <th
                   key={col.key}
                   onClick={() => col.sortable && toggleSort(col.key)}
-                  className={`px-4 py-3 text-left text-xs font-semibold text-[var(--color-muted)] whitespace-nowrap ${col.sortable ? "cursor-pointer select-none hover:text-[var(--color-ink)]" : ""}`}
+                  className={`px-4 py-3 text-left text-xs font-semibold text-[var(--color-muted)] whitespace-nowrap ${col.sortable ? "cursor-pointer select-none hover:text-[var(--color-ink)]" : ""} ${col.sticky ? "sticky right-0 bg-[var(--color-faint)] shadow-[-1px_0_0_var(--color-line)]" : ""}`}
                 >
                   <span className="inline-flex items-center gap-1">
                     {col.label}
@@ -201,12 +203,12 @@ export function DataTable<T>({
               paginated.map((row) => (
                 <tr
                   key={rowKey(row)}
-                  className="hover:bg-[var(--color-faint)] transition-colors"
+                  className="group hover:bg-[var(--color-faint)] transition-colors"
                 >
                   {columns.map((col) => (
                     <td
                       key={col.key}
-                      className="px-4 py-3 text-[var(--color-ink)]"
+                      className={`px-4 py-3 text-[var(--color-ink)] ${col.sticky ? "sticky right-0 bg-[var(--color-surface)] group-hover:bg-[var(--color-faint)] shadow-[-1px_0_0_var(--color-line)]" : ""}`}
                     >
                       {col.render
                         ? col.render(row)

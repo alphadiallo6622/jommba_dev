@@ -186,6 +186,7 @@ export function AbonnementsClient({
     {
       key: "id",
       label: "Actions",
+      sticky: true,
       render: (s) => (
         <div className="flex items-center gap-3">
           {s.canRefund && (
