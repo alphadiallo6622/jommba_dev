@@ -12,6 +12,7 @@ import { randomUUID } from 'crypto'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { square, SQUARE_LOCATION_ID, CURRENCY, toMinorUnits } from '@/lib/square/client'
+import { getOrCreateSquareCustomerId } from '@/lib/square/customer'
 import { getPlanDurationDays } from '@/lib/square/plans'
 import { computePlanPrices, isPlanId } from '@/lib/pricing'
 import { getPlatformSettings } from '@/lib/admin/queries'
@@ -63,12 +64,27 @@ export async function POST(req: NextRequest) {
     appliedPromoId = result.id
   }
 
-  // 4) Débit via Square (paiement unique, montant libre).
+  // 4) Débit via Square (paiement unique, montant libre), rattaché à un client
+  //    Square pour que son nom apparaisse sur le reçu (« Payé par »).
   try {
+    const { data: profile } = await admin
+      .from('profiles')
+      .select('first_name, last_name')
+      .eq('user_id', user.id)
+      .maybeSingle()
+    const customerId = await getOrCreateSquareCustomerId({
+      userId: user.id,
+      email: user.email,
+      firstName: profile?.first_name,
+      lastName: profile?.last_name,
+    })
+
     const { payment } = await square.payments.create({
       sourceId,
       idempotencyKey: randomUUID(),
       locationId: SQUARE_LOCATION_ID,
+      customerId,
+      buyerEmailAddress: user.email ?? undefined,
       amountMoney: { amount: toMinorUnits(finalPrice), currency: CURRENCY },
       // referenceId limité à 40 caractères par Square : un UUID (36) tient seul.
       referenceId: user.id,

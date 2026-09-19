@@ -10,6 +10,7 @@ import { randomUUID } from 'crypto'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { square, SQUARE_LOCATION_ID, CURRENCY, toMinorUnits } from '@/lib/square/client'
+import { getOrCreateSquareCustomerId } from '@/lib/square/customer'
 import { getBoost } from '@/lib/square/plans'
 import { getPlatformSettings } from '@/lib/admin/queries'
 import { paymentError } from '@/lib/payment-errors'
@@ -44,12 +45,28 @@ export async function POST(req: NextRequest) {
   const { boostPricing } = await getPlatformSettings()
   const priceUsd = boostPricing[boost.id]
 
-  // 3) Débit via Square.
+  // 3) Débit via Square, rattaché à un client Square pour que son nom apparaisse
+  //    sur le reçu (« Payé par »).
   try {
+    const admin = createAdminClient()
+    const { data: profile } = await admin
+      .from('profiles')
+      .select('first_name, last_name')
+      .eq('user_id', user.id)
+      .maybeSingle()
+    const customerId = await getOrCreateSquareCustomerId({
+      userId: user.id,
+      email: user.email,
+      firstName: profile?.first_name,
+      lastName: profile?.last_name,
+    })
+
     const { payment } = await square.payments.create({
       sourceId,
       idempotencyKey: randomUUID(),
       locationId: SQUARE_LOCATION_ID,
+      customerId,
+      buyerEmailAddress: user.email ?? undefined,
       amountMoney: { amount: toMinorUnits(priceUsd), currency: CURRENCY },
       // referenceId limité à 40 caractères par Square : un UUID (36) tient seul,
       // pas de préfixe. Le type d'achat est identifié par la note.
@@ -65,7 +82,6 @@ export async function POST(req: NextRequest) {
     }
 
     // 4) Active le boost (admin client : contourne le RLS pour écrire côté serveur).
-    const admin = createAdminClient()
     const expiresAt = new Date(Date.now() + boost.durationHours * 60 * 60 * 1000)
     const { error } = await admin.from('boosts').insert({
       user_id: user.id,
