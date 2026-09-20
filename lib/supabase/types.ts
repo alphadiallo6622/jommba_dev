@@ -58,11 +58,12 @@ export interface Profile {
   validated_at:       string | null
   refusal_reason:     string | null
   last_photo_reminder_at: string | null
+  last_seen_at: string | null
   created_at:         string
   updated_at:         string
 }
 
-export type ProfileInsert = Omit<Profile, 'id' | 'created_at' | 'updated_at' | 'validated_at' | 'refusal_reason' | 'photos_blurred' | 'last_photo_reminder_at'> & {
+export type ProfileInsert = Omit<Profile, 'id' | 'created_at' | 'updated_at' | 'validated_at' | 'refusal_reason' | 'photos_blurred' | 'last_photo_reminder_at' | 'last_seen_at'> & {
   id?:             string
   created_at?:     string
   updated_at?:     string
@@ -200,6 +201,18 @@ export interface Notification {
   is_read:    boolean
   data:       Json | null
   created_at: string
+}
+
+export interface PushSubscriptionRow {
+  id:           string
+  user_id:      string
+  endpoint:     string
+  p256dh:       string
+  auth:         string
+  locale:       string
+  user_agent:   string | null
+  created_at:   string
+  last_used_at: string | null
 }
 
 export interface SupportTicket {
@@ -414,6 +427,12 @@ export type Database = {
         Update:        Indexed<Partial<Notification>>
         Relationships: []
       }
+      push_subscriptions: {
+        Row:           Indexed<PushSubscriptionRow>
+        Insert:        Indexed<Omit<PushSubscriptionRow, 'id' | 'created_at' | 'last_used_at' | 'locale' | 'user_agent'> & { id?: string; created_at?: string; last_used_at?: string | null; locale?: string; user_agent?: string | null }>
+        Update:        Indexed<Partial<PushSubscriptionRow>>
+        Relationships: []
+      }
       support_tickets: {
         Row:           Indexed<SupportTicket>
         Insert:        Indexed<Omit<SupportTicket, 'id' | 'created_at' | 'updated_at' | 'category' | 'admin_reply' | 'replied_at'> & { id?: string; created_at?: string; updated_at?: string; category?: string; admin_reply?: string | null; replied_at?: string | null }>
@@ -478,6 +497,18 @@ export type Database = {
       }
     }
     Functions: {
+      unread_badge_count: {
+        Args: { uid: string }
+        Returns: number
+      }
+      my_unread_badge_count: {
+        Args: Record<string, never>
+        Returns: number
+      }
+      touch_last_seen: {
+        Args: Record<string, never>
+        Returns: undefined
+      }
       get_platform_stats: {
         Args: Record<string, never>
         Returns: {

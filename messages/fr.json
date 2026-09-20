@@ -978,6 +978,30 @@
         "refundConfirmed": {
           "title": "Remboursement confirmé",
           "body": "Votre abonnement Premium a été remboursé à hauteur de {amount, number, ::currency/USD} (70 % du montant payé ; les 30 % restants correspondent aux frais de service). Le montant sera crédité sous 5 à 10 jours ouvrés."
+        },
+        "premiumConfirmed": {
+          "title": "Premium activé 👑",
+          "body": "Ton paiement est confirmé : ton accès Premium est actif. Profite de toutes les fonctionnalités !"
+        },
+        "paymentFailed": {
+          "title": "Paiement échoué 💳",
+          "body": "Ton paiement n'a pas abouti et aucun montant n'a été débité. Réessaie ou utilise une autre carte."
+        },
+        "premiumExpiring": {
+          "title": "Ton Premium expire bientôt 📅",
+          "body": "Ton accès Premium se termine dans {days} jours. Renouvelle-le pour garder tes avantages."
+        },
+        "boostActivated": {
+          "title": "Boost activé 🚀",
+          "body": "Ton profil est mis en avant auprès des autres membres."
+        },
+        "boostExpired": {
+          "title": "Boost terminé",
+          "body": "Ton boost est terminé. Relance-en un pour rester en tête des résultats."
+        },
+        "inactivity": {
+          "title": "Tu nous manques 😴",
+          "body": "Cela fait une semaine que tu ne t'es pas connecté(e). De nouveaux profils t'attendent !"
         }
       },
       "tabs": {
@@ -1510,7 +1534,10 @@
         "emailTitle": "Notifications par email",
         "emailRequests": "Nouvelles demandes de contact",
         "emailMessages": "Nouveaux messages",
-        "emailPromos": "Offres et promotions"
+        "emailPromos": "Offres et promotions",
+        "pushBlocked": "Les notifications sont bloquées dans ton navigateur. Autorise-les dans les réglages du site, puis réessaie.",
+        "pushIosInstall": "Sur iPhone et iPad, ajoute d'abord Jommba à l'écran d'accueil pour recevoir des notifications.",
+        "pushUnsupported": "Ce navigateur ne permet pas les notifications push."
       },
       "security": {
         "title": "Sécurité",
@@ -2163,6 +2190,12 @@
           "décembre"
         ]
       }
+    },
+    "push": {
+      "title": "Activer les notifications",
+      "description": "Sois alerté(e) des nouveaux messages, demandes et visites, même quand Jommba est fermé.",
+      "enable": "Activer",
+      "later": "Plus tard"
     }
   },
   "share": {

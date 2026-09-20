@@ -978,6 +978,30 @@
         "refundConfirmed": {
           "title": "Refund confirmed",
           "body": "Your Premium subscription has been refunded for {amount, number, ::currency/USD} (70% of the amount paid; the remaining 30% covers service fees). The amount will be credited within 5 to 10 business days."
+        },
+        "premiumConfirmed": {
+          "title": "Premium activated 👑",
+          "body": "Your payment is confirmed: your Premium access is active. Enjoy every feature!"
+        },
+        "paymentFailed": {
+          "title": "Payment failed 💳",
+          "body": "Your payment didn't go through and you haven't been charged. Try again or use another card."
+        },
+        "premiumExpiring": {
+          "title": "Your Premium expires soon 📅",
+          "body": "Your Premium access ends in {days} days. Renew it to keep your benefits."
+        },
+        "boostActivated": {
+          "title": "Boost activated 🚀",
+          "body": "Your profile is now highlighted to other members."
+        },
+        "boostExpired": {
+          "title": "Boost ended",
+          "body": "Your boost has ended. Start a new one to stay at the top of the results."
+        },
+        "inactivity": {
+          "title": "We miss you 😴",
+          "body": "It's been a week since you last logged in. New profiles are waiting for you!"
         }
       },
       "tabs": {
@@ -1510,7 +1534,10 @@
         "emailTitle": "Email notifications",
         "emailRequests": "New contact requests",
         "emailMessages": "New messages",
-        "emailPromos": "Offers and promotions"
+        "emailPromos": "Offers and promotions",
+        "pushBlocked": "Notifications are blocked in your browser. Allow them in the site settings, then try again.",
+        "pushIosInstall": "On iPhone and iPad, first add Jommba to your home screen to receive notifications.",
+        "pushUnsupported": "This browser doesn't support push notifications."
       },
       "security": {
         "title": "Security",
@@ -2163,6 +2190,12 @@
           "December"
         ]
       }
+    },
+    "push": {
+      "title": "Turn on notifications",
+      "description": "Get alerted about new messages, requests and visits, even when Jommba is closed.",
+      "enable": "Turn on",
+      "later": "Later"
     }
   },
   "share": {

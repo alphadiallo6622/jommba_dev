@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { Bell, BellOff, Mail, AlertTriangle } from 'lucide-react'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
+import { disablePush, enablePush, getPushSupport } from '@/lib/push/client'
 import SettingsDrawer from '../SettingsDrawer'
 
 type Props = { open: boolean; onClose: () => void }
@@ -14,6 +15,8 @@ type PrefKey = 'push_enabled' | 'email_demande' | 'email_message' | 'email_promo
 export default function NotificationsPanel({ open, onClose }: Props) {
   const t = useTranslations('dashboard.parametres.notifications')
   const { user } = useAuth()
+  const locale = useLocale()
+  const [pushIssue, setPushIssue] = useState<'blocked' | 'iosInstall' | 'unsupported' | null>(null)
   const [pushEnabled, setPushEnabled]   = useState(true)
   const [emailDemande, setEmailDemande] = useState(true)
   const [emailMessage, setEmailMessage] = useState(true)
@@ -48,6 +51,35 @@ export default function NotificationsPanel({ open, onClose }: Props) {
       .eq('user_id', user.id)
   }, [user])
 
+  // Interrupteur push : au-delà de la préférence, il (dés)abonne réellement
+  // cet appareil. L'activation demande la permission du navigateur.
+  const togglePush = async (value: boolean) => {
+    setPushIssue(null)
+    if (!value) {
+      setPushEnabled(false)
+      persist('push_enabled', false)
+      await disablePush()
+      return
+    }
+    const support = getPushSupport()
+    if (support !== 'ok') {
+      // Préférence enregistrée malgré tout : elle s'appliquera sur un appareil compatible.
+      setPushEnabled(true)
+      persist('push_enabled', true)
+      setPushIssue(support === 'ios-needs-install' ? 'iosInstall' : 'unsupported')
+      return
+    }
+    const result = await enablePush(locale)
+    if (result === 'granted') {
+      setPushEnabled(true)
+      persist('push_enabled', true)
+    } else {
+      setPushEnabled(false)
+      persist('push_enabled', false)
+      if (result === 'denied') setPushIssue('blocked')
+    }
+  }
+
   const makeToggle = (key: PrefKey, setter: (v: boolean) => void) => (value: boolean) => {
     setter(value)
     persist(key, value)
@@ -78,10 +110,18 @@ export default function NotificationsPanel({ open, onClose }: Props) {
               {pushEnabled ? <Bell className="w-4 h-4 text-[#10B981]" /> : <BellOff className="w-4 h-4 text-gray-400" />}
               <p className="text-sm font-semibold text-gray-800">{t('pushTitle')}</p>
             </div>
-            <Toggle value={pushEnabled} onChange={makeToggle('push_enabled', setPushEnabled)} />
+            <Toggle value={pushEnabled} onChange={togglePush} />
           </div>
           <p className="text-xs text-gray-500">{t('pushDesc')}</p>
-          {!pushEnabled && (
+          {pushIssue && (
+            <div className="mt-3 flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-500 mt-0.5 shrink-0" />
+              <p className="text-xs text-amber-700">
+                {t(pushIssue === 'blocked' ? 'pushBlocked' : pushIssue === 'iosInstall' ? 'pushIosInstall' : 'pushUnsupported')}
+              </p>
+            </div>
+          )}
+          {!pushEnabled && !pushIssue && (
             <div className="mt-3 flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
               <AlertTriangle className="w-3.5 h-3.5 text-amber-500 mt-0.5 shrink-0" />
               <p className="text-xs text-amber-700">

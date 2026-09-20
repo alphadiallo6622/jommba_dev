@@ -19,6 +19,7 @@ import { computePlanPrices, isPlanId } from '@/lib/pricing'
 import { getPlatformSettings } from '@/lib/admin/queries'
 import { validatePromoCode, redeemPromoCode } from '@/lib/promo'
 import { paymentError } from '@/lib/payment-errors'
+import { createNotification } from '@/lib/push/notify'
 
 export const dynamic = 'force-dynamic'
 
@@ -65,6 +66,10 @@ export async function POST(req: NextRequest) {
     appliedPromoId = result.id
   }
 
+  // Passe à true dès que Square a débité : après cela, une erreur n'est plus un
+  // « paiement échoué » (le membre a payé) et ne doit pas être notifiée comme telle.
+  let charged = false
+
   // 4) Débit via Square (paiement unique, montant libre), rattaché à un client
   //    Square pour que son nom apparaisse sur le reçu (« Payé par »).
   try {
@@ -93,11 +98,20 @@ export async function POST(req: NextRequest) {
     })
 
     if (payment?.status !== 'COMPLETED') {
+      await createNotification({
+        userId: user.id,
+        type: 'premium',
+        title: 'Paiement échoué 💳',
+        body: "Ton paiement n'a pas abouti et aucun montant n'a été débité. Réessaie ou utilise une autre carte.",
+        i18n: 'paymentFailed',
+      })
       return NextResponse.json(
         { error: paymentError('notCompleted', locale), status: payment?.status },
         { status: 402 },
       )
     }
+
+    charged = true
 
     // 5) Consomme le code promo (incrément atomique, protégé contre la concurrence).
     if (appliedPromoId) {
@@ -149,10 +163,28 @@ export async function POST(req: NextRequest) {
       promoCode: promoCode?.trim() || null,
     })
 
+    // Notification + push « Premium confirmé ».
+    await createNotification({
+      userId: user.id,
+      type: 'premium',
+      title: 'Premium activé 👑',
+      body: 'Ton paiement est confirmé : ton accès Premium est actif. Profite de toutes les fonctionnalités !',
+      i18n: 'premiumConfirmed',
+    })
+
     return NextResponse.json({ ok: true, expiresAt: periodEnd.toISOString() })
   } catch (err) {
     const detail = extractSquareError(err)
     console.error('[payments/subscribe] Square error', detail ?? err)
+    if (!charged) {
+      await createNotification({
+        userId: user.id,
+        type: 'premium',
+        title: 'Paiement échoué 💳',
+        body: "Ton paiement n'a pas abouti et aucun montant n'a été débité. Réessaie ou utilise une autre carte.",
+        i18n: 'paymentFailed',
+      })
+    }
     return NextResponse.json({ error: paymentError('subscriptionFailed', locale), detail }, { status: 402 })
   }
 }

@@ -7,6 +7,7 @@ import CoachButton from '@/components/dashboard/CoachButton'
 import CoachModal from '@/components/coach/CoachModal'
 import BottomNav from '@/components/dashboard/BottomNav'
 import AddPhotoReminderModal from '@/components/dashboard/AddPhotoReminderModal'
+import PushNotificationManager from '@/components/pwa/PushNotificationManager'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   // Récupère le profil Supabase côté serveur — le middleware garantit qu'un
@@ -68,6 +69,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <CoachButton />
         <CoachModal />
         <BottomNav />
+        {/* Push + badge de l'icône PWA + dernière activité */}
+        <PushNotificationManager />
       </div>
     </NextIntlClientProvider>
   )

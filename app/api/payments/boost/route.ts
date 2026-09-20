@@ -15,6 +15,7 @@ import { sendPaymentEmails } from '@/lib/payment-emails'
 import { getBoost } from '@/lib/square/plans'
 import { getPlatformSettings } from '@/lib/admin/queries'
 import { paymentError } from '@/lib/payment-errors'
+import { createNotification } from '@/lib/push/notify'
 
 export const dynamic = 'force-dynamic'
 
@@ -46,6 +47,10 @@ export async function POST(req: NextRequest) {
   const { boostPricing } = await getPlatformSettings()
   const priceUsd = boostPricing[boost.id]
 
+  // Passe à true dès que Square a débité : une erreur ultérieure n'est plus un
+  // « paiement échoué » (le membre a payé) et ne doit pas être notifiée comme telle.
+  let charged = false
+
   // 3) Débit via Square, rattaché à un client Square pour que son nom apparaisse
   //    sur le reçu (« Payé par »).
   try {
@@ -76,11 +81,20 @@ export async function POST(req: NextRequest) {
     })
 
     if (payment?.status !== 'COMPLETED') {
+      await createNotification({
+        userId: user.id,
+        type: 'premium',
+        title: 'Paiement échoué 💳',
+        body: "Ton paiement n'a pas abouti et aucun montant n'a été débité. Réessaie ou utilise une autre carte.",
+        i18n: 'paymentFailed',
+      })
       return NextResponse.json(
         { error: paymentError('notCompleted', locale), status: payment?.status },
         { status: 402 },
       )
     }
+
+    charged = true
 
     // 4) Active le boost (admin client : contourne le RLS pour écrire côté serveur).
     const expiresAt = new Date(Date.now() + boost.durationHours * 60 * 60 * 1000)
@@ -112,12 +126,30 @@ export async function POST(req: NextRequest) {
       expiresAt,
     })
 
+    // Notification + push « Boost activé ».
+    await createNotification({
+      userId: user.id,
+      type: 'premium',
+      title: 'Boost activé 🚀',
+      body: 'Ton profil est mis en avant auprès des autres membres.',
+      i18n: 'boostActivated',
+    })
+
     return NextResponse.json({ ok: true, expiresAt: expiresAt.toISOString() })
   } catch (err) {
     // Remonte le détail Square (utile en dev pour distinguer carte refusée /
     // token invalide / mauvais environnement).
     const detail = extractSquareError(err)
     console.error('[payments/boost] Square error', detail ?? err)
+    if (!charged) {
+      await createNotification({
+        userId: user.id,
+        type: 'premium',
+        title: 'Paiement échoué 💳',
+        body: "Ton paiement n'a pas abouti et aucun montant n'a été débité. Réessaie ou utilise une autre carte.",
+        i18n: 'paymentFailed',
+      })
+    }
     return NextResponse.json(
       { error: paymentError('paymentFailed', locale), detail },
       { status: 402 },

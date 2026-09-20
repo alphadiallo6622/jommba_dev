@@ -11,6 +11,9 @@
  *  - Icônes PWA : cache d'abord (immuables, régénérées avec un nouveau nom au besoin).
  *  - Tout le reste (API, _next/*, images, Supabase…) : non intercepté, le
  *    navigateur gère normalement.
+ *
+ * Il porte aussi les notifications push et le badge de l'icône (voir la fin du
+ * fichier) ; ces handlers sont indépendants des stratégies de cache ci-dessus.
  */
 
 // Incrémenter cette version force le remplacement des anciens caches.
@@ -95,4 +98,113 @@ self.addEventListener("fetch", (event) => {
   }
 
   // Tout le reste : comportement navigateur par défaut (aucun respondWith).
+});
+
+// ── Notifications push ─────────────────────────────────────────────────────
+// Ajout indépendant du cache : les handlers ci-dessous ne touchent ni aux
+// stratégies de fetch ni au repli hors ligne.
+//
+// Charge utile envoyée par /api/push/send :
+//   { id, title, body, url, badge, lang }
+
+/** Met à jour le badge de l'icône (Chromium, Safari iOS 16.4+ installé). */
+async function updateAppBadge(count) {
+  try {
+    if (typeof count !== "number" || !("setAppBadge" in self.navigator)) return;
+    if (count > 0) await self.navigator.setAppBadge(count);
+    else await self.navigator.clearAppBadge();
+  } catch {
+    // Badge non supporté : sans conséquence.
+  }
+}
+
+self.addEventListener("push", (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    data = { title: "Jommba", body: event.data ? event.data.text() : "" };
+  }
+
+  event.waitUntil(
+    (async () => {
+      // Safari exige qu'un push affiche toujours une notification.
+      await self.registration.showNotification(data.title || "Jommba", {
+        body: data.body || "",
+        icon: "/icons/icon-192.png",
+        // Une notification par événement ; un renvoi du même id la remplace.
+        tag: data.id || undefined,
+        lang: data.lang || "fr",
+        data: { id: data.id, url: data.url || "/dashboard/notifications" },
+      });
+      await updateAppBadge(data.badge);
+    })()
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const { id, url } = event.notification.data || {};
+  const target = new URL(url || "/dashboard/notifications", self.location.origin).href;
+
+  event.waitUntil(
+    (async () => {
+      // 1) Marque comme lue et met le badge à jour. Un échec (hors ligne,
+      //    session expirée) ne doit pas empêcher l'ouverture de la page.
+      const markRead = fetch("/api/push/read", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((json) => (json ? updateAppBadge(json.badge) : undefined))
+        .catch(() => {});
+
+      // 2) Réutilise la fenêtre ouverte si elle existe, sinon en ouvre une.
+      const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+      const existing = windows.find((c) => new URL(c.url).origin === self.location.origin);
+      if (existing) {
+        await existing.focus().catch(() => {});
+        try {
+          await existing.navigate(target);
+        } catch {
+          // navigate() peut être indisponible : la page écoute ce message.
+          existing.postMessage({ type: "push-navigate", url: target });
+        }
+      } else {
+        await self.clients.openWindow(target);
+      }
+
+      await markRead;
+    })()
+  );
+});
+
+// Le navigateur a renouvelé l'abonnement (clé expirée…) : on se réabonne avec
+// la même clé applicative et on prévient le serveur. Sans session ouverte la
+// requête échoue ; l'abonnement sera de toute façon resynchronisé à la
+// prochaine visite (PushNotificationManager).
+self.addEventListener("pushsubscriptionchange", (event) => {
+  event.waitUntil(
+    (async () => {
+      try {
+        const old = event.oldSubscription;
+        const key = old && old.options && old.options.applicationServerKey;
+        if (!key) return;
+        const sub = await self.registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: key,
+        });
+        await fetch("/api/push/subscribe", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(sub.toJSON()),
+        });
+      } catch {
+        // Resynchronisé à la prochaine visite.
+      }
+    })()
+  );
 });
