@@ -40,9 +40,9 @@ export default function FlashMessageModal({ profile, isPremium, onSend, onClose 
   // ─── Upsell (non-Premium) ─────────────────────────────────────────────────
   if (!isPremium) {
     return (
-      <div className="fixed inset-0 z-[60] bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="fixed inset-0 z-[60] bg-black/50 flex items-center justify-center p-4 animate-overlay-in" onClick={onClose}>
         <div
-          className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden"
+          className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden animate-modal-in"
           onClick={e => e.stopPropagation()}
         >
           <div className="p-6 text-center">
@@ -97,9 +97,9 @@ export default function FlashMessageModal({ profile, isPremium, onSend, onClose 
 
   // ─── Composer (Premium) ───────────────────────────────────────────────────
   return (
-    <div className="fixed inset-0 z-[60] bg-black/50 flex items-end md:items-center md:justify-center" onClick={onClose}>
+    <div className="fixed inset-0 z-[60] bg-black/50 flex items-end md:items-center md:justify-center animate-overlay-in" onClick={onClose}>
       <div
-        className="bg-white rounded-t-2xl md:rounded-2xl w-full md:w-[440px] md:max-w-md overflow-hidden"
+        className="bg-white rounded-t-2xl md:rounded-2xl w-full md:w-[440px] md:max-w-md overflow-hidden animate-sheet-in"
         onClick={e => e.stopPropagation()}
       >
         <div className="md:hidden flex justify-center pt-3 pb-1">

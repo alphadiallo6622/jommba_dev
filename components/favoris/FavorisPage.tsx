@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { Heart, Users, HeartOff, Lock, Clock, Crown, MapPin, Loader2 } from 'lucide-react'
+import { Heart, Users, HeartOff, Lock, Clock, Crown, MapPin } from 'lucide-react'
+import { SkeletonCardGrid } from '@/components/ui/Skeleton'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { fetchBlockedIds } from '@/lib/supabase/moderation-service'
@@ -193,15 +194,17 @@ export default function FavorisPage() {
       </div>
 
       {loading && (
-        <div className="flex justify-center py-16">
-          <Loader2 className="w-6 h-6 animate-spin text-emerald-500" />
-        </div>
+        <SkeletonCardGrid
+          count={8}
+          photoClassName="aspect-square"
+          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"
+        />
       )}
 
       {/* === MES FAVORIS === */}
       {!loading && activeTab === 'mes-favoris' && (
         mesFavoris.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 stagger-children">
             {mesFavoris.map((entry) => (
               <FavorisCard
                 key={entry.profile.id}
@@ -250,7 +253,7 @@ export default function FavorisPage() {
           )}
 
           {quiMAime.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 stagger-children">
               {quiMAime.map((person) => (
                 <div
                   key={person.id}

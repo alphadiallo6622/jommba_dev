@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
-import { MessageCircle, Search, Loader2 } from 'lucide-react'
+import { MessageCircle, Search } from 'lucide-react'
+import { SkeletonList } from '@/components/ui/Skeleton'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/components/providers/AuthProvider'
 import {
@@ -115,15 +116,11 @@ export default function MessagesPage() {
       </div>
 
       {/* Loading */}
-      {loading && (
-        <div className="flex justify-center py-12">
-          <Loader2 className="w-6 h-6 animate-spin text-[#10B981]" />
-        </div>
-      )}
+      {loading && <SkeletonList count={6} />}
 
       {/* Conversations */}
       {!loading && (
-        <div className="space-y-2">
+        <div className="space-y-2 stagger-children">
           {filtered.length > 0 ? (
             filtered.map(conv => (
               <ConversationCard

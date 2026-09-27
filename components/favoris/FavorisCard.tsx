@@ -36,22 +36,22 @@ export default function FavorisCard({ entry, onRemove }: Props) {
   return (
     <div
       onClick={() => router.push(`/dashboard/profil/${profile.id}`)}
-      className="bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+      className="group bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-1 active:scale-[0.98] transition-[translate,scale,box-shadow] duration-300 ease-soft active:duration-75 cursor-pointer"
     >
       {/* Photo */}
-      <div className="relative">
+      <div className="relative overflow-hidden">
         <img
           src={photo}
           alt={profile.firstName}
-          className="w-full aspect-square object-cover"
+          className="w-full aspect-square object-cover transition-transform duration-500 ease-soft group-hover:scale-[1.03]"
         />
         {/* Delete button */}
         <button
           onClick={(e) => { e.stopPropagation(); onRemove(profile.id) }}
-          className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white shadow flex items-center justify-center hover:bg-red-50 transition-colors group"
+          className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white shadow flex items-center justify-center hover:bg-red-50 transition-colors group/delete"
           title={t('removeTitle')}
         >
-          <Trash2 className="w-3.5 h-3.5 text-gray-400 group-hover:text-red-500 transition-colors" />
+          <Trash2 className="w-3.5 h-3.5 text-gray-400 group-hover/delete:text-red-500 transition-colors" />
         </button>
       </div>
 

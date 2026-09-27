@@ -21,10 +21,10 @@ export default function PremiumGridModal() {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center px-6"
+      className="fixed inset-0 z-50 flex items-center justify-center px-6 animate-overlay-in"
       style={{ background: 'rgba(0,0,0,0.55)' }}
     >
-      <div className="bg-white rounded-2xl p-8 w-full max-w-sm shadow-2xl space-y-6">
+      <div className="bg-white rounded-2xl p-8 w-full max-w-sm shadow-2xl space-y-6 animate-modal-in">
         {/* Close */}
         <div className="flex justify-end">
           <button

@@ -42,11 +42,11 @@ export default function BottomNav() {
         {/* Icon — active gets a light pill background */}
         <div className="relative">
           <div className={cn(
-            'rounded-lg px-2 py-0.5',
+            'rounded-lg px-2 py-0.5 transition-colors duration-200',
             active ? 'bg-emerald-50' : 'bg-transparent',
           )}>
             <Icon className={cn(
-              'w-5 h-5',
+              'w-5 h-5 transition-colors duration-200',
               active ? 'text-emerald-500' : 'text-gray-400',
             )} />
           </div>
@@ -57,7 +57,7 @@ export default function BottomNav() {
           )}
         </div>
         <span className={cn(
-          'text-[9px]',
+          'text-[9px] transition-colors duration-200',
           active ? 'font-semibold text-emerald-600' : 'font-medium text-gray-400',
         )}>
           {label}
@@ -78,7 +78,7 @@ export default function BottomNav() {
           className="flex flex-col items-center gap-0.5 flex-1 -translate-y-2"
         >
           <div className={cn(
-            'w-12 h-12 rounded-full flex items-center justify-center shadow-md transition-colors',
+            'w-12 h-12 rounded-full flex items-center justify-center shadow-md transition-[background-color,scale] duration-150 active:scale-95',
             isDiscoverActive ? 'bg-emerald-600' : 'bg-emerald-500',
           )}>
             <Search className="w-5 h-5 text-white" />

@@ -16,7 +16,7 @@ export default function AnimatedSection({
   className = "",
   delay = 0,
   duration = 0.5,
-  yOffset = 20,
+  yOffset = 16,
 }: AnimatedSectionProps) {
   return (
     <motion.div

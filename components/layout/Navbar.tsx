@@ -83,7 +83,7 @@ export default function Navbar() {
             {user ? (
               <NextLink
                 href="/dashboard"
-                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white font-semibold text-sm shadow-green-btn hover:bg-primary-dark hover:-translate-y-0.5 transition-all duration-200"
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white font-semibold text-sm shadow-green-btn hover:bg-primary-dark hover:-translate-y-0.5 transition-all duration-200 active:scale-[0.97]"
               >
                 <LayoutDashboard className="w-4 h-4" />
                 {t("dashboard")}
@@ -98,7 +98,7 @@ export default function Navbar() {
                 </Link>
                 <Link
                   href="/inscription"
-                  className="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-primary text-white font-semibold text-sm shadow-green-btn hover:bg-primary-dark hover:-translate-y-0.5 transition-all duration-200"
+                  className="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-primary text-white font-semibold text-sm shadow-green-btn hover:bg-primary-dark hover:-translate-y-0.5 transition-all duration-200 active:scale-[0.97]"
                 >
                   {t("signup")}
                 </Link>
@@ -111,7 +111,7 @@ export default function Navbar() {
             {user ? (
               <NextLink
                 href="/dashboard"
-                className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full bg-primary text-white font-semibold text-sm shadow-green-btn hover:bg-primary-dark transition-all duration-200"
+                className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full bg-primary text-white font-semibold text-sm shadow-green-btn hover:bg-primary-dark transition-all duration-200 active:scale-[0.97]"
               >
                 <LayoutDashboard className="w-4 h-4" />
                 {t("dashboard")}
@@ -119,7 +119,7 @@ export default function Navbar() {
             ) : (
               <Link
                 href="/connexion"
-                className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap px-4 py-2 rounded-full bg-primary text-white font-semibold text-sm shadow-green-btn hover:bg-primary-dark transition-all duration-200"
+                className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap px-4 py-2 rounded-full bg-primary text-white font-semibold text-sm shadow-green-btn hover:bg-primary-dark transition-all duration-200 active:scale-[0.97]"
               >
                 <LogIn className="w-4 h-4 shrink-0" />
                 {t("loginCta")}

@@ -19,11 +19,11 @@ export default function AddPhotoReminderModal({ hasPhoto }: { hasPhoto: boolean 
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50"
+      className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 animate-overlay-in"
       onClick={() => setOpen(false)}
     >
       <div
-        className="w-full max-w-sm rounded-2xl bg-white shadow-xl overflow-hidden"
+        className="w-full max-w-sm rounded-2xl bg-white shadow-xl overflow-hidden animate-modal-in"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="relative bg-gradient-to-br from-[#0a7a52] via-[#0d9e6a] to-[#10b981] px-6 pt-7 pb-6 text-center">

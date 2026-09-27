@@ -24,11 +24,11 @@ export default function ProfileGridCard({ profile, blurred, viewerIsPremium }: P
 
   return (
     <div className={cn(
-      'bg-white rounded-xl overflow-hidden border shadow-sm',
+      'group bg-white rounded-xl overflow-hidden border shadow-sm transition-[translate,scale,box-shadow] duration-300 ease-soft active:duration-75 hover:-translate-y-1 hover:shadow-lg active:scale-[0.98]',
       profile.isEnAvant ? 'border-amber-300' : 'border-gray-100',
     )}>
       {/* Photo area */}
-      <div className="relative bg-gray-200" style={{ aspectRatio: '3/4' }}>
+      <div className="relative bg-gray-200 overflow-hidden" style={{ aspectRatio: '3/4' }}>
         {/* En avant badge */}
         {profile.isEnAvant && !blurred && (
           <div className="absolute top-2 left-2 z-10 bg-violet-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
@@ -59,7 +59,7 @@ export default function ProfileGridCard({ profile, blurred, viewerIsPremium }: P
             <img
               src={photoUrl}
               alt={`${profile.firstName} ${profile.lastInitial}.`}
-              className="w-full h-full object-cover cursor-pointer"
+              className="w-full h-full object-cover cursor-pointer transition-transform duration-500 ease-soft group-hover:scale-[1.03]"
               onClick={() => router.push(`/dashboard/profil/${profile.id}`)}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
@@ -74,7 +74,7 @@ export default function ProfileGridCard({ profile, blurred, viewerIsPremium }: P
             {/* Add button */}
             <button
               onClick={() => toast.success(t('grid.requestSent'))}
-              className="absolute bottom-2 right-2 w-8 h-8 rounded-full flex items-center justify-center shadow-md hover:opacity-90 transition-opacity"
+              className="absolute bottom-2 right-2 w-8 h-8 rounded-full flex items-center justify-center shadow-md hover:opacity-90 hover:scale-110 active:scale-90 transition-[opacity,scale] duration-150"
               style={{ background: '#10B981' }}
             >
               <Plus className="w-4 h-4 text-white" />

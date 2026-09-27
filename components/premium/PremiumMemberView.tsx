@@ -82,11 +82,11 @@ export default function PremiumMemberView() {
   }
 
   return (
-    <div className="space-y-6 py-6">
+    <div className="space-y-6 py-6 stagger-children">
 
       {/* Member hero */}
       <section className="bg-[#064E3B] rounded-2xl p-6 text-white text-center space-y-3">
-        <div className="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center mx-auto">
+        <div className="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center mx-auto animate-success-in">
           <Crown className="w-7 h-7 text-amber-400" />
         </div>
         <div>

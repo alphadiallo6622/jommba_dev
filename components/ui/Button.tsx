@@ -25,17 +25,17 @@ export default function Button({
   ...props
 }: ButtonProps) {
   const baseStyles =
-    "inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:transform-none select-none";
+    "inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 ease-soft active:duration-75 focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:transform-none disabled:hover:scale-100 select-none";
 
   const variants = {
     primary:
-      "bg-primary text-white shadow-green-btn hover:bg-primary-dark hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm",
+      "bg-primary text-white shadow-green-btn hover:bg-primary-dark hover:scale-[1.02] hover:shadow-green active:scale-[0.98] active:shadow-sm",
     secondary:
       "border border-primary/20 bg-primary-light/10 text-primary hover:bg-primary-light/40 hover:border-primary/40 active:bg-primary-light/60",
     ghost:
       "text-text-primary hover:bg-primary-light/30 hover:text-primary active:bg-primary-light/50",
     dark:
-      "bg-jommba-dark text-white hover:bg-jommba-dark/95 hover:-translate-y-0.5 active:translate-y-0",
+      "bg-jommba-dark text-white hover:bg-jommba-dark/95 hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]",
   };
 
   const sizes = {

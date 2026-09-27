@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { Heart, Inbox, Send, Users, Search, Timer, CheckCircle, XCircle, Loader2 } from 'lucide-react'
+import { Heart, Inbox, Send, Users, Search, Timer, CheckCircle, XCircle } from 'lucide-react'
+import { SkeletonList } from '@/components/ui/Skeleton'
 import { toast } from 'sonner'
 import type { ReceivedRequest, SentRequest, ContactEntry } from '@/lib/mock-demandes'
 import { cn } from '@/lib/utils'
@@ -251,17 +252,18 @@ export default function DemandesPage() {
         ))}
       </div>
 
-      {/* Loading spinner */}
+      {/* Loading skeleton */}
       {loading && (
-        <div className="flex justify-center py-16">
-          <Loader2 className="w-6 h-6 animate-spin text-[#10B981]" />
-        </div>
+        <SkeletonList
+          count={6}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+        />
       )}
 
       {/* === REÇUES === */}
       {!loading && activeTab === 'recues' && (
         recues.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 stagger-children">
             {recues.map(r => (
               <ReceivedRequestCard
                 key={r.id}
@@ -304,7 +306,7 @@ export default function DemandesPage() {
           </div>
 
           {filteredEnvoyees.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 stagger-children">
               {filteredEnvoyees.map(r => (
                 <SentRequestCard key={r.id} request={r} />
               ))}
@@ -324,7 +326,7 @@ export default function DemandesPage() {
       {/* === CONTACTS === */}
       {!loading && activeTab === 'contacts' && (
         contacts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 stagger-children">
             {contacts.map(c => (
               <ContactCard key={c.id} contact={c} />
             ))}

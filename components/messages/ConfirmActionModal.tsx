@@ -31,11 +31,11 @@ export default function ConfirmActionModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/50 flex items-end md:items-center md:justify-center pb-16 md:pb-0"
+      className="fixed inset-0 z-50 bg-black/50 flex items-end md:items-center md:justify-center pb-16 md:pb-0 animate-overlay-in"
       onClick={pending ? undefined : onCancel}
     >
       <div
-        className="bg-white rounded-t-2xl md:rounded-2xl w-full md:w-[420px] p-5"
+        className="bg-white rounded-t-2xl md:rounded-2xl w-full md:w-[420px] p-5 animate-sheet-in"
         onClick={e => e.stopPropagation()}
       >
         {/* Handle bar — mobile only */}

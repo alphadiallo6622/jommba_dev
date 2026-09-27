@@ -44,16 +44,19 @@ function GridCard({ profile, liked, onLike, viewerIsPremium }: {
   const t = useTranslations('dashboard.grid')
   const isOnline = useIsOnline(profile.id)
   return (
-    <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer group">
+    <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-1 active:scale-[0.98] transition-[translate,scale,box-shadow] duration-300 ease-soft active:duration-75 cursor-pointer group">
       <div
-        className="relative"
+        className="relative overflow-hidden"
         style={{ aspectRatio: '3/4' }}
         onClick={() => router.push(`/dashboard/profil/${profile.id}`)}
       >
         <img
           src={profile.photo}
           alt={profile.name}
-          className={cn('w-full h-full object-cover', profile.photoBlurred && 'blur-md scale-105')}
+          className={cn(
+            'w-full h-full object-cover transition-transform duration-500 ease-soft',
+            profile.photoBlurred ? 'blur-md scale-105' : 'group-hover:scale-[1.03]',
+          )}
           draggable={false}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/5 to-transparent pointer-events-none" />
@@ -75,11 +78,15 @@ function GridCard({ profile, liked, onLike, viewerIsPremium }: {
         <button
           onClick={(e) => { e.stopPropagation(); onLike() }}
           className={cn(
-            'absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center shadow transition-colors',
+            'absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center shadow transition-[background-color,scale] duration-150 hover:scale-110 active:scale-90',
             liked ? 'bg-emerald-500' : 'bg-white/90 hover:bg-emerald-50'
           )}
         >
-          <Star className={cn('w-4 h-4', liked ? 'text-white fill-white' : 'text-gray-400')} />
+          {/* key : l'étoile remonte au passage en « liké » → pulse de confirmation */}
+          <Star
+            key={liked ? 'liked' : 'idle'}
+            className={cn('w-4 h-4', liked ? 'text-white fill-white animate-pop' : 'text-gray-400')}
+          />
         </button>
 
         <div className={cn(
@@ -218,7 +225,7 @@ export default function ProfileGrid() {
           <span className="text-xs text-gray-400">{t('profilesCount', { count: profiles.length })}</span>
         </div>
 
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-4 gap-3 stagger-children">
           {profiles.map(p => (
             <GridCard
               key={p.id}

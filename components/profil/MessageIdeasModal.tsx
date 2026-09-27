@@ -89,11 +89,11 @@ export default function MessageIdeasModal({ profile, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-[60] bg-black/50 flex items-end md:items-center md:justify-center"
+      className="fixed inset-0 z-[60] bg-black/50 flex items-end md:items-center md:justify-center animate-overlay-in"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-t-2xl md:rounded-2xl w-full md:w-[480px] md:max-w-lg flex flex-col overflow-hidden"
+        className="bg-white rounded-t-2xl md:rounded-2xl w-full md:w-[480px] md:max-w-lg flex flex-col overflow-hidden animate-sheet-in"
         style={{ maxHeight: '88dvh' }}
         onClick={e => e.stopPropagation()}
       >

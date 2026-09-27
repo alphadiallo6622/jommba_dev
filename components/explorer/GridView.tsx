@@ -37,7 +37,7 @@ export default function GridView() {
           : t('grid.freeVisible', { count: FREE_CARD_COUNT })
         }
       </p>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 stagger-children">
         {profiles.map((profile, i) => (
           <ProfileGridCard
             key={profile.id}

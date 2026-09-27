@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { ArrowLeft, Bell, Check, Loader2 } from 'lucide-react'
+import { ArrowLeft, Bell, Check } from 'lucide-react'
+import { SkeletonList } from '@/components/ui/Skeleton'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/providers/AuthProvider'
@@ -178,11 +179,7 @@ export default function NotificationsPage() {
         })}
       </div>
 
-      {loading && (
-        <div className="flex justify-center py-12">
-          <Loader2 className="w-6 h-6 animate-spin text-[#10B981]" />
-        </div>
-      )}
+      {loading && <SkeletonList count={6} className="space-y-1" />}
 
       {!loading && filtered.length > 0 && (
         <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-3 px-1">
@@ -191,7 +188,7 @@ export default function NotificationsPage() {
       )}
 
       {!loading && (
-        <div className="space-y-1">
+        <div className="space-y-1 stagger-children">
           {filtered.length > 0 ? (
             filtered.map(n => (
               <NotificationCard key={n.id} notif={n} onRead={markAsRead} />

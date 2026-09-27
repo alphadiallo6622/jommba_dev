@@ -6,6 +6,7 @@ import { SITE_METADATA } from "@/lib/constants";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { PresenceProvider } from "@/components/providers/PresenceProvider";
+import MotionProvider from "@/components/providers/MotionProvider";
 import PWAInstallBanner from "@/components/pwa/PWAInstallBanner";
 import ServiceWorkerRegistrar from "@/components/pwa/ServiceWorkerRegistrar";
 import { createClient } from "@/lib/supabase/server";
@@ -74,16 +75,18 @@ export default async function RootLayout({
       className={`notranslate ${inter.variable} ${playfair.variable} ${arefRuqaa.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-jommba-bg text-text-secondary font-sans">
-        <AuthProvider initialUser={user}>
-          <PresenceProvider>
-            {children}
-          </PresenceProvider>
-        </AuthProvider>
-        <Toaster richColors position="top-center" />
-        <ServiceWorkerRegistrar />
-        <NextIntlClientProvider locale={locale} messages={pwaMessages}>
-          <PWAInstallBanner />
-        </NextIntlClientProvider>
+        <MotionProvider>
+          <AuthProvider initialUser={user}>
+            <PresenceProvider>
+              {children}
+            </PresenceProvider>
+          </AuthProvider>
+          <Toaster richColors position="top-center" />
+          <ServiceWorkerRegistrar />
+          <NextIntlClientProvider locale={locale} messages={pwaMessages}>
+            <PWAInstallBanner />
+          </NextIntlClientProvider>
+        </MotionProvider>
       </body>
     </html>
   );

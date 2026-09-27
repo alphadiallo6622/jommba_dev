@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
 import { useTranslations } from 'next-intl'
 import { Volume2, VolumeX, EyeOff, Eye, LogOut, Settings, HelpCircle, User } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -54,7 +55,13 @@ export default function ProfileDropdown({ onClose }: Props) {
   }
 
   return (
-    <div className="absolute top-full right-0 mt-1 w-64 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-50 overflow-hidden">
+    <motion.div
+      className="absolute top-full right-0 mt-1 w-64 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-50 overflow-hidden origin-top-right"
+      initial={{ opacity: 0, y: -4, scale: 0.97 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -4, scale: 0.97, transition: { duration: 0.12, ease: [0.4, 0, 1, 1] } }}
+      transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+    >
 
       {/* Identity row */}
       <div className="px-4 py-3 bg-[#E1F5EE] border-b border-gray-100">
@@ -141,6 +148,6 @@ export default function ProfileDropdown({ onClose }: Props) {
         <LogOut className="w-4 h-4" />
         {t('logout')}
       </button>
-    </div>
+    </motion.div>
   )
 }

@@ -77,12 +77,15 @@ export default function ProfileSwipeCard({ profile, highlightPhoto, isFavorite, 
             {onToggleFavorite && (
               <button
                 onClick={(e) => { e.stopPropagation(); onToggleFavorite() }}
-                className="w-9 h-9 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/40 transition-colors ml-2 shrink-0"
+                className="w-9 h-9 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/40 hover:scale-110 active:scale-90 transition-[background-color,scale] duration-150 ml-2 shrink-0"
               >
-                <Star className={cn(
-                  'w-4 h-4 transition-colors',
-                  isFavorite ? 'fill-amber-400 text-amber-400' : 'text-white',
-                )} />
+                <Star
+                  key={isFavorite ? 'on' : 'off'}
+                  className={cn(
+                    'w-4 h-4 transition-colors',
+                    isFavorite ? 'fill-amber-400 text-amber-400 animate-pop' : 'text-white',
+                  )}
+                />
               </button>
             )}
           </div>

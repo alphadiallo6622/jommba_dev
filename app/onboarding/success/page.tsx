@@ -6,7 +6,7 @@ export default async function OnboardingSuccessPage() {
   const t = await getTranslations('onboarding.success')
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6 py-12">
-      <div className="w-full max-w-sm space-y-8 text-center">
+      <div className="w-full max-w-sm space-y-8 text-center stagger-children">
 
         {/* Logo */}
         <div className="flex justify-center">
@@ -21,10 +21,23 @@ export default async function OnboardingSuccessPage() {
         {/* Success circle */}
         <div className="flex flex-col items-center gap-4">
           <div
-            className="w-24 h-24 rounded-full flex items-center justify-center shadow-lg"
+            className="w-24 h-24 rounded-full flex items-center justify-center shadow-lg animate-success-in"
             style={{ background: 'linear-gradient(135deg, #10B981 0%, #064E3B 100%)' }}
           >
-            <CheckCircle2 className="w-12 h-12 text-white" />
+            {/* Même tracé que l'icône CheckCircle2, la coche se dessine à l'arrivée */}
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="w-12 h-12 text-white"
+              aria-hidden
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="m9 12 2 2 4-4" pathLength={1} className="animate-check-draw" />
+            </svg>
           </div>
           <div className="space-y-1.5">
             <h1 className="text-2xl font-serif font-bold text-gray-900">{t('title')}</h1>

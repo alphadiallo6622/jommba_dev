@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
+import { AnimatePresence } from 'framer-motion'
 import { useTranslations } from 'next-intl'
 import { Home, Compass, Eye, Star, Heart, Crown, Zap, MessageCircle, Bell, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -190,9 +191,11 @@ export default function DashboardNavbar() {
                 dropdownOpen && 'rotate-180',
               )} />
             </button>
-            {dropdownOpen && (
-              <ProfileDropdown onClose={() => setDropdown(false)} />
-            )}
+            <AnimatePresence>
+              {dropdownOpen && (
+                <ProfileDropdown key="profile-dropdown" onClose={() => setDropdown(false)} />
+              )}
+            </AnimatePresence>
           </div>
 
           {dropdownOpen && (

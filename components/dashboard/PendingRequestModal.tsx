@@ -198,11 +198,11 @@ export default function PendingRequestModal() {
 
   return (
     <div
-      className="fixed inset-0 z-[60] bg-black/50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-[60] bg-black/50 flex items-center justify-center p-4 animate-overlay-in"
       onClick={step === 'invite' ? dismiss : undefined}
     >
       <div
-        className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden"
+        className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden animate-modal-in"
         onClick={e => e.stopPropagation()}
       >
         {step === 'invite' ? (

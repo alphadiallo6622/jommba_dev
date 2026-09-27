@@ -18,12 +18,12 @@ export default function BlockModal({ profileName, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center px-6"
+      className="fixed inset-0 z-50 flex items-center justify-center px-6 animate-overlay-in"
       style={{ background: 'rgba(0,0,0,0.45)' }}
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl space-y-4"
+        className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl space-y-4 animate-modal-in"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}

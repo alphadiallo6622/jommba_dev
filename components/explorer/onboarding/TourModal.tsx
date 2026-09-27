@@ -10,10 +10,10 @@ type Props = {
 export default function TourModal({ step, stepIndex, totalSteps, onNext }: Props) {
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center pb-8 sm:pb-0"
+      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center pb-8 sm:pb-0 animate-overlay-in"
       style={{ background: 'rgba(0,0,0,0.55)' }}
     >
-      <div className="bg-white rounded-2xl p-8 w-[320px] shadow-2xl text-center space-y-5 mx-4">
+      <div className="bg-white rounded-2xl p-8 w-[320px] shadow-2xl text-center space-y-5 mx-4 animate-modal-in">
         {/* Step dots */}
         <div className="flex items-center justify-center gap-1.5">
           {Array.from({ length: totalSteps }).map((_, i) => (

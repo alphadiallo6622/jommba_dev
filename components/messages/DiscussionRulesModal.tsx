@@ -17,11 +17,11 @@ export default function DiscussionRulesModal({ firstName, lastInitial, onConfirm
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/50 flex items-end md:items-center md:justify-center pb-16 md:pb-0"
+      className="fixed inset-0 z-50 bg-black/50 flex items-end md:items-center md:justify-center pb-16 md:pb-0 animate-overlay-in"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-t-2xl md:rounded-2xl w-full md:w-[460px] md:max-w-lg flex flex-col"
+        className="bg-white rounded-t-2xl md:rounded-2xl w-full md:w-[460px] md:max-w-lg flex flex-col animate-sheet-in"
         style={{ maxHeight: '90dvh' }}
         onClick={e => e.stopPropagation()}
       >

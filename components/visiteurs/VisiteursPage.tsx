@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { Eye, Loader2 } from 'lucide-react'
+import { Eye } from 'lucide-react'
+import { SkeletonCardGrid } from '@/components/ui/Skeleton'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { useCurrentUser } from '@/lib/use-current-user'
 import { createClient } from '@/lib/supabase/client'
@@ -121,9 +122,10 @@ export default function VisiteursPage() {
       </div>
 
       {loading && (
-        <div className="flex justify-center py-16">
-          <Loader2 className="w-6 h-6 animate-spin text-emerald-500" />
-        </div>
+        <SkeletonCardGrid
+          count={4}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+        />
       )}
 
       {/* Le bandeau ne compte que les visiteurs encore masqués : inutile de
@@ -136,7 +138,7 @@ export default function VisiteursPage() {
       )}
 
       {!loading && visitors.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
           {visitors.map((visitor, index) =>
             // Premium : tout est visible. Free : seuls les `visibleLimit`
             // visiteurs les plus récents le sont, les autres restent floutés.
