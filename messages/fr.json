@@ -287,6 +287,8 @@
       "createAccount": "Créer mon compte",
       "turnstileRequired": "Merci de valider le contrôle anti-robot.",
       "turnstileFailed": "Vérification anti-robot échouée. Réessaie.",
+      "turnstileError": "Le contrôle de sécurité n'a pas pu se charger. Vérifie ta connexion et réessaie.",
+      "turnstileRetry": "Réessayer",
       "accountCreated": "Compte créé ! Vérifie ta boîte mail.",
       "errorFirstNameMin": "Prénom requis (min. 2 caractères)",
       "errorLastNameMin": "Nom requis (min. 2 caractères)",

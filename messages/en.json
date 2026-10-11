@@ -287,6 +287,8 @@
       "createAccount": "Create my account",
       "turnstileRequired": "Please complete the anti-bot check.",
       "turnstileFailed": "Anti-bot verification failed. Try again.",
+      "turnstileError": "The security check could not load. Check your connection and try again.",
+      "turnstileRetry": "Try again",
       "accountCreated": "Account created! Check your inbox.",
       "errorFirstNameMin": "First name required (min. 2 characters)",
       "errorLastNameMin": "Last name required (min. 2 characters)",
