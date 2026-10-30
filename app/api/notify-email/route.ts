@@ -12,6 +12,23 @@ const PREF_COLUMN: Record<NotifyType, 'email_demande' | 'email_message'> = {
   message:          'email_message',
 }
 
+// Colonne d'horodatage du dernier envoi, pour les types que l'on espace.
+// `demande_acceptee` reste immediat : l'evenement est rare et attendu.
+const THROTTLE_COLUMN: Partial<Record<NotifyType, 'last_message_email_at' | 'last_demande_email_at'>> = {
+  message: 'last_message_email_at',
+  demande: 'last_demande_email_at',
+}
+
+/** Un seul e-mail « nouveau message » / « nouvelle demande » par fenêtre. */
+const THROTTLE_HOURS = 5
+
+/**
+ * En deçà de ce délai depuis la dernière activité, le membre est considéré
+ * devant son écran : la notification in-app et le push suffisent, l'e-mail
+ * ferait doublon.
+ */
+const ACTIVE_MINUTES = 15
+
 const SUBJECT: Record<NotifyType, string> = {
   demande:          'Nouvelle demande de contact sur Jommba',
   demande_acceptee: 'Ta demande a été acceptée 🎉',
@@ -38,10 +55,11 @@ export async function POST(req: NextRequest) {
   }
 
   const admin = createAdminClient()
+  const throttleColumn = THROTTLE_COLUMN[type]
 
   const { data: prefs } = await admin
     .from('user_preferences')
-    .select('email_demande, email_message')
+    .select('email_demande, email_message, last_message_email_at, last_demande_email_at')
     .eq('user_id', receiverId)
     .maybeSingle()
 
@@ -50,16 +68,30 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ sent: false, reason: 'opted_out' })
   }
 
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('first_name, last_seen_at')
+    .eq('user_id', receiverId)
+    .maybeSingle()
+
+  // Le membre est devant son écran : la notification in-app et le push font
+  // déjà le travail. `last_seen_at` vide = jamais vu, donc on notifie.
+  const lastSeen = profile?.last_seen_at ? Date.parse(profile.last_seen_at) : 0
+  if (Date.now() - lastSeen < ACTIVE_MINUTES * 60_000) {
+    return NextResponse.json({ sent: false, reason: 'recently_active' })
+  }
+
+  // Un seul e-mail par fenêtre : les événements suivants restent visibles
+  // in-app et en push, ils ne déclenchent plus d'envoi.
+  const lastEmail = throttleColumn ? prefs[throttleColumn] : null
+  if (lastEmail && Date.now() - Date.parse(lastEmail) < THROTTLE_HOURS * 3_600_000) {
+    return NextResponse.json({ sent: false, reason: 'throttled' })
+  }
+
   const { data: userData, error: userError } = await admin.auth.admin.getUserById(receiverId)
   if (userError || !userData?.user?.email) {
     return NextResponse.json({ sent: false, reason: 'no_email' })
   }
-
-  const { data: profile } = await admin
-    .from('profiles')
-    .select('first_name')
-    .eq('user_id', receiverId)
-    .maybeSingle()
 
   try {
     await sendEmail({
@@ -68,8 +100,23 @@ export async function POST(req: NextRequest) {
       subject: SUBJECT[type],
       text: buildText(type, senderName ?? 'Un membre'),
     })
-    return NextResponse.json({ sent: true })
   } catch {
     return NextResponse.json({ sent: false, reason: 'smtp_error' })
   }
+
+  // Horodaté après succès seulement : un échec SMTP ne doit pas faire sauter
+  // la fenêtre suivante.
+  if (throttleColumn) {
+    const now = new Date().toISOString()
+    await admin
+      .from('user_preferences')
+      .update(
+        throttleColumn === 'last_message_email_at'
+          ? { last_message_email_at: now }
+          : { last_demande_email_at: now }
+      )
+      .eq('user_id', receiverId)
+  }
+
+  return NextResponse.json({ sent: true })
 }

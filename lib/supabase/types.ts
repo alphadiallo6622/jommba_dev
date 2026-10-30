@@ -83,6 +83,10 @@ export interface UserPreferences {
   email_demande:  boolean
   email_message:  boolean
   email_promo:    boolean
+  // Dernier e-mail de notification envoyé, par type : sert à les espacer
+  // (un seul par fenêtre de quelques heures). null = aucun envoi à ce jour.
+  last_message_email_at: string | null
+  last_demande_email_at: string | null
   created_at:     string
   updated_at:     string
 }
