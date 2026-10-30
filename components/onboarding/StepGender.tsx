@@ -14,11 +14,16 @@ export default function StepGender({ onNext }: Props) {
   const [pending, setPending] = useState<'homme' | 'femme' | null>(null)
 
   const select = (g: 'homme' | 'femme') => {
-    if (gender && gender !== g) return // already chosen — irreversible
-    if (!gender) {
-      setPending(g)
-      setShowModal(true)
+    // Le store est persisté (localStorage) : au retour sur l'onboarding, le
+    // genre est déjà renseigné. Sans ce cas, cliquer sur son propre genre ne
+    // faisait rien et l'étape devenait un cul-de-sac — aucun autre moyen
+    // d'avancer, la navigation ne passant que par la modale de confirmation.
+    if (gender) {
+      if (gender === g) onNext() // le choix reste irréversible, on avance
+      return
     }
+    setPending(g)
+    setShowModal(true)
   }
 
   const confirm = () => {
@@ -58,6 +63,19 @@ export default function StepGender({ onNext }: Props) {
           </button>
         ))}
       </div>
+
+      {/* Genre déjà choisi : bouton explicite pour repartir vers l'étape
+          suivante, sans quoi rien n'indique qu'il faut recliquer sa carte. */}
+      {gender && (
+        <button
+          type="button"
+          onClick={onNext}
+          className="w-full py-3 rounded-xl text-white font-semibold text-sm hover:opacity-90 transition-opacity"
+          style={{ background: '#10B981' }}
+        >
+          {t('nav.continue')}
+        </button>
+      )}
 
       {/* Confirmation modal */}
       {showModal && (
