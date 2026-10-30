@@ -45,3 +45,7 @@ next-env.d.ts
 
 .vercel
 .env*
+
+# Rapports d'analyse générés localement. Le dépôt est public : ces documents
+# décrivent l'état et les faiblesses du site, ils restent sur la machine.
+/RAPPORT_*.pdf
