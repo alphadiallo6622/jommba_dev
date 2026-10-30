@@ -3,6 +3,28 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { localizePath, safeNextPath, toAuthLocale } from '@/lib/auth/localize-path'
 
+/**
+ * L'onboarding est-il terminé pour la session courante ?
+ * `gender` sert de témoin : la dernière étape de l'onboarding écrit tous ses
+ * champs en un seul `update`, il ne peut donc pas être renseigné à moitié.
+ * En cas de doute (session illisible, profil absent) on renvoie `false` :
+ * mieux vaut un onboarding proposé en trop qu'un profil vide publié.
+ */
+async function isOnboardingDone(
+  supabase: ReturnType<typeof createServerClient>
+): Promise<boolean> {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return false
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('gender')
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  return Boolean(profile?.gender)
+}
+
 // Échange le code OAuth/email contre une session Supabase.
 // Utilisé après confirmation d'email ou connexion OAuth (Google).
 export async function GET(request: Request) {
@@ -33,7 +55,13 @@ export async function GET(request: Request) {
 
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
-      const target = localizePath(next, locale)
+      // Tant que l'onboarding n'est pas terminé, il prime sur `next`. La
+      // connexion Google depuis /connexion n'envoie aucun `next` : sans cette
+      // vérification, un nouveau membre arrivait sur /dashboard avec un profil
+      // vide. Le layout du dashboard l'y renverrait de toute façon ; on évite
+      // ici l'aller-retour.
+      const destination = (await isOnboardingDone(supabase)) ? next : '/onboarding'
+      const target = localizePath(destination, locale)
       const forwardedHost = request.headers.get('x-forwarded-host')
       const isLocalEnv = process.env.NODE_ENV === 'development'
 
