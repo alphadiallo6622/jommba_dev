@@ -12,7 +12,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
-import { authErrorMessage } from '@/lib/auth/error-message'
+import { authErrorMessage, isEmailDeliveryFailure } from '@/lib/auth/error-message'
 import { cn } from '@/lib/utils'
 import { Link } from '@/i18n/navigation'
 import { TurnstileWidget } from '@/components/auth/TurnstileWidget'
@@ -242,7 +242,16 @@ export default function InscriptionPage() {
         },
       })
       if (error) {
-        toast.error(authErrorMessage(error, t('errorGeneric')))
+        // Panne d'envoi d'e-mail : rien à corriger dans le formulaire. On
+        // ramène à l'étape 1, seul endroit où « Continuer avec Google » est
+        // visible — c'est la voie qui fonctionne pendant ce type de panne,
+        // Supabase rattachant l'identité Google au compte déjà créé.
+        if (isEmailDeliveryFailure(error)) {
+          setStep(1)
+          toast.error(t('errorEmailDelivery'), { duration: 12000 })
+        } else {
+          toast.error(authErrorMessage(error, t('errorGeneric')))
+        }
         resetTurnstile()
       } else {
         toast.success(t('accountCreated'))

@@ -81,7 +81,12 @@ export default function MotDePasseOubliePage() {
       if (!res.ok) {
         const body = await res.json().catch(() => ({}))
         console.error('[MotDePasseOublie] Envoi échoué:', res.status, body)
-        toast.error(body.error === 'rate_limited' ? t('errorRateLimited') : t('errorSendFailed'))
+        if (body.error === 'rate_limited') {
+          toast.error(t('errorRateLimited'))
+        } else {
+          // Message long qui oriente vers Google : laisser le temps de le lire.
+          toast.error(t('errorSendFailed'), { duration: 12000 })
+        }
         return
       }
       setSentEmail(data.email)

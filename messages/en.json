@@ -298,6 +298,7 @@
       "errorConfirmRequired": "Confirmation required",
       "errorPasswordMismatch": "Passwords don't match",
       "errorGeneric": "Account creation failed. Please try again in a moment.",
+      "errorEmailDelivery": "Confirmation emails are temporarily unavailable. Sign up right now with “Continue with Google”, or try again later today.",
       "errorNetwork": "Can't reach the server. Check your internet connection."
     },
     "forgotPassword": {
@@ -311,7 +312,7 @@
       "sentHint": "Didn't get it? Check your <strong>Spam</strong> folder. The link is valid for <strong>1 hour</strong>.",
       "useAnotherEmail": "Use a different email address",
       "backToLogin": "Back to sign in",
-      "errorSendFailed": "Couldn't send the link right now.",
+      "errorSendFailed": "Email delivery is temporarily unavailable. If you signed up with Google, just sign in with “Continue with Google”. Otherwise, try again later today.",
       "errorNetwork": "Couldn't send the link. Check your internet connection.",
       "errorEmailInvalid": "Invalid email address",
       "errorRateLimited": "A link was just sent. Please try again in a minute."
