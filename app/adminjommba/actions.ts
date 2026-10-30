@@ -13,7 +13,7 @@ import { sendEmail } from "@/lib/email";
 import { deleteCloudinaryImage, publicIdFromUrl } from "@/lib/cloudinary";
 import { PHOTO_REJECTED_MESSAGE } from "@/lib/photo-messages";
 import type { BroadcastTarget, Json } from "@/lib/supabase/types";
-import type { LimitsSettings, PricingSettings, BoostPricingSettings, MaintenanceSettings, GeoBlockSettings } from "@/lib/admin/types";
+import type { LimitsSettings, PricingSettings, BoostPricingSettings, MaintenanceSettings, GeoBlockSettings, EmailNotificationSettings } from "@/lib/admin/types";
 
 export interface ActionResult {
   ok: boolean;
@@ -853,6 +853,32 @@ export async function setMaintenance(maintenance: MaintenanceSettings): Promise<
     // Le middleware lit le drapeau à chaque requête : on invalide tout le cache
     // pour que la bascule prenne effet immédiatement.
     revalidatePath("/", "layout");
+  }, "settings");
+}
+
+/**
+ * Active ou coupe globalement les e-mails de notification, par type.
+ *
+ * Ces interrupteurs s'ajoutent aux préférences de chaque membre : l'e-mail ne
+ * part que si le membre ET l'administrateur l'autorisent. Les notifications
+ * in-app et les push ne sont jamais affectés.
+ */
+export async function setEmailNotifications(
+  notifications: EmailNotificationSettings,
+): Promise<ActionResult> {
+  return run(async () => {
+    const supabase = createAdminClient();
+    const { error } = await supabase.from("platform_settings").upsert({
+      id: 1,
+      // Normalisé en booléens : une valeur douteuse ne doit pas se retrouver
+      // en base, la route de notification la relirait telle quelle.
+      notifications: {
+        demande: notifications.demande === true,
+        message: notifications.message === true,
+      } as unknown as Json,
+      updated_at: new Date().toISOString(),
+    });
+    if (error) throw new Error(error.message);
   }, "settings");
 }
 

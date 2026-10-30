@@ -19,6 +19,15 @@ const THROTTLE_COLUMN: Partial<Record<NotifyType, 'last_message_email_at' | 'las
   demande: 'last_demande_email_at',
 }
 
+// Interrupteur global correspondant, réglé dans la console admin.
+// `demande_acceptee` suit le même interrupteur que `demande`, comme pour la
+// préférence individuelle.
+const SWITCH_KEY: Record<NotifyType, 'demande' | 'message'> = {
+  demande:          'demande',
+  demande_acceptee: 'demande',
+  message:          'message',
+}
+
 /** Un seul e-mail « nouveau message » / « nouvelle demande » par fenêtre. */
 const THROTTLE_HOURS = 5
 
@@ -56,6 +65,21 @@ export async function POST(req: NextRequest) {
 
   const admin = createAdminClient()
   const throttleColumn = THROTTLE_COLUMN[type]
+
+  // Interrupteur global (console admin → Paramètres). Seul un `false` explicite
+  // coupe l'envoi : réglage absent ou lecture impossible = on laisse passer,
+  // pour qu'un incident de configuration ne prive jamais les membres de leurs
+  // notifications.
+  const { data: platform } = await admin
+    .from('platform_settings')
+    .select('notifications')
+    .eq('id', 1)
+    .maybeSingle()
+
+  const switches = (platform?.notifications ?? {}) as Partial<Record<'demande' | 'message', boolean>>
+  if (switches[SWITCH_KEY[type]] === false) {
+    return NextResponse.json({ sent: false, reason: 'disabled_by_admin' })
+  }
 
   const { data: prefs } = await admin
     .from('user_preferences')

@@ -14,11 +14,12 @@ import { Card, CardHeader } from "@/components/admin/ui/card";
 import { useToast } from "@/components/admin/ui/toast";
 import type {
   AdminAccountRow, ApiServiceRow, LimitsSettings, PricingSettings, BoostPricingSettings,
-  MaintenanceSettings, GeoBlockSettings,
+  MaintenanceSettings, GeoBlockSettings, EmailNotificationSettings,
 } from "@/lib/admin/types";
 import {
   createAdminAccount, updateAdminRole, setAdminAccountStatus, deleteAdminAccount,
   saveLimits, savePricing, saveBoostPricing, setMaintenance, setGeoBlock,
+  setEmailNotifications,
 } from "@/app/adminjommba/actions";
 
 /* ── Types ─────────────────────────────────────────────────────────────────── */
@@ -495,6 +496,7 @@ export function ParametresClient({
   initialBoostPricing,
   initialMaintenance,
   initialGeoBlock,
+  initialEmailNotifications,
 }: {
   admins: AdminAccountRow[];
   apiServices: ApiServiceRow[];
@@ -503,6 +505,7 @@ export function ParametresClient({
   initialBoostPricing: BoostPricingSettings;
   initialMaintenance: MaintenanceSettings;
   initialGeoBlock: GeoBlockSettings;
+  initialEmailNotifications: EmailNotificationSettings;
 }) {
   const { show } = useToast();
   const router = useRouter();
@@ -517,6 +520,7 @@ export function ParametresClient({
   const [maintenance, setMaintenanceState] = useState<MaintenanceSettings>(initialMaintenance);
   const [geoBlock,    setGeoBlockState]    = useState<GeoBlockSettings>(initialGeoBlock);
   const [countryQuery, setCountryQuery]    = useState("");
+  const [emailNotifs, setEmailNotifsState] = useState<EmailNotificationSettings>(initialEmailNotifications);
 
   const act = (
     fn: () => Promise<{ ok: boolean; error?: string }>,
@@ -592,6 +596,19 @@ export function ParametresClient({
 
   const handleSaveMaintenanceMessage = () =>
     act(() => setMaintenance(maintenance), "Message de maintenance enregistré");
+
+  /* Interrupteurs d'e-mails de notification */
+  const handleToggleEmailNotif = (key: keyof EmailNotificationSettings, label: string) => {
+    const next: EmailNotificationSettings = { ...emailNotifs, [key]: !emailNotifs[key] };
+    setEmailNotifsState(next); // MAJ optimiste du switch
+    act(
+      () => setEmailNotifications(next),
+      next[key]
+        ? `E-mails « ${label} » réactivés`
+        : `E-mails « ${label} » coupés — notifications in-app et push conservées`,
+      next[key] ? "success" : "warning",
+    );
+  };
 
   /* Disponibilité par pays */
   const persistGeoBlock = (next: GeoBlockSettings, msg: string, type: "success" | "warning" = "success") => {
@@ -704,6 +721,67 @@ export function ParametresClient({
               </button>
             </div>
           </div>
+        </Card>
+
+        {/* E-mails de notification */}
+        <Card>
+          <CardHeader title="Notifications par e-mail" />
+          <div className="px-5 pb-2 -mt-1">
+            <p className="text-xs text-[var(--color-muted)] leading-relaxed">
+              Coupez l&apos;envoi d&apos;e-mails pour économiser le quota de votre
+              fournisseur. Les membres continuent de recevoir ces notifications
+              <strong> dans l&apos;application et en push</strong> : seul l&apos;e-mail
+              est suspendu. Les e-mails essentiels (mot de passe oublié,
+              confirmation de paiement) ne sont jamais concernés.
+            </p>
+          </div>
+
+          {([
+            {
+              key: "demande" as const,
+              label: "Demandes de contact",
+              desc: "« Nouvelle demande de contact » et « Ta demande a été acceptée ».",
+            },
+            {
+              key: "message" as const,
+              label: "Nouveaux messages",
+              desc: "« Nouveau message sur Jommba », envoyé au destinataire.",
+            },
+          ]).map(({ key, label, desc }) => (
+            <div
+              key={key}
+              className="flex items-start gap-4 px-5 py-4 border-t border-[var(--color-line)]"
+            >
+              <div
+                className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                  emailNotifs[key] ? "bg-[var(--color-faint)]" : "bg-amber-100"
+                }`}
+              >
+                <Mail
+                  className={`w-5 h-5 ${
+                    emailNotifs[key] ? "text-[var(--color-muted)]" : "text-amber-600"
+                  }`}
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="font-semibold text-sm text-[var(--color-ink)]">{label}</h3>
+                  {!emailNotifs[key] && (
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
+                      E-MAILS COUPÉS
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-[var(--color-muted)] mt-0.5 leading-relaxed">{desc}</p>
+              </div>
+              <div className="shrink-0 pt-1">
+                <Toggle
+                  on={emailNotifs[key]}
+                  onToggle={() => handleToggleEmailNotif(key, label)}
+                />
+              </div>
+            </div>
+          ))}
         </Card>
 
         {/* Disponibilité par pays */}

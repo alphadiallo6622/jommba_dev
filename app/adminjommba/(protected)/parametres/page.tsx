@@ -24,6 +24,7 @@ export default async function ParametresPage() {
       initialBoostPricing={settings.boostPricing}
       initialMaintenance={settings.maintenance}
       initialGeoBlock={settings.geoBlock}
+      initialEmailNotifications={settings.emailNotifications}
     />
   );
 }

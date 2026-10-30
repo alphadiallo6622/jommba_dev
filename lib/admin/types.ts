@@ -255,6 +255,20 @@ export interface MaintenanceSettings {
   message: string | null;
 }
 
+/**
+ * Interrupteurs globaux d'envoi d'e-mails de notification.
+ *
+ * Ils s'ajoutent aux préférences individuelles (`user_preferences.email_*`) :
+ * l'e-mail ne part que si le membre ET l'administrateur l'autorisent. Couper un
+ * interrupteur n'affecte ni les notifications in-app ni les push.
+ */
+export interface EmailNotificationSettings {
+  /** « Nouvelle demande de contact » + « Ta demande a été acceptée ». */
+  demande: boolean;
+  /** « Nouveau message sur Jommba ». */
+  message: boolean;
+}
+
 export type GeoBlockMode = "block" | "allow";
 
 export interface GeoBlockSettings {
