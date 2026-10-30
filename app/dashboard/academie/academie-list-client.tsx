@@ -9,6 +9,7 @@ import {
   Clock, ChevronRight, ChevronLeft, GraduationCap,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { paginationRange } from '@/lib/pagination'
 
 export interface AcademyArticleCard {
   id: string
@@ -131,7 +132,7 @@ export default function AcademieListClient({ articles }: { articles: AcademyArti
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-1.5 pt-2">
+        <div className="flex flex-wrap items-center justify-center gap-1.5 pt-2">
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
@@ -140,19 +141,30 @@ export default function AcademieListClient({ articles }: { articles: AcademyArti
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-            <button
-              key={p}
-              onClick={() => setPage(p)}
-              className={`w-9 h-9 rounded-full text-xs font-semibold transition-colors ${
-                p === page
-                  ? 'bg-emerald-500 text-white'
-                  : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              {p}
-            </button>
-          ))}
+          {paginationRange(page, totalPages).map((item, i) =>
+            item === 'ellipsis' ? (
+              <span
+                key={`gap-${i}`}
+                aria-hidden="true"
+                className="w-9 h-9 flex items-center justify-center text-xs text-gray-400 select-none"
+              >
+                …
+              </span>
+            ) : (
+              <button
+                key={item}
+                onClick={() => setPage(item)}
+                aria-current={item === page ? 'page' : undefined}
+                className={`w-9 h-9 rounded-full text-xs font-semibold transition-colors ${
+                  item === page
+                    ? 'bg-emerald-500 text-white'
+                    : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                {item}
+              </button>
+            )
+          )}
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}

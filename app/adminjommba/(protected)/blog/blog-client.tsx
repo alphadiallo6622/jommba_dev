@@ -7,6 +7,7 @@ import type { BlogPostRow, PostStatus } from "@/lib/admin/types";
 import { saveBlogPost, setBlogPostStatus } from "@/app/adminjommba/actions";
 import { RichTextEditor } from "@/components/admin/ui/rich-text-editor";
 import { useToast } from "@/components/admin/ui/toast";
+import { paginationRange } from "@/lib/pagination";
 
 const PER_PAGE = 9;
 
@@ -443,11 +444,11 @@ export function BlogClient({ posts }: { posts: BlogPostRow[] }) {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between pt-1">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between pt-1">
             <span className="text-xs text-[var(--color-muted)]">
               {posts.length} articles · page {page} / {totalPages}
             </span>
-            <div className="flex items-center gap-1.5">
+            <div className="flex flex-wrap items-center gap-1.5">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
@@ -455,19 +456,30 @@ export function BlogClient({ posts }: { posts: BlogPostRow[] }) {
               >
                 <ChevronLeft className="w-3.5 h-3.5" /> Précédent
               </button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                <button
-                  key={p}
-                  onClick={() => setPage(p)}
-                  className={`w-8 h-8 rounded-lg text-xs font-semibold transition-colors ${
-                    p === page
-                      ? "bg-[var(--color-brand-600)] text-white"
-                      : "border border-[var(--color-line)] text-[var(--color-ink)] hover:bg-[var(--color-faint)]"
-                  }`}
-                >
-                  {p}
-                </button>
-              ))}
+              {paginationRange(page, totalPages).map((item, i) =>
+                item === "ellipsis" ? (
+                  <span
+                    key={`gap-${i}`}
+                    aria-hidden="true"
+                    className="w-8 h-8 flex items-center justify-center text-xs text-[var(--color-muted)] select-none"
+                  >
+                    …
+                  </span>
+                ) : (
+                  <button
+                    key={item}
+                    onClick={() => setPage(item)}
+                    aria-current={item === page ? "page" : undefined}
+                    className={`w-8 h-8 rounded-lg text-xs font-semibold transition-colors ${
+                      item === page
+                        ? "bg-[var(--color-brand-600)] text-white"
+                        : "border border-[var(--color-line)] text-[var(--color-ink)] hover:bg-[var(--color-faint)]"
+                    }`}
+                  >
+                    {item}
+                  </button>
+                )
+              )}
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
