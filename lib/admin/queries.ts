@@ -143,6 +143,12 @@ export const getAdminCounts = cache(async (): Promise<AdminCounts> => {
  *  bafouille ne doit pas faire disparaitre quelqu'un du compteur. */
 const ONLINE_WINDOW_MS = 5 * 60 * 1000;
 
+/** Evenements recents lus par type, avant fusion et tri chronologique. */
+const FEED_SOURCE_LIMIT = 15;
+
+/** Longueur du flux d'activite retenue, soit 5 pages de 6 evenements. */
+const FEED_LENGTH = 30;
+
 export interface GenderSplit {
   hommes: number;
   femmes: number;
@@ -192,11 +198,11 @@ export async function getOverviewData(): Promise<OverviewData> {
       supabase.from("profiles").select("created_at").gte("created_at", since30).limit(10_000),
       supabase.from("profiles").select("validated_at").gte("validated_at", since30).limit(10_000),
       supabase.from("profiles").select("status,gender,country,avatar_url,profile_completion,visibility,last_seen_at").limit(10_000),
-      supabase.from("profiles").select("first_name,last_name,created_at").order("created_at", { ascending: false }).limit(4),
-      supabase.from("subscriptions").select("user_id,created_at,duration_months").eq("plan", "premium").order("created_at", { ascending: false }).limit(3),
-      supabase.from("reports").select("reported_id,created_at").order("created_at", { ascending: false }).limit(3),
-      supabase.from("profiles").select("first_name,last_name,validated_at").not("validated_at", "is", null).order("validated_at", { ascending: false }).limit(3),
-      supabase.from("boosts").select("user_id,created_at,expires_at").order("created_at", { ascending: false }).limit(3),
+      supabase.from("profiles").select("first_name,last_name,created_at").order("created_at", { ascending: false }).limit(FEED_SOURCE_LIMIT),
+      supabase.from("subscriptions").select("user_id,created_at,duration_months").eq("plan", "premium").order("created_at", { ascending: false }).limit(FEED_SOURCE_LIMIT),
+      supabase.from("reports").select("reported_id,created_at").order("created_at", { ascending: false }).limit(FEED_SOURCE_LIMIT),
+      supabase.from("profiles").select("first_name,last_name,validated_at").not("validated_at", "is", null).order("validated_at", { ascending: false }).limit(FEED_SOURCE_LIMIT),
+      supabase.from("boosts").select("user_id,created_at,expires_at").order("created_at", { ascending: false }).limit(FEED_SOURCE_LIMIT),
     ]);
 
   // Noms pour les événements liés à un user_id
@@ -307,7 +313,7 @@ export async function getOverviewData(): Promise<OverviewData> {
   }
   const activity: FeedItem[] = events
     .sort((a, b) => b.ts - a.ts)
-    .slice(0, 6)
+    .slice(0, FEED_LENGTH)
     .map((e) => ({ icon: e.icon, tone: e.tone, text: e.text, when: e.when }));
 
   const conversion = counts.totalMembers > 0

@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { ChevronUp, ChevronDown, Search, Download, FileSpreadsheet } from "lucide-react";
 import { downloadCsv, downloadXls } from "@/lib/admin/format";
-import { paginationRange } from "@/lib/pagination";
+import { Pagination } from "./pagination";
 
 export interface Column<T> {
   key: string;
@@ -248,55 +248,12 @@ export function DataTable<T>({
       </div>
 
       {/* Pagination */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between min-h-[28px]">
-        <span className="text-xs text-[var(--color-muted)]">
-          {filtered.length} membre{filtered.length !== 1 ? "s" : ""} · page {page}/{totalPages}
-        </span>
-        {totalPages > 1 && (
-          <div className="flex flex-wrap items-center gap-1">
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-              aria-label="Page précédente"
-              className="px-3 py-1 rounded-lg border border-[var(--color-line)] text-xs text-[var(--color-ink)] disabled:opacity-40 hover:bg-[var(--color-faint)] transition-colors"
-            >
-              ‹
-            </button>
-            {paginationRange(page, totalPages).map((item, i) =>
-              item === "ellipsis" ? (
-                <span
-                  key={`gap-${i}`}
-                  aria-hidden="true"
-                  className="px-2 py-1 text-xs text-[var(--color-muted)] select-none"
-                >
-                  …
-                </span>
-              ) : (
-                <button
-                  key={item}
-                  onClick={() => setPage(item)}
-                  aria-current={item === page ? "page" : undefined}
-                  className={`px-3 py-1 rounded-lg border text-xs transition-colors ${
-                    item === page
-                      ? "bg-[var(--color-brand-600)] border-[var(--color-brand-600)] text-white"
-                      : "border-[var(--color-line)] text-[var(--color-ink)] hover:bg-[var(--color-faint)]"
-                  }`}
-                >
-                  {item}
-                </button>
-              )
-            )}
-            <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-              aria-label="Page suivante"
-              className="px-3 py-1 rounded-lg border border-[var(--color-line)] text-xs text-[var(--color-ink)] disabled:opacity-40 hover:bg-[var(--color-faint)] transition-colors"
-            >
-              ›
-            </button>
-          </div>
-        )}
-      </div>
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        onChange={setPage}
+        label={`${filtered.length} membre${filtered.length !== 1 ? "s" : ""} · page ${page}/${totalPages}`}
+      />
 
       {footer && <div>{footer}</div>}
     </div>

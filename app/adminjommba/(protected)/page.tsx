@@ -7,6 +7,8 @@ import { Card, CardHeader } from "@/components/admin/ui/card";
 import { LineChart } from "@/components/admin/ui/line-chart";
 import { DonutChart } from "@/components/admin/ui/donut-chart";
 import { AutoRefresh } from "@/components/admin/auto-refresh";
+import { CountryTable } from "@/components/admin/country-table";
+import { ActivityFeed } from "@/components/admin/activity-feed";
 import { getOverviewData } from "@/lib/admin/queries";
 
 export const metadata: Metadata = { title: "Vue d'ensemble" };
@@ -29,17 +31,6 @@ const QUICK_ACTIONS = [
   { label: "Envoyer une annonce",   href: "/adminjommba/notifications", icon: "send"          },
   { label: "Nouvel article",        href: "/adminjommba/blog",          icon: "plus-circle"   },
 ];
-
-const ACT_BG: Record<string, string> = {
-  green: "bg-emerald-50",
-  amber: "bg-amber-50",
-  red:   "bg-red-50",
-};
-const ACT_IC: Record<string, string> = {
-  green: "text-emerald-600",
-  amber: "text-amber-600",
-  red:   "text-red-600",
-};
 
 export default async function AdminOverviewPage() {
   const { kpis, chart, distribution, activity, pendingProfiles, gender, funnel, countries } =
@@ -179,92 +170,12 @@ export default async function AdminOverviewPage() {
       </div>
 
       {/* ── Répartition par pays ── */}
-      <Card>
-        <CardHeader
-          title="Inscrits par pays"
-          action={
-            <span className="text-[11px] text-[var(--color-muted)]">
-              {countries.length} pays représentés
-            </span>
-          }
-        />
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-xs text-[var(--color-muted)] border-b border-[var(--color-line)]">
-                <th className="font-medium px-5 py-2.5">Pays</th>
-                <th className="font-medium px-5 py-2.5 text-right">Membres</th>
-                <th className="font-medium px-5 py-2.5 text-right">Hommes</th>
-                <th className="font-medium px-5 py-2.5 text-right">Femmes</th>
-                <th className="font-medium px-5 py-2.5 text-right w-32">Part</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--color-line)]">
-              {countries.map((row) => (
-                <tr key={row.code} className="hover:bg-[var(--color-faint)]">
-                  <td className="px-5 py-2.5 text-[var(--color-ink)] font-medium">
-                    {row.country}
-                  </td>
-                  <td className="px-5 py-2.5 text-right font-semibold text-[var(--color-ink)]">
-                    {row.total.toLocaleString("fr-FR")}
-                  </td>
-                  <td className="px-5 py-2.5 text-right text-[var(--color-muted)]">{row.hommes}</td>
-                  <td className="px-5 py-2.5 text-right text-[var(--color-muted)]">{row.femmes}</td>
-                  <td className="px-5 py-2.5">
-                    <div className="flex items-center gap-2 justify-end">
-                      <div className="h-1.5 w-16 rounded-full bg-[var(--color-faint)] overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-[var(--color-brand-500)]"
-                          style={{ width: `${row.share}%` }}
-                        />
-                      </div>
-                      <span className="text-xs text-[var(--color-muted)] w-9 text-right">
-                        {row.share} %
-                      </span>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
+      <CountryTable rows={countries} />
 
       {/* ── Bottom row ── */}
       <div className="grid lg:grid-cols-2 gap-4">
         {/* Activity feed */}
-        <Card>
-          <CardHeader
-            title="Activité récente"
-            action={
-              <Link href="/adminjommba/membres" className="text-xs text-[var(--color-brand-600)] hover:underline font-medium">
-                Tout voir
-              </Link>
-            }
-          />
-          <div className="divide-y divide-[var(--color-line)]">
-            {activity.length === 0 ? (
-              <p className="px-5 py-8 text-sm text-[var(--color-muted)] text-center">
-                Aucune activité récente
-              </p>
-            ) : (
-              activity.map((item, i) => {
-                const Icon = getIcon(item.icon);
-                return (
-                  <div key={i} className="flex items-start gap-3 px-5 py-3">
-                    <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${ACT_BG[item.tone]}`}>
-                      <Icon className={`w-3.5 h-3.5 ${ACT_IC[item.tone]}`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-[var(--color-ink)] leading-snug">{item.text}</p>
-                      <p className="text-xs text-[var(--color-muted)] mt-0.5">{item.when}</p>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </Card>
+        <ActivityFeed items={activity} />
 
         {/* Quick actions */}
         <Card>
