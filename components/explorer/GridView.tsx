@@ -79,7 +79,7 @@ export default function GridView({ hasMore, loadingMore, onLoadMore }: Props) {
           <ProfileGridCard
             key={profile.id}
             profile={profile}
-            blurred={(!isPremium && i >= FREE_CARD_COUNT) || profile.photosBlurred}
+            locked={!isPremium && i >= FREE_CARD_COUNT}
             viewerIsPremium={isPremium}
           />
         ))}

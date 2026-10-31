@@ -1,6 +1,6 @@
 'use client'
 
-import { Plus, Crown, BadgeCheck } from 'lucide-react'
+import { Plus, Crown, BadgeCheck, Camera } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
@@ -11,16 +11,20 @@ import { useIsOnline } from '@/components/providers/PresenceProvider'
 
 type Props = {
   profile: ExplorerProfile
-  blurred?: boolean
+  /** Carte verrouillee par le mur payant : le visiteur doit passer Premium. */
+  locked?: boolean
   viewerIsPremium?: boolean
 }
 
-export default function ProfileGridCard({ profile, blurred, viewerIsPremium }: Props) {
+export default function ProfileGridCard({ profile, locked, viewerIsPremium }: Props) {
   const router  = useRouter()
   const t = useTranslations('dashboard.explorer')
   const tv = useTranslations('dashboard.profileValues')
   const photoUrl = profile.photos[0] ?? '/avatar-placeholder.svg'
   const isOnline = useIsOnline(profile.id)
+  // Le membre a choisi de flouter ses photos : la fiche reste ouverte, seule
+  // l'image est voilee. Rien a voir avec un contenu reserve aux abonnes.
+  const blurredByOwner = profile.photosBlurred
 
   return (
     <div className={cn(
@@ -30,13 +34,13 @@ export default function ProfileGridCard({ profile, blurred, viewerIsPremium }: P
       {/* Photo area */}
       <div className="relative bg-gray-200 overflow-hidden" style={{ aspectRatio: '3/4' }}>
         {/* En avant badge */}
-        {profile.isEnAvant && !blurred && (
+        {profile.isEnAvant && !locked && (
           <div className="absolute top-2 left-2 z-10 bg-violet-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
             {t('featured')}
           </div>
         )}
 
-        {blurred ? (
+        {locked ? (
           /* Locked — click to go premium */
           <button
             className="w-full h-full relative block"
@@ -59,9 +63,19 @@ export default function ProfileGridCard({ profile, blurred, viewerIsPremium }: P
             <img
               src={photoUrl}
               alt={`${profile.firstName} ${profile.lastInitial}.`}
-              className="w-full h-full object-cover cursor-pointer transition-transform duration-500 ease-soft group-hover:scale-[1.03]"
+              className={cn(
+                'w-full h-full object-cover cursor-pointer transition-transform duration-500 ease-soft group-hover:scale-[1.03]',
+                blurredByOwner && 'blur-md scale-105',
+              )}
               onClick={() => router.push(`/dashboard/profil/${profile.id}`)}
             />
+
+            {blurredByOwner && (
+              <span className="absolute bottom-2 left-2 z-10 flex items-center gap-1 bg-gray-800/70 text-white text-[9px] font-semibold px-1.5 py-0.5 rounded-full">
+                <Camera className="w-2.5 h-2.5" />
+                {t('photoBlurred')}
+              </span>
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
 
             {viewerIsPremium && isOnline && (
@@ -84,7 +98,7 @@ export default function ProfileGridCard({ profile, blurred, viewerIsPremium }: P
       </div>
 
       {/* Info — always visible, but subdued when blurred */}
-      <div className={cn('p-2.5 space-y-1', blurred && 'opacity-50')}>
+      <div className={cn('p-2.5 space-y-1', locked && 'opacity-50')}>
         <p className="text-sm font-semibold text-gray-900 truncate flex items-center gap-1">
           {profile.firstName} {profile.lastInitial}., {profile.age}
           <BadgeCheck className="w-3.5 h-3.5 text-sky-500 shrink-0" aria-label={t('verified')} />
