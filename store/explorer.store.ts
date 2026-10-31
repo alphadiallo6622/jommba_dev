@@ -6,6 +6,8 @@ export type TourHighlight = 'none' | 'photo' | 'add-btn' | 'flash-btn'
 type ExplorerStore = {
   mode: 'swipe' | 'grid'
   profiles: ExplorerProfile[]
+  /** Nombre total de profils visibles cote serveur, pages non chargees comprises. */
+  totalProfiles: number
   grillUsesLeft: number
   currentProfileIndex: number
   filtersOpen: boolean
@@ -18,7 +20,9 @@ type ExplorerStore = {
   tourHighlight: TourHighlight
 
   setMode: (mode: 'swipe' | 'grid') => void
-  setProfiles: (profiles: ExplorerProfile[]) => void
+  setProfiles: (profiles: ExplorerProfile[], total?: number) => void
+  /** Ajoute une page suivante en ignorant les profils deja presents. */
+  appendProfiles: (profiles: ExplorerProfile[]) => void
   decrementGrillUses: () => void
   nextProfile: (total: number) => void
   toggleFilter: (filter: string) => void
@@ -32,6 +36,7 @@ type ExplorerStore = {
 export const useExplorerStore = create<ExplorerStore>()((set) => ({
   mode: 'swipe',
   profiles: [],
+  totalProfiles: 0,
   grillUsesLeft: 5,
   currentProfileIndex: 0,
   filtersOpen: false,
@@ -42,7 +47,15 @@ export const useExplorerStore = create<ExplorerStore>()((set) => ({
   tourHighlight: 'none',
 
   setMode: (mode) => set({ mode }),
-  setProfiles: (profiles) => set({ profiles, currentProfileIndex: 0 }),
+  setProfiles: (profiles, total) => set({
+    profiles,
+    totalProfiles: total ?? profiles.length,
+    currentProfileIndex: 0,
+  }),
+  appendProfiles: (profiles) => set((s) => {
+    const seen = new Set(s.profiles.map(p => p.id))
+    return { profiles: [...s.profiles, ...profiles.filter(p => !seen.has(p.id))] }
+  }),
   decrementGrillUses: () => set((s) => ({ grillUsesLeft: Math.max(0, s.grillUsesLeft - 1) })),
   nextProfile: (total) => set((s) => ({ currentProfileIndex: (s.currentProfileIndex + 1) % total })),
   toggleFilter: (filter) => set((s) => ({

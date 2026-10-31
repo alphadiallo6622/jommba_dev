@@ -1,6 +1,7 @@
 import type { Profile } from './types'
 import type { MockUser } from '@/lib/mock-user'
 import type { ExplorerProfile } from '@/lib/mock-explorer'
+import { countryCode, formatLocation } from '@/lib/countries'
 
 // Mappe un profil Supabase (snake_case) vers MockUser (camelCase)
 // pour la compatibilité avec les composants existants.
@@ -13,7 +14,7 @@ export function profileToMockUser(profile: Profile, email: string): MockUser {
     age:               profile.age ?? 0,
     height:            profile.height ?? 0,
     city:              profile.city ?? '',
-    country:           profile.country ?? 'SN',
+    country:           countryCode(profile.country),
     maritalStatus:     profile.marital_status ?? '',
     job:               profile.job ?? '',
     education:         profile.education ?? '',
@@ -47,14 +48,14 @@ export function profileToMockUser(profile: Profile, email: string): MockUser {
   }
 }
 
-export function supabaseProfileToExplorer(p: Profile): ExplorerProfile {
+export function supabaseProfileToExplorer(p: Profile, locale = 'fr'): ExplorerProfile {
   return {
     id: p.user_id,
     firstName: p.first_name,
     lastInitial: (p.last_name ?? '').charAt(0),
     age: p.age ?? 0,
-    location: [p.city, p.country].filter(Boolean).join(', ') || 'Inconnu',
-    country: p.country ?? '',
+    location: formatLocation(p.city, p.country, locale) || 'Inconnu',
+    country: countryCode(p.country),
     maritalStatus: p.marital_status ?? '',
     job: p.job ?? '',
     photos: [p.avatar_url ?? '/avatar-placeholder.svg'],

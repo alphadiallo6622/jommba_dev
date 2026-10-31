@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 type Translator = ReturnType<typeof useTranslations>
 import {
   ArrowLeft, Camera, Crown, MoreHorizontal, MapPin, Plus,
@@ -19,6 +19,7 @@ import { notifyByEmail } from '@/lib/notify-email'
 import { oppositeGender } from '@/lib/gender'
 import { translateProfileValue, translateProfileValueList } from '@/lib/profile-values'
 import { MIN_VISIBLE_PROFILE_COMPLETION } from '@/lib/constants'
+import { formatLocation } from '@/lib/countries'
 import type { FullProfile } from '@/lib/mock-demandes'
 import type { Profile } from '@/lib/supabase/types'
 import ProfileSection from './ProfileSection'
@@ -31,7 +32,7 @@ import FlashMessageModal from './FlashMessageModal'
 
 type Props = { id: string }
 
-function profileToFull(p: Profile, requestStatus: FullProfile['requestStatus'], unknownLocation: string): FullProfile {
+function profileToFull(p: Profile, requestStatus: FullProfile['requestStatus'], unknownLocation: string, locale: string): FullProfile {
   return {
     id:             p.user_id,
     firstName:      p.first_name,
@@ -39,7 +40,7 @@ function profileToFull(p: Profile, requestStatus: FullProfile['requestStatus'], 
     photo:          p.avatar_url ?? '/avatar-placeholder.svg',
     isPhotoBlurred: p.photos_blurred ?? false,
     isPremium:      p.is_premium,
-    location:       [p.city, p.country].filter(Boolean).join(', ') || unknownLocation,
+    location:       formatLocation(p.city, p.country, locale) || unknownLocation,
     tags:           [p.marital_status, p.job, p.education].filter(Boolean) as string[],
     requestStatus,
     marriageVision: p.marriage_vision ?? '',
@@ -65,6 +66,7 @@ function profileToFull(p: Profile, requestStatus: FullProfile['requestStatus'], 
 
 export default function ProfilePage({ id }: Props) {
   const router  = useRouter()
+  const locale = useLocale()
   const t = useTranslations('dashboard.profil')
   const tv = useTranslations('dashboard.profileValues')
   const { user } = useAuth()
@@ -123,7 +125,7 @@ export default function ProfilePage({ id }: Props) {
         status = 'acceptee'
       }
 
-      setProfile(profileToFull(p as Profile, status, t('unknownLocation')))
+      setProfile(profileToFull(p as Profile, status, t('unknownLocation'), locale))
 
       // Journalise la visite (1 ligne par paire visiteur/profil, horodatage
       // rafraîchi — sert au compteur de Visiteurs uniques) — seulement pour
@@ -149,7 +151,7 @@ export default function ProfilePage({ id }: Props) {
     } finally {
       setLoading(false)
     }
-  }, [user, id, isMyProfile, gender, t])
+  }, [user, id, isMyProfile, gender, t, locale])
 
   useEffect(() => { fetchProfile() }, [fetchProfile])
 

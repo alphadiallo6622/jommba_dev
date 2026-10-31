@@ -514,6 +514,25 @@ export type Database = {
         Args: Record<string, never>
         Returns: undefined
       }
+      discover_profiles: {
+        Args: {
+          p_viewer:     string
+          p_gender:     string
+          p_seed:       string
+          p_completion: number
+          p_limit:      number
+          p_offset:     number
+        }
+        Returns: Profile[]
+      }
+      discover_profiles_count: {
+        Args: {
+          p_viewer:     string
+          p_gender:     string
+          p_completion: number
+        }
+        Returns: number
+      }
       get_platform_stats: {
         Args: Record<string, never>
         Returns: {

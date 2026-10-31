@@ -13,6 +13,7 @@ import StepValues        from '@/components/onboarding/StepValues'
 import StepPhotos        from '@/components/onboarding/StepPhotos'
 import { createClient }  from '@/lib/supabase/client'
 import { computeProfileCompletion } from '@/lib/supabase/profile-completion'
+import { countryCode } from '@/lib/countries'
 import { useAuth }       from '@/components/providers/AuthProvider'
 import { toast }         from 'sonner'
 import { localizedLogin } from '@/lib/i18n/locale-cookie'
@@ -88,7 +89,9 @@ export default function OnboardingPage() {
       // n'a pas été rempli — ?? seul ne le convertit pas en null, ce qui
       // faussait le calcul de complétude du profil (city:"" comptait comme
       // "rempli"). On normalise explicitement ici.
-      const country = (store.location?.residenceCountry || store.location?.country || null)
+      // `country` est stocké en code ISO (GN, FR…), jamais en nom de pays :
+      // c'est la forme canonique lue par les filtres et par l'affichage.
+      const country = countryCode(store.location?.residenceCountry || store.location?.country) || null
       const city    = (store.location?.region?.trim() || null)
 
       // First valid photo = avatar

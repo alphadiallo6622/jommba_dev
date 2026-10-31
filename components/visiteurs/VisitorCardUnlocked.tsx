@@ -2,9 +2,10 @@
 
 import { useRouter } from 'next/navigation'
 import { Clock, MapPin } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import type { Visitor } from '@/lib/mock-visitors'
 import { formatHoursAgo } from '@/lib/format-time-ago'
+import { formatLocation } from '@/lib/countries'
 
 interface Props {
   visitor: Visitor
@@ -12,6 +13,7 @@ interface Props {
 
 export default function VisitorCardUnlocked({ visitor }: Props) {
   const router = useRouter()
+  const locale = useLocale()
   const t = useTranslations('dashboard.visiteurs')
   return (
     <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
@@ -42,7 +44,7 @@ export default function VisitorCardUnlocked({ visitor }: Props) {
         </p>
         <p className="text-gray-400 text-xs mt-0.5 flex items-center gap-1">
           <MapPin className="w-3 h-3" />
-          {visitor.city}, {visitor.country}
+          {formatLocation(visitor.city, visitor.country, locale)}
         </p>
 
         {/* View profile button */}

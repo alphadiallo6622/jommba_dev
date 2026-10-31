@@ -259,3 +259,38 @@ export function localizeStoredCountry(stored: string, locale: string): string {
   const byCode = CODE_TO_NAME.get(stored.trim().toUpperCase());
   return byCode ? countryLabel(byCode, locale) : stored;
 }
+
+const EN_NAME_TO_COUNTRY = new Map(COUNTRIES.map((c) => [c.nameEn.toLowerCase(), c]));
+
+/**
+ * Code ISO 3166-1 alpha-2 d'un pays à partir de n'importe quelle écriture
+ * rencontrée en base ou dans un formulaire : code ("GN"), nom français
+ * ("Guinée") ou nom anglais ("Guinea"). Renvoie "" si rien ne correspond —
+ * l'appelant décide alors s'il stocke null.
+ *
+ * C'est la seule porte d'entrée pour écrire `profiles.country` : la base ne
+ * stocke plus que des codes.
+ */
+export function countryCode(value: string | null | undefined): string {
+  if (!value) return "";
+  const raw = value.trim();
+  if (!raw) return "";
+  if (CODE_TO_NAME.has(raw.toUpperCase())) return raw.toUpperCase();
+  const match =
+    FR_NAME_TO_COUNTRY.get(raw.toLowerCase()) ?? EN_NAME_TO_COUNTRY.get(raw.toLowerCase());
+  return match ? match.code : "";
+}
+
+/**
+ * « Ville, Pays » prêt à afficher, le pays traduit dans la locale courante.
+ * Les parties absentes sont simplement omises ; tout vide renvoie "".
+ */
+export function formatLocation(
+  city: string | null | undefined,
+  country: string | null | undefined,
+  locale: string,
+): string {
+  return [city?.trim(), country ? localizeStoredCountry(country, locale) : ""]
+    .filter(Boolean)
+    .join(", ");
+}

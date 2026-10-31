@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { X, MessageCircle, Plus, UserPlus, Compass } from 'lucide-react'
 import { toast } from 'sonner'
@@ -15,7 +15,16 @@ import { cn } from '@/lib/utils'
 import ProfileSwipeCard from './ProfileSwipeCard'
 import ProfileDetails from './ProfileDetails'
 
-export default function SwipeView() {
+/** Marge d'avance : on va chercher la page suivante avant d'atteindre la fin
+ *  de la pile, pour que le swipe ne s'arrête jamais sur un écran vide. */
+const PREFETCH_AHEAD = 5
+
+type Props = {
+  hasMore: boolean
+  onLoadMore: () => void
+}
+
+export default function SwipeView({ hasMore, onLoadMore }: Props) {
   const t = useTranslations('dashboard.explorer')
   const ts = useTranslations('dashboard.explorer.swipe')
   const { currentProfileIndex, nextProfile, tourHighlight, profiles: allProfiles, appliedFilters, setShowPremiumModal } = useExplorerStore()
@@ -27,6 +36,10 @@ export default function SwipeView() {
   const [skipConfirmOpen, setSkipConfirm] = useState(false)
 
   const profile = profiles.length > 0 ? profiles[currentProfileIndex % profiles.length] : null
+
+  useEffect(() => {
+    if (hasMore && currentProfileIndex >= profiles.length - PREFETCH_AHEAD) onLoadMore()
+  }, [hasMore, onLoadMore, currentProfileIndex, profiles.length])
 
   if (!profile) {
     return (

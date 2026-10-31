@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { X, AlertCircle, ImageOff } from "lucide-react";
 import type { PendingProfileRow } from "@/lib/admin/types";
+import { formatLocation } from "@/lib/countries";
 import { validateProfile, refuseProfile } from "@/app/adminjommba/actions";
 import { useToast } from "@/components/admin/ui/toast";
 
@@ -77,7 +78,7 @@ function ExamineModal({
               {profile.name}{profile.age != null && `, ${profile.age} ans`}
             </h2>
             <p className="text-sm text-[var(--color-muted)] mt-0.5">
-              {profile.gender} · {profile.city}, {profile.country} · soumis {profile.sub.toLowerCase()}
+              {profile.gender} · {formatLocation(profile.city, profile.country, "fr")} · soumis {profile.sub.toLowerCase()}
             </p>
           </div>
 
@@ -271,7 +272,7 @@ export function ValidationClient({ profiles }: { profiles: PendingProfileRow[] }
                       {p.name}{p.age != null && `, ${p.age}`}
                     </p>
                     <p className="text-xs text-[var(--color-muted)]">
-                      {p.gender} · {p.city}, {p.country}
+                      {p.gender} · {formatLocation(p.city, p.country, "fr")}
                     </p>
                     <p className="text-xs text-[var(--color-muted)]">
                       {p.job} · {p.edu}

@@ -1479,6 +1479,8 @@
         "inAfrica": "In Africa",
         "diaspora": "Diaspora",
         "country": "Country",
+        "selectCountry": "Select your country",
+        "countryRequired": "Choose your country of residence.",
         "city": "City",
         "cityPlaceholder": "e.g. Paris",
         "profession": "Profession",
@@ -1684,7 +1686,8 @@
         "requestSent": "Request sent ✓",
         "profilesCount": "{count} profiles",
         "allVisible": "All visible",
-        "freeVisible": "{count} visible for free"
+        "freeVisible": "{count} visible for free",
+        "loadMore": "Show more profiles"
       },
       "filters": {
         "title": "Filters",

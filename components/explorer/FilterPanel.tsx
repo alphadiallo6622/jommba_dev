@@ -59,8 +59,8 @@ function CountrySelect({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  // La valeur du filtre reste le nom français : seul l'affichage est traduit.
-  const selectedCountries = selected.filter(f => COUNTRIES.some(c => c.name === f))
+  // La valeur du filtre est le code ISO stocké en base ; seul l'affichage est traduit.
+  const selectedCountries = selected.filter(f => COUNTRIES.some(c => c.code === f))
   const allSelected = selected.includes(ALL_COUNTRIES_VALUE)
 
   const filteredCountries = useMemo(() => {
@@ -158,12 +158,12 @@ function CountrySelect({
               </button>
 
               {filteredCountries.map(country => {
-                const active = selected.includes(country.name)
+                const active = selected.includes(country.code)
                 return (
                   <button
                     key={country.code}
                     type="button"
-                    onClick={() => onToggle(country.name)}
+                    onClick={() => onToggle(country.code)}
                     className={cn(
                       'w-full flex items-center justify-between px-4 py-2 text-sm text-left hover:bg-gray-50 transition-colors',
                       active ? 'text-emerald-600 font-medium' : 'text-gray-700',

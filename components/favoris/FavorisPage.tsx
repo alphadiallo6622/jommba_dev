@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { Heart, Users, HeartOff, Lock, Clock, Crown, MapPin } from 'lucide-react'
 import { SkeletonCardGrid } from '@/components/ui/Skeleton'
 import { toast } from 'sonner'
@@ -11,6 +11,7 @@ import { fetchBlockedIds } from '@/lib/supabase/moderation-service'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { useCurrentUser } from '@/lib/use-current-user'
 import { supabaseProfileToExplorer } from '@/lib/supabase/profile-service'
+import { formatLocation } from '@/lib/countries'
 import type { FavoriteEntry } from '@/store/favoris.store'
 import { formatHoursAgo } from '@/lib/format-time-ago'
 import FavorisCard from './FavorisCard'
@@ -56,6 +57,7 @@ type ProfileRow = {
 
 export default function FavorisPage() {
   const router = useRouter()
+  const locale = useLocale()
   const t = useTranslations('dashboard.favoris')
   const { user } = useAuth()
   const { isPremium } = useCurrentUser()
@@ -128,7 +130,7 @@ export default function FavorisPage() {
             firstName:   p?.first_name ?? '…',
             lastInitial: (p?.last_name ?? '').charAt(0),
             age:         p?.age ?? 0,
-            location:    [p?.city, p?.country].filter(Boolean).join(', ') || t('unknown'),
+            location:    formatLocation(p?.city, p?.country, locale) || t('unknown'),
             hoursAgo:    hrs,
           }
         })
@@ -138,7 +140,7 @@ export default function FavorisPage() {
     } finally {
       setLoading(false)
     }
-  }, [user, t])
+  }, [user, t, locale])
 
   useEffect(() => { fetchData() }, [fetchData])
 

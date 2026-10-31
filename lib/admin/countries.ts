@@ -4,4 +4,4 @@
 // lib/countries.ts pour être partagée avec l'onboarding et les paramètres.
 
 export type { Country } from "@/lib/countries";
-export { COUNTRIES, countryName } from "@/lib/countries";
+export { COUNTRIES, countryName, localizeStoredCountry } from "@/lib/countries";

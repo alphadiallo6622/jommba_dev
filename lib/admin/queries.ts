@@ -4,6 +4,7 @@
 import { cache } from "react";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { timeAgo, formatDate, formatDateTime, formatDuration } from "@/lib/admin/format";
+import { formatLocation, localizeStoredCountry } from "@/lib/countries";
 import type {
   Kpi, ChartPoint, DonutSegment, MonthBar, CountryBar, RevenuePoint, DayPoint,
   FeedItem, AdminNotification, MemberRow, PendingProfileRow, PhotoQueueItem,
@@ -30,7 +31,7 @@ function fullName(first: string | null, last: string | null): string {
 }
 
 function location(city: string | null, country: string | null): string {
-  return [city, country].filter((v) => v && v.trim()).join(", ") || "—";
+  return formatLocation(city, country, "fr") || "—";
 }
 
 /** Compte par jour sur les `days` derniers jours (index 0 = il y a days-1 jours). */
@@ -281,7 +282,7 @@ export async function getStatsData(): Promise<StatsData> {
   // Membres par pays (top 6)
   const byCountry: Record<string, number> = {};
   for (const row of profileCountries.data ?? []) {
-    const c = row.country?.trim() || "Non renseigné";
+    const c = localizeStoredCountry(row.country?.trim() ?? "", "fr") || "Non renseigné";
     byCountry[c] = (byCountry[c] ?? 0) + 1;
   }
   const countries: CountryBar[] = Object.entries(byCountry)
@@ -482,7 +483,7 @@ export async function getPendingProfiles(): Promise<PendingProfileRow[]> {
     name: fullName(p.first_name, p.last_name),
     age: p.age,
     city: p.city?.trim() || "—",
-    country: p.country?.trim() || "—",
+    country: localizeStoredCountry(p.country?.trim() ?? "", "fr") || "—",
     gender: p.gender === "femme" ? "Femme" : p.gender === "homme" ? "Homme" : "—",
     job: p.job?.trim() || "—",
     edu: p.education?.trim() || "—",

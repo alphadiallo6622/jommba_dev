@@ -7,14 +7,14 @@ import { Loader2 } from 'lucide-react'
 import { useCurrentUser } from '@/lib/use-current-user'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { updateMyProfile } from '@/lib/supabase/profile-actions'
-import { AFRICAN_COUNTRIES, NON_AFRICAN_COUNTRIES, countriesForLocale, countryLabel } from '@/lib/countries'
+import { AFRICAN_COUNTRIES, NON_AFRICAN_COUNTRIES, countriesForLocale, countryLabel, countryCode } from '@/lib/countries'
 import { translateProfileValue } from '@/lib/profile-values'
 import SettingsDrawer from '../SettingsDrawer'
 
 type Props = { open: boolean; onClose: () => void }
 
-const AFRICA_COUNTRIES  = AFRICAN_COUNTRIES.map(c => c.name)
-const DAKAR_CITIES = ['Dakar','Thiès','Kaolack','Saint-Louis','Ziguinchor','Diourbel','Louga','Fatick','Kolda','Tambacounda']
+const AFRICA_CODES = new Set(AFRICAN_COUNTRIES.map(c => c.code))
+const SENEGAL_CITIES = ['Dakar','Thiès','Kaolack','Saint-Louis','Ziguinchor','Diourbel','Louga','Fatick','Kolda','Tambacounda']
 // Valeur canonique (FR) stockée en base ; le libellé est traduit à l'affichage.
 const ETUDES = ['Bac','Bac+2','Bac+3','Bac+5','Doctorat','Autre']
 
@@ -26,18 +26,18 @@ export default function LocationPanel({ open, onClose }: Props) {
   const mockUser = useCurrentUser()
   const { user } = useAuth()
   const [inAfrica, setInAfrica] = useState(true)
-  const [country, setCountry]   = useState('Sénégal')
-  const [city, setCity]         = useState('Dakar')
+  const [country, setCountry]   = useState('')
+  const [city, setCity]         = useState('')
   const [profession, setProfession] = useState('')
   const [etudes, setEtudes]     = useState('Bac+3')
   const [saving, setSaving]     = useState(false)
 
   // Initialise depuis le profil réel chargé dans le store
   useEffect(() => {
-    if (mockUser.country) {
-      const isAfrica = AFRICA_COUNTRIES.includes(mockUser.country) || mockUser.country === 'SN'
-      setInAfrica(isAfrica)
-      setCountry(mockUser.country === 'SN' ? 'Sénégal' : mockUser.country)
+    const code = countryCode(mockUser.country)
+    if (code) {
+      setInAfrica(AFRICA_CODES.has(code))
+      setCountry(code)
     }
     if (mockUser.city) setCity(mockUser.city)
     // tags = [situation, job, éducation] (voir buildTags dans profile-service)
@@ -47,6 +47,7 @@ export default function LocationPanel({ open, onClose }: Props) {
 
   const save = async () => {
     if (!user) return
+    if (!country) { toast.error(t('countryRequired')); return }
     setSaving(true)
     const err = await updateMyProfile(user.id, {
       country,
@@ -68,8 +69,8 @@ export default function LocationPanel({ open, onClose }: Props) {
 
   const select = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 bg-white focus:outline-none focus:border-[#10B981]'
   const inputCls = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-[#10B981]'
-  // Ville et profession comptent dans la complétude (lib/profile-sections.ts) ;
-  // pays et niveau d'études ont toujours une valeur sélectionnée.
+  // Ville, pays et profession comptent dans la complétude
+  // (lib/profile-sections.ts) ; le niveau d'études a toujours une valeur.
   const missingCls = 'w-full border border-red-400 bg-red-50/40 rounded-xl px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-[#10B981]'
   const toFill = <span className="ml-2 text-[10px] font-normal normal-case text-red-500">{tp('toFill')}</span>
   const cityMissing = !city.trim()
@@ -99,7 +100,7 @@ export default function LocationPanel({ open, onClose }: Props) {
             ].map(({ label, value }) => (
               <button
                 key={label}
-                onClick={() => { setInAfrica(value); setCountry(value ? 'Sénégal' : 'France'); setCity('') }}
+                onClick={() => { setInAfrica(value); setCountry(''); setCity('') }}
                 className={`py-2.5 text-sm font-medium rounded-xl border transition-colors ${
                   inAfrica === value
                     ? 'bg-[#E1F5EE] border-[#10B981] text-[#10B981]'
@@ -114,16 +115,24 @@ export default function LocationPanel({ open, onClose }: Props) {
 
         {/* Country */}
         <div>
-          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">{t('country')}</label>
-          <select value={country} onChange={e => setCountry(e.target.value)} className={select}>
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+            {t('country')}{!country && toFill}
+          </label>
+          <select
+            value={country}
+            onChange={e => setCountry(e.target.value)}
+            aria-invalid={!country}
+            className={country ? select : missingCls}
+          >
+            <option value="">{t('selectCountry')}</option>
             {countries.map(c => (
-              <option key={c.code} value={c.name}>{countryLabel(c, locale)}</option>
+              <option key={c.code} value={c.code}>{countryLabel(c, locale)}</option>
             ))}
           </select>
         </div>
 
         {/* City */}
-        {inAfrica && country === 'Sénégal' ? (
+        {inAfrica && country === 'SN' ? (
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
               {t('city')}{cityMissing && toFill}
@@ -134,7 +143,7 @@ export default function LocationPanel({ open, onClose }: Props) {
               aria-invalid={cityMissing}
               className={cityMissing ? missingCls : select}
             >
-              {DAKAR_CITIES.map(c => <option key={c}>{c}</option>)}
+              {SENEGAL_CITIES.map(c => <option key={c}>{c}</option>)}
             </select>
           </div>
         ) : (
