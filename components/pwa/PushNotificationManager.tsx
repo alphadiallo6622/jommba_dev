@@ -18,9 +18,7 @@ import { useAuth } from '@/components/providers/AuthProvider'
 import { enablePush, ensurePushSubscription, getPushSupport, setBadge } from '@/lib/push/client'
 
 const DISMISS_KEY = 'jommba-push-dismissed-at'
-const LAST_SEEN_KEY = 'jommba-last-seen-at'
 const DISMISS_MS = 7 * 24 * 60 * 60 * 1000
-const LAST_SEEN_MS = 60 * 60 * 1000
 
 function readStorage(key: string): number {
   try {
@@ -53,12 +51,6 @@ export default function PushNotificationManager() {
     const supabase = createClient()
     let cancelled = false
     let promptTimer: ReturnType<typeof setTimeout> | undefined
-
-    if (Date.now() - readStorage(LAST_SEEN_KEY) > LAST_SEEN_MS) {
-      supabase.rpc('touch_last_seen').then(({ error }) => {
-        if (!error) writeStorage(LAST_SEEN_KEY, Date.now())
-      })
-    }
 
     if (getPushSupport() !== 'ok') return
 

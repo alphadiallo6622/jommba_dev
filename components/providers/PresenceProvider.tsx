@@ -6,6 +6,11 @@ import { useAuth } from './AuthProvider'
 
 const PRESENCE_CHANNEL = 'jommba-online-users'
 
+/** Periode du battement qui entretient profiles.last_seen_at. Le canal de
+ *  presence ne vit que dans le navigateur : sans cette trace en base, la
+ *  console admin n'a aucun moyen de compter les membres connectes. */
+const HEARTBEAT_MS = 60_000
+
 const OnlineUsersContext = createContext<Set<string>>(new Set())
 
 export function PresenceProvider({ children }: { children: React.ReactNode }) {
@@ -39,6 +44,26 @@ export function PresenceProvider({ children }: { children: React.ReactNode }) {
       })
 
     return () => { supabase.removeChannel(channel) }
+  }, [user])
+
+  // Battement vers la base, en pause quand l'onglet est masque : un onglet
+  // oublie en arriere-plan ne doit pas compter comme une connexion active.
+  useEffect(() => {
+    if (!user) return
+    const supabase = createClient()
+    const beat = () => {
+      if (document.visibilityState !== 'visible') return
+      supabase.rpc('touch_last_seen').then(({ error }) => {
+        if (error) console.error('[presence] touch_last_seen:', error)
+      })
+    }
+    beat()
+    const timer = setInterval(beat, HEARTBEAT_MS)
+    document.addEventListener('visibilitychange', beat)
+    return () => {
+      clearInterval(timer)
+      document.removeEventListener('visibilitychange', beat)
+    }
   }, [user])
 
   return (

@@ -6,6 +6,7 @@ import { KpiCard } from "@/components/admin/ui/kpi-card";
 import { Card, CardHeader } from "@/components/admin/ui/card";
 import { LineChart } from "@/components/admin/ui/line-chart";
 import { DonutChart } from "@/components/admin/ui/donut-chart";
+import { AutoRefresh } from "@/components/admin/auto-refresh";
 import { getOverviewData } from "@/lib/admin/queries";
 
 export const metadata: Metadata = { title: "Vue d'ensemble" };
@@ -41,10 +42,20 @@ const ACT_IC: Record<string, string> = {
 };
 
 export default async function AdminOverviewPage() {
-  const { kpis, chart, distribution, activity, pendingProfiles } = await getOverviewData();
+  const { kpis, chart, distribution, activity, pendingProfiles, gender, funnel, countries } =
+    await getOverviewData();
+
+  const genderSegments = [
+    { label: "Hommes",         value: gender.hommes,       color: "#2563eb" },
+    { label: "Femmes",         value: gender.femmes,       color: "#db2777" },
+    { label: "Non renseigné",  value: gender.nonRenseigne, color: "#cbd5e1" },
+  ];
 
   return (
     <div className="space-y-5">
+      {/* Les KPI « en ligne maintenant » et la file de validation doivent
+          coller au present : la page se recharge toute seule. */}
+      <AutoRefresh seconds={30} />
       {/* ── Alert banner ── */}
       <div
         className="rounded-2xl px-6 py-5 flex items-center justify-between gap-4"
@@ -70,7 +81,7 @@ export default async function AdminOverviewPage() {
       </div>
 
       {/* ── KPI cards ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
         {kpis.map((kpi) => (
           <KpiCard key={kpi.label} kpi={kpi} />
         ))}
@@ -111,6 +122,113 @@ export default async function AdminOverviewPage() {
           </div>
         </Card>
       </div>
+
+      {/* ── Genre & parcours d'inscription ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+        <Card className="lg:col-span-2">
+          <CardHeader title="Hommes / Femmes" />
+          <div className="p-5">
+            <DonutChart segments={genderSegments} />
+            <div className="mt-4 pt-4 border-t border-[var(--color-line)] flex items-baseline justify-between">
+              <span className="text-xs text-[var(--color-muted)]">
+                Hommes pour une femme
+              </span>
+              <span className="text-lg font-bold text-[var(--color-ink)]">
+                {gender.ratio}
+              </span>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="lg:col-span-3">
+          <CardHeader
+            title="Parcours d'inscription"
+            action={
+              <span className="text-[11px] text-[var(--color-muted)]">
+                de la création du compte à Découvrir
+              </span>
+            }
+          />
+          <div className="p-5 space-y-3">
+            {funnel.map((step) => (
+              <div key={step.label}>
+                <div className="flex items-baseline justify-between gap-3 mb-1">
+                  <span className="text-sm font-medium text-[var(--color-ink)]">
+                    {step.label}
+                    <span className="ml-2 text-xs font-normal text-[var(--color-muted)]">
+                      {step.hint}
+                    </span>
+                  </span>
+                  <span className="text-sm font-bold text-[var(--color-ink)] shrink-0">
+                    {step.value.toLocaleString("fr-FR")}
+                    <span className="ml-1.5 text-xs font-medium text-[var(--color-muted)]">
+                      {step.share} %
+                    </span>
+                  </span>
+                </div>
+                <div className="h-2 rounded-full bg-[var(--color-faint)] overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-[var(--color-brand-500)]"
+                    style={{ width: `${step.share}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+
+      {/* ── Répartition par pays ── */}
+      <Card>
+        <CardHeader
+          title="Inscrits par pays"
+          action={
+            <span className="text-[11px] text-[var(--color-muted)]">
+              {countries.length} pays représentés
+            </span>
+          }
+        />
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-left text-xs text-[var(--color-muted)] border-b border-[var(--color-line)]">
+                <th className="font-medium px-5 py-2.5">Pays</th>
+                <th className="font-medium px-5 py-2.5 text-right">Membres</th>
+                <th className="font-medium px-5 py-2.5 text-right">Hommes</th>
+                <th className="font-medium px-5 py-2.5 text-right">Femmes</th>
+                <th className="font-medium px-5 py-2.5 text-right w-32">Part</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[var(--color-line)]">
+              {countries.map((row) => (
+                <tr key={row.code} className="hover:bg-[var(--color-faint)]">
+                  <td className="px-5 py-2.5 text-[var(--color-ink)] font-medium">
+                    {row.country}
+                  </td>
+                  <td className="px-5 py-2.5 text-right font-semibold text-[var(--color-ink)]">
+                    {row.total.toLocaleString("fr-FR")}
+                  </td>
+                  <td className="px-5 py-2.5 text-right text-[var(--color-muted)]">{row.hommes}</td>
+                  <td className="px-5 py-2.5 text-right text-[var(--color-muted)]">{row.femmes}</td>
+                  <td className="px-5 py-2.5">
+                    <div className="flex items-center gap-2 justify-end">
+                      <div className="h-1.5 w-16 rounded-full bg-[var(--color-faint)] overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-[var(--color-brand-500)]"
+                          style={{ width: `${row.share}%` }}
+                        />
+                      </div>
+                      <span className="text-xs text-[var(--color-muted)] w-9 text-right">
+                        {row.share} %
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
 
       {/* ── Bottom row ── */}
       <div className="grid lg:grid-cols-2 gap-4">

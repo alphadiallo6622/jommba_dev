@@ -5,6 +5,7 @@ import { cache } from "react";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { timeAgo, formatDate, formatDateTime, formatDuration } from "@/lib/admin/format";
 import { formatLocation, localizeStoredCountry } from "@/lib/countries";
+import { MIN_VISIBLE_PROFILE_COMPLETION } from "@/lib/constants";
 import type {
   Kpi, ChartPoint, DonutSegment, MonthBar, CountryBar, RevenuePoint, DayPoint,
   FeedItem, AdminNotification, MemberRow, PendingProfileRow, PhotoQueueItem,
@@ -137,12 +138,48 @@ export const getAdminCounts = cache(async (): Promise<AdminCounts> => {
 
 // ── Vue d'ensemble ────────────────────────────────────────────────────────────
 
+/** Fenetre pendant laquelle un membre est considere connecte. Large au regard
+ *  du battement de 60 s envoye par PresenceProvider : un reseau mobile qui
+ *  bafouille ne doit pas faire disparaitre quelqu'un du compteur. */
+const ONLINE_WINDOW_MS = 5 * 60 * 1000;
+
+export interface GenderSplit {
+  hommes: number;
+  femmes: number;
+  nonRenseigne: number;
+  /** Hommes pour une femme, « — » tant qu'aucune femme n'est inscrite. */
+  ratio: string;
+}
+
+/** Une marche du parcours d'inscription, de la creation de compte au profil
+ *  reellement visible dans Decouvrir. */
+export interface FunnelStep {
+  label: string;
+  value: number;
+  hint: string;
+  /** Part des comptes totaux, en pourcentage arrondi. */
+  share: number;
+}
+
+export interface CountryRow {
+  code: string;
+  country: string;
+  total: number;
+  hommes: number;
+  femmes: number;
+  share: number;
+}
+
 export interface OverviewData {
   kpis: Kpi[];
   chart: ChartPoint[];
   distribution: DonutSegment[];
   activity: FeedItem[];
   pendingProfiles: number;
+  gender: GenderSplit;
+  funnel: FunnelStep[];
+  countries: CountryRow[];
+  onlineNow: number;
 }
 
 export async function getOverviewData(): Promise<OverviewData> {
@@ -154,7 +191,7 @@ export async function getOverviewData(): Promise<OverviewData> {
     await Promise.all([
       supabase.from("profiles").select("created_at").gte("created_at", since30).limit(10_000),
       supabase.from("profiles").select("validated_at").gte("validated_at", since30).limit(10_000),
-      supabase.from("profiles").select("status").limit(10_000),
+      supabase.from("profiles").select("status,gender,country,avatar_url,profile_completion,visibility,last_seen_at").limit(10_000),
       supabase.from("profiles").select("first_name,last_name,created_at").order("created_at", { ascending: false }).limit(4),
       supabase.from("subscriptions").select("user_id,created_at,duration_months").eq("plan", "premium").order("created_at", { ascending: false }).limit(3),
       supabase.from("reports").select("reported_id,created_at").order("created_at", { ascending: false }).limit(3),
@@ -180,14 +217,73 @@ export async function getOverviewData(): Promise<OverviewData> {
   const valBuckets = bucketByDay((validations.data ?? []).map((r) => r.validated_at), 30);
   const chart: ChartPoint[] = insBuckets.map((v, i) => ({ day: i + 1, inscriptions: v, validations: valBuckets[i] }));
 
-  // Répartition
+  const profileRows = statuses.data ?? [];
+
+  // Répartition par statut
   const byStatus: Record<string, number> = {};
-  for (const row of statuses.data ?? []) byStatus[row.status] = (byStatus[row.status] ?? 0) + 1;
+  for (const row of profileRows) byStatus[row.status] = (byStatus[row.status] ?? 0) + 1;
   const distribution: DonutSegment[] = [
     { label: "Validés",             value: byStatus["validated"] ?? 0, color: "#10b981" },
     { label: "En attente",          value: byStatus["pending"] ?? 0,   color: "#e8920c" },
     { label: "Refusés / Suspendus", value: (byStatus["refused"] ?? 0) + (byStatus["suspended"] ?? 0), color: "#df4548" },
   ];
+
+  // Répartition par genre. Un genre absent signale un onboarding jamais
+  // termine : ces comptes ne sont visibles par personne dans Decouvrir.
+  const hommes = profileRows.filter((r) => r.gender === "homme").length;
+  const femmes = profileRows.filter((r) => r.gender === "femme").length;
+  const gender: GenderSplit = {
+    hommes,
+    femmes,
+    nonRenseigne: profileRows.filter((r) => !r.gender).length,
+    ratio: femmes > 0 ? (hommes / femmes).toFixed(1).replace(".", ",") : "—",
+  };
+
+  // Connectes maintenant, d'apres le battement entretenu par PresenceProvider.
+  const onlineSince = Date.now() - ONLINE_WINDOW_MS;
+  const onlineNow = profileRows.filter(
+    (r) => r.last_seen_at !== null && Date.parse(r.last_seen_at) > onlineSince,
+  ).length;
+
+  // Parcours d'inscription : ou se perdent les comptes entre la creation et
+  // l'apparition dans Decouvrir. Chaque marche inclut les suivantes.
+  const onboarded = profileRows.filter((r) => r.gender !== null);
+  const withPhoto = onboarded.filter((r) => r.avatar_url !== null);
+  const visible = withPhoto.filter(
+    (r) =>
+      r.status === "validated" &&
+      r.visibility === "active" &&
+      (r.profile_completion ?? 0) >= MIN_VISIBLE_PROFILE_COMPLETION,
+  );
+  const share = (n: number) =>
+    profileRows.length > 0 ? Math.round((n / profileRows.length) * 100) : 0;
+  const funnel: FunnelStep[] = [
+    { label: "Comptes créés",      value: profileRows.length, hint: "inscriptions totales",        share: 100 },
+    { label: "Onboarding terminé", value: onboarded.length,   hint: "genre renseigné",             share: share(onboarded.length) },
+    { label: "Avec photo",         value: withPhoto.length,   hint: "photo de profil en ligne",    share: share(withPhoto.length) },
+    { label: "Visibles",           value: visible.length,     hint: "apparaissent dans Découvrir", share: share(visible.length) },
+  ];
+
+  // Repartition par pays, genre par genre.
+  const byCountry = new Map<string, { total: number; hommes: number; femmes: number }>();
+  for (const row of profileRows) {
+    const code = row.country?.trim().toUpperCase() || "??";
+    const entry = byCountry.get(code) ?? { total: 0, hommes: 0, femmes: 0 };
+    entry.total += 1;
+    if (row.gender === "homme") entry.hommes += 1;
+    if (row.gender === "femme") entry.femmes += 1;
+    byCountry.set(code, entry);
+  }
+  const countries: CountryRow[] = [...byCountry.entries()]
+    .map(([code, v]) => ({
+      code,
+      country: code === "??" ? "Non renseigné" : localizeStoredCountry(code, "fr"),
+      total: v.total,
+      hommes: v.hommes,
+      femmes: v.femmes,
+      share: share(v.total),
+    }))
+    .sort((a, b) => b.total - a.total);
 
   // Flux d'activité — fusion des événements récents
   type RawEvent = FeedItem & { ts: number };
@@ -223,9 +319,15 @@ export async function getOverviewData(): Promise<OverviewData> {
     { label: "En attente de validation", value: String(counts.pendingProfiles), delta: "à traiter < 24 h", icon: "clock", accent: "#e8920c", accentBg: "#fdf3e3", spark: insBuckets.slice(-12) },
     { label: "Abonnés Premium", value: String(counts.premiumMembers), delta: `${conversion} % conversion`, up: true, icon: "crown", accent: "#0a8f63", accentBg: "#e7f7ef" },
     { label: "Signalements ouverts", value: String(counts.openReports), delta: counts.openReports > 0 ? "priorité haute" : "aucun en attente", icon: "flag", accent: "#df4548", accentBg: "#fceceb" },
+    { label: "En ligne maintenant", value: String(onlineNow), delta: "actifs ces 5 dernières minutes", up: onlineNow > 0, icon: "radio", accent: "#2563eb", accentBg: "#eff6ff" },
+    { label: "Profils visibles", value: String(visible.length), delta: `sur ${profileRows.length} comptes`, icon: "eye", accent: "#7c3aed", accentBg: "#f5f3ff" },
   ];
 
-  return { kpis, chart, distribution, activity, pendingProfiles: counts.pendingProfiles };
+  return {
+    kpis, chart, distribution, activity,
+    pendingProfiles: counts.pendingProfiles,
+    gender, funnel, countries, onlineNow,
+  };
 }
 
 // ── Statistiques ──────────────────────────────────────────────────────────────
