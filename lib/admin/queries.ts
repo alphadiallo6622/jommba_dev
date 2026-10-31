@@ -197,7 +197,7 @@ export async function getOverviewData(): Promise<OverviewData> {
     await Promise.all([
       supabase.from("profiles").select("created_at").gte("created_at", since30).limit(10_000),
       supabase.from("profiles").select("validated_at").gte("validated_at", since30).limit(10_000),
-      supabase.from("profiles").select("status,gender,country,avatar_url,profile_completion,visibility,last_seen_at").limit(10_000),
+      supabase.from("profiles").select("status,gender,country,avatar_url,profile_completion,visibility,last_seen_at,onboarding_completed_at").limit(10_000),
       supabase.from("profiles").select("first_name,last_name,created_at").order("created_at", { ascending: false }).limit(FEED_SOURCE_LIMIT),
       supabase.from("subscriptions").select("user_id,created_at,duration_months").eq("plan", "premium").order("created_at", { ascending: false }).limit(FEED_SOURCE_LIMIT),
       supabase.from("reports").select("reported_id,created_at").order("created_at", { ascending: false }).limit(FEED_SOURCE_LIMIT),
@@ -253,7 +253,10 @@ export async function getOverviewData(): Promise<OverviewData> {
 
   // Parcours d'inscription : ou se perdent les comptes entre la creation et
   // l'apparition dans Decouvrir. Chaque marche inclut les suivantes.
-  const onboarded = profileRows.filter((r) => r.gender !== null);
+  // Le genre marque le debut de l'onboarding (il est ecrit des l'etape 1) ;
+  // onboarding_completed_at en marque l'achevement.
+  const started = profileRows.filter((r) => r.gender !== null);
+  const onboarded = profileRows.filter((r) => r.onboarding_completed_at !== null);
   const withPhoto = onboarded.filter((r) => r.avatar_url !== null);
   const visible = withPhoto.filter(
     (r) =>
@@ -264,10 +267,11 @@ export async function getOverviewData(): Promise<OverviewData> {
   const share = (n: number) =>
     profileRows.length > 0 ? Math.round((n / profileRows.length) * 100) : 0;
   const funnel: FunnelStep[] = [
-    { label: "Comptes créés",      value: profileRows.length, hint: "inscriptions totales",        share: 100 },
-    { label: "Onboarding terminé", value: onboarded.length,   hint: "genre renseigné",             share: share(onboarded.length) },
-    { label: "Avec photo",         value: withPhoto.length,   hint: "photo de profil en ligne",    share: share(withPhoto.length) },
-    { label: "Visibles",           value: visible.length,     hint: "apparaissent dans Découvrir", share: share(visible.length) },
+    { label: "Comptes créés",       value: profileRows.length, hint: "inscriptions totales",        share: 100 },
+    { label: "Onboarding commencé", value: started.length,     hint: "genre choisi (étape 1/7)",    share: share(started.length) },
+    { label: "Onboarding terminé",  value: onboarded.length,   hint: "les 7 étapes franchies",      share: share(onboarded.length) },
+    { label: "Avec photo",          value: withPhoto.length,   hint: "photo de profil en ligne",    share: share(withPhoto.length) },
+    { label: "Visibles",            value: visible.length,     hint: "apparaissent dans Découvrir", share: share(visible.length) },
   ];
 
   // Repartition par pays, genre par genre.

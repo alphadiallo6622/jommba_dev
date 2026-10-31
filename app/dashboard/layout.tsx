@@ -34,12 +34,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
     // Onboarding obligatoire, quel que soit le mode d'inscription. Une connexion
     // Google crée le compte sans passer par le formulaire : sans ce garde-fou,
     // ces membres atterrissaient directement ici avec un profil vide.
-    // `gender` est le témoin fiable de l'onboarding terminé : la dernière étape
-    // écrit tous les champs d'un seul `update`, il ne peut donc pas être à
-    // moitié rempli. Le garde vit ici (et non dans proxy.ts) car le profil est
-    // déjà chargé : zéro requête supplémentaire, et le proxy ne doit pas taper
-    // en base puisqu'il s'exécute aussi sur les routes préchargées.
-    if (!profile?.gender) {
+    // `onboarding_completed_at` est le témoin de l'achèvement. Le genre ne
+    // peut plus jouer ce rôle : les étapes sont enregistrées au fur et à
+    // mesure, donc un genre renseigné signifie « commencé », pas « terminé ».
+    // Le garde vit ici (et non dans proxy.ts) car le profil est déjà chargé :
+    // zéro requête supplémentaire, et le proxy ne doit pas taper en base
+    // puisqu'il s'exécute aussi sur les routes préchargées.
+    if (!profile?.onboarding_completed_at) {
       redirect('/onboarding')
     }
 

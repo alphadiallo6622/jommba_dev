@@ -59,11 +59,13 @@ export interface Profile {
   refusal_reason:     string | null
   last_photo_reminder_at: string | null
   last_seen_at: string | null
+  /** Date d'achevement de l'onboarding ; null tant qu'il n'est pas termine. */
+  onboarding_completed_at: string | null
   created_at:         string
   updated_at:         string
 }
 
-export type ProfileInsert = Omit<Profile, 'id' | 'created_at' | 'updated_at' | 'validated_at' | 'refusal_reason' | 'photos_blurred' | 'last_photo_reminder_at' | 'last_seen_at'> & {
+export type ProfileInsert = Omit<Profile, 'id' | 'created_at' | 'updated_at' | 'validated_at' | 'refusal_reason' | 'photos_blurred' | 'last_photo_reminder_at' | 'last_seen_at' | 'onboarding_completed_at'> & {
   id?:             string
   created_at?:     string
   updated_at?:     string

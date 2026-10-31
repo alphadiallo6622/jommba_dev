@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Heart } from 'lucide-react'
@@ -13,14 +14,11 @@ import StepValues        from '@/components/onboarding/StepValues'
 import StepPhotos        from '@/components/onboarding/StepPhotos'
 import { createClient }  from '@/lib/supabase/client'
 import { computeProfileCompletion } from '@/lib/supabase/profile-completion'
-import { countryCode } from '@/lib/countries'
 import { useAuth }       from '@/components/providers/AuthProvider'
 import { toast }         from 'sonner'
 import { localizedLogin } from '@/lib/i18n/locale-cookie'
-import { normalizeHeightCm } from '@/lib/utils'
 import { applyModerationPolicy } from './actions'
-
-const TOTAL_STEPS = 7
+import { TOTAL_STEPS, fullPatch, stepPatch } from '@/lib/onboarding-steps'
 
 const STEP_LABEL_KEYS = [
   'gender',
@@ -37,6 +35,23 @@ export default function OnboardingPage() {
   const t                   = useTranslations('onboarding')
   const { user }            = useAuth()
   const { currentStep, setStep, reset } = useOnboardingStore()
+
+  // Le store est persiste dans le navigateur, donc la reprise est acquise
+  // sur le meme appareil. Sur un autre appareil, le genre deja enregistre
+  // doit malgre tout etre retrouve : le choix est irreversible, et le
+  // formulaire ne doit pas offrir de le refaire.
+  useEffect(() => {
+    if (!user) return
+    if (useOnboardingStore.getState().gender) return
+    createClient()
+      .from('profiles')
+      .select('gender')
+      .eq('user_id', user.id)
+      .single()
+      .then(({ data }) => {
+        if (data?.gender) useOnboardingStore.getState().setField('gender', data.gender)
+      })
+  }, [user])
 
   // Display name from Supabase auth metadata. Le formulaire d'inscription pose
   // first_name ; Google (OIDC) renvoie given_name / name — d'où les fallbacks.
@@ -55,7 +70,26 @@ export default function OnboardingPage() {
   const isWelcome  = currentStep === 0
   const progressPct = isWelcome ? 0 : Math.round((currentStep / TOTAL_STEPS) * 100)
 
-  const goNext = () => { if (currentStep < TOTAL_STEPS) setStep(currentStep + 1) }
+  // Chaque etape est ecrite des qu'elle est franchie. Avant, le formulaire
+  // n'ecrivait qu'a la derniere etape : un abandon en route ne laissait aucune
+  // trace en base, et le membre repartait de zero en changeant d'appareil.
+  // L'echec n'interrompt pas la saisie — l'ecriture finale rattrapera l'etape.
+  const saveStep = async (step: number) => {
+    if (!user) return
+    const patch = stepPatch(step, useOnboardingStore.getState())
+    if (Object.keys(patch).length === 0) return
+    const { error } = await createClient()
+      .from('profiles')
+      .update(patch)
+      .eq('user_id', user.id)
+    if (error) console.error('[Onboarding] etape', step, 'non enregistree :', error)
+  }
+
+  const goNext = () => {
+    if (currentStep >= TOTAL_STEPS) return
+    void saveStep(currentStep)
+    setStep(currentStep + 1)
+  }
   const goBack = () => { if (currentStep > 1) setStep(currentStep - 1) }
 
   const handleFinish = async () => {
@@ -68,69 +102,42 @@ export default function OnboardingPage() {
         return
       }
 
-      // Get all store data at submission time
+      // Les etapes ont deja ete ecrites une a une. On repart de ce qui est en
+      // base et le formulaire ne fait que completer : une valeur vide dans le
+      // store (etape saisie sur un autre appareil, cache vide) ne doit pas
+      // effacer ce qui est deja enregistre.
       const store = useOnboardingStore.getState()
+      const { data: saved } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', authUser.id)
+        .single()
 
-      // Age calculation from day/month/year
-      let age: number | null = null
-      if (store.birthDate) {
-        const { day, month, year } = store.birthDate
-        const birth = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
-        const today = new Date()
-        age = today.getFullYear() - birth.getFullYear()
-        if (
-          today.getMonth() < birth.getMonth() ||
-          (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate())
-        ) age--
-      }
+      const merged = { ...(saved ?? {}), ...fullPatch(store) } as Record<string, unknown>
+      const str = (key: string) => (merged[key] as string | null) ?? null
 
-      // Determine country and city from location.
-      // Un champ vide reste '' (jamais undefined) dans le store tant qu'il
-      // n'a pas été rempli — ?? seul ne le convertit pas en null, ce qui
-      // faussait le calcul de complétude du profil (city:"" comptait comme
-      // "rempli"). On normalise explicitement ici.
-      // `country` est stocké en code ISO (GN, FR…), jamais en nom de pays :
-      // c'est la forme canonique lue par les filtres et par l'affichage.
-      const country = countryCode(store.location?.residenceCountry || store.location?.country) || null
-      const city    = (store.location?.region?.trim() || null)
-
-      // First valid photo = avatar
-      const avatar_url = store.photos.find(p => Boolean(p)) ?? null
-
-      // Profile completion score (mêmes 10 champs clés que le reste de l'app)
+      // Score de complétude (mêmes 10 champs clés que le reste de l'app)
       const profile_completion = computeProfileCompletion({
-        gender:          store.gender,
-        age,
-        marital_status:  store.maritalStatus,
-        job:             store.profession || null,
-        education:       store.educationLevel || null,
-        height:          normalizeHeightCm(store.height),
-        city,
-        country,
-        marriage_vision: store.values.marriageVision.length > 0 ? store.values.marriageVision.join(',') : null,
-        avatar_url,
+        gender:          str('gender'),
+        age:             (merged.age as number | null) ?? null,
+        marital_status:  str('marital_status'),
+        job:             str('job'),
+        education:       str('education'),
+        height:          (merged.height as number | null) ?? null,
+        city:            str('city'),
+        country:         str('country'),
+        marriage_vision: str('marriage_vision'),
+        avatar_url:      str('avatar_url'),
       })
 
-      // Save profile to Supabase
       const { error: updateError } = await supabase
         .from('profiles')
         .update({
-          gender:           store.gender,
-          age,
-          marital_status:   store.maritalStatus ?? null,
-          job:              store.profession     || null,
-          education:        store.educationLevel || null,
-          height:           normalizeHeightCm(store.height),
-          city,
-          country,
-          marriage_vision:  store.values.marriageVision.length
-            ? store.values.marriageVision.join(',') : null,
-          seeking:          store.values.soughtQualities.length
-            ? store.values.soughtQualities.join(',') : null,
-          polygamy:         store.values.polygamy || null,
-          has_children:     store.values.children || null,
-          avatar_url,
+          ...fullPatch(store),
           profile_completion,
+          // Temoin d'achevement : c'est lui, et non le genre, qui ouvre le
+          // dashboard depuis que les etapes sont enregistrees au fil de l'eau.
+          onboarding_completed_at: new Date().toISOString(),
         })
         .eq('user_id', authUser.id)
 
