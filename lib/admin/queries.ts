@@ -595,8 +595,10 @@ export async function getPendingProfiles(): Promise<PendingProfileRow[]> {
     userId: p.user_id,
     name: fullName(p.first_name, p.last_name),
     age: p.age,
-    city: p.city?.trim() || "—",
-    country: localizeStoredCountry(p.country?.trim() ?? "", "fr") || "—",
+    // Ville/pays bruts : le repli « — » et la mise en forme vivent côté client,
+    // pour ne pas afficher « —, — » quand la localisation manque.
+    city: p.city?.trim() ?? "",
+    country: localizeStoredCountry(p.country?.trim() ?? "", "fr"),
     gender: p.gender === "femme" ? "Femme" : p.gender === "homme" ? "Homme" : "—",
     job: p.job?.trim() || "—",
     edu: p.education?.trim() || "—",
@@ -604,6 +606,19 @@ export async function getPendingProfiles(): Promise<PendingProfileRow[]> {
     madhhab: p.madhhab?.trim() || "—",
     photos: photosByUser.get(p.user_id) ?? [],
     sub: timeAgo(p.created_at),
+    height: p.height,
+    languages: p.languages,
+    mosqueFrequency: p.mosque_frequency,
+    arabicLevel: p.arabic_level,
+    hasChildren: p.has_children,
+    wantsChildren: p.wants_children,
+    canRelocate: p.can_relocate,
+    polygamy: p.polygamy,
+    seeking: p.seeking,
+    marriageVision: p.marriage_vision,
+    interests: p.interests,
+    bio: p.bio,
+    completion: p.profile_completion ?? 0,
   }));
 }
 

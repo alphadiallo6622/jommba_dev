@@ -4,13 +4,23 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { X, AlertCircle, ImageOff } from "lucide-react";
 import type { PendingProfileRow } from "@/lib/admin/types";
-import { formatLocation } from "@/lib/countries";
 import { validateProfile, refuseProfile } from "@/app/adminjommba/actions";
 import { useToast } from "@/components/admin/ui/toast";
 
 function initials(name: string) {
   return name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
 }
+
+/** Valeur affichable, « — » si vide. */
+const dash = (v: string | number | null | undefined) => {
+  if (v == null) return "—";
+  const s = String(v).trim();
+  return s === "" ? "—" : s;
+};
+
+/** « Ville, Pays » sans « —, — » quand la localisation manque. */
+const locationText = (city: string, country: string) =>
+  [city.trim(), country.trim()].filter(Boolean).join(", ") || "—";
 
 const REFUSAL_REASONS = [
   "Photo non conforme",
@@ -78,27 +88,67 @@ function ExamineModal({
               {profile.name}{profile.age != null && `, ${profile.age} ans`}
             </h2>
             <p className="text-sm text-[var(--color-muted)] mt-0.5">
-              {profile.gender} · {formatLocation(profile.city, profile.country, "fr")} · soumis {profile.sub.toLowerCase()}
+              {profile.gender} · {locationText(profile.city, profile.country)} · soumis {profile.sub.toLowerCase()}
             </p>
           </div>
 
-          {/* Info fields 2x2 */}
+          {/* Profil complété */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-[var(--color-muted)]">Profil complété</span>
+              <span className="font-semibold text-[var(--color-ink)]">{profile.completion}%</span>
+            </div>
+            <div className="h-1.5 rounded-full bg-[var(--color-faint)] overflow-hidden">
+              <div
+                className="h-full rounded-full bg-[var(--color-brand-500)]"
+                style={{ width: `${profile.completion}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Profil complet */}
           <div className="grid grid-cols-2 gap-3">
             {[
-              { label: "Profession",      value: profile.job },
-              { label: "Niveau d'études", value: profile.edu },
-              { label: "Situation",       value: profile.situation },
-              { label: "Madhhab",         value: profile.madhhab },
+              { label: "Profession",       value: profile.job },
+              { label: "Niveau d'études",  value: profile.edu },
+              { label: "Situation",        value: profile.situation },
+              { label: "Madhhab",          value: profile.madhhab },
+              { label: "Taille",           value: profile.height != null ? `${profile.height} cm` : "—" },
+              { label: "Langues",          value: dash(profile.languages) },
+              { label: "Mosquée",          value: dash(profile.mosqueFrequency) },
+              { label: "Niveau d'arabe",   value: dash(profile.arabicLevel) },
+              { label: "A des enfants",    value: dash(profile.hasChildren) },
+              { label: "Veut des enfants", value: dash(profile.wantsChildren) },
+              { label: "Peut déménager",   value: dash(profile.canRelocate) },
+              { label: "Polygamie",        value: dash(profile.polygamy) },
             ].map(({ label, value }) => (
               <div
                 key={label}
                 className="rounded-xl border border-[var(--color-line)] bg-[var(--color-faint)] px-3.5 py-3"
               >
                 <p className="text-[10px] font-medium text-[var(--color-muted)] mb-0.5">{label}</p>
-                <p className="text-sm font-semibold text-[var(--color-ink)]">{value}</p>
+                <p className="text-sm font-semibold text-[var(--color-ink)] break-words">{value}</p>
               </div>
             ))}
           </div>
+
+          {/* Champs libres */}
+          {[
+            { label: "Recherche",          value: profile.seeking },
+            { label: "Vision du mariage",  value: profile.marriageVision },
+            { label: "Centres d'intérêt",  value: profile.interests },
+            { label: "Bio",                value: profile.bio },
+          ]
+            .filter(({ value }) => value && value.trim())
+            .map(({ label, value }) => (
+              <div
+                key={label}
+                className="rounded-xl border border-[var(--color-line)] bg-[var(--color-faint)] px-3.5 py-3"
+              >
+                <p className="text-[10px] font-medium text-[var(--color-muted)] mb-1">{label}</p>
+                <p className="text-sm text-[var(--color-ink)] leading-relaxed break-words">{value}</p>
+              </div>
+            ))}
 
           {/* Photos */}
           <div>
@@ -272,7 +322,7 @@ export function ValidationClient({ profiles }: { profiles: PendingProfileRow[] }
                       {p.name}{p.age != null && `, ${p.age}`}
                     </p>
                     <p className="text-xs text-[var(--color-muted)]">
-                      {p.gender} · {formatLocation(p.city, p.country, "fr")}
+                      {p.gender} · {locationText(p.city, p.country)}
                     </p>
                     <p className="text-xs text-[var(--color-muted)]">
                       {p.job} · {p.edu}

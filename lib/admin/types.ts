@@ -84,7 +84,9 @@ export interface PendingProfileRow {
   userId: string;
   name: string;
   age: number | null;
+  /** Ville brute (vide si non renseignée) — l'affichage ajoute le repli « — ». */
   city: string;
+  /** Pays déjà localisé en français (vide si non renseigné). */
   country: string;
   gender: string;
   job: string;
@@ -93,6 +95,20 @@ export interface PendingProfileRow {
   madhhab: string;
   photos: string[]; // URLs
   sub: string;      // « Il y a 3 h »
+  // Profil complet, pour l'examen avant publication.
+  height: number | null;
+  languages: string | null;
+  mosqueFrequency: string | null;
+  arabicLevel: string | null;
+  hasChildren: string | null;
+  wantsChildren: string | null;
+  canRelocate: string | null;
+  polygamy: string | null;
+  seeking: string | null;
+  marriageVision: string | null;
+  interests: string | null;
+  bio: string | null;
+  completion: number;
 }
 
 export interface PhotoQueueItem {
