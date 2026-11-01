@@ -114,9 +114,9 @@ export const getAdminCounts = cache(async (): Promise<AdminCounts> => {
   const [total, newMonth, pending, premium, reports, photos, tickets, boosts] = await Promise.all([
     supabase.from("profiles").select("id", { count: "exact", head: true }),
     supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", monthStart.toISOString()),
-    // `.not("gender", ...)` : seuls les onboardings réellement soumis comptent
-    // comme « en attente » — cf. la note au-dessus de getPendingProfiles().
-    supabase.from("profiles").select("id", { count: "exact", head: true }).eq("status", "pending").not("gender", "is", null),
+    // `.not("onboarding_completed_at", ...)` : seuls les onboardings réellement
+    // soumis comptent comme « en attente » — cf. la note au-dessus de getPendingProfiles().
+    supabase.from("profiles").select("id", { count: "exact", head: true }).eq("status", "pending").not("onboarding_completed_at", "is", null),
     supabase.from("profiles").select("id", { count: "exact", head: true }).eq("is_premium", true),
     supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "pending"),
     supabase.from("profile_photos").select("id", { count: "exact", head: true }).eq("status", "pending"),
@@ -563,16 +563,17 @@ export async function searchMembers(q: string): Promise<MemberRow[]> {
 // profils entièrement vides arrivaient dans la file quelques secondes après
 // l'inscription, et l'admin était invité à valider un dossier inexistant.
 //
-// On ne retient donc que les profils dont l'onboarding a bien été soumis.
-// `gender` sert de témoin : la dernière étape de l'onboarding écrit tous ses
-// champs en un seul `update`, il ne peut pas être renseigné à moitié.
+// On ne retient donc que les profils dont l'onboarding a bien été soumis, ce
+// que marque `onboarding_completed_at`. Pas `gender` : chaque étape est
+// enregistrée dès qu'elle est franchie, le genre l'est dès l'étape 1 et ne
+// signifie plus que « commencé ».
 
 export async function getPendingProfiles(): Promise<PendingProfileRow[]> {
   const supabase = createAdminClient();
   const { data: profiles } = await supabase
     .from("profiles").select("*")
     .eq("status", "pending")
-    .not("gender", "is", null) // onboarding soumis uniquement — cf. note ci-dessus
+    .not("onboarding_completed_at", "is", null) // onboarding soumis uniquement — cf. note ci-dessus
     .order("created_at", { ascending: true })
     .limit(200);
 

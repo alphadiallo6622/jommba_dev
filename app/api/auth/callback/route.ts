@@ -5,8 +5,8 @@ import { localizePath, safeNextPath, toAuthLocale } from '@/lib/auth/localize-pa
 
 /**
  * L'onboarding est-il terminé pour la session courante ?
- * `gender` sert de témoin : la dernière étape de l'onboarding écrit tous ses
- * champs en un seul `update`, il ne peut donc pas être renseigné à moitié.
+ * `onboarding_completed_at` sert de témoin, pas `gender` : chaque étape est
+ * enregistrée dès qu'elle est franchie, le genre l'est dès l'étape 1.
  * En cas de doute (session illisible, profil absent) on renvoie `false` :
  * mieux vaut un onboarding proposé en trop qu'un profil vide publié.
  */
@@ -18,11 +18,11 @@ async function isOnboardingDone(
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('gender')
+    .select('onboarding_completed_at')
     .eq('user_id', user.id)
     .maybeSingle()
 
-  return Boolean(profile?.gender)
+  return Boolean(profile?.onboarding_completed_at)
 }
 
 // Échange le code OAuth/email contre une session Supabase.
