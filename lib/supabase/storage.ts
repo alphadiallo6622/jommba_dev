@@ -15,7 +15,9 @@
 import { createAdminClient } from './admin'
 
 export const PROFILE_PHOTOS_BUCKET = 'profile-photos'
-/** Couvertures d'articles, deposees depuis la console admin. */
+/** Images editoriales deposees depuis la console admin : couvertures
+ *  d'articles de blog et visuels de l'Academie, qui partagent la meme route
+ *  d'upload. Le bucket garde son nom d'origine, anterieur a l'Academie. */
 export const BLOG_IMAGES_BUCKET = 'blog-images'
 
 /** Extensions des formats acceptés par le bucket (cf. allowed_mime_types). */
@@ -95,7 +97,7 @@ export async function uploadProfilePhoto(userId: string, file: File): Promise<Up
   return uploadImage(PROFILE_PHOTOS_BUCKET, userId, file)
 }
 
-/** Couverture d'article, déposée depuis la console admin. */
+/** Image éditoriale de la console admin (blog ou Académie). */
 export async function uploadBlogImage(file: File): Promise<UploadResult> {
   return uploadImage(BLOG_IMAGES_BUCKET, 'covers', file)
 }

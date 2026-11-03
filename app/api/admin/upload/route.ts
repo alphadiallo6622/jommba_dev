@@ -1,6 +1,7 @@
 // app/api/admin/upload/route.ts
-// Dépôt des images de la console admin (couvertures d'articles de blog) sur
-// Supabase Storage. Protégé par le cookie admin.
+// Dépôt des images de la console admin sur Supabase Storage : couvertures
+// d'articles de blog et visuels de l'Académie passent tous deux par ici.
+// Protégé par le cookie admin.
 //
 // Ces images partaient sur Cloudinary, dont le quota gratuit est épuisé. Le
 // contrat de la route est inchangé — mêmes entrées, même réponse `{ url }` —

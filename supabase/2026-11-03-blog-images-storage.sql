@@ -1,7 +1,11 @@
 -- ─── Images du blog sur Supabase Storage ─────────────────────────────────────
--- Dernier usage de Cloudinary : les couvertures d'articles deposees depuis la
--- console admin. Elles passent ici, ce qui permet de fermer le compte
--- Cloudinary sans rien perdre.
+-- Dernier usage de Cloudinary : les images deposees depuis la console admin.
+-- Elles passent ici, ce qui permet de fermer le compte Cloudinary sans rien
+-- perdre.
+--
+-- Le bucket recoit les couvertures d'articles de blog ET les visuels de
+-- l'Academie : les deux ecrans partagent la meme route d'upload
+-- (app/api/admin/upload). Le nom du bucket est anterieur a l'Academie.
 --
 -- Bucket separe de `profile-photos` : ce sont des contenus editoriaux, pas des
 -- donnees de membres, et ils n'ont ni le meme cycle de vie ni les memes
