@@ -15,6 +15,8 @@
 import { createAdminClient } from './admin'
 
 export const PROFILE_PHOTOS_BUCKET = 'profile-photos'
+/** Couvertures d'articles, deposees depuis la console admin. */
+export const BLOG_IMAGES_BUCKET = 'blog-images'
 
 /** Extensions des formats acceptés par le bucket (cf. allowed_mime_types). */
 const EXT_BY_MIME: Record<string, string> = {
@@ -58,12 +60,13 @@ export type UploadResult =
   | { ok: false; error: string }
 
 /**
- * Dépose une photo de profil dans le bucket et renvoie son URL publique.
- * Le chemin commence par l'id du membre : ses photos restent regroupées, et un
- * nom aléatoire évite qu'une URL soit devinable depuis une autre.
+ * Dépose une image dans un bucket et renvoie son URL publique.
+ * `prefix` regroupe les fichiers (l'id du membre pour une photo de profil) ; le
+ * nom reste aléatoire, pour qu'une URL ne soit pas devinable depuis une autre.
  */
-export async function uploadProfilePhoto(
-  userId: string,
+async function uploadImage(
+  bucket: string,
+  prefix: string,
   file: File,
 ): Promise<UploadResult> {
   const mime = (file.type || '').toLowerCase()
@@ -72,19 +75,29 @@ export async function uploadProfilePhoto(
   }
 
   const supabase = createAdminClient()
-  const path = `${userId}/${crypto.randomUUID()}.${EXT_BY_MIME[mime]}`
+  const path = `${prefix}/${crypto.randomUUID()}.${EXT_BY_MIME[mime]}`
 
   const { error } = await supabase.storage
-    .from(PROFILE_PHOTOS_BUCKET)
+    .from(bucket)
     .upload(path, file, { contentType: mime, upsert: false })
 
   if (error) {
-    console.error('[storage] upload photo échoué:', error)
+    console.error(`[storage] upload ${bucket} échoué:`, error)
     return { ok: false, error: error.message }
   }
 
-  const { data } = supabase.storage.from(PROFILE_PHOTOS_BUCKET).getPublicUrl(path)
+  const { data } = supabase.storage.from(bucket).getPublicUrl(path)
   return { ok: true, url: data.publicUrl, path }
+}
+
+/** Photo de profil d'un membre : regroupée sous son id. */
+export async function uploadProfilePhoto(userId: string, file: File): Promise<UploadResult> {
+  return uploadImage(PROFILE_PHOTOS_BUCKET, userId, file)
+}
+
+/** Couverture d'article, déposée depuis la console admin. */
+export async function uploadBlogImage(file: File): Promise<UploadResult> {
+  return uploadImage(BLOG_IMAGES_BUCKET, 'covers', file)
 }
 
 /**

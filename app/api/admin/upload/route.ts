@@ -1,22 +1,16 @@
 // app/api/admin/upload/route.ts
-// Upload signé vers Cloudinary pour les images de la console admin
-// (couvertures d'articles de blog). Protégé par le cookie admin.
+// Dépôt des images de la console admin (couvertures d'articles de blog) sur
+// Supabase Storage. Protégé par le cookie admin.
+//
+// Ces images partaient sur Cloudinary, dont le quota gratuit est épuisé. Le
+// contrat de la route est inchangé — mêmes entrées, même réponse `{ url }` —
+// seul l'hébergeur du fichier change.
 import { NextRequest, NextResponse } from "next/server";
-import crypto from "crypto";
 import { verifyAdminToken, COOKIE } from "@/lib/admin/auth";
+import { uploadBlogImage } from "@/lib/supabase/storage";
 
-const CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME!;
-const API_KEY    = process.env.CLOUDINARY_API_KEY!;
-const API_SECRET = process.env.CLOUDINARY_API_SECRET!;
-const FOLDER      = "jommba/blog";
-
-function sign(params: Record<string, string>): string {
-  const sorted = Object.keys(params)
-    .sort()
-    .map((k) => `${k}=${params[k]}`)
-    .join("&");
-  return crypto.createHash("sha1").update(sorted + API_SECRET).digest("hex");
-}
+/** Garde-fou serveur, aligné sur la limite du bucket (10 Mo). */
+const MAX_BYTES = 10 * 1024 * 1024;
 
 export async function POST(req: NextRequest) {
   const token = req.cookies.get(COOKIE)?.value;
@@ -32,32 +26,15 @@ export async function POST(req: NextRequest) {
   if (!file.type.startsWith("image/")) {
     return NextResponse.json({ error: "Le fichier doit être une image" }, { status: 400 });
   }
-
-  const timestamp = String(Math.floor(Date.now() / 1000));
-  const params    = { folder: FOLDER, timestamp };
-  const signature = sign(params);
-
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("timestamp", timestamp);
-  formData.append("api_key", API_KEY);
-  formData.append("signature", signature);
-  formData.append("folder", FOLDER);
-
-  const res = await fetch(
-    `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-    { method: "POST", body: formData },
-  );
-
-  const json = (await res.json()) as { secure_url?: string; error?: { message: string } };
-
-  if (!res.ok || !json.secure_url) {
-    console.error("[admin/upload] Cloudinary error:", json.error);
-    return NextResponse.json(
-      { error: json.error?.message ?? "Échec de l'upload" },
-      { status: 400 },
-    );
+  if (file.size > MAX_BYTES) {
+    return NextResponse.json({ error: "Image trop lourde (10 Mo maximum)" }, { status: 400 });
   }
 
-  return NextResponse.json({ url: json.secure_url });
+  const result = await uploadBlogImage(file);
+  if (!result.ok) {
+    console.error("[admin/upload] échec:", result.error);
+    return NextResponse.json({ error: result.error }, { status: 400 });
+  }
+
+  return NextResponse.json({ url: result.url });
 }

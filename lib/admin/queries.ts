@@ -1045,9 +1045,9 @@ export async function getApiConnections(): Promise<ApiServiceRow[]> {
     service("auth", "Supabase Auth", "Authentification & sessions",
       ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY"]),
 
-    service("cloud", "Cloudinary", "Stockage des photos de profil",
-      ["CLOUDINARY_CLOUD_NAME", "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET"],
-      { detail: process.env.CLOUDINARY_CLOUD_NAME?.trim() ?? null }),
+    service("cloud", "Supabase Storage", "Photos de profil, couvertures d'articles, vocaux",
+      ["NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"],
+      { detail: "profile-photos · blog-images · voice-messages" }),
 
     service("db", "Supabase PostgreSQL", "Base de données principale",
       ["NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"]),
