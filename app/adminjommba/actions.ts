@@ -10,7 +10,7 @@ import { verifyAdminToken, COOKIE, type AdminSession, type AdminRole } from "@/l
 import { hasPermission, ADMIN_ROLES, type AdminPermission } from "@/lib/admin/permissions";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendEmail } from "@/lib/email";
-import { deleteCloudinaryImage, publicIdFromUrl } from "@/lib/cloudinary";
+import { deleteStoredPhoto } from "@/lib/photo-storage";
 import { PHOTO_REJECTED_MESSAGE } from "@/lib/photo-messages";
 import type { BroadcastTarget, Json } from "@/lib/supabase/types";
 import type { LimitsSettings, PricingSettings, BoostPricingSettings, MaintenanceSettings, GeoBlockSettings, EmailNotificationSettings } from "@/lib/admin/types";
@@ -187,11 +187,10 @@ export async function rejectPhoto(photoId: string): Promise<ActionResult> {
       .from("profile_photos").select("*").eq("id", photoId).single();
     if (readErr || !photo) throw new Error(readErr?.message ?? "Photo introuvable");
 
-    // 1. Suppression du fichier Cloudinary (non bloquant en cas d'échec).
-    const publicId = photo.public_id ?? publicIdFromUrl(photo.url);
-    if (publicId) {
-      await deleteCloudinaryImage(publicId);
-    }
+    // 1. Suppression du fichier chez son hébergeur — Cloudinary pour les
+    //    photos d'avant la bascule, Supabase Storage pour les suivantes.
+    //    Non bloquant en cas d'échec.
+    await deleteStoredPhoto(photo.url, photo.public_id);
 
     // 2. Suppression de la ligne en BDD.
     const { error } = await supabase.from("profile_photos").delete().eq("id", photoId);
