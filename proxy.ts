@@ -20,6 +20,23 @@ function isMaintenanceExempt(pathname: string): boolean {
   )
 }
 
+/**
+ * Contextes où la maintenance ne s'applique pas. Le drapeau vit en base, donc
+ * il vaut pour tous les environnements : fermer le site public rendait le
+ * travail et la recette impossibles, alors que c'est précisément pendant une
+ * maintenance qu'on en a besoin.
+ *  - le poste de développement ;
+ *  - les déploiements Vercel (*.vercel.app), qui servent de préversion.
+ * Le domaine public, lui, reste bien soumis à la maintenance.
+ */
+function isMaintenanceBypassed(req: NextRequest): boolean {
+  if (process.env.NODE_ENV === "development") return true
+  // L'en-tête `host` porte le domaine réellement demandé derrière le proxy
+  // Vercel ; `nextUrl` sert de repli.
+  const host = (req.headers.get("host") ?? req.nextUrl.hostname).toLowerCase()
+  return host.endsWith(".vercel.app")
+}
+
 /** Lit le drapeau de maintenance via l'API REST Supabase (lecture publique). */
 async function isMaintenanceEnabled(): Promise<boolean> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -132,7 +149,7 @@ export async function proxy(req: NextRequest) {
   }
 
   // ── 0bis. Mode maintenance ────────────────────────────────────────────────
-  const maintenance = await isMaintenanceEnabled()
+  const maintenance = !isMaintenanceBypassed(req) && (await isMaintenanceEnabled())
   if (maintenance) {
     // Maintenance active : tout le trafic public bascule vers /maintenance.
     if (!isMaintenanceExempt(pathname)) {
