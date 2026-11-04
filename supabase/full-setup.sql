@@ -227,6 +227,21 @@ CREATE TABLE IF NOT EXISTS public.notifications (
 CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON public.notifications(user_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_is_read ON public.notifications(is_read);
 
+-- ─── TABLE : pwa_installs (compteur d'installations de l'app) ────────────────
+-- Une ligne par installation constatée côté client. `user_id` est facultatif :
+-- l'installation peut avoir lieu avant toute connexion.
+CREATE TABLE IF NOT EXISTS public.pwa_installs (
+  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id      UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  platform     TEXT NOT NULL DEFAULT 'unknown'
+                 CHECK (platform IN ('android', 'ios', 'desktop', 'unknown')),
+  user_agent   TEXT,
+  installed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_pwa_installs_installed_at
+  ON public.pwa_installs(installed_at DESC);
+
 -- ─── TABLE : support_tickets ──────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.support_tickets (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -290,6 +305,16 @@ ALTER TABLE public.subscriptions      ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.reports            ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notifications      ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.support_tickets    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.pwa_installs       ENABLE ROW LEVEL SECURITY;
+
+-- Installations de la PWA : tout visiteur peut déclarer la sienne (le bandeau
+-- d'installation s'affiche avant la connexion), mais seulement avec son propre
+-- user_id ou aucun. Personne ne relit la table : le compteur de la console
+-- passe par la clé service_role.
+DROP POLICY IF EXISTS "anyone_records_own_pwa_install" ON public.pwa_installs;
+CREATE POLICY "anyone_records_own_pwa_install"
+  ON public.pwa_installs FOR INSERT TO anon, authenticated
+  WITH CHECK (user_id IS NULL OR auth.uid() = user_id);
 
 -- PROFILES
 DROP POLICY IF EXISTS "read_validated_profiles"    ON public.profiles;

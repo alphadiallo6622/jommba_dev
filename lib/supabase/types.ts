@@ -18,6 +18,7 @@ export type PhotoStatus    = 'pending' | 'approved' | 'rejected'
 export type BlogPostStatus = 'draft' | 'published'
 export type BroadcastTarget = 'all' | 'free' | 'premium' | 'pending'
 export type AdminAccountStatus = 'active' | 'disabled'
+export type PWAInstallPlatform = 'android' | 'ios' | 'desktop' | 'unknown'
 
 // ─── Tables ───────────────────────────────────────────────────────────────────
 
@@ -219,6 +220,16 @@ export interface PushSubscriptionRow {
   user_agent:   string | null
   created_at:   string
   last_used_at: string | null
+}
+
+/** Une ligne par installation de la PWA constatée côté client.
+ *  `user_id` est nul quand l'installation a lieu avant toute connexion. */
+export interface PWAInstallRow {
+  id:           string
+  user_id:      string | null
+  platform:     PWAInstallPlatform
+  user_agent:   string | null
+  installed_at: string
 }
 
 export interface SupportTicket {
@@ -438,6 +449,12 @@ export type Database = {
         Row:           Indexed<PushSubscriptionRow>
         Insert:        Indexed<Omit<PushSubscriptionRow, 'id' | 'created_at' | 'last_used_at' | 'locale' | 'user_agent'> & { id?: string; created_at?: string; last_used_at?: string | null; locale?: string; user_agent?: string | null }>
         Update:        Indexed<Partial<PushSubscriptionRow>>
+        Relationships: []
+      }
+      pwa_installs: {
+        Row:           Indexed<PWAInstallRow>
+        Insert:        Indexed<Omit<PWAInstallRow, 'id' | 'installed_at' | 'user_agent' | 'platform'> & { id?: string; installed_at?: string; user_agent?: string | null; platform?: PWAInstallPlatform }>
+        Update:        Indexed<Partial<PWAInstallRow>>
         Relationships: []
       }
       support_tickets: {

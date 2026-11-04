@@ -217,6 +217,21 @@ CREATE TABLE IF NOT EXISTS public.notifications (
 CREATE INDEX idx_notifications_user_id ON public.notifications(user_id);
 CREATE INDEX idx_notifications_is_read ON public.notifications(is_read);
 
+-- ─── TABLE : pwa_installs (compteur d'installations de l'app) ────────────────
+-- Une ligne par installation constatée côté client. `user_id` est facultatif :
+-- l'installation peut avoir lieu avant toute connexion.
+CREATE TABLE IF NOT EXISTS public.pwa_installs (
+  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id      UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  platform     TEXT NOT NULL DEFAULT 'unknown'
+                 CHECK (platform IN ('android', 'ios', 'desktop', 'unknown')),
+  user_agent   TEXT,
+  installed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_pwa_installs_installed_at
+  ON public.pwa_installs(installed_at DESC);
+
 -- ─── TABLE : support_tickets ──────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.support_tickets (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),

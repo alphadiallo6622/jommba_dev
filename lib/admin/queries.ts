@@ -103,6 +103,10 @@ export interface AdminCounts {
   pendingPhotos: number;
   openTickets: number;
   activeBoosts: number;
+  /** Installations de la PWA recensées (toutes plateformes). */
+  pwaInstalls: number;
+  /** Installations depuis le 1er du mois en cours. */
+  pwaInstallsThisMonth: number;
 }
 
 export const getAdminCounts = cache(async (): Promise<AdminCounts> => {
@@ -111,7 +115,7 @@ export const getAdminCounts = cache(async (): Promise<AdminCounts> => {
   monthStart.setDate(1);
   monthStart.setHours(0, 0, 0, 0);
 
-  const [total, newMonth, pending, premium, reports, photos, tickets, boosts] = await Promise.all([
+  const [total, newMonth, pending, premium, reports, photos, tickets, boosts, pwaTotal, pwaMonth] = await Promise.all([
     supabase.from("profiles").select("id", { count: "exact", head: true }),
     supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", monthStart.toISOString()),
     // `.not("onboarding_completed_at", ...)` : seuls les onboardings réellement
@@ -122,6 +126,9 @@ export const getAdminCounts = cache(async (): Promise<AdminCounts> => {
     supabase.from("profile_photos").select("id", { count: "exact", head: true }).eq("status", "pending"),
     supabase.from("support_tickets").select("id", { count: "exact", head: true }).in("status", ["open", "in_progress"]),
     supabase.from("boosts").select("id", { count: "exact", head: true }).gt("expires_at", new Date().toISOString()),
+    // Installations de la PWA, comptées par components/pwa/PWAInstallTracker.
+    supabase.from("pwa_installs").select("id", { count: "exact", head: true }),
+    supabase.from("pwa_installs").select("id", { count: "exact", head: true }).gte("installed_at", monthStart.toISOString()),
   ]);
 
   return {
@@ -133,6 +140,10 @@ export const getAdminCounts = cache(async (): Promise<AdminCounts> => {
     pendingPhotos:   photos.count ?? 0,
     openTickets:     tickets.count ?? 0,
     activeBoosts:    boosts.count ?? 0,
+    // `?? 0` couvre aussi le cas où la table n'existe pas encore : le KPI
+    // affiche zéro au lieu de faire échouer toute la vue d'ensemble.
+    pwaInstalls:     pwaTotal.count ?? 0,
+    pwaInstallsThisMonth: pwaMonth.count ?? 0,
   };
 });
 
@@ -331,6 +342,17 @@ export async function getOverviewData(): Promise<OverviewData> {
     { label: "Signalements ouverts", value: String(counts.openReports), delta: counts.openReports > 0 ? "priorité haute" : "aucun en attente", icon: "flag", accent: "#df4548", accentBg: "#fceceb" },
     { label: "En ligne maintenant", value: String(onlineNow), delta: "actifs ces 5 dernières minutes", up: onlineNow > 0, icon: "radio", accent: "#2563eb", accentBg: "#eff6ff" },
     { label: "Profils visibles", value: String(visible.length), delta: `sur ${profileRows.length} comptes`, icon: "eye", accent: "#7c3aed", accentBg: "#f5f3ff" },
+    {
+      label: "Apps installées",
+      value: counts.pwaInstalls.toLocaleString("fr-FR"),
+      delta: counts.pwaInstallsThisMonth > 0
+        ? `+${counts.pwaInstallsThisMonth} ce mois`
+        : "aucune ce mois",
+      up: counts.pwaInstallsThisMonth > 0,
+      icon: "smartphone",
+      accent: "#0891b2",
+      accentBg: "#ecfeff",
+    },
   ];
 
   return {

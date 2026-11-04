@@ -8,6 +8,7 @@ import { AuthProvider } from "@/components/providers/AuthProvider";
 import { PresenceProvider } from "@/components/providers/PresenceProvider";
 import MotionProvider from "@/components/providers/MotionProvider";
 import PWAInstallBar from "@/components/pwa/PWAInstallBar";
+import PWAInstallTracker from "@/components/pwa/PWAInstallTracker";
 import ServiceWorkerRegistrar from "@/components/pwa/ServiceWorkerRegistrar";
 import { createClient } from "@/lib/supabase/server";
 import "./globals.css";
@@ -83,6 +84,7 @@ export default async function RootLayout({
           </AuthProvider>
           <Toaster richColors position="top-center" />
           <ServiceWorkerRegistrar />
+          <PWAInstallTracker />
           <NextIntlClientProvider locale={locale} messages={pwaMessages}>
             <PWAInstallBar />
           </NextIntlClientProvider>
