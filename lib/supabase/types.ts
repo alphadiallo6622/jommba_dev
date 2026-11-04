@@ -228,6 +228,10 @@ export interface PWAInstallRow {
   id:           string
   user_id:      string | null
   platform:     PWAInstallPlatform
+  /** Code ISO alpha-2 relevé à l'installation. Nul si la géo est indisponible. */
+  country:      string | null
+  /** Ville relevée à l'installation. Nulle si la géo est indisponible. */
+  city:         string | null
   user_agent:   string | null
   installed_at: string
 }
@@ -453,7 +457,7 @@ export type Database = {
       }
       pwa_installs: {
         Row:           Indexed<PWAInstallRow>
-        Insert:        Indexed<Omit<PWAInstallRow, 'id' | 'installed_at' | 'user_agent' | 'platform'> & { id?: string; installed_at?: string; user_agent?: string | null; platform?: PWAInstallPlatform }>
+        Insert:        Indexed<Omit<PWAInstallRow, 'id' | 'installed_at' | 'user_agent' | 'platform' | 'country' | 'city'> & { id?: string; installed_at?: string; user_agent?: string | null; platform?: PWAInstallPlatform; country?: string | null; city?: string | null }>
         Update:        Indexed<Partial<PWAInstallRow>>
         Relationships: []
       }

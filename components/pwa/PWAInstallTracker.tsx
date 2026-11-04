@@ -1,9 +1,13 @@
 'use client'
 
 // components/pwa/PWAInstallTracker.tsx
-// Enregistre une ligne dans `pwa_installs` quand l'app est installée, pour
-// alimenter le KPI « Apps installées » de la console d'administration.
-// Composant sans rendu, monté dans le layout racine.
+// Signale à /api/pwa/install que l'app vient d'être installée, pour alimenter
+// le KPI « Apps installées » de la console d'administration et sa carte des
+// lieux. Composant sans rendu, monté dans le layout racine.
+//
+// L'enregistrement passe par une route serveur et non par le client Supabase :
+// seul le serveur voit les en-têtes de géolocalisation du réseau Edge, d'où
+// viennent le pays et la ville de l'installation.
 //
 // Aucune API navigateur ne permet d'interroger « cette app est-elle
 // installée ? ». On s'appuie donc sur deux signaux complémentaires :
@@ -20,7 +24,6 @@
 // en boucle — un verrou en mémoire limite à une tentative par chargement.
 
 import { useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { usePWAInstall } from '@/lib/use-pwa-install'
 import type { PWAInstallPlatform } from '@/lib/supabase/types'
 
@@ -61,19 +64,17 @@ export default function PWAInstallTracker() {
       if (attemptedThisLoad || alreadyRecorded()) return
       attemptedThisLoad = true
 
-      const supabase = createClient()
-      const { data } = await supabase.auth.getUser()
-
-      const { error } = await supabase.from('pwa_installs').insert({
-        user_id:    data.user?.id ?? null,
-        platform:   detected,
-        user_agent: window.navigator.userAgent.slice(0, 500),
-      })
-
-      if (error) {
-        // Table absente (migration pas encore appliquée) ou réseau coupé :
-        // on ne pose pas le drapeau, la prochaine ouverture réessaiera.
-        console.error('[pwa] enregistrement de l’installation impossible:', error)
+      try {
+        const res = await fetch('/api/pwa/install', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ platform: detected }),
+        })
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      } catch (err) {
+        // Réseau coupé, route indisponible : on ne pose pas le drapeau, la
+        // prochaine ouverture de l'app réessaiera.
+        console.error('[pwa] enregistrement de l’installation impossible:', err)
         return
       }
       markRecorded()

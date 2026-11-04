@@ -225,9 +225,16 @@ CREATE TABLE IF NOT EXISTS public.pwa_installs (
   user_id      UUID REFERENCES auth.users(id) ON DELETE SET NULL,
   platform     TEXT NOT NULL DEFAULT 'unknown'
                  CHECK (platform IN ('android', 'ios', 'desktop', 'unknown')),
+  -- Lieu relevé à l'installation par /api/pwa/install, d'après les en-têtes de
+  -- géolocalisation du réseau Edge. Nuls en local et derrière certains VPN.
+  country      TEXT,  -- ISO 3166-1 alpha-2
+  city         TEXT,
   user_agent   TEXT,
   installed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE INDEX IF NOT EXISTS idx_pwa_installs_country
+  ON public.pwa_installs(country);
 
 CREATE INDEX IF NOT EXISTS idx_pwa_installs_installed_at
   ON public.pwa_installs(installed_at DESC);

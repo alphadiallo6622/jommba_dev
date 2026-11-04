@@ -235,9 +235,16 @@ CREATE TABLE IF NOT EXISTS public.pwa_installs (
   user_id      UUID REFERENCES auth.users(id) ON DELETE SET NULL,
   platform     TEXT NOT NULL DEFAULT 'unknown'
                  CHECK (platform IN ('android', 'ios', 'desktop', 'unknown')),
+  -- Lieu relevé à l'installation par /api/pwa/install, d'après les en-têtes de
+  -- géolocalisation du réseau Edge. Nuls en local et derrière certains VPN.
+  country      TEXT,  -- ISO 3166-1 alpha-2
+  city         TEXT,
   user_agent   TEXT,
   installed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE INDEX IF NOT EXISTS idx_pwa_installs_country
+  ON public.pwa_installs(country);
 
 CREATE INDEX IF NOT EXISTS idx_pwa_installs_installed_at
   ON public.pwa_installs(installed_at DESC);
@@ -307,14 +314,11 @@ ALTER TABLE public.notifications      ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.support_tickets    ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.pwa_installs       ENABLE ROW LEVEL SECURITY;
 
--- Installations de la PWA : tout visiteur peut déclarer la sienne (le bandeau
--- d'installation s'affiche avant la connexion), mais seulement avec son propre
--- user_id ou aucun. Personne ne relit la table : le compteur de la console
--- passe par la clé service_role.
+-- Installations de la PWA : aucune policy, donc aucun accès client. L'écriture
+-- passe par /api/pwa/install et la lecture par la console, toutes deux avec la
+-- clé service_role — seule la route serveur voit les en-têtes de
+-- géolocalisation d'où viennent le pays et la ville.
 DROP POLICY IF EXISTS "anyone_records_own_pwa_install" ON public.pwa_installs;
-CREATE POLICY "anyone_records_own_pwa_install"
-  ON public.pwa_installs FOR INSERT TO anon, authenticated
-  WITH CHECK (user_id IS NULL OR auth.uid() = user_id);
 
 -- PROFILES
 DROP POLICY IF EXISTS "read_validated_profiles"    ON public.profiles;

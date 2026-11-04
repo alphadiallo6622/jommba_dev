@@ -313,3 +313,22 @@ export interface BroadcastTargetCounts {
   premium: number;
   pending: number;
 }
+
+/** Une ville où la PWA a été installée, avec son nombre d'installations. */
+export interface PWAInstallPlaceRow {
+  country: string;
+  city: string;
+  count: number;
+  /** Part du total des installations, en pourcentage entier. */
+  share: number;
+  /** Ancienneté de la plus récente installation du groupe (« il y a 2 j »). */
+  last: string;
+}
+
+export interface PWAInstallPlacesData {
+  rows: PWAInstallPlaceRow[];
+  /** Nombre total d'installations, lieu connu ou non. */
+  total: number;
+  /** Combien d'entre elles ont un pays ou une ville. */
+  located: number;
+}

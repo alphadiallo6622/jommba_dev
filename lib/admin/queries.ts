@@ -12,7 +12,7 @@ import type {
   ReportRow, SubscriptionRow, BoostRow, BlogPostRow, AcademyArticleRow, TicketRow, BroadcastRow,
   AdminAccountRow, ApiServiceRow, LimitsSettings, PricingSettings, BoostPricingSettings, PromoCodeRow,
   BroadcastTargetCounts, MemberStatus, MaintenanceSettings, GeoBlockSettings,
-  EmailNotificationSettings,
+  EmailNotificationSettings, PWAInstallPlaceRow, PWAInstallPlacesData,
 } from "@/lib/admin/types";
 import type { AdminMember } from "@/lib/supabase/types";
 
@@ -1136,4 +1136,85 @@ export async function getAdminNotifications(): Promise<AdminNotification[]> {
     items.push({ id: "ok", icon: "check-circle", tone: "green", text: "Aucune action requise — tout est à jour", when: "Maintenant", read: true });
   }
   return items;
+}
+
+// ── Lieux d'installation de la PWA ────────────────────────────────────────────
+
+/**
+ * Où la PWA a été installée, agrégé par ville.
+ *
+ * Deux sources, dans cet ordre :
+ *   1. le relevé fait à l'installation (en-têtes de géolocalisation Vercel,
+ *      colonnes `country` / `city`) — c'est le lieu réel ;
+ *   2. à défaut (développement local, VPN, lignes antérieures à la mise en
+ *      place du relevé), la ville déclarée dans le profil du membre.
+ *
+ * Les installations anonymes sans relevé restent sans lieu connu : elles sont
+ * regroupées sous « Non renseigné » plutôt que passées sous silence, pour que
+ * le total de la liste corresponde toujours au compteur.
+ */
+export async function getPWAInstallPlaces(): Promise<PWAInstallPlacesData> {
+  const supabase = createAdminClient();
+
+  const { data: installs, error } = await supabase
+    .from("pwa_installs")
+    .select("user_id,country,city,installed_at")
+    .order("installed_at", { ascending: false })
+    .limit(5_000);
+
+  // Table ou colonnes absentes (migration pas encore appliquée) : liste vide
+  // plutôt qu'une vue d'ensemble en erreur.
+  if (error || !installs) return { rows: [], total: 0, located: 0 };
+
+  // Repli sur le profil pour les lignes sans relevé.
+  const needProfile = [...new Set(
+    installs.filter((i) => !i.country && !i.city && i.user_id).map((i) => i.user_id as string),
+  )];
+  const profilePlace = new Map<string, { city: string | null; country: string | null }>();
+  if (needProfile.length > 0) {
+    const { data: profiles } = await supabase
+      .from("profiles").select("user_id,city,country").in("user_id", needProfile);
+    for (const p of profiles ?? []) {
+      profilePlace.set(p.user_id, { city: p.city, country: p.country });
+    }
+  }
+
+  type Bucket = { country: string; city: string; count: number; last: string };
+  const buckets = new Map<string, Bucket>();
+  let located = 0;
+
+  for (const row of installs) {
+    const fallback = row.user_id ? profilePlace.get(row.user_id) : undefined;
+    const rawCountry = (row.country ?? fallback?.country ?? "").trim();
+    const rawCity    = (row.city    ?? fallback?.city    ?? "").trim();
+
+    const country = rawCountry ? localizeStoredCountry(rawCountry, "fr") : "Non renseigné";
+    const city    = rawCity || "Ville inconnue";
+    if (rawCountry || rawCity) located += 1;
+
+    const key = `${country}||${city}`;
+    const bucket = buckets.get(key);
+    if (bucket) {
+      bucket.count += 1;
+      // Les lignes arrivent du plus récent au plus ancien : la première vue
+      // d'un groupe porte déjà sa date la plus récente.
+    } else {
+      buckets.set(key, { country, city, count: 1, last: row.installed_at });
+    }
+  }
+
+  const total = installs.length;
+  const rows: PWAInstallPlaceRow[] = [...buckets.values()]
+    .map((b) => ({
+      country: b.country,
+      city:    b.city,
+      count:   b.count,
+      share:   total > 0 ? Math.round((b.count / total) * 100) : 0,
+      last:    timeAgo(b.last),
+    }))
+    // Les villes les plus fournies d'abord ; à égalité, ordre alphabétique
+    // pour que la liste ne danse pas d'un chargement à l'autre.
+    .sort((a, b) => b.count - a.count || a.country.localeCompare(b.country) || a.city.localeCompare(b.city));
+
+  return { rows, total, located };
 }

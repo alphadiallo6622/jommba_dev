@@ -9,7 +9,8 @@ import { DonutChart } from "@/components/admin/ui/donut-chart";
 import { AutoRefresh } from "@/components/admin/auto-refresh";
 import { CountryTable } from "@/components/admin/country-table";
 import { ActivityFeed } from "@/components/admin/activity-feed";
-import { getOverviewData } from "@/lib/admin/queries";
+import { PWAInstallPlaces } from "@/components/admin/pwa-install-places";
+import { getOverviewData, getPWAInstallPlaces } from "@/lib/admin/queries";
 
 export const metadata: Metadata = { title: "Vue d'ensemble" };
 export const dynamic = "force-dynamic";
@@ -25,6 +26,10 @@ function getIcon(name: string): LucideIcons.LucideIcon {
   );
 }
 
+/** Libellé du KPI ouvrant la liste des lieux d'installation — il doit rester
+ *  identique à celui produit par getOverviewData(). */
+const PWA_KPI_LABEL = "Apps installées";
+
 const QUICK_ACTIONS = [
   { label: "Valider des profils",   href: "/adminjommba/validation",   icon: "shield-check" },
   { label: "Traiter signalements",  href: "/adminjommba/signalements",  icon: "flag"          },
@@ -33,8 +38,10 @@ const QUICK_ACTIONS = [
 ];
 
 export default async function AdminOverviewPage() {
-  const { kpis, chart, distribution, activity, pendingProfiles, gender, funnel, countries } =
-    await getOverviewData();
+  const [
+    { kpis, chart, distribution, activity, pendingProfiles, gender, funnel, countries },
+    installPlaces,
+  ] = await Promise.all([getOverviewData(), getPWAInstallPlaces()]);
 
   const genderSegments = [
     { label: "Hommes",         value: gender.hommes,       color: "#2563eb" },
@@ -73,9 +80,13 @@ export default async function AdminOverviewPage() {
 
       {/* ── KPI cards ── */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-        {kpis.map((kpi) => (
-          <KpiCard key={kpi.label} kpi={kpi} />
-        ))}
+        {kpis.map((kpi) =>
+          kpi.label === PWA_KPI_LABEL ? (
+            <PWAInstallPlaces key={kpi.label} kpi={kpi} places={installPlaces} />
+          ) : (
+            <KpiCard key={kpi.label} kpi={kpi} />
+          ),
+        )}
       </div>
 
       {/* ── Charts row ── */}
