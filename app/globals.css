@@ -283,3 +283,113 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+
+/* ───────────────────────────────────────────────────────────────────────────
+   Bandeau d'installation PWA (components/pwa/PWAInstallBar.tsx)
+
+   Le bandeau est `fixed` au-dessus des en-têtes, eux aussi `fixed` : il ne
+   peut donc pas pousser la page par le flux normal. Sa hauteur est publiée
+   ici sous `--pwa-bar-h`, que consomment le <body> (padding haut) et les
+   en-têtes (décalage `top`). Le drapeau `data-pwa-bar` est posé sur <html>
+   par le composant, et retiré dès que l'app est installée.
+   ──────────────────────────────────────────────────────────────────────── */
+/* Ces deux hauteurs doivent rester synchrones avec les classes du bandeau
+   (`h-[58px] sm:h-16` dans PWAInstallBar.tsx). */
+:root {
+  --pwa-bar-h: 0px;
+}
+html[data-pwa-bar="1"] {
+  --pwa-bar-h: 58px;
+}
+@media (min-width: 640px) {
+  html[data-pwa-bar="1"] {
+    --pwa-bar-h: 64px;
+  }
+}
+
+/* L'apparition du bandeau décale la page : on l'accompagne au lieu de la
+   faire sauter. Même durée que l'entrée du bandeau. */
+body {
+  padding-top: var(--pwa-bar-h);
+  transition: padding-top 450ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* En-têtes `fixed top-0` : ils se posent sous le bandeau. */
+.app-fixed-header {
+  top: var(--pwa-bar-h);
+  transition: top 450ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Les boîtes calées sur la hauteur du viewport doivent retirer celle du
+   bandeau, sans quoi elles débordent sous le pli — la conversation
+   (`h-dvh overflow-hidden`) poussait sa zone de saisie hors écran. Règle
+   centrale plutôt qu'un `calc` répété sur chaque page. */
+html[data-pwa-bar="1"] .h-dvh {
+  height: calc(100dvh - var(--pwa-bar-h));
+}
+html[data-pwa-bar="1"] .min-h-screen {
+  min-height: calc(100vh - var(--pwa-bar-h));
+}
+
+/* Fond du bandeau : dégradé de marque + profondeur. */
+.pwa-bar {
+  background:
+    radial-gradient(120% 180% at 0% 0%, rgba(255, 255, 255, 0.18) 0%, transparent 55%),
+    linear-gradient(100deg, var(--color-primary-dark) 0%, var(--color-primary) 55%, #00BF88 100%);
+  box-shadow: 0 6px 24px -8px rgba(0, 143, 100, 0.55);
+}
+
+/* Balayage lumineux : une bande claire traverse le bandeau toutes les 6 s.
+   Discret, jamais clignotant — l'œil l'enregistre sans être happé. */
+.pwa-bar__sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.26) 48%,
+    rgba(255, 255, 255, 0.42) 52%,
+    transparent 65%
+  );
+  background-size: 260% 100%;
+  background-repeat: no-repeat;
+  animation: pwa-bar-sheen 6s cubic-bezier(0.4, 0, 0.2, 1) 1.2s infinite;
+}
+@keyframes pwa-bar-sheen {
+  0%        { background-position: 160% 0; }
+  45%, 100% { background-position: -60% 0; }
+}
+
+/* L'icône respire très légèrement, pour signaler qu'il s'agit d'une app. */
+.pwa-bar__icon {
+  animation: pwa-bar-float 3.6s ease-in-out infinite;
+}
+@keyframes pwa-bar-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-2px); }
+}
+
+/* Halo lent autour du bouton : il attire l'œil sans bouger la mise en page. */
+.pwa-bar__cta {
+  animation: pwa-bar-glow 2.8s ease-in-out infinite;
+}
+@keyframes pwa-bar-glow {
+  0%, 100% { box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12), 0 0 0 0 rgba(255, 255, 255, 0.5); }
+  55%      { box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12), 0 0 0 7px rgba(255, 255, 255, 0); }
+}
+
+/* Mouvements réduits : le bandeau reste, ses animations d'ambiance s'arrêtent.
+   La règle globale plus haut ne fait que les raccourcir ; une boucle infinie
+   à 1 ms scintillerait, on les coupe franchement. */
+@media (prefers-reduced-motion: reduce) {
+  .pwa-bar__sheen,
+  .pwa-bar__icon,
+  .pwa-bar__cta {
+    animation: none !important;
+  }
+  body,
+  .app-fixed-header {
+    transition: none;
+  }
+}

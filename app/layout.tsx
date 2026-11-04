@@ -7,7 +7,7 @@ import { Toaster } from "sonner";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { PresenceProvider } from "@/components/providers/PresenceProvider";
 import MotionProvider from "@/components/providers/MotionProvider";
-import PWAInstallBanner from "@/components/pwa/PWAInstallBanner";
+import PWAInstallBar from "@/components/pwa/PWAInstallBar";
 import ServiceWorkerRegistrar from "@/components/pwa/ServiceWorkerRegistrar";
 import { createClient } from "@/lib/supabase/server";
 import "./globals.css";
@@ -61,7 +61,7 @@ export default async function RootLayout({
   // défaut ailleurs (dashboard, adminjommba…, non localisés).
   const locale = await getLocale();
 
-  // La bannière PWA vit ici (donc sur tout le site, dashboard compris), mais ce
+  // Le bandeau PWA vit ici (donc sur tout le site, dashboard compris), mais ce
   // layout racine n'a pas de NextIntlClientProvider — seul app/[locale]/ en a
   // un. On lui fournit donc le strict nécessaire : le namespace "pwa". Les
   // pages localisées gardent leur propre provider imbriqué, inchangé.
@@ -84,7 +84,7 @@ export default async function RootLayout({
           <Toaster richColors position="top-center" />
           <ServiceWorkerRegistrar />
           <NextIntlClientProvider locale={locale} messages={pwaMessages}>
-            <PWAInstallBanner />
+            <PWAInstallBar />
           </NextIntlClientProvider>
         </MotionProvider>
       </body>

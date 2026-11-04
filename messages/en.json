@@ -2219,15 +2219,15 @@
     "more": "More sharing options"
   },
   "pwa": {
-    "installTitle": "Install Jommba.com",
-    "installDescription": "Install Jommba on your phone for faster access.",
-    "install": "Install",
-    "later": "Later",
     "close": "Close",
     "iosTitle": "Install Jommba.com",
     "iosDescription": "Safari can't install automatically. Just follow these 2 steps:",
     "iosStepShare": "Tap <icon></icon> Share, in the Safari toolbar",
     "iosStepAdd": "Choose <icon></icon> \"Add to Home Screen\"",
-    "iosGotIt": "Got it"
+    "iosGotIt": "Got it",
+    "barTitle": "The Jommba app is here 🎉",
+    "barSubtitle": "Faster, with notifications",
+    "barCta": "Install app",
+    "barAria": "Install the Jommba app"
   }
 }

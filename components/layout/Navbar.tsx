@@ -37,7 +37,7 @@ export default function Navbar() {
     <>
       <header
         className={cn(
-          "fixed top-0 left-0 right-0 z-50 h-[76px] transition-all duration-300 flex items-center",
+          "app-fixed-header fixed left-0 right-0 z-50 h-[76px] transition-all duration-300 flex items-center",
           isScrolled
             ? "glass-effect shadow-sm border-b border-white/10"
             : "bg-white md:bg-transparent border-b border-gray-100 md:border-transparent"

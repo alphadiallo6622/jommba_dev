@@ -1,12 +1,15 @@
 'use client'
 
 // lib/use-pwa-install.ts
-// Logique d'installation de la PWA : détection de la plateforme, capture de
-// l'événement `beforeinstallprompt` (Chrome/Edge/Android) et mémorisation du
-// refus pendant 2 jours.
+// Logique d'installation de la PWA : détection de la plateforme et capture de
+// l'événement `beforeinstallprompt` (Chrome/Edge/Android).
+//
+// Le bandeau d'installation n'est pas refermable : il reste tant que l'app
+// n'est pas installée. Il n'y a donc aucune mémorisation de refus ici — le
+// seul état qui le fait disparaître est le passage en mode standalone.
 //
 // Le hook ne rend rien : il expose un état prêt à consommer par
-// components/pwa/PWAInstallBanner.tsx.
+// components/pwa/PWAInstallBar.tsx.
 //
 // L'état vient d'APIs navigateur (matchMedia, localStorage, événements
 // globaux), donc absent du rendu serveur. On le lit avec `useSyncExternalStore`
@@ -14,12 +17,6 @@
 // l'hydratation (snapshot serveur dédié) sans cascade de rendus.
 
 import { useCallback, useSyncExternalStore } from 'react'
-
-/** Clé localStorage stockant la date (ms) du dernier « Plus tard ». */
-const DISMISS_KEY = 'jommba:pwa-install-dismissed-at'
-
-/** Durée pendant laquelle on ne redemande pas après un refus. */
-const DISMISS_DURATION_MS = 2 * 24 * 60 * 60 * 1000 // 2 jours
 
 /**
  * Événement non standard émis par Chromium quand l'app est installable.
@@ -37,8 +34,8 @@ interface BeforeInstallPromptEvent extends Event {
 export type PWAPlatform = 'ios' | 'android' | 'desktop'
 
 export interface UsePWAInstallResult {
-  /** La bannière doit-elle être affichée ? (toutes conditions réunies) */
-  canShowBanner: boolean
+  /** L'app est installable ici et maintenant : le bandeau doit s'afficher. */
+  canInstall: boolean
   /** L'app tourne déjà en mode application (installée). */
   isStandalone: boolean
   /** iOS/iPadOS : pas de `beforeinstallprompt`, on affiche un guide manuel. */
@@ -47,8 +44,6 @@ export interface UsePWAInstallResult {
   platform: PWAPlatform
   /** Déclenche l'invite native. Renvoie true si l'utilisateur a accepté. */
   promptInstall: () => Promise<boolean>
-  /** Ferme la bannière et mémorise le refus pendant 2 jours. */
-  dismiss: () => void
 }
 
 // ── Détections plateforme ────────────────────────────────────────────────────
@@ -77,20 +72,6 @@ function detectAndroid(): boolean {
   return /Android/i.test(window.navigator.userAgent)
 }
 
-/** Le refus a-t-il moins de 2 jours ? (localStorage peut être bloqué) */
-function isRecentlyDismissed(): boolean {
-  try {
-    const raw = window.localStorage.getItem(DISMISS_KEY)
-    if (!raw) return false
-    const dismissedAt = Number(raw)
-    if (!Number.isFinite(dismissedAt)) return false
-    return Date.now() - dismissedAt < DISMISS_DURATION_MS
-  } catch {
-    // Mode privé Safari, cookies bloqués… : on considère qu'il n'y a pas de refus.
-    return false
-  }
-}
-
 // ── Store externe ────────────────────────────────────────────────────────────
 // Un seul état partagé par tous les consommateurs du hook. Il doit vivre hors
 // de React : `beforeinstallprompt` peut être émis avant même le montage du
@@ -101,16 +82,16 @@ interface PWAState {
   isStandalone: boolean
   isIOS: boolean
   platform: PWAPlatform
-  dismissed: boolean
 }
 
 /** Snapshot renvoyé côté serveur : rien n'est installable avant hydratation. */
 const SERVER_STATE: PWAState = {
   deferredPrompt: null,
+  // Rien n'est installable avant hydratation : le bandeau est absent du HTML
+  // initial, il entre en animation une fois l'éligibilité connue.
   isStandalone: false,
   isIOS: false,
   platform: 'desktop',
-  dismissed: true, // masque la bannière dans le HTML initial
 }
 
 let state: PWAState = SERVER_STATE
@@ -139,7 +120,6 @@ function initialize() {
     isStandalone: detectStandalone(),
     isIOS: ios,
     platform: ios ? 'ios' : detectAndroid() ? 'android' : 'desktop',
-    dismissed: isRecentlyDismissed(),
   }
 
   // Chromium émet cet événement quand les critères d'installabilité sont
@@ -149,7 +129,7 @@ function initialize() {
     setState({ deferredPrompt: event as BeforeInstallPromptEvent })
   })
 
-  // L'app vient d'être installée : on masque la bannière immédiatement.
+  // L'app vient d'être installée : on masque le bandeau immédiatement.
   window.addEventListener('appinstalled', () => {
     setState({ deferredPrompt: null, isStandalone: true })
   })
@@ -181,17 +161,8 @@ function getServerSnapshot(): PWAState {
 // ── Hook ─────────────────────────────────────────────────────────────────────
 
 export function usePWAInstall(): UsePWAInstallResult {
-  const { deferredPrompt, isStandalone, isIOS, platform, dismissed } =
+  const { deferredPrompt, isStandalone, isIOS, platform } =
     useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
-
-  const dismiss = useCallback(() => {
-    setState({ dismissed: true })
-    try {
-      window.localStorage.setItem(DISMISS_KEY, String(Date.now()))
-    } catch {
-      // Stockage indisponible : la bannière réapparaîtra à la prochaine visite.
-    }
-  }, [])
 
   const promptInstall = useCallback(async (): Promise<boolean> => {
     const prompt = state.deferredPrompt
@@ -204,28 +175,23 @@ export function usePWAInstall(): UsePWAInstallResult {
     // nouveau si l'utilisateur a refusé et redevient éligible.
     setState({ deferredPrompt: null })
 
-    if (outcome === 'accepted') return true
-
-    // Refus dans l'invite native : on respecte le même délai de 2 jours.
-    dismiss()
-    return false
-  }, [dismiss])
+    // Un refus dans l'invite native ne masque pas le bandeau : Chromium
+    // réémettra `beforeinstallprompt` et le bouton redeviendra actif.
+    return outcome === 'accepted'
+  }, [])
 
   // Conditions d'affichage :
   //  - jamais si l'app est déjà installée / lancée en standalone
-  //  - jamais si l'utilisateur a fermé la bannière il y a moins de 2 jours
-  //  - sinon : soit le navigateur l'a déclarée installable (beforeinstallprompt),
-  //    soit on est sur iOS où l'on affiche le guide manuel (Safari n'émet
-  //    jamais l'événement).
-  const canShowBanner =
-    !isStandalone && !dismissed && (deferredPrompt !== null || isIOS)
+  //  - sinon : soit le navigateur l'a déclarée installable
+  //    (`beforeinstallprompt`), soit on est sur iOS où l'on affiche le guide
+  //    manuel (Safari n'émet jamais l'événement).
+  const canInstall = !isStandalone && (deferredPrompt !== null || isIOS)
 
   return {
-    canShowBanner,
+    canInstall,
     isStandalone,
     isIOS,
     platform,
     promptInstall,
-    dismiss,
   }
 }
