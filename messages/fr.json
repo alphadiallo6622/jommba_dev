@@ -1774,10 +1774,15 @@
           "harassment": "Harcèlement",
           "other": "Autre"
         },
-        "placeholder": "Décris le problème...",
+        "placeholder": "Décris le problème : ce qui s’est passé, quand, où…",
         "cancel": "Annuler",
         "submit": "Signaler",
-        "sent": "Signalement envoyé. Merci de nous aider à garder la communauté saine."
+        "sent": "Signalement envoyé. Merci de nous aider à garder la communauté saine.",
+        "intro": "Explique en quelques mots ce qui pose problème. Notre équipe de modération lit chaque signalement.",
+        "commentLabel": "Ton commentaire (obligatoire)",
+        "commentHint": "Encore quelques mots ({count} caractères minimum).",
+        "commentOk": "Merci, ces précisions aident la modération.",
+        "error": "Envoi impossible. Réessaie dans un instant."
       },
       "block": {
         "title": "Bloquer {name} ?",

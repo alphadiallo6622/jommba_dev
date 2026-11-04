@@ -68,12 +68,46 @@ export async function unblockUser(myId: string, otherId: string): Promise<boolea
   return true
 }
 
-/** Signale `otherId` à la modération (console admin → Signalements). */
-export async function reportUser(myId: string, otherId: string, reason: string): Promise<boolean> {
+/** Motifs de signalement. L'`id` est la valeur stockée en base : un code stable,
+ *  indépendant de la langue du membre qui signale, que la console admin traduit
+ *  à l'affichage. `key` pointe vers `dashboard.explorer.report.reasons`. */
+export const REPORT_REASONS = [
+  { id: 'fausse_photo', key: 'fakePhoto',     emoji: '📷', severity: 'medium' },
+  { id: 'faux_nom',     key: 'fakeName',      emoji: '👤', severity: 'medium' },
+  { id: 'inapproprie',  key: 'inappropriate', emoji: '⚠️', severity: 'high'   },
+  { id: 'arnaque',      key: 'scam',          emoji: '🔴', severity: 'high'   },
+  { id: 'harcelement',  key: 'harassment',    emoji: '🚫', severity: 'high'   },
+  { id: 'autre',        key: 'other',         emoji: '🏷️', severity: 'low'    },
+] as const
+
+export type ReportReasonId = (typeof REPORT_REASONS)[number]['id']
+
+type ReportReasonSeverity = (typeof REPORT_REASONS)[number]['severity']
+
+const SEVERITY_BY_REASON = new Map<string, ReportReasonSeverity>(
+  REPORT_REASONS.map(r => [r.id, r.severity]),
+)
+
+/** Signale `otherId` à la modération (console admin → Signalements).
+ *  `description` est le commentaire saisi par le membre : c'est la pièce sur
+ *  laquelle l'administrateur tranche, elle n'est donc jamais vide côté UI. */
+export async function reportUser(
+  myId: string,
+  otherId: string,
+  reason: ReportReasonId,
+  description: string,
+): Promise<boolean> {
   const supabase = createClient()
   const { error } = await supabase
     .from('reports')
-    .insert({ reporter_id: myId, reported_id: otherId, reason, status: 'pending' })
+    .insert({
+      reporter_id: myId,
+      reported_id: otherId,
+      reason,
+      description: description.trim() || null,
+      severity:    SEVERITY_BY_REASON.get(reason) ?? 'medium',
+      status:      'pending',
+    })
   if (error) {
     console.error('[moderation] reportUser error:', error)
     return false

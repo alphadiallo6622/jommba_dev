@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl'
 import { Bot } from 'lucide-react'
 import { ExplorerProfile } from '@/lib/mock-explorer'
 import { translateProfileValue, translateProfileValueList } from '@/lib/profile-values'
-import ReportModal from './ReportModal'
+import ReportModal from '@/components/moderation/ReportModal'
 import BlockModal  from './BlockModal'
 
 type Props = { profile: ExplorerProfile }
@@ -90,6 +90,7 @@ export default function ProfileDetails({ profile }: Props) {
       {showReport && (
         <ReportModal
           profileName={profile.firstName}
+          reportedUserId={profile.id}
           onClose={() => setShowReport(false)}
         />
       )}

@@ -196,7 +196,13 @@ CREATE TABLE IF NOT EXISTS public.reports (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   reporter_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   reported_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  -- Code motif stable (fausse_photo, faux_nom, inapproprie, arnaque,
+  -- harcelement, autre) — la console admin le traduit à l'affichage.
   reason      TEXT NOT NULL,
+  severity    TEXT NOT NULL DEFAULT 'medium'
+                CHECK (severity IN ('high', 'medium', 'low')),
+  -- Commentaire du signaleur : la pièce sur laquelle la modération tranche.
+  description TEXT,
   status      TEXT NOT NULL DEFAULT 'pending'
                 CHECK (status IN ('pending', 'reviewed', 'resolved')),
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),

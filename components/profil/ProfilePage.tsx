@@ -29,6 +29,7 @@ import PhotoUpsellBanner from './PhotoUpsellBanner'
 import MyProfileView from './MyProfileView'
 import MessageIdeasModal from './MessageIdeasModal'
 import FlashMessageModal from './FlashMessageModal'
+import ReportModal from '@/components/moderation/ReportModal'
 
 type Props = { id: string }
 
@@ -75,6 +76,7 @@ export default function ProfilePage({ id }: Props) {
   const [profile, setProfile]   = useState<FullProfile | null>(null)
   const [loading, setLoading]   = useState(true)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [showReport, setShowReport] = useState(false)
   const [showIdeas, setShowIdeas] = useState(false)
   const [showFlash, setShowFlash] = useState(false)
 
@@ -195,18 +197,11 @@ export default function ProfilePage({ id }: Props) {
     toast.error(t('requestRefused'))
   }
 
-  const handleReport = async () => {
+  // Le signalement passe par le modal partagé : motif + commentaire obligatoires,
+  // c'est ce commentaire que la console admin affiche pour trancher.
+  const handleReport = () => {
     setMenuOpen(false)
-    if (!user) return
-    const supabase = createClient()
-    const { error } = await supabase.from('reports').insert({
-      reporter_id: user.id,
-      reported_id: id,
-      reason:      t('reportReason'),
-      status:      'pending',
-    })
-    if (error) { toast.error(t('reportError')); return }
-    toast.success(t('reportSent'))
+    setShowReport(true)
   }
 
   if (isMyProfile) return <MyProfileView />
@@ -368,6 +363,13 @@ export default function ProfilePage({ id }: Props) {
           isPremium={isPremium}
           onSend={handleSendFlash}
           onClose={() => setShowFlash(false)}
+        />
+      )}
+      {showReport && (
+        <ReportModal
+          profileName={profile.firstName}
+          reportedUserId={id}
+          onClose={() => setShowReport(false)}
         />
       )}
 

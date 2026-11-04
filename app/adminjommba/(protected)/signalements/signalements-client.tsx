@@ -2,12 +2,14 @@
 // app/adminjommba/(protected)/signalements/signalements-client.tsx
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Flag, CheckCircle2 } from "lucide-react";
-import type { ReportRow } from "@/lib/admin/types";
+import { Flag, CheckCircle2, Quote, ExternalLink } from "lucide-react";
+import type { ReportRow, MemberRow } from "@/lib/admin/types";
 import {
   dismissReport, warnReportedMember, suspendReportedMember,
 } from "@/app/adminjommba/actions";
 import { useToast } from "@/components/admin/ui/toast";
+import { MemberProfileModal } from "@/components/admin/ui/member-profile";
+import { formatDate } from "@/lib/admin/format";
 
 const SEV_LABEL: Record<string, string> = {
   high:   "Priorité haute",
@@ -25,11 +27,52 @@ const FLAG_STYLE: Record<string, string> = {
   low:    "bg-gray-100 text-gray-500",
 };
 
+// Codes motif écrits par le formulaire de signalement. Les signalements
+// antérieurs stockaient une phrase libre : on la réaffiche telle quelle.
+const REASON_LABEL: Record<string, string> = {
+  fausse_photo: "Fausse photo",
+  faux_nom:     "Faux nom",
+  inapproprie:  "Contenu ou propos inappropriés",
+  arnaque:      "Arnaque",
+  harcelement:  "Harcèlement",
+  autre:        "Autre",
+};
+const reasonLabel = (reason: string) => REASON_LABEL[reason] ?? reason;
+
+// Nom cliquable qui ouvre la fiche du membre ; inerte si le compte a été
+// supprimé entre-temps (plus de fiche à montrer).
+function MemberLink({
+  name,
+  member,
+  onOpen,
+}: {
+  name: string;
+  member: MemberRow | null;
+  onOpen: () => void;
+}) {
+  if (!member) {
+    return <span className="font-medium text-[var(--color-muted)] italic">{name}</span>;
+  }
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      className="inline-flex items-center gap-1 font-medium text-[var(--color-brand-600)] hover:underline underline-offset-2"
+    >
+      {name}
+      <ExternalLink className="w-3 h-3 shrink-0" />
+    </button>
+  );
+}
+
+type OpenProfile = { member: MemberRow; subtitle: string };
+
 export function SignalementsClient({ reports }: { reports: ReportRow[] }) {
   const { show } = useToast();
   const router = useRouter();
   const [busy, startTransition] = useTransition();
   const [removed, setRemoved] = useState<Set<string>>(new Set());
+  const [profile, setProfile] = useState<OpenProfile | null>(null);
 
   const visible = reports.filter((r) => !removed.has(r.id));
 
@@ -68,32 +111,68 @@ export function SignalementsClient({ reports }: { reports: ReportRow[] }) {
       ) : (
         <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-line)] divide-y divide-[var(--color-line)] shadow-[var(--shadow-card)]">
           {visible.map((r) => (
-            <div key={r.id} className="flex items-start gap-4 px-5 py-4">
-              {/* Flag icon */}
-              <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${FLAG_STYLE[r.sev]}`}>
-                <Flag className="w-4 h-4" />
-              </div>
-
-              {/* Content */}
-              <div className="flex-1 min-w-0 space-y-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-semibold text-sm text-[var(--color-ink)]">{r.reason}</span>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${SEV_STYLE[r.sev]}`}>
-                    {SEV_LABEL[r.sev]}
-                  </span>
+            <div key={r.id} className="px-4 sm:px-5 py-4">
+              {/* Motif, priorité, parties, commentaire */}
+              <div className="flex items-start gap-3">
+                <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${FLAG_STYLE[r.sev]}`}>
+                  <Flag className="w-4 h-4" />
                 </div>
-                {r.desc && <p className="text-sm text-[var(--color-muted)]">{r.desc}</p>}
-                <p className="text-xs text-[var(--color-muted)]">
-                  Signalé par{" "}
-                  <span className="font-medium text-[var(--color-ink)]">{r.reporter}</span>
-                  {" · "}contre{" "}
-                  <span className="font-medium text-[var(--color-ink)]">{r.reported}</span>
-                  {" · "}{r.when}
-                </p>
+
+                <div className="flex-1 min-w-0 space-y-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-semibold text-sm text-[var(--color-ink)]">
+                      {reasonLabel(r.reason)}
+                    </span>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${SEV_STYLE[r.sev]}`}>
+                      {SEV_LABEL[r.sev]}
+                    </span>
+                  </div>
+
+                  {/* Qui contre qui — les deux profils s'ouvrent */}
+                  <p className="text-xs text-[var(--color-muted)] leading-relaxed">
+                    Signalé par{" "}
+                    <MemberLink
+                      name={r.reporter}
+                      member={r.reporterMember}
+                      onOpen={() => r.reporterMember && setProfile({
+                        member: r.reporterMember,
+                        subtitle: "Auteur du signalement",
+                      })}
+                    />
+                    {" · "}contre{" "}
+                    <MemberLink
+                      name={r.reported}
+                      member={r.reportedMember}
+                      onOpen={() => r.reportedMember && setProfile({
+                        member: r.reportedMember,
+                        subtitle: "Membre signalé",
+                      })}
+                    />
+                    {" · "}
+                    <span title={formatDate(r.createdAt)}>{r.when}</span>
+                  </p>
+
+                  {/* Commentaire du signaleur — la pièce de la décision */}
+                  {r.desc ? (
+                    <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-faint)] px-3 py-2.5">
+                      <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-muted)]">
+                        <Quote className="w-3 h-3" />
+                        Motif indiqué par {r.reporter}
+                      </p>
+                      <p className="text-sm text-[var(--color-ink)] mt-1 leading-relaxed whitespace-pre-wrap break-words">
+                        {r.desc}
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-xs italic text-[var(--color-muted)]">
+                      Aucun commentaire fourni (signalement antérieur au formulaire détaillé).
+                    </p>
+                  )}
+                </div>
               </div>
 
-              {/* Actions */}
-              <div className="flex items-center gap-2 shrink-0">
+              {/* Actions : sous le texte, jamais par-dessus */}
+              <div className="flex flex-wrap items-center gap-2 mt-3 sm:pl-12">
                 <button
                   disabled={busy}
                   onClick={() => act(r, dismissReport, "Signalement ignoré", "success")}
@@ -119,6 +198,14 @@ export function SignalementsClient({ reports }: { reports: ReportRow[] }) {
             </div>
           ))}
         </div>
+      )}
+
+      {profile && (
+        <MemberProfileModal
+          member={profile.member}
+          subtitle={profile.subtitle}
+          onClose={() => setProfile(null)}
+        />
       )}
     </div>
   );

@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl'
 import { ArrowLeft, Heart, Clock, MoreVertical, ChevronRight, Lock, LockOpen, User, Ban, Flag } from 'lucide-react'
 import { Conversation } from '@/lib/mock-messages'
 import ConfirmActionModal from './ConfirmActionModal'
+import ReportModal from '@/components/moderation/ReportModal'
 
 type Props = {
   conv: Conversation
@@ -13,17 +14,18 @@ type Props = {
   msgsTotal?: number
   /** Blocage du membre — la discussion se ferme ensuite (géré par le parent). */
   onBlock: () => Promise<void>
-  /** Signalement du membre à la modération. */
-  onReport: () => Promise<void>
+  /** `user_id` du membre d'en face — destinataire du signalement. */
+  otherUserId: string
 }
 
-export default function ConversationHeader({ conv, msgsRemaining, msgsTotal = 30, onBlock, onReport }: Props) {
+export default function ConversationHeader({ conv, msgsRemaining, msgsTotal = 30, onBlock, otherUserId }: Props) {
   const router    = useRouter()
   const t         = useTranslations('dashboard.messages.conv')
   const [menuOpen,    setMenuOpen]    = useState(false)
   const [showTooltip, setShowTooltip] = useState(false)
   // Action de modération en attente de confirmation dans la feuille.
-  const [confirming,  setConfirming]  = useState<null | 'block' | 'report'>(null)
+  const [confirming,  setConfirming]  = useState<null | 'block'>(null)
+  const [reporting,   setReporting]   = useState(false)
   const [pending,     setPending]     = useState(false)
 
   const fullName = `${conv.firstName} ${conv.lastInitial}.`
@@ -32,7 +34,7 @@ export default function ConversationHeader({ conv, msgsRemaining, msgsTotal = 30
     if (!confirming) return
     setPending(true)
     try {
-      await (confirming === 'block' ? onBlock() : onReport())
+      await onBlock()
       setConfirming(null)
     } finally {
       setPending(false)
@@ -142,7 +144,7 @@ export default function ConversationHeader({ conv, msgsRemaining, msgsTotal = 30
                 </button>
 
                 <button
-                  onClick={() => { setMenuOpen(false); setConfirming('report') }}
+                  onClick={() => { setMenuOpen(false); setReporting(true) }}
                   className="w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-red-600 flex items-center gap-2.5 hover:bg-red-50 transition-colors"
                 >
                   <Flag className="w-4 h-4 text-red-400 shrink-0" />
@@ -177,17 +179,11 @@ export default function ConversationHeader({ conv, msgsRemaining, msgsTotal = 30
         />
       )}
 
-      {confirming === 'report' && (
-        <ConfirmActionModal
-          icon={<Flag className="w-6 h-6" />}
-          tone="warning"
-          title={t('reportTitle', { name: fullName })}
-          description={t('reportDesc')}
-          confirmLabel={t('report')}
-          cancelLabel={t('cancel')}
-          pending={pending}
-          onConfirm={runConfirmed}
-          onCancel={() => setConfirming(null)}
+      {reporting && (
+        <ReportModal
+          profileName={fullName}
+          reportedUserId={otherUserId}
+          onClose={() => setReporting(false)}
         />
       )}
 

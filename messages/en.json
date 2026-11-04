@@ -1774,10 +1774,15 @@
           "harassment": "Harassment",
           "other": "Other"
         },
-        "placeholder": "Describe the problem...",
+        "placeholder": "Describe the problem: what happened, when, where…",
         "cancel": "Cancel",
         "submit": "Report",
-        "sent": "Report sent. Thank you for helping us keep the community healthy."
+        "sent": "Report sent. Thank you for helping us keep the community healthy.",
+        "intro": "Tell us in a few words what the problem is. Our moderation team reads every report.",
+        "commentLabel": "Your comment (required)",
+        "commentHint": "A few more words, please ({count} characters minimum).",
+        "commentOk": "Thanks, these details help our moderators.",
+        "error": "Could not send. Please try again in a moment."
       },
       "block": {
         "title": "Block {name}?",

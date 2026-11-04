@@ -542,6 +542,21 @@ export async function getMembers(): Promise<MemberRow[]> {
   return members.map((m) => toMemberRow(m, extra, subs));
 }
 
+/** Fiches membres complètes indexées par `user_id`. Utilisé là où l'admin doit
+ *  ouvrir un profil depuis un autre écran (signalements…). */
+export async function getMembersByIds(userIds: string[]): Promise<Map<string, MemberRow>> {
+  const ids = [...new Set(userIds)].filter(Boolean);
+  if (ids.length === 0) return new Map();
+
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("admin_members").select("*").in("user_id", ids);
+
+  const members = data ?? [];
+  const { extra, subs } = await loadMemberExtras(supabase, members.map((m) => m.user_id));
+  return new Map(members.map((m) => [m.user_id, toMemberRow(m, extra, subs)]));
+}
+
 export async function searchMembers(q: string): Promise<MemberRow[]> {
   const supabase = createAdminClient();
   const like = `%${q.replace(/[%_]/g, "")}%`;
@@ -666,19 +681,24 @@ export async function getReports(): Promise<ReportRow[]> {
 
   if (!reports || reports.length === 0) return [];
 
+  // Fiche complète des deux parties : l'admin doit pouvoir ouvrir le profil du
+  // signaleur comme celui du signalé avant de trancher.
   const ids = [...new Set(reports.flatMap((r) => [r.reporter_id, r.reported_id]))];
-  const { data: names } = await supabase
-    .from("profiles").select("user_id,first_name,last_name").in("user_id", ids);
-  const nameMap = new Map((names ?? []).map((n) => [n.user_id, fullName(n.first_name, n.last_name)]));
+  const memberMap = await getMembersByIds(ids);
+  const nameOf = (id: string) => memberMap.get(id)?.name ?? "Membre supprimé";
 
   return reports.map((r) => ({
     id: r.id,
-    reporter: nameMap.get(r.reporter_id) ?? "Membre supprimé",
-    reported: nameMap.get(r.reported_id) ?? "Membre supprimé",
+    reporter: nameOf(r.reporter_id),
+    reported: nameOf(r.reported_id),
+    reporterUserId: r.reporter_id,
     reportedUserId: r.reported_id,
+    reporterMember: memberMap.get(r.reporter_id) ?? null,
+    reportedMember: memberMap.get(r.reported_id) ?? null,
     reason: r.reason,
     desc: r.description ?? "",
     when: timeAgo(r.created_at),
+    createdAt: r.created_at,
     sev: r.severity,
   }));
 }

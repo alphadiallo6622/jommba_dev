@@ -124,10 +124,18 @@ export interface ReportRow {
   id: string;
   reporter: string;
   reported: string;
+  reporterUserId: string;
   reportedUserId: string;
+  /** Fiche complète du signaleur, pour l'ouvrir depuis la liste (null si compte supprimé). */
+  reporterMember: MemberRow | null;
+  /** Fiche complète du membre signalé (null si compte supprimé). */
+  reportedMember: MemberRow | null;
+  /** Code motif (`arnaque`, `faux_nom`…) ou texte libre pour les anciens signalements. */
   reason: string;
+  /** Commentaire saisi par le signaleur — la pièce sur laquelle l'admin tranche. */
   desc: string;
   when: string;
+  createdAt: string;
   sev: "high" | "medium" | "low";
 }
 

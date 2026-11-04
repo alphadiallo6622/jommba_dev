@@ -18,7 +18,7 @@ import {
   formatTimeAgo,
 } from '@/lib/supabase/messages-service'
 import type { Message as DbMessage } from '@/lib/supabase/types'
-import { fetchBlockState, blockUser, unblockUser, reportUser } from '@/lib/supabase/moderation-service'
+import { fetchBlockState, blockUser, unblockUser } from '@/lib/supabase/moderation-service'
 import { sendVoiceMessage } from '@/lib/supabase/voice-service'
 import { notifyByEmail } from '@/lib/notify-email'
 import ConversationHeader from './ConversationHeader'
@@ -208,15 +208,6 @@ export default function ConversationPage({ id }: Props) {
     setReloadKey(k => k + 1)   // relance le chargement de la discussion
   }
 
-  const handleReport = async () => {
-    if (!user) return
-    if (!await reportUser(user.id, id, t('conv.reportReason'))) {
-      toast.error(t('conv.reportError'))
-      return
-    }
-    toast.success(t('conv.reportDone'))
-  }
-
   const handleSendVoice = async (blob: Blob, durationMs: number) => {
     if (!user || !convIdRef.current) return
 
@@ -357,7 +348,7 @@ export default function ConversationPage({ id }: Props) {
         msgsRemaining={msgsRemaining}
         msgsTotal={MSGS_REQUIRED}
         onBlock={handleBlock}
-        onReport={handleReport}
+        otherUserId={id}
       />
 
       <MessageArea
