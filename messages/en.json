@@ -864,7 +864,8 @@
       "alreadyLiked": "Already liked",
       "like": "Like",
       "requestSent": "Request sent to {name} ✓",
-      "unknownCity": "Unknown"
+      "unknownCity": "Unknown",
+      "goPremium": "Go Premium"
     },
     "pendingModal": {
       "title": "Pending requests",

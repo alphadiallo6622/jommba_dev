@@ -864,7 +864,8 @@
       "alreadyLiked": "Déjà aimé",
       "like": "J'aime",
       "requestSent": "Demande envoyée à {name} ✓",
-      "unknownCity": "Inconnu"
+      "unknownCity": "Inconnu",
+      "goPremium": "Passer Premium"
     },
     "pendingModal": {
       "title": "Demandes en attente",

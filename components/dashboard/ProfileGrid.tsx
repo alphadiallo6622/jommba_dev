@@ -1,10 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Heart, Crown, MapPin, Briefcase, X, BadgeCheck } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { AnimatePresence, motion, useReducedMotion, type Variants } from 'framer-motion'
+import {
+  AnimatePresence, motion, useMotionValue, useReducedMotion, useTransform,
+  type Variants,
+} from 'framer-motion'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { fetchBlockedIds } from '@/lib/supabase/moderation-service'
@@ -38,8 +41,17 @@ function scoreColor(score: number) {
 /** Sens du départ de la carte : « j'aime » sort à droite, « passer » à gauche. */
 type SwipeAction = 'pass' | 'like'
 
+/** Déplacement horizontal, en pixels, au-delà duquel le lâcher vaut décision. */
+const SWIPE_DISTANCE = 110
+/** Un geste bref mais vif décide aussi, même sous la distance : c'est le
+ *  « flick » qu'on attend d'une pile de cartes. */
+const SWIPE_VELOCITY = 520
+/** Amplitude sur laquelle le tampon passe de transparent à pleinement visible. */
+const STAMP_RANGE = 120
+
 /** Carte du carrousel : elle entre par en dessous puis, à la décision, part
- *  sur le côté en pivotant — le geste de swipe, joué par le bouton. */
+ *  sur le côté en pivotant. Le départ est joué soit par les boutons, soit par
+ *  le geste de l'utilisateur. */
 const CARD_VARIANTS: Variants = {
   enter: { opacity: 0, scale: 0.92, y: 24 },
   center: {
@@ -51,7 +63,10 @@ const CARD_VARIANTS: Variants = {
     transition: { duration: 0.42, ease: [0.16, 1, 0.3, 1] },
   },
   exit: (direction: SwipeAction) => ({
-    x: direction === 'like' ? '115%' : '-115%',
+    // Distance en pixels et non en pourcentage : `x` est ici une motion value
+    // pilotée par le geste, qui ne sait pas se résoudre contre la largeur du
+    // parent en cours d'animation.
+    x: direction === 'like' ? 620 : -620,
     rotate: direction === 'like' ? 16 : -16,
     opacity: 0,
     transition: { duration: 0.34, ease: [0.4, 0, 0.2, 1] },
@@ -63,6 +78,143 @@ const CARD_VARIANTS_REDUCED: Variants = {
   enter:  { opacity: 0 },
   center: { opacity: 1, transition: { duration: 0.15 } },
   exit:   { opacity: 0, transition: { duration: 0.15 } },
+}
+
+/** Tampon « J'aime » / « Passer », incliné par-dessus la photo. */
+function Stamp({ action, label }: { action: SwipeAction; label: string }) {
+  return (
+    <span
+      className={cn(
+        'flex items-center gap-2 rounded-2xl border-4 px-5 py-2.5 text-xl font-black uppercase tracking-wide backdrop-blur-sm',
+        action === 'like'
+          ? 'border-emerald-400 bg-emerald-500/25 text-white'
+          : 'border-gray-300 bg-gray-700/35 text-white',
+      )}
+      style={{ transform: `rotate(${action === 'like' ? -12 : 12}deg)` }}
+    >
+      {action === 'like' ? <Heart className="w-6 h-6 fill-current" /> : <X className="w-6 h-6" />}
+      {label}
+    </span>
+  )
+}
+
+/**
+ * Carte déplaçable du carrousel.
+ *
+ * Chaque carte possède sa propre `motion value` horizontale — d'où un
+ * composant à part plutôt qu'un bloc en ligne : la carte qui s'en va garde la
+ * position atteinte par le doigt, celle qui arrive repart de zéro.
+ *
+ * Rotation et opacité des tampons sont dérivées de cette valeur : elles
+ * suivent le doigt sans repasser par l'état React, donc sans re-rendu à
+ * chaque frame.
+ */
+function SwipeCard({
+  profile,
+  direction,
+  reduceMotion,
+  onOpen,
+  onSwipe,
+  labels,
+}: {
+  profile: GridProfile
+  direction: SwipeAction
+  reduceMotion: boolean
+  onOpen: () => void
+  onSwipe: (action: SwipeAction) => void
+  labels: { like: string; pass: string }
+}) {
+  const x = useMotionValue(0)
+  const rotate = useTransform(x, [-240, 0, 240], [-16, 0, 16])
+  const likeOpacity = useTransform(x, [20, STAMP_RANGE], [0, 1])
+  const passOpacity = useTransform(x, [-20, -STAMP_RANGE], [0, 1])
+
+  // Un geste ne doit pas ouvrir le profil au relâchement. Remis à zéro à
+  // chaque appui : sans cela, un glissement sans clic condamnerait le tap
+  // suivant.
+  const dragged = useRef(false)
+
+  return (
+    <motion.div
+      custom={direction}
+      variants={reduceMotion ? CARD_VARIANTS_REDUCED : CARD_VARIANTS}
+      initial="enter"
+      animate="center"
+      exit="exit"
+      style={{ x, rotate }}
+      drag="x"
+      // Contraintes nulles + élasticité : la carte suit le doigt puis revient
+      // d'elle-même au centre si la décision n'est pas franche.
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={0.7}
+      dragMomentum={false}
+      whileDrag={{ cursor: 'grabbing' }}
+      onPointerDown={() => { dragged.current = false }}
+      onDragStart={() => { dragged.current = true }}
+      onDragEnd={(_, info) => {
+        const far  = Math.abs(info.offset.x) > SWIPE_DISTANCE
+        const fast = Math.abs(info.velocity.x) > SWIPE_VELOCITY
+        if (far || fast) onSwipe(info.offset.x > 0 ? 'like' : 'pass')
+      }}
+      onClick={() => { if (!dragged.current) onOpen() }}
+      className="absolute inset-0 rounded-2xl overflow-hidden cursor-grab select-none active:cursor-grabbing"
+    >
+      <img
+        src={profile.photo}
+        alt={profile.name}
+        className={cn('w-full h-full object-cover', profile.photoBlurred && 'blur-md scale-105')}
+        draggable={false}
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/5 to-transparent pointer-events-none" />
+
+      {profile.isPremium && (
+        <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-amber-500 text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-md">
+          <Crown className="w-3 h-3" />
+          PREMIUM
+        </div>
+      )}
+
+      <div className={cn(
+        'absolute top-3 right-3 flex items-center gap-1 px-3 py-1.5 rounded-full shadow-md',
+        scoreColor(profile.score)
+      )}>
+        <Heart className="w-3 h-3 text-white fill-white" />
+        <span className="text-white text-[11px] font-bold">{profile.score}%</span>
+      </div>
+
+      {/* Tampons pilotés par le geste : ils se révèlent à mesure que la carte
+          s'écarte, et disparaissent si elle revient au centre. */}
+      <motion.div
+        aria-hidden="true"
+        style={{ opacity: likeOpacity }}
+        className="absolute inset-0 flex items-center justify-center pointer-events-none"
+      >
+        <Stamp action="like" label={labels.like} />
+      </motion.div>
+      <motion.div
+        aria-hidden="true"
+        style={{ opacity: passOpacity }}
+        className="absolute inset-0 flex items-center justify-center pointer-events-none"
+      >
+        <Stamp action="pass" label={labels.pass} />
+      </motion.div>
+
+      <div className="absolute bottom-0 left-0 right-0 p-4 space-y-1 pointer-events-none">
+        <h3 className="text-white font-bold text-[26px] leading-tight">
+          {profile.name}{' '}
+          <span className="font-normal text-xl opacity-90">{profile.age}</span>
+        </h3>
+        <div className="flex items-center gap-1.5">
+          <MapPin className="w-3.5 h-3.5 text-white/70 shrink-0" />
+          <span className="text-white/85 text-sm">{profile.city}</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <Briefcase className="w-3.5 h-3.5 text-white/70 shrink-0" />
+          <span className="text-white/85 text-sm line-clamp-1">{profile.job}</span>
+        </div>
+      </div>
+    </motion.div>
+  )
 }
 
 function GridCard({ profile, liked, onLike, viewerIsPremium }: {
@@ -213,9 +365,13 @@ export default function ProfileGrid() {
   // L'index avance tout de suite : AnimatePresence garde la carte sortante le
   // temps de son animation, la suivante entre par-dessous. Aucun setTimeout à
   // synchroniser avec la durée de l'animation.
-  const advance = (action: SwipeAction) => {
+  //
+  // `withStamp` distingue l'origine de la décision : un appui bouton n'a rien
+  // montré, on flashe donc le tampon ; un geste a déjà affiché le sien en
+  // suivant le doigt, le rejouer ferait doublon.
+  const advance = (action: SwipeAction, withStamp = true) => {
     setDirection(action)
-    setStamp(action)
+    if (withStamp) setStamp(action)
     setIndex(i => i + 1)
   }
 
@@ -223,7 +379,20 @@ export default function ProfileGrid() {
     if (liked.has(id) || !user) return false
     const result = await sendContactRequest(user.id, id, isPremium)
     if (!result.ok) {
-      toast.error(result.message)
+      if (result.reason === 'limit') {
+        // Le quota quotidien n'est pas une panne mais une limite du plan
+        // gratuit : ton d'avertissement plutôt que d'erreur, et un bouton pour
+        // agir — le message invitait à passer Premium sans offrir le chemin.
+        toast.warning(result.message, {
+          duration: 6_000,
+          action: {
+            label: t('goPremium'),
+            onClick: () => router.push('/dashboard/premium'),
+          },
+        })
+      } else {
+        toast.error(result.message)
+      }
       return false
     }
     setLiked(prev => new Set([...prev, id]))
@@ -233,13 +402,24 @@ export default function ProfileGrid() {
   }
 
   const handlePass = () => advance('pass')
-  const handleLikeCarousel = async () => {
+  const handleLikeCarousel = async (withStamp = true) => {
     if (!profile) return
     // Profil déjà liké : la demande n'est pas renvoyée, mais on passe quand
     // même au suivant sinon le bouton reste sans effet.
-    if (liked.has(profile.id)) { advance('like'); return }
+    if (liked.has(profile.id)) { advance('like', withStamp); return }
     const ok = await handleLike(profile.id, profile.name)
-    if (ok) advance('like')
+    if (ok) advance('like', withStamp)
+  }
+
+  /**
+   * Décision prise au doigt. La carte est déjà partie sur le côté quand on
+   * arrive ici : si la demande de contact échoue, l'index n'avance pas et la
+   * carte revient au centre toute seule — l'utilisateur voit que rien n'a été
+   * validé, sans message contradictoire.
+   */
+  const handleSwipe = (action: SwipeAction) => {
+    if (action === 'pass') { advance('pass', false); return }
+    void handleLikeCarousel(false)
   }
 
   if (profiles.length === 0) return null
@@ -348,59 +528,23 @@ export default function ProfileGrid() {
                   superposent donc sans se pousser — pas de `popLayout`, qui
                   remesurerait inutilement des éléments déjà hors flux. */}
               <AnimatePresence initial={false} custom={direction}>
-                <motion.div
+                <SwipeCard
                   // La clé force React à remonter la carte entière à chaque
                   // profil au lieu de remplacer les textes en place : le nom et
                   // l'âge ne peuvent plus rester figés si une extension ou un
                   // traducteur a modifié le DOM.
                   key={profile.id}
-                  custom={direction}
-                  variants={reduceMotion ? CARD_VARIANTS_REDUCED : CARD_VARIANTS}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  className="absolute inset-0 rounded-2xl overflow-hidden cursor-pointer select-none"
-                  onClick={() => router.push(`/dashboard/profil/${profile.id}`)}
-                >
-                  <img
-                    src={profile.photo}
-                    alt={profile.name}
-                    className={cn('w-full h-full object-cover', profile.photoBlurred && 'blur-md scale-105')}
-                    draggable={false}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/5 to-transparent pointer-events-none" />
-                  {profile.isPremium && (
-                    <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-amber-500 text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-md">
-                      <Crown className="w-3 h-3" />
-                      PREMIUM
-                    </div>
-                  )}
-                  <div className={cn(
-                    'absolute top-3 right-3 flex items-center gap-1 px-3 py-1.5 rounded-full shadow-md',
-                    scoreColor(profile.score)
-                  )}>
-                    <Heart className="w-3 h-3 text-white fill-white" />
-                    <span className="text-white text-[11px] font-bold">{profile.score}%</span>
-                  </div>
-                  <div className="absolute bottom-0 left-0 right-0 p-4 space-y-1 pointer-events-none">
-                    <h3 className="text-white font-bold text-[26px] leading-tight">
-                      {profile.name}{' '}
-                      <span className="font-normal text-xl opacity-90">{profile.age}</span>
-                    </h3>
-                    <div className="flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-white/70 shrink-0" />
-                      <span className="text-white/85 text-sm">{profile.city}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Briefcase className="w-3.5 h-3.5 text-white/70 shrink-0" />
-                      <span className="text-white/85 text-sm line-clamp-1">{profile.job}</span>
-                    </div>
-                  </div>
-                </motion.div>
+                  profile={profile}
+                  direction={direction}
+                  reduceMotion={Boolean(reduceMotion)}
+                  labels={{ like: t('like'), pass: t('pass') }}
+                  onOpen={() => router.push(`/dashboard/profil/${profile.id}`)}
+                  onSwipe={handleSwipe}
+                />
               </AnimatePresence>
 
-              {/* Tampon de décision. Il vit hors de la carte : celle-ci est
-                  déjà en train de sortir et son contenu est figé. */}
+              {/* Tampon des boutons. Le geste a déjà les siens, portés par la
+                  carte : on ne le rejoue pas par-dessus. */}
               <AnimatePresence>
                 {stamp && (
                   <motion.div
@@ -413,20 +557,7 @@ export default function ProfileGrid() {
                     transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
                     onAnimationComplete={() => setStamp(null)}
                   >
-                    <span
-                      className={cn(
-                        'flex items-center gap-2 rounded-2xl border-4 px-5 py-2.5 text-xl font-black uppercase tracking-wide backdrop-blur-sm',
-                        stamp === 'like'
-                          ? 'border-emerald-400 bg-emerald-500/25 text-white'
-                          : 'border-gray-300 bg-gray-700/35 text-white',
-                      )}
-                      style={{ transform: `rotate(${stamp === 'like' ? -12 : 12}deg)` }}
-                    >
-                      {stamp === 'like'
-                        ? <Heart className="w-6 h-6 fill-current" />
-                        : <X className="w-6 h-6" />}
-                      {stamp === 'like' ? t('like') : t('pass')}
-                    </span>
+                    <Stamp action={stamp} label={stamp === 'like' ? t('like') : t('pass')} />
                   </motion.div>
                 )}
               </AnimatePresence>
