@@ -862,7 +862,7 @@
       "restart": "Recommencer",
       "pass": "Passer",
       "alreadyLiked": "Déjà aimé",
-      "like": "Aimer",
+      "like": "J'aime",
       "requestSent": "Demande envoyée à {name} ✓",
       "unknownCity": "Inconnu"
     },
