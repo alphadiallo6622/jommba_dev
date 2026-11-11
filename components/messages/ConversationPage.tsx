@@ -360,8 +360,10 @@ export default function ConversationPage({ id }: Props) {
 
       <MessageInput onSend={handleSend} onSendVoice={handleSendVoice} isPremium={isPremium} />
 
-      {/* Spacer for mobile bottom nav */}
-      <div className="md:hidden shrink-0 h-16" />
+      {/* Réserve la hauteur de la barre de navigation fixe (≈ h-16) + l'inset
+          de la zone de gestes, pour que la zone de saisie passe toujours
+          au-dessus de la nav, y compris sur les appareils à barre gestuelle. */}
+      <div className="md:hidden shrink-0 h-[calc(4rem+env(safe-area-inset-bottom))]" />
     </div>
   )
 }

@@ -320,10 +320,11 @@ body {
   transition: top 450ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Les boîtes calées sur la hauteur du viewport doivent retirer celle du
-   bandeau, sans quoi elles débordent sous le pli — la conversation
-   (`h-dvh overflow-hidden`) poussait sa zone de saisie hors écran. Règle
-   centrale plutôt qu'un `calc` répété sur chaque page. */
+/* Garde-fou générique : toute boîte calée sur la hauteur du viewport (`h-dvh`)
+   doit retirer celle du bandeau, sans quoi elle déborde sous le pli. La
+   conversation n'en dépend plus (elle s'ancre désormais en `fixed … bottom-0`,
+   cf. app/dashboard/messages/[id]/page.tsx) mais la règle reste utile pour tout
+   futur usage de `h-dvh`. */
 html[data-pwa-bar="1"] .h-dvh {
   height: calc(100dvh - var(--pwa-bar-h));
 }
