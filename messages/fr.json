@@ -2078,7 +2078,7 @@
         "belowMinimum": "Montant trop faible pour Mobile Money (minimum {amount} GNF).",
         "tooManyAttempts": "Trop de tentatives rapprochées. Patiente {minutes} min avant de relancer le paiement.",
         "howToValidate": "Comment valider le paiement",
-        "validateOrange": "Après avoir appuyé sur « Payer », une demande Orange Money arrive sur ton téléphone. Compose {code} (ou via l'app Orange Max it), vérifie le numéro du vendeur, puis confirme avec ton code secret.",
+        "validateOrange": "Après avoir appuyé sur « Payer », une demande Orange Money arrive par SMS sur ton téléphone. Compose {code} (ou via l'app Orange Max it) puis confirme avec ton code secret.",
         "validateMtn": "Après avoir appuyé sur « Payer », une demande MTN MoMo arrive sur ton téléphone. Compose {code}, puis confirme avec ton code secret.",
         "validateMtnGeneric": "Après avoir appuyé sur « Payer », valide la demande MTN MoMo reçue par SMS/USSD, puis confirme avec ton code secret.",
         "payGnf": "Payer · {amount} GNF"
