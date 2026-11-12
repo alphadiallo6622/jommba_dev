@@ -40,7 +40,7 @@ const LS_COOLDOWN = 'mm_cooldown_until'
 // Codes de validation USSD par opérateur. MTN à compléter (fourni par l'admin) :
 // tant que MTN_USSD est vide, on affiche une consigne générique pour MTN.
 const ORANGE_USSD = '*146#'
-const MTN_USSD = '' // ex. '*XYZ#'
+const MTN_USSD = '*440#'
 
 // localStorage défensif (peut échouer en navigation privée / stockage bloqué).
 function readLS(k: string): string | null {
