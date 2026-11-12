@@ -19,7 +19,7 @@ import {
   readSignatureHeader,
   normalizeStatus,
 } from '@/lib/sayele/client'
-import { activatePremiumFromMobileMoney } from '@/lib/sayele/activate'
+import { activateMobileMoneyPayment } from '@/lib/sayele/activate-dispatch'
 import { createNotification } from '@/lib/push/notify'
 
 export const dynamic = 'force-dynamic'
@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
 
   try {
     if (status === 'settled' || type.includes('settled')) {
-      await activatePremiumFromMobileMoney(paymentId)
+      await activateMobileMoneyPayment(paymentId)
     } else if (status === 'failed' || status === 'expired' || type.includes('failed')) {
       const { data: updated } = await admin
         .from('mobile_money_payments')

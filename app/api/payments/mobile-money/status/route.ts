@@ -12,7 +12,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getSayeleServerConfig } from '@/lib/sayele/config'
 import { getTransaction } from '@/lib/sayele/client'
-import { activatePremiumFromMobileMoney } from '@/lib/sayele/activate'
+import { activateMobileMoneyPayment } from '@/lib/sayele/activate-dispatch'
 import { createNotification } from '@/lib/push/notify'
 
 export const dynamic = 'force-dynamic'
@@ -58,7 +58,7 @@ export async function GET(req: NextRequest) {
       if (config.secretKey) {
         const tx = await getTransaction(config.baseUrl, config.secretKey, row.provider_tx_id)
         if (tx.status === 'settled') {
-          const result = await activatePremiumFromMobileMoney(row.id)
+          const result = await activateMobileMoneyPayment(row.id)
           return NextResponse.json({ status: 'settled', expiresAt: result.expiresAt })
         }
         if (tx.status === 'failed' || tx.status === 'expired') {

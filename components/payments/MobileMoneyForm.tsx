@@ -24,7 +24,12 @@ interface Config {
 }
 
 interface Props {
-  planId: string
+  /** Nature de l'achat : Premium (défaut) ou Boost — choisit l'endpoint + le corps. */
+  kind?: 'premium' | 'boost'
+  /** Premium : identifiant du plan. */
+  planId?: string
+  /** Boost : identifiant du boost. */
+  boostId?: string
   promoCode?: string
   /** Montant total en USD (déjà remisé le cas échéant). */
   amountUsd: number
@@ -65,7 +70,7 @@ function removeLS(k: string) {
   }
 }
 
-export default function MobileMoneyForm({ planId, promoCode, amountUsd, onSuccess }: Props) {
+export default function MobileMoneyForm({ kind = 'premium', planId, boostId, promoCode, amountUsd, onSuccess }: Props) {
   const t = useTranslations('dashboard.premium.payment')
   const tp = useTranslations('dashboard.payment')
   const locale = useLocale()
@@ -196,10 +201,18 @@ export default function MobileMoneyForm({ planId, promoCode, amountUsd, onSucces
     setPhase('submitting')
     setError(null)
     try {
-      const res = await fetch('/api/payments/mobile-money', {
+      // Boost et Premium partagent l'infra Mobile Money mais ont un endpoint et
+      // un corps distincts (le polling de statut, lui, est commun).
+      const endpoint =
+        kind === 'boost' ? '/api/payments/boost/mobile-money' : '/api/payments/mobile-money'
+      const body =
+        kind === 'boost'
+          ? { boostId, operator, phone: phone.trim(), locale }
+          : { planId, operator, phone: phone.trim(), promoCode: promoCode?.trim() || undefined, locale }
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planId, operator, phone: phone.trim(), promoCode: promoCode?.trim() || undefined, locale }),
+        body: JSON.stringify(body),
       })
       const json = await res.json().catch(() => ({}))
       if (!res.ok) {
