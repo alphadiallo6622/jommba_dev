@@ -282,6 +282,22 @@ export function countryCode(value: string | null | undefined): string {
 }
 
 /**
+ * Emoji drapeau d'un pays, dérivé de sa valeur stockée (code ISO, nom français
+ * ou anglais). Renvoie "" si le pays n'est pas reconnu — l'appelant n'affiche
+ * alors aucun drapeau plutôt qu'un mauvais.
+ *
+ * Le drapeau est construit à partir du code ISO 3166-1 alpha-2 converti en
+ * paire d'« indicateurs régionaux » Unicode (ex. "FR" → 🇫🇷).
+ */
+export function countryFlag(value: string | null | undefined): string {
+  const code = countryCode(value);
+  if (code.length !== 2) return "";
+  return String.fromCodePoint(
+    ...[...code].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65),
+  );
+}
+
+/**
  * « Ville, Pays » prêt à afficher, le pays traduit dans la locale courante.
  * Les parties absentes sont simplement omises ; tout vide renvoie "".
  */

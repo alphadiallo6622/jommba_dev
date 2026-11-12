@@ -1,15 +1,19 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { useCurrentUser } from '@/lib/use-current-user'
+import { countryFlag, formatLocation } from '@/lib/countries'
 
 export default function UserProfileCard() {
   const router = useRouter()
   const t = useTranslations('dashboard.userCard')
+  const locale = useLocale()
   const mockUser = useCurrentUser()
   const { firstName, city, country, avatar, profileCompletion } = mockUser
   const isComplete = profileCompletion >= 100
+  const flag = countryFlag(country)
+  const location = formatLocation(city, country, locale)
 
   return (
     <div
@@ -28,7 +32,8 @@ export default function UserProfileCard() {
             {t('greeting', { name: firstName })}
           </p>
           <p className="text-emerald-100 text-xs mt-0.5">
-            🇸🇳 {city}, {country}
+            {flag && <span className="mr-1">{flag}</span>}
+            {location}
           </p>
         </div>
       </div>
