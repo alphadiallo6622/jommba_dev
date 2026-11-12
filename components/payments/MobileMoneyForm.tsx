@@ -33,6 +33,37 @@ interface Props {
 
 const POLL_INTERVAL_MS = 3000
 const MAX_POLLS = 50 // ~2,5 min
+const MAX_FAILS = 3 // échecs consécutifs avant blocage temporaire
+const COOLDOWN_MS = 15 * 60 * 1000 // 15 min
+const LS_FAILS = 'mm_fail_count'
+const LS_COOLDOWN = 'mm_cooldown_until'
+// Codes de validation USSD par opérateur. MTN à compléter (fourni par l'admin) :
+// tant que MTN_USSD est vide, on affiche une consigne générique pour MTN.
+const ORANGE_USSD = '*146#'
+const MTN_USSD = '' // ex. '*XYZ#'
+
+// localStorage défensif (peut échouer en navigation privée / stockage bloqué).
+function readLS(k: string): string | null {
+  try {
+    return localStorage.getItem(k)
+  } catch {
+    return null
+  }
+}
+function writeLS(k: string, v: string) {
+  try {
+    localStorage.setItem(k, v)
+  } catch {
+    /* ignore */
+  }
+}
+function removeLS(k: string) {
+  try {
+    localStorage.removeItem(k)
+  } catch {
+    /* ignore */
+  }
+}
 
 export default function MobileMoneyForm({ planId, promoCode, amountUsd, onSuccess }: Props) {
   const t = useTranslations('dashboard.premium.payment')
@@ -44,6 +75,9 @@ export default function MobileMoneyForm({ planId, promoCode, amountUsd, onSucces
   const [phone, setPhone] = useState('')
   const [phase, setPhase] = useState<'form' | 'submitting' | 'waiting' | 'error'>('form')
   const [error, setError] = useState<string | null>(null)
+  // Anti-répétition : blocage temporaire après plusieurs échecs d'affilée.
+  const [cooldownUntil, setCooldownUntil] = useState<number | null>(null)
+  const [nowTs, setNowTs] = useState<number>(() => Date.now())
 
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const pollCount = useRef(0)
@@ -72,11 +106,56 @@ export default function MobileMoneyForm({ planId, promoCode, amountUsd, onSucces
     }
   }, [])
 
+  // Reprend un blocage anti-répétition en cours (persisté localement, survit au
+  // rechargement de la page).
+  useEffect(() => {
+    const until = Number(readLS(LS_COOLDOWN)) || 0
+    if (until > Date.now()) setCooldownUntil(until)
+    else removeLS(LS_COOLDOWN)
+  }, [])
+
+  // Compte à rebours du blocage : met à jour l'affichage et lève le blocage à
+  // expiration.
+  useEffect(() => {
+    if (!cooldownUntil) return
+    const i = setInterval(() => {
+      const n = Date.now()
+      setNowTs(n)
+      if (n >= cooldownUntil) {
+        setCooldownUntil(null)
+        removeLS(LS_COOLDOWN)
+        removeLS(LS_FAILS)
+      }
+    }, 1000)
+    return () => clearInterval(i)
+  }, [cooldownUntil])
+
   const stopPolling = () => {
     if (pollRef.current) {
       clearInterval(pollRef.current)
       pollRef.current = null
     }
+  }
+
+  // Enregistre un échec consécutif ; au seuil, déclenche le blocage temporaire.
+  const registerFailure = () => {
+    const n = (Number(readLS(LS_FAILS)) || 0) + 1
+    if (n >= MAX_FAILS) {
+      const until = Date.now() + COOLDOWN_MS
+      writeLS(LS_COOLDOWN, String(until))
+      writeLS(LS_FAILS, '0')
+      setCooldownUntil(until)
+      setNowTs(Date.now())
+    } else {
+      writeLS(LS_FAILS, String(n))
+    }
+  }
+
+  // Remet le compteur à zéro après un succès.
+  const resetFailures = () => {
+    removeLS(LS_FAILS)
+    removeLS(LS_COOLDOWN)
+    setCooldownUntil(null)
   }
 
   const startPolling = (id: string) => {
@@ -89,11 +168,13 @@ export default function MobileMoneyForm({ planId, promoCode, amountUsd, onSucces
         const json = await res.json().catch(() => ({}))
         if (json.status === 'settled') {
           stopPolling()
+          resetFailures()
           onSuccess()
           return
         }
         if (json.status === 'failed' || json.status === 'expired') {
           stopPolling()
+          registerFailure()
           setError(t('mobileFailed'))
           setPhase('error')
           return
@@ -103,6 +184,7 @@ export default function MobileMoneyForm({ planId, promoCode, amountUsd, onSucces
       }
       if (pollCount.current >= MAX_POLLS) {
         stopPolling()
+        registerFailure()
         setError(t('mobileTimeout'))
         setPhase('error')
       }
@@ -110,7 +192,7 @@ export default function MobileMoneyForm({ planId, promoCode, amountUsd, onSucces
   }
 
   const handleSubmit = async () => {
-    if (!operator || !phone.trim() || phase === 'submitting' || belowMin) return
+    if (!operator || !phone.trim() || phase === 'submitting' || belowMin || cooldownActive) return
     setPhase('submitting')
     setError(null)
     try {
@@ -121,6 +203,7 @@ export default function MobileMoneyForm({ planId, promoCode, amountUsd, onSucces
       })
       const json = await res.json().catch(() => ({}))
       if (!res.ok) {
+        registerFailure()
         setError(json.error ?? tp('genericError'))
         setPhase('error')
         return
@@ -128,6 +211,7 @@ export default function MobileMoneyForm({ planId, promoCode, amountUsd, onSucces
       setPhase('waiting')
       startPolling(json.paymentId)
     } catch {
+      registerFailure()
       setError(tp('genericError'))
       setPhase('error')
     }
@@ -156,6 +240,20 @@ export default function MobileMoneyForm({ planId, promoCode, amountUsd, onSucces
   const minMinor = config?.minAmountMinor ?? 0
   const belowMin = amountGnf != null && minMinor > 0 && amountGnf < minMinor
   const minLabel = new Intl.NumberFormat('fr-FR').format(minMinor)
+
+  // Blocage anti-répétition en cours ?
+  const cooldownActive = cooldownUntil != null && cooldownUntil > nowTs
+  const cooldownMinutes = cooldownActive
+    ? Math.max(1, Math.ceil((cooldownUntil! - nowTs) / 60000))
+    : 0
+
+  // Consigne de validation selon l'opérateur (Orange confirmé : *146#).
+  const validateText =
+    operator === 'mtn'
+      ? MTN_USSD
+        ? t('validateMtn', { code: MTN_USSD })
+        : t('validateMtnGeneric')
+      : t('validateOrange', { code: ORANGE_USSD })
 
   // Écran d'attente (paiement validé sur le téléphone).
   if (phase === 'waiting') {
@@ -227,9 +325,25 @@ export default function MobileMoneyForm({ planId, promoCode, amountUsd, onSucces
         </p>
       )}
 
+      {/* Trop de tentatives d'affilée : on explique d'attendre avant de relancer. */}
+      {cooldownActive && (
+        <p className="mt-2.5 flex items-start gap-1.5 text-sm text-amber-600">
+          <span className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
+          {t('tooManyAttempts', { minutes: cooldownMinutes })}
+        </p>
+      )}
+
+      {/* Aide : comment valider le paiement sur le téléphone (ex. *146# Orange). */}
+      {operator && (
+        <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50/70 px-3.5 py-3">
+          <p className="text-xs font-semibold text-blue-800">{t('howToValidate')}</p>
+          <p className="mt-1 text-xs leading-relaxed text-blue-700/90">{validateText}</p>
+        </div>
+      )}
+
       <button
         onClick={handleSubmit}
-        disabled={!operator || !phone.trim() || phase === 'submitting' || belowMin}
+        disabled={!operator || !phone.trim() || phase === 'submitting' || belowMin || cooldownActive}
         className="mt-5 w-full rounded-2xl bg-gradient-to-b from-emerald-500 to-emerald-600 py-4 text-base font-semibold text-white shadow-lg shadow-emerald-500/30 transition-all duration-200 hover:from-emerald-600 hover:to-emerald-700 hover:shadow-xl active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none"
       >
         {phase === 'submitting' ? (
@@ -238,9 +352,7 @@ export default function MobileMoneyForm({ planId, promoCode, amountUsd, onSucces
             {tp('processing')}
           </span>
         ) : (
-          <>
-            {t('pay')} · {amountUsd} ${amountGnfLabel ? ` · ${t('approx', { amount: amountGnfLabel })}` : ''}
-          </>
+          <>{amountGnfLabel ? t('payGnf', { amount: amountGnfLabel }) : t('pay')}</>
         )}
       </button>
 

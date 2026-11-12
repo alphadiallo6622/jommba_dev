@@ -2075,7 +2075,13 @@
         "waitingHint": "Confirmez la demande reçue par SMS ou dans l'application de votre opérateur. L'activation est automatique.",
         "mobileFailed": "Le paiement a échoué. Réessaie ou change d'opérateur.",
         "mobileTimeout": "Délai dépassé. Si vous avez validé le paiement, votre accès s'activera sous peu.",
-        "belowMinimum": "Montant trop faible pour Mobile Money (minimum {amount} GNF)."
+        "belowMinimum": "Montant trop faible pour Mobile Money (minimum {amount} GNF).",
+        "tooManyAttempts": "Trop de tentatives rapprochées. Patiente {minutes} min avant de relancer le paiement.",
+        "howToValidate": "Comment valider le paiement",
+        "validateOrange": "Après avoir appuyé sur « Payer », une demande Orange Money arrive sur ton téléphone. Compose {code} (ou via l'app Orange Max it), vérifie le numéro du vendeur, puis confirme avec ton code secret.",
+        "validateMtn": "Après avoir appuyé sur « Payer », une demande MTN MoMo arrive sur ton téléphone. Compose {code}, puis confirme avec ton code secret.",
+        "validateMtnGeneric": "Après avoir appuyé sur « Payer », valide la demande MTN MoMo reçue par SMS/USSD, puis confirme avec ton code secret.",
+        "payGnf": "Payer · {amount} GNF"
       },
       "cta": {
         "button": "Devenir membre Premium",

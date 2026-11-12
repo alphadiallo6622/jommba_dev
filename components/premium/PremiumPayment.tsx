@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Smartphone, CreditCard } from 'lucide-react'
@@ -21,9 +21,28 @@ export default function PremiumPayment({ selectedPlan, pricing, appliedPromo }: 
   const t = useTranslations('dashboard.premium.payment')
   const router = useRouter()
   const [paymentMethod, setPaymentMethod] = useState<'mobile' | 'card'>('card')
+  // Taux USD→GNF (pour afficher le montant en GNF quand Mobile Money est choisi).
+  const [gnfRate, setGnfRate] = useState<number | null>(null)
 
   const basePrice = pricing?.prices[selectedPlan] ?? 10
   const total = appliedPromo?.discountedPrice ?? basePrice
+
+  useEffect(() => {
+    let active = true
+    fetch('/api/premium/mobile-money-config')
+      .then((r) => r.json())
+      .then((c) => {
+        if (active && typeof c?.usdToGnf === 'number' && c.usdToGnf > 0) setGnfRate(c.usdToGnf)
+      })
+      .catch(() => {})
+    return () => {
+      active = false
+    }
+  }, [])
+
+  // En Mobile Money on affiche le montant en GNF ; en Carte (Square) on garde le $.
+  const showGnf = paymentMethod === 'mobile' && gnfRate != null
+  const toGnf = (usd: number) => new Intl.NumberFormat('fr-FR').format(Math.round(usd * (gnfRate ?? 0)))
 
   return (
     <section className="py-4">
@@ -78,13 +97,15 @@ export default function PremiumPayment({ selectedPlan, pricing, appliedPromo }: 
         <span className="text-sm font-medium text-gray-600">{t('total')}</span>
         <div className="flex items-baseline gap-2">
           {appliedPromo && (
-            <span className="text-sm text-gray-400 line-through">{basePrice} $</span>
+            <span className="text-sm text-gray-400 line-through">
+              {showGnf ? `${toGnf(basePrice)} GNF` : `${basePrice} $`}
+            </span>
           )}
           <div className="flex items-baseline gap-1">
             <span className="text-3xl font-extrabold tracking-tight text-emerald-600">
-              {total}
+              {showGnf ? toGnf(total) : total}
             </span>
-            <span className="text-base font-semibold text-emerald-500">$</span>
+            <span className="text-base font-semibold text-emerald-500">{showGnf ? 'GNF' : '$'}</span>
           </div>
         </div>
       </div>
