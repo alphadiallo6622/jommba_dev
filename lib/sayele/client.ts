@@ -11,7 +11,27 @@
 //   • Statuts : pending → processing → settled, ou → failed
 //   • Guinée : country=GN, currency=GNF, opérateurs orange / mtn
 //   • Secret webhook au format `whsec_…` (convention type Stripe)
+//   • CONFIRMÉ (via erreur de validation de l'API) : le champ `operator` attend
+//     l'une de ces valeurs exactes : visa, mastercard, orange_money, mtn, wave,
+//     moov, kulu, soutra_money, paycard, akiba. Nos clés internes 'orange'/'mtn'
+//     sont donc traduites vers la valeur « wire » attendue (orange → orange_money).
 import { createHmac, timingSafeEqual } from 'crypto'
+
+/**
+ * Traduit notre code opérateur interne ('orange' | 'mtn') vers la valeur exacte
+ * attendue par l'API Sayele. 'mtn' est identique ; 'orange' devient 'orange_money'.
+ * Les valeurs déjà au format Sayele sont laissées telles quelles.
+ */
+const OPERATOR_WIRE: Record<string, string> = {
+  orange: 'orange_money',
+  orange_money: 'orange_money',
+  mtn: 'mtn',
+}
+
+function toSayeleOperator(operator: string): string {
+  const key = operator.trim().toLowerCase()
+  return OPERATOR_WIRE[key] ?? key
+}
 
 export type SayeleStatus = 'pending' | 'processing' | 'settled' | 'failed' | 'expired'
 
@@ -97,7 +117,7 @@ export async function createTransaction(input: CreateTransactionInput): Promise<
     currency: input.currency,
     country: input.country,
     method: 'mobile_money',
-    operator: input.operator,
+    operator: toSayeleOperator(input.operator),
     instrument: input.phone,
     customerReference: input.reference,
   }

@@ -170,9 +170,15 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     const detail = err instanceof SayeleApiError ? err.message : undefined
     console.error('[payments/mobile-money] création transaction échouée', detail ?? err)
+    // On conserve le détail de l'échec dans `raw` pour diagnostic ultérieur
+    // (erreur de validation de l'API, etc.) sans dépendre des logs.
+    const failureRaw =
+      err instanceof SayeleApiError
+        ? { error: err.message, status: err.status, body: err.body }
+        : { error: String(err) }
     await admin
       .from('mobile_money_payments')
-      .update({ status: 'failed', updated_at: new Date().toISOString() })
+      .update({ status: 'failed', raw: failureRaw as never, updated_at: new Date().toISOString() })
       .eq('id', reference)
     return NextResponse.json(
       { error: paymentError('mobileMoneyInitFailed', locale), detail },
