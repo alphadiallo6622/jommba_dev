@@ -66,6 +66,11 @@ export async function activatePremiumFromMobileMoney(paymentId: string): Promise
       status: 'active',
       payment_method: 'mobile_money',
       price_usd: amountUsd,
+      // Devise de règlement réelle : GNF. On conserve price_usd (équivalent USD)
+      // pour les métriques normalisées, et on stocke le montant GNF réellement
+      // payé pour l'affichage/agrégation par devise côté admin.
+      currency: payment.currency,
+      amount_native: payment.amount_minor,
       duration_months: Math.round((durationDays / 30) * 100) / 100,
       current_period_end: periodEnd.toISOString(),
       square_subscription_id: null,

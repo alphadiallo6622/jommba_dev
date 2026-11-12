@@ -739,9 +739,13 @@ export interface SubscriptionsData {
   rows: SubscriptionRow[];
   kpis: {
     activeCount: number;
-    monthRevenue: number;
-    totalRevenue: number;
-    yearRevenue: number;
+    // Revenus séparés par devise (on n'additionne jamais USD et GNF).
+    monthRevenueUsd: number;
+    monthRevenueGnf: number;
+    yearRevenueUsd: number;
+    yearRevenueGnf: number;
+    totalRevenueUsd: number;
+    totalRevenueGnf: number;
     cancellations30d: number;
     refunds30d: number;
     totalCancellations: number;
@@ -788,6 +792,13 @@ export async function getSubscriptions(): Promise<SubscriptionsData> {
     // La résiliation seule ne donne pas de remboursement.
     const paid = s.price_usd != null && Number(s.price_usd) > 0;
     const isSquare = s.payment_method === "square";
+    // Devise de règlement : GNF pour Mobile Money, USD sinon (défaut). Le montant
+    // affiché est le montant réellement payé dans cette devise.
+    const currency = s.currency ?? (s.payment_method === "mobile_money" ? "GNF" : "USD");
+    const amount =
+      currency === "GNF"
+        ? (s.amount_native != null ? Number(s.amount_native) : null)
+        : (s.price_usd != null ? Number(s.price_usd) : null);
     return {
       id: s.id,
       userId: s.user_id,
@@ -804,7 +815,8 @@ export async function getSubscriptions(): Promise<SubscriptionsData> {
       city: info?.city ?? null,
       country: info?.country ?? null,
       location: location(info?.city ?? null, info?.country ?? null),
-      amount: s.price_usd != null ? Number(s.price_usd) : null,
+      amount,
+      currency,
     };
   });
 
@@ -815,15 +827,31 @@ export async function getSubscriptions(): Promise<SubscriptionsData> {
   // Revenu = somme des montants réellement encaissés (montant > 0), déduction faite
   // des abonnements remboursés. Les abonnements offerts (montant 0) ne comptent pas.
   // Rattachement au mois/année de la DATE DE SOUSCRIPTION (created_at).
-  const paidUsd = (s: (typeof allSubs)[number]) => Number(s.price_usd ?? 0);
-  const isRevenue = (s: (typeof allSubs)[number]) => paidUsd(s) > 0 && !s.refunded_at;
+  // Devise de règlement d'un abonnement (GNF pour Mobile Money, USD sinon).
+  const curOf = (s: (typeof allSubs)[number]) =>
+    s.currency ?? (s.payment_method === "mobile_money" ? "GNF" : "USD");
+  // Montant encaissé dans chaque devise (0 si l'abonnement est dans l'autre devise).
+  const usdAmt = (s: (typeof allSubs)[number]) => (curOf(s) === "GNF" ? 0 : Number(s.price_usd ?? 0));
+  const gnfAmt = (s: (typeof allSubs)[number]) => (curOf(s) === "GNF" ? Number(s.amount_native ?? 0) : 0);
   const subMs = (s: (typeof allSubs)[number]) => Date.parse(s.created_at);
-  const sumRevenue = (predicate: (s: (typeof allSubs)[number]) => boolean) =>
-    Math.round(allSubs.filter((s) => isRevenue(s) && predicate(s)).reduce((sum, s) => sum + paidUsd(s), 0));
+  const notRefunded = (s: (typeof allSubs)[number]) => !s.refunded_at;
+  // On somme chaque devise séparément (jamais de mélange USD + GNF).
+  const sumUsd = (predicate: (s: (typeof allSubs)[number]) => boolean) =>
+    Math.round(allSubs.filter((s) => notRefunded(s) && usdAmt(s) > 0 && predicate(s)).reduce((sum, s) => sum + usdAmt(s), 0));
+  const sumGnf = (predicate: (s: (typeof allSubs)[number]) => boolean) =>
+    Math.round(allSubs.filter((s) => notRefunded(s) && gnfAmt(s) > 0 && predicate(s)).reduce((sum, s) => sum + gnfAmt(s), 0));
 
-  const totalRevenue = sumRevenue(() => true);
-  const monthRevenue = sumRevenue((s) => subMs(s) >= monthStart.getTime() && subMs(s) < nextMonthStart.getTime());
-  const yearRevenue = sumRevenue((s) => subMs(s) >= yearStart.getTime() && subMs(s) < nextYearStart.getTime());
+  const inMonth = (s: (typeof allSubs)[number]) =>
+    subMs(s) >= monthStart.getTime() && subMs(s) < nextMonthStart.getTime();
+  const inYear = (s: (typeof allSubs)[number]) =>
+    subMs(s) >= yearStart.getTime() && subMs(s) < nextYearStart.getTime();
+
+  const totalRevenueUsd = sumUsd(() => true);
+  const totalRevenueGnf = sumGnf(() => true);
+  const monthRevenueUsd = sumUsd(inMonth);
+  const monthRevenueGnf = sumGnf(inMonth);
+  const yearRevenueUsd = sumUsd(inYear);
+  const yearRevenueGnf = sumGnf(inYear);
 
   // Convention alignée sur les filtres du tableau : une « résiliation » est un
   // abonnement annulé mais NON remboursé (le remboursé est sa propre catégorie).
@@ -842,9 +870,12 @@ export async function getSubscriptions(): Promise<SubscriptionsData> {
     rows,
     kpis: {
       activeCount,
-      monthRevenue,
-      totalRevenue,
-      yearRevenue,
+      monthRevenueUsd,
+      monthRevenueGnf,
+      yearRevenueUsd,
+      yearRevenueGnf,
+      totalRevenueUsd,
+      totalRevenueGnf,
       cancellations30d,
       refunds30d,
       totalCancellations,

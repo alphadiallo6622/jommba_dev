@@ -59,9 +59,12 @@ export function AbonnementsClient({
   rows: SubscriptionRow[];
   kpis: {
     activeCount: number;
-    monthRevenue: number;
-    totalRevenue: number;
-    yearRevenue: number;
+    monthRevenueUsd: number;
+    monthRevenueGnf: number;
+    yearRevenueUsd: number;
+    yearRevenueGnf: number;
+    totalRevenueUsd: number;
+    totalRevenueGnf: number;
     cancellations30d: number;
     refunds30d: number;
     totalCancellations: number;
@@ -75,12 +78,22 @@ export function AbonnementsClient({
   const [confirm, setConfirm] = useState<Confirm | null>(null);
 
   const usd = (n: number) => `${n.toLocaleString("fr-FR")} $`;
+  const gnf = (n: number) => `${n.toLocaleString("fr-FR")} GNF`;
+  // Ligne secondaire GNF sur les cartes de revenu, seulement si du Mobile Money
+  // a été encaissé (sinon on n'affiche que le $).
+  const gnfSub = (n: number) => (n > 0 ? gnf(n) : undefined);
+  // Montant d'un abonnement affiché dans sa devise (GNF Mobile Money, $ sinon).
+  const formatAmount = (s: SubscriptionRow) =>
+    s.amount == null ? "—" : s.amount === 0 ? "Offert" : s.currency === "GNF" ? gnf(s.amount) : usd(s.amount);
 
-  const KPIS = [
+  const KPIS: {
+    label: string; value: string; sub?: string;
+    icon: typeof Crown; color: string; bg: string;
+  }[] = [
     { label: "Abonnés actifs",        value: String(kpis.activeCount),      icon: Crown,        color: "#e8920c", bg: "#fdf3e3" },
-    { label: "Revenu du mois",        value: usd(kpis.monthRevenue),        icon: DollarSign,   color: "#10b981", bg: "#ecfdf5" },
-    { label: "Revenu de l'année",     value: usd(kpis.yearRevenue),         icon: CalendarDays, color: "#10b981", bg: "#ecfdf5" },
-    { label: "Revenu total",          value: usd(kpis.totalRevenue),        icon: Wallet,       color: "#0a7a52", bg: "#ecfdf5" },
+    { label: "Revenu du mois",        value: usd(kpis.monthRevenueUsd),  sub: gnfSub(kpis.monthRevenueGnf),  icon: DollarSign,   color: "#10b981", bg: "#ecfdf5" },
+    { label: "Revenu de l'année",     value: usd(kpis.yearRevenueUsd),   sub: gnfSub(kpis.yearRevenueGnf),   icon: CalendarDays, color: "#10b981", bg: "#ecfdf5" },
+    { label: "Revenu total",          value: usd(kpis.totalRevenueUsd),  sub: gnfSub(kpis.totalRevenueGnf),  icon: Wallet,       color: "#0a7a52", bg: "#ecfdf5" },
     { label: "Résiliations (total)",  value: String(kpis.totalCancellations), icon: Ban,        color: "#df4548", bg: "#fceceb" },
     { label: "Expirés (total)",       value: String(kpis.totalExpired),     icon: Clock,        color: "#6b7280", bg: "#f3f4f6" },
     { label: "Remboursements (total)", value: String(kpis.totalRefunds),    icon: RotateCcw,    color: "#df4548", bg: "#fceceb" },
@@ -159,12 +172,10 @@ export function AbonnementsClient({
       key: "amount",
       label: "Montant",
       render: (s) => (
-        <span className="text-sm font-medium">
-          {s.amount == null ? "—" : s.amount === 0 ? "Offert" : `${s.amount} $`}
-        </span>
+        <span className="text-sm font-medium">{formatAmount(s)}</span>
       ),
       sortable: true,
-      csvValue: (s) => (s.amount == null ? "—" : s.amount === 0 ? "Offert" : `${s.amount} $`),
+      csvValue: (s) => formatAmount(s),
     },
     {
       key: "status",
@@ -234,6 +245,9 @@ export function AbonnementsClient({
               <div>
                 <p className="text-xs text-[var(--color-muted)] font-medium">{k.label}</p>
                 <p className="text-2xl font-bold text-[var(--color-ink)] mt-0.5">{k.value}</p>
+                {k.sub && (
+                  <p className="text-sm font-semibold text-[#0a7a52] mt-0.5">{k.sub}</p>
+                )}
               </div>
               <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"

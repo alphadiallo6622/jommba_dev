@@ -158,7 +158,10 @@ export interface SubscriptionRow {
   city: string | null;
   country: string | null;
   location: string;
-  amount: number | null; // montant payé en USD
+  /** Montant payé exprimé dans sa devise de règlement (voir `currency`). */
+  amount: number | null;
+  /** Devise du montant : 'USD' (Square) ou 'GNF' (Mobile Money). */
+  currency: string;
 }
 
 export interface BoostRow {

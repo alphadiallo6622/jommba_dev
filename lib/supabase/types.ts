@@ -175,6 +175,10 @@ export interface Subscription {
   duration_months:       number
   payment_method:        string | null
   price_usd:             number | null
+  /** Devise de règlement : 'USD' (Square, défaut) ou 'GNF' (Mobile Money). */
+  currency:              string | null
+  /** Montant réellement payé dans la devise de règlement (GNF sans sous-unité). */
+  amount_native:         number | null
   cancelled_at:          string | null
   refunded_at:           string | null
   created_at:            string
@@ -453,7 +457,7 @@ export type Database = {
       }
       subscriptions: {
         Row:           Indexed<Subscription>
-        Insert:        Indexed<Omit<Subscription, 'id' | 'created_at' | 'updated_at' | 'duration_months' | 'payment_method' | 'price_usd' | 'cancelled_at' | 'refunded_at' | 'stripe_subscription_id'> & { id?: string; created_at?: string; updated_at?: string; duration_months?: number; payment_method?: string | null; price_usd?: number | null; cancelled_at?: string | null; refunded_at?: string | null; stripe_subscription_id?: string | null }>
+        Insert:        Indexed<Omit<Subscription, 'id' | 'created_at' | 'updated_at' | 'duration_months' | 'payment_method' | 'price_usd' | 'currency' | 'amount_native' | 'cancelled_at' | 'refunded_at' | 'stripe_subscription_id'> & { id?: string; created_at?: string; updated_at?: string; duration_months?: number; payment_method?: string | null; price_usd?: number | null; currency?: string | null; amount_native?: number | null; cancelled_at?: string | null; refunded_at?: string | null; stripe_subscription_id?: string | null }>
         Update:        Indexed<Partial<Subscription>>
         Relationships: []
       }
