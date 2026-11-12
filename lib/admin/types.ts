@@ -293,6 +293,22 @@ export interface EmailNotificationSettings {
   message: boolean;
 }
 
+/**
+ * Config Mobile Money (Sayele) exposée à l'UI admin — PRÉSENCE des secrets
+ * seulement, jamais leur valeur. Les champs `*FromEnv` indiquent qu'un secret
+ * provient encore du .env.local (pas encore enregistré/chiffré en base).
+ */
+export interface MobileMoneyAdminSettings {
+  enabled: boolean;
+  baseUrl: string;
+  webhookUrl: string;
+  usdToGnf: number;
+  hasSecretKey: boolean;
+  hasWebhookSecret: boolean;
+  secretKeyFromEnv: boolean;
+  webhookSecretFromEnv: boolean;
+}
+
 export type GeoBlockMode = "block" | "allow";
 
 export interface GeoBlockSettings {

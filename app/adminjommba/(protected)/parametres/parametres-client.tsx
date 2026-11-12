@@ -6,6 +6,7 @@ import {
   UserPlus, MoreHorizontal, Bot, Database, Lock,
   ShieldCheck, Cloud, Mail, X, Pencil, Trash2,
   ChevronDown, Globe, Wallet, Eye, EyeOff, Power, Wrench, Search, MapPin,
+  Smartphone,
 } from "lucide-react";
 import { COUNTRIES, countryName } from "@/lib/admin/countries";
 import { computePlanPrices, computeFullPrices, computeDiscountLabels, PLAN_IDS } from "@/lib/pricing";
@@ -14,12 +15,12 @@ import { Card, CardHeader } from "@/components/admin/ui/card";
 import { useToast } from "@/components/admin/ui/toast";
 import type {
   AdminAccountRow, ApiServiceRow, LimitsSettings, PricingSettings, BoostPricingSettings,
-  MaintenanceSettings, GeoBlockSettings, EmailNotificationSettings,
+  MaintenanceSettings, GeoBlockSettings, EmailNotificationSettings, MobileMoneyAdminSettings,
 } from "@/lib/admin/types";
 import {
   createAdminAccount, updateAdminRole, setAdminAccountStatus, deleteAdminAccount,
   saveLimits, savePricing, saveBoostPricing, setMaintenance, setGeoBlock,
-  setEmailNotifications,
+  setEmailNotifications, saveMobileMoneySettings,
 } from "@/app/adminjommba/actions";
 
 /* ── Types ─────────────────────────────────────────────────────────────────── */
@@ -39,7 +40,7 @@ const BOOST_FIELDS = [
 
 const SERVICE_ICONS: Record<string, ElementType> = {
   ai: Bot, turnstile: ShieldCheck, square: Wallet, db: Database,
-  auth: Lock, google: Globe, cloud: Cloud, email: Mail,
+  auth: Lock, google: Globe, cloud: Cloud, email: Mail, sayele: Smartphone,
 };
 
 /* ── Toggle switch ──────────────────────────────────────────────────────────── */
@@ -497,6 +498,7 @@ export function ParametresClient({
   initialMaintenance,
   initialGeoBlock,
   initialEmailNotifications,
+  initialMobileMoney,
 }: {
   admins: AdminAccountRow[];
   apiServices: ApiServiceRow[];
@@ -506,6 +508,7 @@ export function ParametresClient({
   initialMaintenance: MaintenanceSettings;
   initialGeoBlock: GeoBlockSettings;
   initialEmailNotifications: EmailNotificationSettings;
+  initialMobileMoney: MobileMoneyAdminSettings;
 }) {
   const { show } = useToast();
   const router = useRouter();
@@ -521,6 +524,13 @@ export function ParametresClient({
   const [geoBlock,    setGeoBlockState]    = useState<GeoBlockSettings>(initialGeoBlock);
   const [countryQuery, setCountryQuery]    = useState("");
   const [emailNotifs, setEmailNotifsState] = useState<EmailNotificationSettings>(initialEmailNotifications);
+  // Mobile Money (Sayele). Les deux champs secrets sont vides par défaut : les
+  // laisser vides conserve la valeur en base ; les remplir la remplace.
+  const [mm, setMm] = useState(initialMobileMoney);
+  const [mmSecretKey, setMmSecretKey] = useState("");
+  const [mmWebhookSecret, setMmWebhookSecret] = useState("");
+  const [mmShowSecret, setMmShowSecret] = useState(false);
+  const [mmShowWebhook, setMmShowWebhook] = useState(false);
 
   const act = (
     fn: () => Promise<{ ok: boolean; error?: string }>,
@@ -653,6 +663,35 @@ export function ParametresClient({
     if (!q) return true;
     return c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q);
   });
+
+  /* Enregistrement de la config Mobile Money (Sayele) */
+  const handleSaveMobileMoney = () =>
+    act(
+      () =>
+        saveMobileMoneySettings({
+          enabled: mm.enabled,
+          baseUrl: mm.baseUrl,
+          webhookUrl: mm.webhookUrl,
+          usdToGnf: mm.usdToGnf,
+          secretKey: mmSecretKey.trim() || undefined,
+          webhookSecret: mmWebhookSecret.trim() || undefined,
+        }),
+      "Configuration Mobile Money enregistrée",
+      "success",
+      () => {
+        // On vide les champs secrets après enregistrement (ils ne sont jamais
+        // relus) et on reflète leur présence.
+        setMm((m) => ({
+          ...m,
+          hasSecretKey: m.hasSecretKey || mmSecretKey.trim() !== "",
+          hasWebhookSecret: m.hasWebhookSecret || mmWebhookSecret.trim() !== "",
+          secretKeyFromEnv: mmSecretKey.trim() ? false : m.secretKeyFromEnv,
+          webhookSecretFromEnv: mmWebhookSecret.trim() ? false : m.webhookSecretFromEnv,
+        }));
+        setMmSecretKey("");
+        setMmWebhookSecret("");
+      },
+    );
 
   return (
     <>
@@ -1150,6 +1189,173 @@ export function ParametresClient({
             </div>
           </Card>
         </div>
+
+        {/* Paiement Mobile Money (Sayele) */}
+        <Card>
+          <div
+            className={`flex items-start gap-4 px-5 py-4 ${
+              mm.enabled ? "bg-emerald-50/60" : ""
+            } transition-colors rounded-t-2xl`}
+          >
+            <div
+              className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                mm.enabled ? "bg-emerald-100" : "bg-[var(--color-faint)]"
+              }`}
+            >
+              <Smartphone className={`w-5 h-5 ${mm.enabled ? "text-emerald-600" : "text-[var(--color-muted)]"}`} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-sm text-[var(--color-ink)]">Paiement Mobile Money (Sayele)</h3>
+                {mm.enabled && (
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
+                    ACTIF
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-[var(--color-muted)] mt-0.5 leading-relaxed">
+                Paiement Premium par Mobile Money en Guinée (Orange, MTN · GNF), en
+                plus de Square. Désactivé, le bouton Mobile Money reste masqué côté
+                membre. Les clés surchargent le <code>.env.local</code> et sont
+                chiffrées en base.
+              </p>
+            </div>
+            <div className="shrink-0 pt-1">
+              <Toggle on={mm.enabled} onToggle={() => setMm((m) => ({ ...m, enabled: !m.enabled }))} />
+            </div>
+          </div>
+
+          <div className="px-5 pb-5 pt-1 border-t border-[var(--color-line)] space-y-4">
+            {/* Taux de change */}
+            <div className="flex items-center justify-between gap-4 pt-3">
+              <span className="text-sm text-[var(--color-ink)]">
+                Taux de change (1 USD = ? GNF)
+              </span>
+              <div className="flex items-center gap-1.5">
+                <input
+                  type="number"
+                  min={0}
+                  step="1"
+                  value={mm.usdToGnf}
+                  onChange={(e) => setMm((m) => ({ ...m, usdToGnf: Number(e.target.value) }))}
+                  className="w-28 text-center px-2 py-1.5 text-sm border border-[var(--color-line)] rounded-lg bg-[var(--color-surface)] text-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-300)] transition"
+                />
+                <span className="text-sm text-[var(--color-muted)]">GNF</span>
+              </div>
+            </div>
+
+            {/* Clé secrète */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-[var(--color-ink)]">
+                Clé secrète API (SECRET_KEY)
+              </label>
+              <div className="relative">
+                <input
+                  type={mmShowSecret ? "text" : "password"}
+                  value={mmSecretKey}
+                  onChange={(e) => setMmSecretKey(e.target.value)}
+                  placeholder={
+                    mm.hasSecretKey
+                      ? (mm.secretKeyFromEnv
+                          ? "Défini via .env.local — saisir pour enregistrer en base"
+                          : "•••••••• défini (chiffré) — laisser vide pour conserver")
+                      : "sk_live_…"
+                  }
+                  className="w-full px-3.5 py-2.5 pr-10 text-sm border border-[var(--color-line)] rounded-xl bg-[var(--color-faint)] text-[var(--color-ink)] placeholder:text-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-300)] focus:bg-white transition"
+                />
+                <button
+                  type="button"
+                  onClick={() => setMmShowSecret((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-ink)] transition-colors"
+                >
+                  {mmShowSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Secret du webhook */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-[var(--color-ink)]">
+                Secret du webhook (WEBHOOK_SECRET_KEY)
+              </label>
+              <div className="relative">
+                <input
+                  type={mmShowWebhook ? "text" : "password"}
+                  value={mmWebhookSecret}
+                  onChange={(e) => setMmWebhookSecret(e.target.value)}
+                  placeholder={
+                    mm.hasWebhookSecret
+                      ? (mm.webhookSecretFromEnv
+                          ? "Défini via .env.local — saisir pour enregistrer en base"
+                          : "•••••••• défini (chiffré) — laisser vide pour conserver")
+                      : "whsec_…"
+                  }
+                  className="w-full px-3.5 py-2.5 pr-10 text-sm border border-[var(--color-line)] rounded-xl bg-[var(--color-faint)] text-[var(--color-ink)] placeholder:text-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-300)] focus:bg-white transition"
+                />
+                <button
+                  type="button"
+                  onClick={() => setMmShowWebhook((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-ink)] transition-colors"
+                >
+                  {mmShowWebhook ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            {/* URL du webhook */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-[var(--color-ink)]">
+                URL de notification (webhook)
+              </label>
+              <input
+                type="text"
+                value={mm.webhookUrl}
+                onChange={(e) => setMm((m) => ({ ...m, webhookUrl: e.target.value }))}
+                placeholder="https://jommba.com/api/webhooks/sayele"
+                className="w-full px-3.5 py-2.5 text-sm border border-[var(--color-line)] rounded-xl bg-[var(--color-faint)] text-[var(--color-ink)] placeholder:text-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-300)] focus:bg-white transition"
+              />
+              <p className="text-[11px] text-[var(--color-muted)]">
+                Doit correspondre exactement à l&apos;URL configurée dans le tableau
+                de bord Sayele.
+              </p>
+            </div>
+
+            {/* URL de l'API */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-[var(--color-ink)]">
+                URL de base de l&apos;API{" "}
+                <span className="font-normal text-[var(--color-muted)]">(optionnel)</span>
+              </label>
+              <input
+                type="text"
+                value={mm.baseUrl}
+                onChange={(e) => setMm((m) => ({ ...m, baseUrl: e.target.value }))}
+                placeholder="https://api.gate.sayele.co"
+                className="w-full px-3.5 py-2.5 text-sm border border-[var(--color-line)] rounded-xl bg-[var(--color-faint)] text-[var(--color-ink)] placeholder:text-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-300)] focus:bg-white transition"
+              />
+            </div>
+
+            <div className="flex items-start gap-2.5 px-3.5 py-3 bg-[var(--color-faint)] border border-[var(--color-line)] rounded-xl">
+              <Lock className="w-3.5 h-3.5 text-[var(--color-muted)] shrink-0 mt-0.5" />
+              <p className="text-[11px] text-[var(--color-muted)] leading-relaxed">
+                Les secrets sont chiffrés avant stockage et ne sont jamais renvoyés
+                au navigateur. Un champ secret laissé vide conserve la valeur
+                actuelle. En l&apos;absence de valeur en base, les variables
+                <code> SECRET_KEY</code>, <code>WEBHOOK_SECRET_KEY</code> et
+                <code> WH_URL_NOTIFICATION</code> du <code>.env.local</code> servent
+                de repli.
+              </p>
+            </div>
+
+            <button
+              disabled={busy}
+              onClick={handleSaveMobileMoney}
+              className="mt-1 px-5 py-2 rounded-xl bg-[var(--color-brand-600)] text-white text-sm font-semibold hover:bg-[var(--color-brand-700)] transition-colors disabled:opacity-50"
+            >
+              Enregistrer
+            </button>
+          </div>
+        </Card>
       </div>
 
       {/* Create account modal */}

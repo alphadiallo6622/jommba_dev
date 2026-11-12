@@ -2063,7 +2063,18 @@
         "total": "Total à payer",
         "subscribe": "Devenir membre Premium",
         "success": "Bienvenue chez Premium ! 🎉",
-        "mobileSoon": "Le paiement Mobile Money arrive bientôt."
+        "mobileSoon": "Le paiement Mobile Money arrive bientôt.",
+        "operatorLabel": "Opérateur",
+        "orange": "Orange Money",
+        "mtn": "MTN MoMo",
+        "phoneLabel": "Numéro Mobile Money",
+        "phonePlaceholder": "6XX XX XX XX",
+        "approx": "≈ {amount} GNF",
+        "pay": "Payer",
+        "waiting": "Validez le paiement sur votre téléphone",
+        "waitingHint": "Confirmez la demande reçue par SMS ou dans l'application de votre opérateur. L'activation est automatique.",
+        "mobileFailed": "Le paiement a échoué. Réessaie ou change d'opérateur.",
+        "mobileTimeout": "Délai dépassé. Si vous avez validé le paiement, votre accès s'activera sous peu."
       },
       "cta": {
         "button": "Devenir membre Premium",

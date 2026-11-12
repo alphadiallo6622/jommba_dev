@@ -7,6 +7,7 @@ import { Smartphone, CreditCard } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import SquareCardForm from '@/components/payments/SquareCardForm'
+import MobileMoneyForm from '@/components/payments/MobileMoneyForm'
 import type { PremiumPricingData } from '@/components/premium/PremiumPricing'
 import type { AppliedPromo } from '@/app/dashboard/premium/page'
 
@@ -42,7 +43,7 @@ export default function PremiumPayment({ selectedPlan, pricing, appliedPromo }: 
           <Smartphone className="w-6 h-6 text-orange-500 mx-auto mb-1.5" />
           <span className="text-sm font-medium text-gray-800 block mb-1.5">{t('mobileMoney')}</span>
           <div className="flex justify-center gap-1 flex-wrap">
-            {['Orange', 'Free', 'Wave'].map((b) => (
+            {['Orange', 'MTN'].map((b) => (
               <span key={b} className="text-[10px] bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded font-medium">
                 {b}
               </span>
@@ -104,13 +105,16 @@ export default function PremiumPayment({ selectedPlan, pricing, appliedPromo }: 
           />
         </div>
       ) : (
-        // Mobile Money : prestataire non encore branché (Square ne le gère pas).
-        <button
-          onClick={() => toast.info(t('mobileSoon'))}
-          className="mt-5 w-full rounded-2xl bg-gradient-to-b from-emerald-500 to-emerald-600 py-4 font-semibold text-white shadow-lg shadow-emerald-500/30 transition-all hover:from-emerald-600 hover:to-emerald-700 hover:shadow-xl active:scale-[0.99]"
-        >
-          {t('subscribe')} · {total} $
-        </button>
+        // Mobile Money (Sayele) — Guinée / GNF. Additionnel, indépendant de Square.
+        <MobileMoneyForm
+          planId={selectedPlan}
+          promoCode={appliedPromo?.code}
+          amountUsd={total}
+          onSuccess={() => {
+            toast.success(t('success'))
+            router.refresh()
+          }}
+        />
       )}
     </section>
   )

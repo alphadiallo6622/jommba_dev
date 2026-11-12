@@ -70,6 +70,14 @@ export const getPlatformSettings = cache(async (): Promise<{ limits: LimitsSetti
   };
 });
 
+// ── Mobile Money (Sayele) ──────────────────────────────────────────────────────
+
+/** Config Mobile Money pour l'écran admin (présence des secrets seulement). */
+export async function getMobileMoneySettings() {
+  const { getMobileMoneyAdminView } = await import("@/lib/sayele/config");
+  return getMobileMoneyAdminView();
+}
+
 // ── Codes promo ────────────────────────────────────────────────────────────────
 
 export async function getPromoCodes(): Promise<PromoCodeRow[]> {
@@ -1104,6 +1112,17 @@ export async function getApiConnections(): Promise<ApiServiceRow[]> {
         kind: "payment",
         optional: ["SQUARE_WEBHOOK_SIGNATURE_KEY", "SQUARE_PLAN_15J", "SQUARE_PLAN_1M", "SQUARE_PLAN_3M", "SQUARE_PLAN_6M"],
         detail: squareEnv ? `Environnement : ${squareEnv}` : null,
+      }),
+
+    // Mobile Money (Sayele Gate) — Guinée / GNF. Clés surchargeables depuis la
+    // carte « Paiement Mobile Money » ci-dessous (stockées chiffrées en base) ;
+    // cette ligne reflète la présence des variables de repli .env.local.
+    service("sayele", "Sayele — Mobile Money", "Paiements Premium (Orange, MTN · GNF)",
+      ["SECRET_KEY", "WEBHOOK_SECRET_KEY"],
+      {
+        kind: "payment",
+        optional: ["WH_URL_NOTIFICATION"],
+        detail: "Guinée · configurable sans redéploiement",
       }),
 
     service("turnstile", "Cloudflare Turnstile", "Anti-bot des formulaires",

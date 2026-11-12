@@ -22,6 +22,8 @@ interface PaymentEmailInput {
   /** Date de fin de l'accès Premium / du Boost. */
   expiresAt: Date
   promoCode?: string | null
+  /** Moyen de paiement (ajuste le libellé du reçu). 'square' par défaut. */
+  provider?: 'square' | 'mobile_money'
 }
 
 const PLAN_LABEL_FR: Record<string, string> = {
@@ -43,6 +45,7 @@ export async function sendPaymentEmails(input: PaymentEmailInput): Promise<void>
   })
   const fullName = [input.firstName, input.lastName].filter(Boolean).join(' ') || '—'
   const isPremium = input.kind === 'premium'
+  const isMobileMoney = input.provider === 'mobile_money'
 
   const tasks: Promise<void>[] = []
 
@@ -51,13 +54,19 @@ export async function sendPaymentEmails(input: PaymentEmailInput): Promise<void>
     const subject = isPremium
       ? (en ? 'Your Jommba Premium payment is confirmed' : 'Votre paiement Jommba Premium est confirmé')
       : (en ? 'Your Jommba Boost payment is confirmed' : 'Votre paiement Jommba Boost est confirmé')
+    const receiptLineEn = isMobileMoney
+      ? `Payment made via Mobile Money.`
+      : `A separate receipt has also been sent to you by Square.`
+    const receiptLineFr = isMobileMoney
+      ? `Paiement effectué via Mobile Money.`
+      : `Un reçu vous a également été envoyé séparément par Square.`
     const text = en
       ? `Thank you! We have received your payment of ${amount}.\n\n` +
         `${isPremium ? `Premium ${duration}` : `Boost ${duration}`} is now active until ${until}.\n\n` +
-        `A separate receipt has also been sent to you by Square.`
+        receiptLineEn
       : `Merci ! Nous avons bien reçu votre paiement de ${amount}.\n\n` +
         `${isPremium ? `Premium ${duration}` : `Boost ${duration}`} est désormais actif jusqu'au ${until}.\n\n` +
-        `Un reçu vous a également été envoyé séparément par Square.`
+        receiptLineFr
     tasks.push(
       sendEmail({
         to: input.memberEmail,
@@ -81,8 +90,9 @@ export async function sendPaymentEmails(input: PaymentEmailInput): Promise<void>
         `Produit : ${isPremium ? 'Premium' : 'Boost'} ${PLAN_LABEL_FR[input.itemId] ?? input.itemId}\n` +
         `Montant : ${input.amountUsd.toLocaleString('fr-FR')} $\n` +
         (input.promoCode ? `Code promo : ${input.promoCode}\n` : '') +
+        `Moyen de paiement : ${isMobileMoney ? 'Mobile Money' : 'Square'}\n` +
         `Actif jusqu'au : ${input.expiresAt.toLocaleDateString('fr-FR')}\n` +
-        `ID paiement Square : ${input.paymentId ?? '—'}`,
+        `${isMobileMoney ? 'ID transaction Mobile Money' : 'ID paiement Square'} : ${input.paymentId ?? '—'}`,
       signatureName: 'Console Jommba',
       signatureRole: 'Notification automatique',
     }),

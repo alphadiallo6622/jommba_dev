@@ -14,6 +14,7 @@ import { deleteStoredPhoto } from "@/lib/photo-storage";
 import { PHOTO_REJECTED_MESSAGE } from "@/lib/photo-messages";
 import type { BroadcastTarget, Json } from "@/lib/supabase/types";
 import type { LimitsSettings, PricingSettings, BoostPricingSettings, MaintenanceSettings, GeoBlockSettings, EmailNotificationSettings } from "@/lib/admin/types";
+import { encryptSecret } from "@/lib/crypto/secret-box";
 
 export interface ActionResult {
   ok: boolean;
@@ -941,6 +942,74 @@ export async function saveBoostPricing(boostPricing: BoostPricingSettings): Prom
     const { error } = await supabase.from("platform_settings").upsert({
       id: 1,
       boost_pricing: boostPricing as unknown as Json,
+      updated_at: new Date().toISOString(),
+    });
+    if (error) throw new Error(error.message);
+  }, "settings");
+}
+
+// ── Paramètres : Mobile Money (Sayele) ────────────────────────────────────────
+// Config du moyen de paiement Mobile Money, stockée en base (surcharge le
+// .env.local). Les secrets sont chiffrés (AES-256-GCM) avant écriture et ne
+// repartent jamais vers le client. Laisser un champ secret vide = conserver la
+// valeur existante (évite d'effacer une clé par mégarde).
+
+export interface MobileMoneySettingsInput {
+  enabled: boolean;
+  baseUrl: string;
+  webhookUrl: string;
+  usdToGnf: number;
+  /** Nouvelle clé secrète en clair ('' ou absent = inchangé). */
+  secretKey?: string;
+  /** Nouveau secret de webhook en clair ('' ou absent = inchangé). */
+  webhookSecret?: string;
+}
+
+function isHttpUrl(value: string): boolean {
+  try {
+    const u = new URL(value);
+    return u.protocol === "https:" || u.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
+export async function saveMobileMoneySettings(input: MobileMoneySettingsInput): Promise<ActionResult> {
+  return run(async () => {
+    if (!Number.isFinite(input.usdToGnf) || input.usdToGnf <= 0) {
+      throw new Error("Le taux USD→GNF doit être supérieur à 0");
+    }
+    const baseUrl = input.baseUrl?.trim() || "";
+    const webhookUrl = input.webhookUrl?.trim() || "";
+    if (baseUrl && !isHttpUrl(baseUrl)) throw new Error("URL de base de l'API invalide");
+    if (webhookUrl && !isHttpUrl(webhookUrl)) throw new Error("URL de webhook invalide");
+
+    const supabase = createAdminClient();
+
+    // Conserve les secrets déjà chiffrés quand ils ne sont pas remplacés.
+    const { data: existing } = await supabase
+      .from("platform_settings")
+      .select("mobile_money")
+      .eq("id", 1)
+      .maybeSingle();
+    const current = (existing?.mobile_money ?? {}) as Record<string, unknown>;
+
+    const next: Record<string, unknown> = {
+      enabled: input.enabled === true,
+      baseUrl,
+      webhookUrl,
+      usdToGnf: input.usdToGnf,
+      secretKey: input.secretKey?.trim()
+        ? encryptSecret(input.secretKey.trim())
+        : (current.secretKey ?? null),
+      webhookSecret: input.webhookSecret?.trim()
+        ? encryptSecret(input.webhookSecret.trim())
+        : (current.webhookSecret ?? null),
+    };
+
+    const { error } = await supabase.from("platform_settings").upsert({
+      id: 1,
+      mobile_money: next as unknown as Json,
       updated_at: new Date().toISOString(),
     });
     if (error) throw new Error(error.message);

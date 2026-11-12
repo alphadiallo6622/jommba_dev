@@ -1,7 +1,7 @@
 // app/adminjommba/(protected)/parametres/page.tsx
 import type { Metadata } from "next";
 import {
-  getAdminAccounts, getApiConnections, getPlatformSettings,
+  getAdminAccounts, getApiConnections, getPlatformSettings, getMobileMoneySettings,
 } from "@/lib/admin/queries";
 import { ParametresClient } from "./parametres-client";
 
@@ -9,10 +9,11 @@ export const metadata: Metadata = { title: "Paramètres" };
 export const dynamic = "force-dynamic";
 
 export default async function ParametresPage() {
-  const [admins, apiServices, settings] = await Promise.all([
+  const [admins, apiServices, settings, mobileMoney] = await Promise.all([
     getAdminAccounts(),
     getApiConnections(),
     getPlatformSettings(),
+    getMobileMoneySettings(),
   ]);
 
   return (
@@ -25,6 +26,7 @@ export default async function ParametresPage() {
       initialMaintenance={settings.maintenance}
       initialGeoBlock={settings.geoBlock}
       initialEmailNotifications={settings.emailNotifications}
+      initialMobileMoney={mobileMoney}
     />
   );
 }

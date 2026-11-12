@@ -12,6 +12,10 @@ type PaymentErrorKey =
   | 'chargedButNotActivated'
   | 'paymentFailed'
   | 'subscriptionFailed'
+  | 'mobileMoneyUnavailable'
+  | 'invalidOperator'
+  | 'invalidPhone'
+  | 'mobileMoneyInitFailed'
 
 const MESSAGES: Record<PaymentErrorKey, { fr: string; en: string }> = {
   notAuthenticated: {
@@ -37,6 +41,22 @@ const MESSAGES: Record<PaymentErrorKey, { fr: string; en: string }> = {
   subscriptionFailed: {
     fr: "L'abonnement a échoué.",
     en: 'The subscription failed.',
+  },
+  mobileMoneyUnavailable: {
+    fr: "Le paiement Mobile Money n'est pas disponible pour le moment.",
+    en: 'Mobile Money payment is not available right now.',
+  },
+  invalidOperator: {
+    fr: 'Opérateur non pris en charge. Choisissez Orange ou MTN.',
+    en: 'Unsupported operator. Choose Orange or MTN.',
+  },
+  invalidPhone: {
+    fr: 'Numéro de téléphone invalide (format guinéen attendu, ex. 62X XX XX XX).',
+    en: 'Invalid phone number (Guinean format expected, e.g. 62X XX XX XX).',
+  },
+  mobileMoneyInitFailed: {
+    fr: "Impossible de démarrer le paiement Mobile Money. Réessayez dans un instant.",
+    en: 'Could not start the Mobile Money payment. Please try again shortly.',
   },
 }
 

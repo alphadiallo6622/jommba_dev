@@ -316,7 +316,33 @@ export interface PlatformSettings {
   maintenance:   Json
   geo_block:     Json
   notifications: Json
+  mobile_money:  Json
   updated_at:    string
+}
+
+/** Transaction Mobile Money (Sayele). Suivi serveur du flux asynchrone. */
+export interface MobileMoneyPayment {
+  id:              string
+  user_id:         string
+  provider:        string
+  provider_tx_id:  string | null
+  reference:       string | null
+  kind:            string
+  plan_id:         string
+  operator:        string
+  phone:           string
+  amount_usd:      number
+  amount_minor:    number
+  currency:        string
+  promo_id:        string | null
+  promo_code:      string | null
+  status:          'pending' | 'processing' | 'settled' | 'failed' | 'expired'
+  subscription_id: string | null
+  locale:          string | null
+  raw:             Json | null
+  created_at:      string
+  updated_at:      string
+  settled_at:      string | null
 }
 
 export type PromoDiscountType = 'percent' | 'fixed_amount'
@@ -505,8 +531,14 @@ export type Database = {
       }
       platform_settings: {
         Row:           Indexed<PlatformSettings>
-        Insert:        Indexed<{ id: number; limits?: Json; pricing?: Json; boost_pricing?: Json; maintenance?: Json; geo_block?: Json; notifications?: Json; updated_at?: string }>
+        Insert:        Indexed<{ id: number; limits?: Json; pricing?: Json; boost_pricing?: Json; maintenance?: Json; geo_block?: Json; notifications?: Json; mobile_money?: Json; updated_at?: string }>
         Update:        Indexed<Partial<PlatformSettings>>
+        Relationships: []
+      }
+      mobile_money_payments: {
+        Row:           Indexed<MobileMoneyPayment>
+        Insert:        Indexed<Pick<MobileMoneyPayment, 'user_id' | 'plan_id' | 'operator' | 'phone' | 'amount_usd' | 'amount_minor'> & Partial<Omit<MobileMoneyPayment, 'user_id' | 'plan_id' | 'operator' | 'phone' | 'amount_usd' | 'amount_minor'>>>
+        Update:        Indexed<Partial<MobileMoneyPayment>>
         Relationships: []
       }
       promo_codes: {
