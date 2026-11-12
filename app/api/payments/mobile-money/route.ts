@@ -26,6 +26,7 @@ import {
   isSayeleOperator,
   normalizeGuineaPhone,
   usdToGnfMinor,
+  SAYELE_MIN_AMOUNT_MINOR,
 } from '@/lib/sayele/config'
 import { createTransaction, SayeleApiError } from '@/lib/sayele/client'
 
@@ -96,6 +97,11 @@ export async function POST(req: NextRequest) {
   const amountMinor = usdToGnfMinor(finalUsd, config.usdToGnf)
   if (amountMinor <= 0) {
     return NextResponse.json({ error: paymentError('mobileMoneyInitFailed', locale) }, { status: 400 })
+  }
+  // Garde-fou : Sayele/chapchappay refusent sous le minimum (503 sinon). On
+  // bloque proprement AVANT l'appel distant, avec un message clair.
+  if (amountMinor < SAYELE_MIN_AMOUNT_MINOR) {
+    return NextResponse.json({ error: paymentError('mobileMoneyBelowMinimum', locale) }, { status: 400 })
   }
 
   // 6) Ligne de suivi (état pending) AVANT l'appel distant : la référence sert au

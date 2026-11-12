@@ -16,6 +16,7 @@ type PaymentErrorKey =
   | 'invalidOperator'
   | 'invalidPhone'
   | 'mobileMoneyInitFailed'
+  | 'mobileMoneyBelowMinimum'
 
 const MESSAGES: Record<PaymentErrorKey, { fr: string; en: string }> = {
   notAuthenticated: {
@@ -57,6 +58,10 @@ const MESSAGES: Record<PaymentErrorKey, { fr: string; en: string }> = {
   mobileMoneyInitFailed: {
     fr: "Impossible de démarrer le paiement Mobile Money. Réessayez dans un instant.",
     en: 'Could not start the Mobile Money payment. Please try again shortly.',
+  },
+  mobileMoneyBelowMinimum: {
+    fr: 'Montant trop faible pour le paiement Mobile Money (minimum 3 000 GNF).',
+    en: 'Amount too low for Mobile Money payment (minimum 3,000 GNF).',
   },
 }
 

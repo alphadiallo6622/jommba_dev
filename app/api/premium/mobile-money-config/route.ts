@@ -3,7 +3,7 @@
 // l'afficher, quels opérateurs, et quel taux USD→GNF pour l'estimation affichée.
 // Aucun secret n'est exposé (clés lues uniquement par les routes serveur).
 import { NextResponse } from 'next/server'
-import { getSayeleServerConfig } from '@/lib/sayele/config'
+import { getSayeleServerConfig, SAYELE_MIN_AMOUNT_MINOR } from '@/lib/sayele/config'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,5 +17,6 @@ export async function GET() {
     operators: config.operators,
     currency: config.currency,
     usdToGnf: config.usdToGnf,
+    minAmountMinor: SAYELE_MIN_AMOUNT_MINOR,
   })
 }

@@ -2074,7 +2074,8 @@
         "waiting": "Confirm the payment on your phone",
         "waitingHint": "Approve the request received by SMS or in your operator's app. Activation is automatic.",
         "mobileFailed": "The payment failed. Try again or switch operator.",
-        "mobileTimeout": "Timed out. If you approved the payment, your access will activate shortly."
+        "mobileTimeout": "Timed out. If you approved the payment, your access will activate shortly.",
+        "belowMinimum": "Amount too low for Mobile Money (minimum {amount} GNF)."
       },
       "cta": {
         "button": "Become a Premium member",

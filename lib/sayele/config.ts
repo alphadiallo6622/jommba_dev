@@ -24,6 +24,13 @@ export const DEFAULT_BASE_URL = 'https://api.gate.sayele.co'
 export const DEFAULT_WEBHOOK_URL = 'https://jommba.com/api/webhooks/sayele'
 /** Taux de repli indicatif ; l'admin le règle réellement dans /parametres. */
 export const DEFAULT_USD_TO_GNF = 8600
+/**
+ * Montant minimum accepté par Sayele / l'agrégateur (chapchappay) par
+ * transaction, en unités mineures GNF. Confirmé en live le 2026-11-12 : en
+ * dessous, l'API renvoie 503 « moyen de paiement temporairement indisponible ».
+ * On bloque donc proprement côté app avant l'appel.
+ */
+export const SAYELE_MIN_AMOUNT_MINOR = 3000
 
 /** Forme stockée dans platform_settings.mobile_money (jsonb). */
 export interface StoredMobileMoney {

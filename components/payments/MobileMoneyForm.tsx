@@ -19,6 +19,8 @@ interface Config {
   operators: Operator[]
   currency: string
   usdToGnf: number
+  /** Montant minimum accepté (unités mineures GNF), 0 si non fourni. */
+  minAmountMinor?: number
 }
 
 interface Props {
@@ -108,7 +110,7 @@ export default function MobileMoneyForm({ planId, promoCode, amountUsd, onSucces
   }
 
   const handleSubmit = async () => {
-    if (!operator || !phone.trim() || phase === 'submitting') return
+    if (!operator || !phone.trim() || phase === 'submitting' || belowMin) return
     setPhase('submitting')
     setError(null)
     try {
@@ -149,6 +151,11 @@ export default function MobileMoneyForm({ planId, promoCode, amountUsd, onSucces
   const amountGnf =
     config && config.usdToGnf > 0 ? Math.round(amountUsd * config.usdToGnf) : null
   const amountGnfLabel = amountGnf != null ? new Intl.NumberFormat('fr-FR').format(amountGnf) : null
+  // Sous le minimum opérateur : l'appel échouerait (503). On prévient et on
+  // désactive le bouton plutôt que de laisser partir une tentative vouée à l'échec.
+  const minMinor = config?.minAmountMinor ?? 0
+  const belowMin = amountGnf != null && minMinor > 0 && amountGnf < minMinor
+  const minLabel = new Intl.NumberFormat('fr-FR').format(minMinor)
 
   // Écran d'attente (paiement validé sur le téléphone).
   if (phase === 'waiting') {
@@ -206,6 +213,13 @@ export default function MobileMoneyForm({ planId, promoCode, amountUsd, onSucces
         />
       </div>
 
+      {belowMin && (
+        <p className="mt-2.5 flex items-center gap-1.5 text-sm text-amber-600">
+          <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
+          {t('belowMinimum', { amount: minLabel })}
+        </p>
+      )}
+
       {error && (
         <p className="mt-2.5 flex items-center gap-1.5 text-sm text-red-600">
           <span className="inline-block h-1.5 w-1.5 rounded-full bg-red-500" />
@@ -215,7 +229,7 @@ export default function MobileMoneyForm({ planId, promoCode, amountUsd, onSucces
 
       <button
         onClick={handleSubmit}
-        disabled={!operator || !phone.trim() || phase === 'submitting'}
+        disabled={!operator || !phone.trim() || phase === 'submitting' || belowMin}
         className="mt-5 w-full rounded-2xl bg-gradient-to-b from-emerald-500 to-emerald-600 py-4 text-base font-semibold text-white shadow-lg shadow-emerald-500/30 transition-all duration-200 hover:from-emerald-600 hover:to-emerald-700 hover:shadow-xl active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none"
       >
         {phase === 'submitting' ? (
