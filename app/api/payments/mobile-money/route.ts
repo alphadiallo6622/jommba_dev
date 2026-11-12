@@ -176,9 +176,22 @@ export async function POST(req: NextRequest) {
       err instanceof SayeleApiError
         ? { error: err.message, status: err.status, body: err.body }
         : { error: String(err) }
+
+    // IMPORTANT : une erreur 5xx de Sayele N'EST PAS un échec définitif. Sayele
+    // crée la transaction (état `pending`, référence = notre id) puis peut
+    // répondre 503 si le rail opérateur n'est pas immédiatement disponible. La
+    // ligne doit donc rester `pending` pour qu'un webhook tardif (rapproché par
+    // `customer_reference`) ou une réconciliation puisse encore activer Premium.
+    // Seule une erreur client (4xx = requête invalide, aucune transaction créée)
+    // est marquée `failed`.
+    const sayeleServerError = err instanceof SayeleApiError && err.status >= 500
     await admin
       .from('mobile_money_payments')
-      .update({ status: 'failed', raw: failureRaw as never, updated_at: new Date().toISOString() })
+      .update({
+        status: sayeleServerError ? 'pending' : 'failed',
+        raw: failureRaw as never,
+        updated_at: new Date().toISOString(),
+      })
       .eq('id', reference)
     return NextResponse.json(
       { error: paymentError('mobileMoneyInitFailed', locale), detail },
