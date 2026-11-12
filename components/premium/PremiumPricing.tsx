@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useEffect, useState } from 'react'
+import { useLocale, useTranslations } from 'next-intl'
 import { Tag } from 'lucide-react'
 import { plans } from '@/lib/mock-premium'
 import { cn } from '@/lib/utils'
@@ -25,10 +25,29 @@ interface Props {
 
 export default function PremiumPricing({ selectedPlan, setSelectedPlan, pricing, appliedPromo, onPromoApplied }: Props) {
   const t = useTranslations('dashboard.premium.pricing')
+  const locale = useLocale()
   const [showPromo, setShowPromo] = useState(false)
   const [promoCode, setPromoCode] = useState('')
   const [promoError, setPromoError] = useState<string | null>(null)
   const [applying, setApplying] = useState(false)
+  // Taux USD→GNF (si Mobile Money dispo) pour afficher l'équivalent GNF.
+  const [gnfRate, setGnfRate] = useState<number | null>(null)
+
+  useEffect(() => {
+    let active = true
+    fetch('/api/premium/mobile-money-config')
+      .then((r) => r.json())
+      .then((c) => {
+        if (active && typeof c?.usdToGnf === 'number' && c.usdToGnf > 0) setGnfRate(c.usdToGnf)
+      })
+      .catch(() => {})
+    return () => {
+      active = false
+    }
+  }, [])
+
+  const gnfLabel = (usd: number) =>
+    new Intl.NumberFormat(locale).format(Math.round(usd * (gnfRate ?? 0)))
 
   const handleApplyPromo = async () => {
     if (!promoCode.trim() || applying) return
@@ -124,6 +143,11 @@ export default function PremiumPricing({ selectedPlan, setSelectedPlan, pricing,
                   </div>
                   {discount && (
                     <span className="text-xs text-amber-600 font-medium">{discount}</span>
+                  )}
+                  {gnfRate && totalPrice != null && (
+                    <span className="block text-xs text-emerald-600 font-medium mt-0.5">
+                      ({gnfLabel(totalPrice)} GNF)
+                    </span>
                   )}
                 </div>
               </div>

@@ -9,11 +9,16 @@ type BoostPricingResponse = {
   boosts: { id: string; durationLabel: string; priceUsd: number }[]
 }
 
+// On conserve le prix USD numérique pour afficher l'équivalent GNF.
+type Opt = BoostOption & { priceUsd: number }
+
 export default function BoostStep2() {
   const t = useTranslations('dashboard.boost')
   const locale = useLocale()
   const { selectOption, goToStep } = useBoostStore()
-  const [options, setOptions] = useState<BoostOption[] | null>(null)
+  const [options, setOptions] = useState<Opt[] | null>(null)
+  // Taux USD→GNF (si Mobile Money dispo) pour afficher l'équivalent GNF.
+  const [gnfRate, setGnfRate] = useState<number | null>(null)
 
   // Les prix viennent des paramètres admin : jamais codés en dur ici, pour
   // rester alignés avec le montant réellement débité par /api/payments/boost.
@@ -29,11 +34,28 @@ export default function BoostStep2() {
             label: t('optionLabel', { duration: b.durationLabel }),
             duration: b.durationLabel,
             price: formatPrice(b.priceUsd),
+            priceUsd: b.priceUsd,
           })),
         ),
       )
       .catch(() => setOptions([]))
   }, [locale, t])
+
+  useEffect(() => {
+    let active = true
+    fetch('/api/premium/mobile-money-config')
+      .then((r) => r.json())
+      .then((c) => {
+        if (active && typeof c?.usdToGnf === 'number' && c.usdToGnf > 0) setGnfRate(c.usdToGnf)
+      })
+      .catch(() => {})
+    return () => {
+      active = false
+    }
+  }, [])
+
+  const gnfLabel = (usd: number) =>
+    new Intl.NumberFormat(locale).format(Math.round(usd * (gnfRate ?? 0)))
 
   return (
     <div className="p-6">
@@ -67,9 +89,16 @@ export default function BoostStep2() {
                 {option.duration}
               </p>
             </div>
-            <span className="font-bold text-[#10B981] text-sm">
-              {option.price}
-            </span>
+            <div className="text-right shrink-0">
+              <span className="font-bold text-[#10B981] text-sm block">
+                {option.price}
+              </span>
+              {gnfRate && (
+                <span className="text-[11px] text-emerald-600 font-medium">
+                  ({gnfLabel(option.priceUsd)} GNF)
+                </span>
+              )}
+            </div>
           </button>
         ))}
       </div>
