@@ -34,6 +34,7 @@ export type FullProfile = {
   firstName: string
   age: number
   photo: string
+  photos: string[]
   isPhotoBlurred: boolean
   isPremium: boolean
   location: string

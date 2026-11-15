@@ -1869,6 +1869,7 @@
       },
       "gallery": {
         "photosCount": "Photos (1/{max})",
+        "photosShown": "Photos ({shown}/{total})",
         "main": "Main",
         "premium": "Premium"
       },

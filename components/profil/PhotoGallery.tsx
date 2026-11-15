@@ -1,8 +1,10 @@
 'use client'
 
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Camera, Crown, Plus } from 'lucide-react'
+import PhotoLightbox from './PhotoLightbox'
 
 const MAX_FREE    = 3
 const MAX_PREMIUM = 6
@@ -10,13 +12,24 @@ const MAX_PREMIUM = 6
 type Props = {
   photo: string
   isPremium: boolean
+  /** Photos réelles du profil consulté (principale en tête). Active le mode
+   *  consultation : les membres Premium voient les photos supplémentaires,
+   *  les autres voient des emplacements verrouillés (uniquement s'il y en a). */
+  galleryPhotos?: string[]
   onMainPhotoClick?: () => void
   onAddPhoto?: () => void
 }
 
-export default function PhotoGallery({ photo, isPremium, onMainPhotoClick, onAddPhoto }: Props) {
+export default function PhotoGallery({ photo, isPremium, galleryPhotos, onMainPhotoClick, onAddPhoto }: Props) {
   const router = useRouter()
   const t = useTranslations('dashboard.profil.gallery')
+
+  // ── Mode consultation : on affiche les vraies photos du profil ───────────
+  if (galleryPhotos) {
+    return <ViewerGallery photos={galleryPhotos} fallback={photo} isPremium={isPremium} />
+  }
+
+  // ── Mode édition (mon profil) : emplacements d'ajout ─────────────────────
   const max = isPremium ? MAX_PREMIUM : MAX_FREE
   // Extra slots = max - 1 (main already occupies 1 slot)
   const extraSlots = max - 1
@@ -70,6 +83,71 @@ export default function PhotoGallery({ photo, isPremium, onMainPhotoClick, onAdd
           ))
         )}
       </div>
+    </div>
+  )
+}
+
+/* ── Galerie en consultation (profil d'un autre membre) ──────────────────── */
+function ViewerGallery({ photos, fallback, isPremium }: { photos: string[]; fallback: string; isPremium: boolean }) {
+  const router = useRouter()
+  const t = useTranslations('dashboard.profil.gallery')
+  const [lightbox, setLightbox] = useState<string | null>(null)
+
+  const all   = photos.length > 0 ? photos : [fallback]
+  const main  = all[0]
+  const extra = all.slice(1)
+  const total = all.length
+  const shown = isPremium ? total : 1
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-100 p-4 mb-3">
+      <div className="flex items-center gap-2 mb-3">
+        <Camera className="w-4 h-4 text-gray-500" />
+        <span className="text-sm font-semibold text-gray-700">
+          {t('photosShown', { shown, total })}
+        </span>
+        {isPremium && total > 1 && (
+          <span className="text-[9px] font-bold bg-amber-500 text-white px-1.5 py-0.5 rounded-full">PREMIUM</span>
+        )}
+      </div>
+
+      <div className="flex gap-2 flex-wrap">
+        {/* Photo principale — toujours visible, cliquable */}
+        <button
+          onClick={() => setLightbox(main)}
+          className="relative w-16 h-16 rounded-xl overflow-hidden shrink-0"
+        >
+          <img src={main} alt={t('main')} className="w-full h-full object-cover" />
+          <span className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[9px] text-center py-0.5">
+            {t('main')}
+          </span>
+        </button>
+
+        {isPremium
+          /* Premium : les photos supplémentaires réelles, cliquables */
+          ? extra.map((src, i) => (
+              <button
+                key={i}
+                onClick={() => setLightbox(src)}
+                className="w-16 h-16 rounded-xl overflow-hidden shrink-0 ring-1 ring-gray-100 hover:ring-[#10B981] transition-[box-shadow]"
+              >
+                <img src={src} alt="" className="w-full h-full object-cover" />
+              </button>
+            ))
+          /* Non Premium : un emplacement verrouillé par photo cachée (upsell) */
+          : extra.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => router.push('/dashboard/premium')}
+                className="w-16 h-16 rounded-xl bg-amber-50 border border-amber-200 flex flex-col items-center justify-center shrink-0 hover:bg-amber-100 transition-colors"
+              >
+                <Crown className="w-4 h-4 text-amber-400 mb-0.5" />
+                <span className="text-[9px] text-amber-500 font-medium">{t('premium')}</span>
+              </button>
+            ))}
+      </div>
+
+      <PhotoLightbox open={lightbox !== null} photo={lightbox ?? ''} onClose={() => setLightbox(null)} />
     </div>
   )
 }

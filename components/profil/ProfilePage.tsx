@@ -33,12 +33,13 @@ import ReportModal from '@/components/moderation/ReportModal'
 
 type Props = { id: string }
 
-function profileToFull(p: Profile, requestStatus: FullProfile['requestStatus'], unknownLocation: string, locale: string): FullProfile {
+function profileToFull(p: Profile, photos: string[], requestStatus: FullProfile['requestStatus'], unknownLocation: string, locale: string): FullProfile {
   return {
     id:             p.user_id,
     firstName:      p.first_name,
     age:            p.age ?? 0,
     photo:          p.avatar_url ?? '/avatar-placeholder.svg',
+    photos:         photos.length > 0 ? photos : [p.avatar_url ?? '/avatar-placeholder.svg'],
     isPhotoBlurred: p.photos_blurred ?? false,
     isPremium:      p.is_premium,
     location:       formatLocation(p.city, p.country, locale) || unknownLocation,
@@ -88,10 +89,11 @@ export default function ProfilePage({ id }: Props) {
     try {
       const supabase = createClient()
 
-      const [{ data: p }, { data: outgoing }, { data: incoming }] = await Promise.all([
+      const [{ data: p }, { data: outgoing }, { data: incoming }, { data: photoRows }] = await Promise.all([
         supabase.from('profiles').select('*').eq('user_id', id).single(),
         supabase.from('likes').select('status').eq('sender_id', user.id).eq('receiver_id', id).eq('type', 'request').maybeSingle(),
         supabase.from('likes').select('status').eq('sender_id', id).eq('receiver_id', user.id).eq('type', 'request').maybeSingle(),
+        supabase.from('profile_photos').select('url,is_primary,order').eq('user_id', id).eq('status', 'approved').order('is_primary', { ascending: false }).order('order', { ascending: true }),
       ])
 
       if (!p) { setProfile(null); return }
@@ -127,7 +129,11 @@ export default function ProfilePage({ id }: Props) {
         status = 'acceptee'
       }
 
-      setProfile(profileToFull(p as Profile, status, t('unknownLocation'), locale))
+      // Toutes les photos approuvées du membre (principale en tête). Les photos
+      // supplémentaires ne sont dévoilées qu'aux membres Premium (cf. PhotoGallery).
+      const photos = (photoRows ?? []).map(r => r.url as string).filter(Boolean)
+
+      setProfile(profileToFull(p as Profile, photos, status, t('unknownLocation'), locale))
 
       // Journalise la visite (1 ligne par paire visiteur/profil, horodatage
       // rafraîchi — sert au compteur de Visiteurs uniques) — seulement pour
@@ -280,7 +286,7 @@ export default function ProfilePage({ id }: Props) {
         </div>
       </div>
 
-      <PhotoGallery photo={profile.photo} isPremium={profile.isPremium} />
+      <PhotoGallery photo={profile.photo} galleryPhotos={profile.photos} isPremium={isPremium} />
       <PhotoUpsellBanner />
 
       <div className="mb-4">
