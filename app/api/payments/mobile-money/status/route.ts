@@ -43,8 +43,16 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Transaction introuvable' }, { status: 404 })
   }
 
-  // États terminaux : rien à réconcilier.
+  // settled : on vérifie que l'activation a bien eu lieu. Un paiement settled
+  // SANS objet lié (abonnement pour Premium, boost pour un Boost) est un blocage
+  // à reprendre — l'activation est idempotente et re-entrante, donc sûre à
+  // rejouer ici (garde-fou si un insert avait échoué juste après le règlement).
   if (row.status === 'settled') {
+    const activated = row.kind === 'boost' ? row.boost_id != null : row.subscription_id != null
+    if (!activated) {
+      const result = await activateMobileMoneyPayment(row.id)
+      return NextResponse.json({ status: 'settled', settledAt: row.settled_at, expiresAt: result.expiresAt })
+    }
     return NextResponse.json({ status: 'settled', settledAt: row.settled_at })
   }
   if (row.status === 'failed' || row.status === 'expired') {

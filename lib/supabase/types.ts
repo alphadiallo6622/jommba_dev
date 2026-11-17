@@ -342,6 +342,7 @@ export interface MobileMoneyPayment {
   promo_code:      string | null
   status:          'pending' | 'processing' | 'settled' | 'failed' | 'expired'
   subscription_id: string | null
+  boost_id:        string | null
   locale:          string | null
   raw:             Json | null
   created_at:      string

@@ -24,21 +24,23 @@ import type { ActivationResult } from '@/lib/sayele/activate'
 export async function activateBoostFromMobileMoney(paymentId: string): Promise<ActivationResult> {
   const admin = createAdminClient()
 
-  // 1) Réclamation atomique : on ne passe à 'settled' que depuis un état non
-  //    terminal. Aucune ligne renvoyée ⇒ déjà activé (ou échec) ⇒ on ne refait rien.
-  const { data: claimed } = await admin
+  // 1) Charge la transaction. Court-circuits idempotents : introuvable ou déjà
+  //    liée à un boost → rien à refaire ; échouée / expirée → on ne crée rien.
+  //    On sait REPRENDRE un paiement resté `settled` sans boost (garde-fou
+  //    anti-blocage) ; l'idempotence tient au verrou atomique sur boost_id.
+  const { data: paymentRow } = await admin
     .from('mobile_money_payments')
-    .update({ status: 'settled', settled_at: new Date().toISOString(), updated_at: new Date().toISOString() })
-    .eq('id', paymentId)
-    .in('status', ['pending', 'processing'])
     .select('*')
+    .eq('id', paymentId)
     .maybeSingle()
 
-  if (!claimed) {
-    return { activated: false, alreadyDone: true }
+  const payment = paymentRow as MobileMoneyPayment | null
+  if (!payment) return { activated: false, alreadyDone: true }
+  if (payment.boost_id) return { activated: false, alreadyDone: true }
+  if (payment.status === 'failed' || payment.status === 'expired') {
+    return { activated: false, alreadyDone: false }
   }
 
-  const payment = claimed as MobileMoneyPayment
   const boost = getBoost(payment.plan_id)
   if (!boost) {
     console.error('[sayele/activate-boost] boost inconnu', payment.id, payment.plan_id)
@@ -49,26 +51,50 @@ export async function activateBoostFromMobileMoney(paymentId: string): Promise<A
   const now = new Date().toISOString()
   const amountUsd = Number(payment.amount_usd)
 
-  // 2) Crée le boost — forme identique à la route Square (square_payment_id null
+  // 2) Marque la transaction settled si ce n'est pas déjà le cas.
+  if (payment.status !== 'settled') {
+    await admin
+      .from('mobile_money_payments')
+      .update({ status: 'settled', settled_at: payment.settled_at ?? now, updated_at: now })
+      .eq('id', payment.id)
+      .in('status', ['pending', 'processing'])
+  }
+
+  // 3) Crée le boost — forme identique à la route Square (square_payment_id null
   //    car payé par Mobile Money).
-  const { error: insErr } = await admin.from('boosts').insert({
-    user_id: payment.user_id,
-    expires_at: expiresAt.toISOString(),
-    square_payment_id: null,
-    amount_usd: amountUsd,
-  })
-  if (insErr) {
-    // Paiement confirmé mais insert échoué : à surveiller (remboursement manuel
-    // possible), comme côté Square.
-    console.error('[sayele/activate-boost] insert boost échoué après settled', payment.id, insErr)
+  const { data: created, error: insErr } = await admin
+    .from('boosts')
+    .insert({
+      user_id: payment.user_id,
+      expires_at: expiresAt.toISOString(),
+      square_payment_id: null,
+      amount_usd: amountUsd,
+    })
+    .select('id')
+    .single()
+
+  if (insErr || !created) {
+    // Insert échoué : la transaction reste `settled` SANS boost_id, donc
+    // reprenable (polling / cron de réconciliation) — plus de blocage définitif.
+    console.error('[sayele/activate-boost] insert boost échoué', payment.id, insErr)
     return { activated: false, alreadyDone: false }
   }
 
-  // Trace l'achat sur la transaction.
-  await admin
+  // 4) Verrou d'idempotence : on inscrit boost_id seulement s'il est encore nul.
+  //    Course perdue (exécution concurrente déjà liée) → on supprime le doublon
+  //    orphelin et on s'arrête sans ré-envoyer e-mails ni notifications.
+  const { data: linked } = await admin
     .from('mobile_money_payments')
-    .update({ updated_at: now })
+    .update({ boost_id: created.id, updated_at: now })
     .eq('id', payment.id)
+    .is('boost_id', null)
+    .select('id')
+    .maybeSingle()
+
+  if (!linked) {
+    await admin.from('boosts').delete().eq('id', created.id)
+    return { activated: false, alreadyDone: true }
+  }
 
   // 3) Profil (nom) pour les e-mails + notifications.
   const { data: profile } = await admin

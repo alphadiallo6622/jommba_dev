@@ -30,22 +30,26 @@ export interface ActivationResult {
 export async function activatePremiumFromMobileMoney(paymentId: string): Promise<ActivationResult> {
   const admin = createAdminClient()
 
-  // 1) Réclamation atomique : on ne passe à 'settled' que depuis un état non
-  //    terminal. Si aucune ligne n'est renvoyée, l'activation a déjà eu lieu
-  //    (ou la transaction a échoué) → on ne refait rien.
-  const { data: claimed } = await admin
+  // 1) Charge la transaction. Court-circuits idempotents :
+  //    - introuvable, ou déjà liée à un abonnement → rien à refaire ;
+  //    - échouée / expirée → on ne crée rien.
+  //    À la différence d'une simple réclamation, on sait REPRENDRE un paiement
+  //    resté `settled` sans abonnement (insert précédent échoué) : c'est le
+  //    garde-fou anti-blocage. L'idempotence est assurée plus bas par le verrou
+  //    atomique sur subscription_id, pas par l'état `settled`.
+  const { data: paymentRow } = await admin
     .from('mobile_money_payments')
-    .update({ status: 'settled', settled_at: new Date().toISOString(), updated_at: new Date().toISOString() })
-    .eq('id', paymentId)
-    .in('status', ['pending', 'processing'])
     .select('*')
+    .eq('id', paymentId)
     .maybeSingle()
 
-  if (!claimed) {
-    return { activated: false, alreadyDone: true }
+  const payment = paymentRow as MobileMoneyPayment | null
+  if (!payment) return { activated: false, alreadyDone: true }
+  if (payment.subscription_id) return { activated: false, alreadyDone: true }
+  if (payment.status === 'failed' || payment.status === 'expired') {
+    return { activated: false, alreadyDone: false }
   }
 
-  const payment = claimed as MobileMoneyPayment
   const durationDays = getPlanDurationDays(payment.plan_id)
   if (!durationDays) {
     console.error('[sayele/activate] plan inconnu', payment.id, payment.plan_id)
@@ -56,7 +60,18 @@ export async function activatePremiumFromMobileMoney(paymentId: string): Promise
   const now = new Date().toISOString()
   const amountUsd = Number(payment.amount_usd)
 
-  // 2) Enregistre l'abonnement — forme identique à la route Square (historique
+  // 2) Marque la transaction settled si ce n'est pas déjà le cas (première
+  //    activation depuis pending/processing). Une reprise (déjà settled) saute
+  //    cette étape.
+  if (payment.status !== 'settled') {
+    await admin
+      .from('mobile_money_payments')
+      .update({ status: 'settled', settled_at: payment.settled_at ?? now, updated_at: now })
+      .eq('id', payment.id)
+      .in('status', ['pending', 'processing'])
+  }
+
+  // 3) Enregistre l'abonnement — forme identique à la route Square (historique
   //    multi-lignes : chaque achat est une nouvelle ligne).
   const { data: sub, error: subErr } = await admin
     .from('subscriptions')
@@ -85,20 +100,31 @@ export async function activatePremiumFromMobileMoney(paymentId: string): Promise
     .single()
 
   if (subErr || !sub) {
-    // Le paiement est confirmé mais l'insert a échoué : à surveiller
-    // (remboursement manuel possible), comme côté Square.
-    console.error('[sayele/activate] insert subscription échoué après settled', payment.id, subErr)
+    // Insert échoué : la transaction reste `settled` SANS subscription_id, donc
+    // reprenable (polling / cron de réconciliation) — plus de blocage définitif.
+    console.error('[sayele/activate] insert subscription échoué', payment.id, subErr)
     return { activated: false, alreadyDone: false }
+  }
+
+  // 4) Verrou d'idempotence : on inscrit subscription_id SEULEMENT s'il est
+  //    encore nul. Si une exécution concurrente (webhook + polling) a déjà lié
+  //    un abonnement, on perd la course → on supprime notre doublon orphelin et
+  //    on s'arrête sans ré-envoyer e-mails ni notifications.
+  const { data: linked } = await admin
+    .from('mobile_money_payments')
+    .update({ subscription_id: sub.id, updated_at: now })
+    .eq('id', payment.id)
+    .is('subscription_id', null)
+    .select('id')
+    .maybeSingle()
+
+  if (!linked) {
+    await admin.from('subscriptions').delete().eq('id', sub.id)
+    return { activated: false, alreadyDone: true }
   }
 
   // Marque le profil Premium (source lue par l'app pour débloquer les fonctions).
   await admin.from('profiles').update({ is_premium: true }).eq('user_id', payment.user_id)
-
-  // Lie l'abonnement à la transaction (traçabilité).
-  await admin
-    .from('mobile_money_payments')
-    .update({ subscription_id: sub.id, updated_at: now })
-    .eq('id', payment.id)
 
   // 3) Consomme le code promo éventuel (incrément atomique protégé).
   if (payment.promo_id) {
