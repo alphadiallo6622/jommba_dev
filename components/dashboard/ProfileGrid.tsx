@@ -41,8 +41,11 @@ function scoreColor(score: number) {
 /** Sens du départ de la carte : « j'aime » sort à droite, « passer » à gauche. */
 type SwipeAction = 'pass' | 'like'
 
-/** Nombre de profils présentés dans la sélection du dashboard. */
+/** Nombre de profils présentés dans la sélection du dashboard (carrousel mobile). */
 const SELECTION_SIZE = 50
+/** Nombre de cartes affichées dans la grille desktop : un aperçu, le reste se
+ *  découvre via « Voir tout ». */
+const DESKTOP_GRID_SIZE = 12
 /** Plafond du vivier interrogé avant le tirage aléatoire : garde la requête
  *  bornée si la base grandit au-delà des quelques centaines de membres. */
 const POOL_LIMIT = 500
@@ -469,11 +472,11 @@ export default function ProfileGrid() {
               <p className="text-xs text-gray-400">{t('selectionSubtitle')}</p>
             </div>
           </div>
-          <span className="text-xs text-gray-400">{t('profilesCount', { count: profiles.length })}</span>
+          <span className="text-xs text-gray-400">{t('profilesCount', { count: Math.min(profiles.length, DESKTOP_GRID_SIZE) })}</span>
         </div>
 
         <div className="grid grid-cols-4 gap-3 stagger-children">
-          {profiles.map(p => (
+          {profiles.slice(0, DESKTOP_GRID_SIZE).map(p => (
             <GridCard
               key={p.id}
               profile={p}
@@ -484,10 +487,10 @@ export default function ProfileGrid() {
           ))}
         </div>
 
-        <div className="text-center pt-1">
+        <div className="text-center pt-2">
           <button
             onClick={() => router.push('/dashboard/explorer')}
-            className="text-sm font-medium text-emerald-500 hover:text-emerald-600 transition-colors"
+            className="inline-flex items-center justify-center px-8 py-3 rounded-xl bg-emerald-500 text-white text-base font-semibold shadow-sm hover:bg-emerald-600 active:scale-[0.98] transition-[background-color,scale] duration-150"
           >
             {t('seeAll')}
           </button>
