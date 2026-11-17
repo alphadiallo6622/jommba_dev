@@ -41,6 +41,35 @@ function scoreColor(score: number) {
 /** Sens du départ de la carte : « j'aime » sort à droite, « passer » à gauche. */
 type SwipeAction = 'pass' | 'like'
 
+/** Nombre de profils présentés dans la sélection du dashboard. */
+const SELECTION_SIZE = 50
+/** Plafond du vivier interrogé avant le tirage aléatoire : garde la requête
+ *  bornée si la base grandit au-delà des quelques centaines de membres. */
+const POOL_LIMIT = 500
+/** Poids de tirage des profils Premium. À 3, ils ont ~3× plus de chances
+ *  d'entrer dans la sélection et remontent en moyenne vers le début — sans
+ *  jamais occuper d'office la tête, pour ne pas écraser les autres profils. */
+const PREMIUM_WEIGHT = 3
+
+/**
+ * Tirage aléatoire pondéré (algorithme A-Res, Efraimidis–Spirakis).
+ *
+ * Chaque profil reçoit une clé `random^(1/poids)` ; on garde les `size` plus
+ * grandes. Un poids supérieur tire la clé vers le haut : le profil est à la
+ * fois plus souvent retenu et, en moyenne, mieux placé. Le résultat reste
+ * aléatoire à chaque chargement, donc la sélection change à chaque visite.
+ */
+function weightedSelection(pool: GridProfile[], size: number): GridProfile[] {
+  return pool
+    .map(p => ({
+      p,
+      key: Math.pow(Math.random(), 1 / (p.isPremium ? PREMIUM_WEIGHT : 1)),
+    }))
+    .sort((a, b) => b.key - a.key)
+    .slice(0, size)
+    .map(x => x.p)
+}
+
 /** Déplacement horizontal, en pixels, au-delà duquel le lâcher vaut décision. */
 const SWIPE_DISTANCE = 110
 /** Un geste bref mais vif décide aussi, même sous la distance : c'est le
@@ -332,27 +361,29 @@ export default function ProfileGrid() {
       // Sans photo de profil (avatar_url), le membre n'est pas visible.
       .not('avatar_url', 'is', null)
       .gte('profile_completion', MIN_VISIBLE_PROFILE_COMPLETION)
+      // On interroge un large vivier (borné par POOL_LIMIT), puis le tirage
+      // aléatoire pondéré ci-dessous en extrait SELECTION_SIZE profils : la
+      // sélection varie à chaque chargement au lieu de figer les plus complets.
       .order('profile_completion', { ascending: false })
-      .limit(12)
+      .limit(POOL_LIMIT)
       .then(({ data }) => {
         if (cancelled) return
         if (data && data.length > 0) {
-          setProfiles(
-            (data as { user_id: string; first_name: string; last_name: string | null; age: number | null; city: string | null; job: string | null; avatar_url: string | null; is_premium: boolean; profile_completion: number; photos_blurred: boolean | null }[])
-              // Les membres bloqués sortent du carrousel.
-              .filter(p => !blockedIds.has(p.user_id))
-              .map(p => ({
-                id:           p.user_id,
-                name:         `${p.first_name} ${(p.last_name ?? '').charAt(0)}.`,
-                age:          p.age ?? 0,
-                city:         p.city ?? t('unknownCity'),
-                job:          p.job ?? '',
-                score:        p.profile_completion ?? 80,
-                photo:        p.avatar_url ?? '/avatar-placeholder.svg',
-                isPremium:    p.is_premium,
-                photoBlurred: p.photos_blurred ?? false,
-              }))
-          )
+          const pool = (data as { user_id: string; first_name: string; last_name: string | null; age: number | null; city: string | null; job: string | null; avatar_url: string | null; is_premium: boolean; profile_completion: number; photos_blurred: boolean | null }[])
+            // Les membres bloqués sortent du carrousel.
+            .filter(p => !blockedIds.has(p.user_id))
+            .map(p => ({
+              id:           p.user_id,
+              name:         `${p.first_name} ${(p.last_name ?? '').charAt(0)}.`,
+              age:          p.age ?? 0,
+              city:         p.city ?? t('unknownCity'),
+              job:          p.job ?? '',
+              score:        p.profile_completion ?? 80,
+              photo:        p.avatar_url ?? '/avatar-placeholder.svg',
+              isPremium:    p.is_premium,
+              photoBlurred: p.photos_blurred ?? false,
+            }))
+          setProfiles(weightedSelection(pool, SELECTION_SIZE))
         }
       })
     })
