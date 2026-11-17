@@ -2184,6 +2184,7 @@
         "daysLeft": "{n}d left",
         "planLine": "{plan} · Automatic renewal",
         "planLabel": "Premium {n} Month(s)",
+        "planLabelDays": "Premium {n} Day(s)",
         "impactTitle": "Your impact since Premium",
         "visitors": "Visitors",
         "favorites": "Favorites",

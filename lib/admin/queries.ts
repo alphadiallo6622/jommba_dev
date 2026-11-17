@@ -35,6 +35,15 @@ function location(city: string | null, country: string | null): string {
   return formatLocation(city, country, "fr") || "—";
 }
 
+/** Libellé de durée d'abonnement : « 15 jours » sous 1 mois (plan 15j = 0,5),
+ *  sinon « N mois ». `duration_months` est un numeric (demi-durées possibles). */
+function planDurationLabel(months: number | null | undefined): string | null {
+  if (months == null) return null;
+  const n = Number(months);
+  if (n < 1) return `${Math.max(1, Math.round(n * 30))} jours`;
+  return `${n} mois`;
+}
+
 /** Compte par jour sur les `days` derniers jours (index 0 = il y a days-1 jours). */
 function bucketByDay(dates: (string | null)[], days: number): number[] {
   const buckets = new Array<number>(days).fill(0);
@@ -321,7 +330,7 @@ export async function getOverviewData(): Promise<OverviewData> {
     events.push({ icon: "user-plus", tone: "green", text: `${fullName(p.first_name, p.last_name)} a soumis son profil`, when: timeAgo(p.created_at), ts: Date.parse(p.created_at) });
   }
   for (const s of recentSubs.data ?? []) {
-    events.push({ icon: "crown", tone: "amber", text: `${names.get(s.user_id) ?? "Un membre"} a souscrit Premium (${s.duration_months} mois)`, when: timeAgo(s.created_at), ts: Date.parse(s.created_at) });
+    events.push({ icon: "crown", tone: "amber", text: `${names.get(s.user_id) ?? "Un membre"} a souscrit Premium (${planDurationLabel(s.duration_months) ?? "—"})`, when: timeAgo(s.created_at), ts: Date.parse(s.created_at) });
   }
   for (const r of recentReports.data ?? []) {
     events.push({ icon: "flag", tone: "red", text: `Nouveau signalement contre ${names.get(r.reported_id) ?? "un membre"}`, when: timeAgo(r.created_at), ts: Date.parse(r.created_at) });
@@ -545,7 +554,7 @@ async function loadMemberExtras(
   for (const s of subRows.data ?? []) {
     const info: SubInfo = {
       amount: s.price_usd != null ? Number(s.price_usd) : null,
-      plan: s.duration_months != null ? `${s.duration_months} mois` : null,
+      plan: planDurationLabel(s.duration_months),
     };
     if (!latest.has(s.user_id)) latest.set(s.user_id, info);
     if (s.status === "active" && !s.refunded_at && !active.has(s.user_id)) {
@@ -804,7 +813,7 @@ export async function getSubscriptions(): Promise<SubscriptionsData> {
       userId: s.user_id,
       name: info?.name ?? "Membre supprimé",
       email: info?.email ?? "—",
-      plan: `${s.duration_months} mois`,
+      plan: planDurationLabel(s.duration_months) ?? "—",
       payment: s.payment_method ?? "—",
       status: s.status,
       expires: s.current_period_end ? formatDateTime(s.current_period_end) : "—",

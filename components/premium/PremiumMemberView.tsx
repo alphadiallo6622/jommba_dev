@@ -107,7 +107,7 @@ export default function PremiumMemberView() {
             </span>
           </div>
         )}
-        {sub && <div className="text-xs text-white/50">{t('planLine', { plan: t('planLabel', { n: sub.durationMonths }) })}</div>}
+        {sub && <div className="text-xs text-white/50">{t('planLine', { plan: sub.durationMonths < 1 ? t('planLabelDays', { n: Math.max(1, Math.round(sub.durationMonths * 30)) }) : t('planLabel', { n: sub.durationMonths }) })}</div>}
       </section>
 
       {/* Impact stats since premium */}

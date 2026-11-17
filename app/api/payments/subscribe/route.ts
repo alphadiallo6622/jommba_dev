@@ -130,9 +130,9 @@ export async function POST(req: NextRequest) {
         status: 'active',
         payment_method: 'square',
         price_usd: finalPrice,
-        // Colonne entière (NOT NULL) : 15j (0,5 mois) est stocké arrondi à 1.
+        // Durée en mois (0,5 pour le plan 15 jours) — colonne numeric.
         // La durée d'accès réelle est portée par current_period_end.
-        duration_months: Math.max(1, Math.round(durationDays / 30)),
+        duration_months: Math.round((durationDays / 30) * 100) / 100,
         current_period_end: periodEnd.toISOString(),
         square_subscription_id: null,
         square_customer_id: null,

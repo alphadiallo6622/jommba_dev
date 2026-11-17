@@ -71,10 +71,10 @@ export async function activatePremiumFromMobileMoney(paymentId: string): Promise
       // payé pour l'affichage/agrégation par devise côté admin.
       currency: payment.currency,
       amount_native: payment.amount_minor,
-      // La colonne est un entier (contrainte NOT NULL). Le plan 15j (0,5 mois)
-      // y est stocké arrondi à 1 : la durée d'accès réelle reste portée par
-      // current_period_end (calculée depuis durationDays), pas par ce libellé.
-      duration_months: Math.max(1, Math.round(durationDays / 30)),
+      // Durée en mois (0,5 pour le plan 15 jours) — colonne numeric. La durée
+      // d'accès réelle reste portée par current_period_end (calculée depuis
+      // durationDays), pas par ce libellé.
+      duration_months: Math.round((durationDays / 30) * 100) / 100,
       current_period_end: periodEnd.toISOString(),
       square_subscription_id: null,
       square_customer_id: null,

@@ -58,9 +58,8 @@ export default function SubscriptionPanel({ open, onClose }: Props) {
   const money = (usd: number | null) =>
     usd == null ? '—' : `${usd.toFixed(2).replace(/\.00$/, '')} $`
 
-  /** « 3 mois » à partir de duration_months. La colonne est un entier : le plan
-   *  15 jours y est stocké arrondi à 1 mois, d'où le repli sur les jours si une
-   *  valeur fractionnaire venait à apparaître. */
+  /** « 3 mois » à partir de duration_months (numeric). Sous 1 mois (plan 15j =
+   *  0,5), on affiche la durée en jours plutôt qu'une fraction de mois. */
   const durationLabel = (months: number | null) => {
     if (months == null) return '—'
     if (months < 1) return t('durationDays', { n: Math.max(1, Math.round(months * 30)) })

@@ -2184,6 +2184,7 @@
         "daysLeft": "{n}j restants",
         "planLine": "{plan} · Renouvellement automatique",
         "planLabel": "Premium {n} Mois",
+        "planLabelDays": "Premium {n} Jours",
         "impactTitle": "Ton impact depuis Premium",
         "visitors": "Visiteurs",
         "favorites": "Favoris",

@@ -102,8 +102,10 @@ export async function POST(req: NextRequest) {
             .maybeSingle()
           // Un cycle remboursé ne doit jamais être réactivé par une facture tardive.
           if (row?.user_id && !row.refunded_at) {
+            // duration_months peut être fractionnaire (0,5 = 15 jours) : on
+            // prolonge en jours, car setMonth() tronque les fractions.
             const end = new Date()
-            end.setMonth(end.getMonth() + (row.duration_months ?? 1))
+            end.setDate(end.getDate() + Math.round((row.duration_months ?? 1) * 30))
             await admin
               .from('subscriptions')
               .update({
